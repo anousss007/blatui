@@ -10,6 +10,13 @@
     // Pages pass a short title ("Blocks"); append the brand unless it's already there.
     $fullTitle = ! $title ? $homeTitle : (str_contains($title, $brand) ? $title : $title.' — '.$brand);
     $canonical = url()->current();
+    $jsonLd = json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'WebSite',
+        'name' => $brand,
+        'url' => config('brand.url'),
+        'description' => config('brand.description'),
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 @endphp
 
 <!DOCTYPE html>
@@ -43,15 +50,7 @@
     <meta name="twitter:image" content="{{ url('/og.png') }}">
 
     {{-- Structured data --}}
-    <script type="application/ld+json">
-    @json([
-        '@context' => 'https://schema.org',
-        '@type' => 'WebSite',
-        'name' => $brand,
-        'url' => config('brand.url'),
-        'description' => config('brand.description'),
-    ], JSON_UNESCAPED_SLASHES)
-    </script>
+    <script type="application/ld+json">{!! $jsonLd !!}</script>
 
     {{-- Icons --}}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
