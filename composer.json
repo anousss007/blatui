@@ -1,0 +1,50 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "blatui/blatui",
+    "description": "Open-source shadcn/ui for the BLAT stack (Blade, Laravel, Alpine.js, Tailwind CSS v4). A CLI that copies components you own into your Laravel project.",
+    "keywords": ["laravel", "blade", "alpinejs", "tailwindcss", "shadcn", "ui", "components", "cli", "blatui"],
+    "homepage": "https://github.com/anousss007/blatui",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        { "name": "anousss007", "homepage": "https://github.com/anousss007" }
+    ],
+    "support": {
+        "issues": "https://github.com/anousss007/blatui/issues",
+        "source": "https://github.com/anousss007/blatui"
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/console": "^11.0 || ^12.0 || ^13.0",
+        "illuminate/support": "^11.0 || ^12.0 || ^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0 || ^10.0",
+        "laravel/pint": "^1.18"
+    },
+    "autoload": {
+        "psr-4": {
+            "BlatUI\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BlatUI\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BlatUI\\BlatuiServiceProvider"
+            ]
+        },
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

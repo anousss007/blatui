@@ -1,0 +1,16 @@
+# Keep the Composer dist lean — exclude dev-only paths from `composer require`.
+/.github          export-ignore
+/tests            export-ignore
+/.gitattributes   export-ignore
+/.gitignore       export-ignore
+/.editorconfig    export-ignore
+/phpunit.xml      export-ignore
+/pint.json        export-ignore
+/CONTRIBUTING.md  export-ignore
+
+# Normalize line endings.
+*.php  text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+*.blade.php text eol=lf
