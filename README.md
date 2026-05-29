@@ -7,6 +7,7 @@
 A CLI that copies open-source, copy-paste UI components **you own** straight into your Laravel project.
 
 [![Latest Version](https://img.shields.io/packagist/v/blatui/blatui.svg)](https://packagist.org/packages/blatui/blatui)
+[![CI](https://github.com/anousss007/blatui/actions/workflows/ci.yml/badge.svg)](https://github.com/anousss007/blatui/actions/workflows/ci.yml)
 [![License](https://img.shields.io/packagist/l/blatui/blatui.svg)](LICENSE)
 
 **55 components · 70 charts · fully themeable · light + dark · MIT**
