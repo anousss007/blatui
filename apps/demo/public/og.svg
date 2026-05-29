@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#ffffff" fill-opacity="0.06"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect x="80" y="84" width="84" height="84" rx="20" fill="#ffffff"/>
+  <g transform="translate(102,106) scale(1.66)" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15.536 11.293a1 1 0 0 0 0 1.414l2.376 2.377a1 1 0 0 0 1.414 0l2.377-2.377a1 1 0 0 0 0-1.414l-2.377-2.377a1 1 0 0 0-1.414 0z"/>
+    <path d="M2.297 11.293a1 1 0 0 0 0 1.414l2.377 2.377a1 1 0 0 0 1.414 0l2.377-2.377a1 1 0 0 0 0-1.414L6.088 8.916a1 1 0 0 0-1.414 0z"/>
+    <path d="M8.916 4.674a1 1 0 0 0 0 1.414l2.377 2.377a1 1 0 0 0 1.414 0l2.377-2.377a1 1 0 0 0 0-1.414l-2.377-2.377a1 1 0 0 0-1.414 0z"/>
+    <path d="M8.916 17.912a1 1 0 0 0 0 1.414l2.377 2.377a1 1 0 0 0 1.414 0l2.377-2.377a1 1 0 0 0 0-1.414l-2.377-2.377a1 1 0 0 0-1.414 0z"/>
+  </g>
+  <text x="184" y="142" font-family="Inter, system-ui, sans-serif" font-size="40" font-weight="700" fill="#ffffff">BlatUI</text>
+  <text x="80" y="320" font-family="Inter, system-ui, sans-serif" font-size="82" font-weight="800" fill="#ffffff" letter-spacing="-2">Beautiful UI for the</text>
+  <text x="80" y="410" font-family="Inter, system-ui, sans-serif" font-size="82" font-weight="800" fill="#a1a1aa" letter-spacing="-2">BLAT stack.</text>
+  <text x="80" y="498" font-family="Inter, system-ui, sans-serif" font-size="30" font-weight="500" fill="#a1a1aa">Open-source shadcn/ui for Blade · Laravel · Alpine · Tailwind</text>
+  <g font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="600" fill="#e4e4e7">
+    <text x="80" y="566">55 Components</text>
+    <text x="360" y="566">·</text>
+    <text x="392" y="566">62 Blocks</text>
+    <text x="600" y="566">·</text>
+    <text x="632" y="566">70 Charts</text>
+    <text x="840" y="566">·</text>
+    <text x="872" y="566">MIT</text>
+  </g>
+</svg>
