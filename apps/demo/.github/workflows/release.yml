@@ -1,0 +1,31 @@
+name: Release
+
+# Cut a GitHub Release whenever a SemVer tag is pushed.
+#   git tag -a v1.2.0 -m "v1.2.0" && git push origin v1.2.0
+# Packagist (once the package is submitted + webhook enabled) picks up the
+# same tag automatically — no extra step for the Composer release.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create / update release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
