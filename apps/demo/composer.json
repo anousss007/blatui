@@ -4,11 +4,11 @@
     "type": "project",
     "description": "BlatUI — open-source shadcn/ui for the BLAT stack (Blade, Laravel, Alpine.js, Tailwind CSS v4). Copy-paste components, blocks and charts you own.",
     "keywords": ["laravel", "blade", "alpinejs", "tailwindcss", "shadcn", "ui", "components", "blatui"],
-    "homepage": "https://github.com/anousss007/blat-ui",
+    "homepage": "https://github.com/anousss007/blatui-demo",
     "license": "MIT",
     "support": {
-        "issues": "https://github.com/anousss007/blat-ui/issues",
-        "source": "https://github.com/anousss007/blat-ui"
+        "issues": "https://github.com/anousss007/blatui-demo/issues",
+        "source": "https://github.com/anousss007/blatui-demo"
     },
     "require": {
         "php": "^8.3",

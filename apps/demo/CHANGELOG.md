@@ -19,5 +19,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Artisan CLI** — `blatui:init` (doctor), `blatui:add` (copy components), `blatui:list`.
 - SEO baseline — titles, meta description, Open Graph / Twitter cards, sitemap.xml, robots.txt, favicon, OG image.
 
-[Unreleased]: https://github.com/anousss007/blat-ui/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/anousss007/blat-ui/releases/tag/v1.0.0
+[Unreleased]: https://github.com/anousss007/blatui-demo/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/anousss007/blatui-demo/releases/tag/v1.0.0
