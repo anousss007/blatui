@@ -7,4 +7,6 @@ return [
     'tagline' => env('BRAND_TAGLINE', 'shadcn/ui for the BLAT stack'),
     'description' => env('BRAND_DESCRIPTION', 'Open-source shadcn/ui for the BLAT stack — Blade, Laravel, Alpine.js & Tailwind CSS v4. 55 components, 62 blocks and 70 charts you copy, paste and own. MIT licensed.'),
     'github' => env('BRAND_GITHUB', 'https://github.com/anousss007/blatui-demo'),
+    'package' => env('BRAND_PACKAGE', 'https://github.com/anousss007/blatui'),
+    'url' => env('BRAND_URL', 'https://blatui.remix-it.com'),
 ];

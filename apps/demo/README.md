@@ -8,6 +8,10 @@ Open-source, copy-paste UI components for Laravel. No JS runtime lock-in, no bla
 
 **55 components · 62 blocks · 70 charts** · fully themeable · light + dark · MIT licensed
 
+### 🌐 [**Live demo & docs → blatui.remix-it.com**](https://blatui.remix-it.com)
+
+Install the CLI: [**`composer require blatui/blatui`**](https://github.com/anousss007/blatui) · [Package repo](https://github.com/anousss007/blatui)
+
 </div>
 
 ---
