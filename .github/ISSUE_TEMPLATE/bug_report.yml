@@ -1,0 +1,29 @@
+name: Bug report
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, plus what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The exact command(s) you ran.
+      placeholder: |
+        1. composer require blatui/blatui
+        2. php artisan blatui:add ...
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: BlatUI, Laravel and PHP versions.
+      placeholder: "BlatUI 1.0.0 · Laravel 12 · PHP 8.3"
+    validations:
+      required: true

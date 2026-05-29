@@ -11,7 +11,7 @@ class BlatuiServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(Registry::class, fn () => new Registry());
+        $this->app->singleton(Registry::class, fn () => new Registry);
     }
 
     public function boot(): void
