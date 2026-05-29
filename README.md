@@ -11,7 +11,7 @@ A CLI that copies open-source, copy-paste UI components **you own** straight int
 
 **55 components · 70 charts · fully themeable · light + dark · MIT**
 
-[Live demo & docs →](https://github.com/anousss007/blatui-demo)
+[Live demo & docs → blatui.remix-it.com](https://blatui.remix-it.com)
 
 </div>
 
@@ -103,7 +103,7 @@ Blocks (dashboards, sidebars, login pages…) and the 70 charts are **copy-paste
 from the demo site** — they're full-page compositions, not primitives, so you
 grab the exact source you want rather than installing it:
 
-👉 **[Browse blocks & charts on the demo site](https://github.com/anousss007/blatui-demo)**
+👉 **[Browse blocks & charts on the live demo](https://blatui.remix-it.com/blocks)**
 
 ## Commands
 
