@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Install flow** — corrected misleading setup docs that didn't work on a clean
+  Laravel install: the README/getting-started now document the complete, verified
+  path (publish the foundations, then `@import "./blatui.css"` + `import
+  "./blatui.js"`), list `tw-animate-css` as a required peer (the theme CSS imports
+  it), and fix the card example to add the missing `input` component.
+- `blatui:init` now also checks for `tw-animate-css` and `apexcharts`, and verifies
+  the foundations are actually **imported** into `app.css` / `app.js` — publishing
+  alone is no longer reported as "present".
+- The customizer's **Copy theme CSS** now exports a complete, self-contained
+  stylesheet (Tailwind import + `@theme inline` mapping + every token), so a pasted
+  theme actually renders styled instead of producing no utilities.
+
+### Changed
+- `Registry` now reads the generated `stubs/registry.json` manifest (single source
+  of truth synced from the demo) instead of re-deriving families and dependencies.
+
 ## [1.0.0] - 2026-05-29
 
 ### Added
