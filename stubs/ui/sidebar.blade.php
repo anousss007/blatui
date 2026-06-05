@@ -59,6 +59,8 @@
         <div
             x-show="openMobile"
             @click="openMobile = false"
+            role="presentation"
+            aria-hidden="true"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
@@ -69,8 +71,12 @@
         ></div>
         <div
             x-show="openMobile"
-            x-trap.noscroll="openMobile"
+            x-trap.noscroll.inert="openMobile"
             @keydown.escape.window="openMobile = false"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Sidebar"
+            tabindex="-1"
             x-transition:enter="transition ease-in-out duration-300"
             x-transition:enter-start="{{ $isLeft ? '-translate-x-full' : 'translate-x-full' }}"
             x-transition:enter-end="translate-x-0"

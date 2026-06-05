@@ -7,6 +7,9 @@
         hide() { clearTimeout(this.t); this.t = setTimeout(() => this.open = false, @js($closeDelay)); } }"
     @mouseenter="show()"
     @mouseleave="hide()"
+    @focusin="show()"
+    @focusout="hide()"
+    @keydown.escape="hide()"
     {{ $attributes->twMerge('relative inline-block') }}
 >
     {{ $slot }}

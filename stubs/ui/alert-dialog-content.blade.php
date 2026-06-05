@@ -2,6 +2,8 @@
     <div x-show="open" x-cloak class="fixed inset-0 z-50">
         <div
             x-show="open"
+            role="presentation"
+            aria-hidden="true"
             data-slot="alert-dialog-overlay"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0"
@@ -14,9 +16,13 @@
 
         <div
             x-show="open"
-            x-trap.noscroll="open"
+            x-trap.noscroll.inert="open"
+            @keydown.escape.window="open = false"
+            :id="$id('blat-alert-dialog')"
+            x-blat-labelledby="{ label: '[data-slot=alert-dialog-title]', description: '[data-slot=alert-dialog-description]' }"
             role="alertdialog"
             aria-modal="true"
+            tabindex="-1"
             data-slot="alert-dialog-content"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"

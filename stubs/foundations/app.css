@@ -132,10 +132,12 @@
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
+    /* Darkened from 0.556 → 0.49 to meet WCAG AA 4.5:1 on muted/accent backgrounds (was 4.34:1). */
+    --muted-foreground: oklch(0.49 0 0);
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
+    /* Darkened from 0.577 → 0.55 so destructive text clears AA 4.5:1 on white (was 4.49:1). */
+    --destructive: oklch(0.55 0.238 27.325);
     --destructive-foreground: oklch(0.985 0 0);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
@@ -217,10 +219,10 @@
     --secondary: oklch(0.97 0.001 106.424);
     --secondary-foreground: oklch(0.216 0.006 56.043);
     --muted: oklch(0.97 0.001 106.424);
-    --muted-foreground: oklch(0.553 0.013 58.071);
+    --muted-foreground: oklch(0.49 0.013 58.071);
     --accent: oklch(0.97 0.001 106.424);
     --accent-foreground: oklch(0.216 0.006 56.043);
-    --destructive: oklch(0.577 0.245 27.325);
+    --destructive: oklch(0.55 0.238 27.325);
     --border: oklch(0.923 0.003 48.717);
     --input: oklch(0.923 0.003 48.717);
     --ring: oklch(0.709 0.01 56.259);
@@ -285,10 +287,10 @@
     --secondary: oklch(0.967 0.001 286.375);
     --secondary-foreground: oklch(0.21 0.006 285.885);
     --muted: oklch(0.967 0.001 286.375);
-    --muted-foreground: oklch(0.552 0.016 285.938);
+    --muted-foreground: oklch(0.49 0.016 285.938);
     --accent: oklch(0.967 0.001 286.375);
     --accent-foreground: oklch(0.21 0.006 285.885);
-    --destructive: oklch(0.577 0.245 27.325);
+    --destructive: oklch(0.55 0.238 27.325);
     --border: oklch(0.92 0.004 286.32);
     --input: oklch(0.92 0.004 286.32);
     --ring: oklch(0.705 0.015 286.067);
@@ -353,10 +355,10 @@
     --secondary: oklch(0.96 0.003 325.6);
     --secondary-foreground: oklch(0.212 0.019 322.12);
     --muted: oklch(0.96 0.003 325.6);
-    --muted-foreground: oklch(0.542 0.034 322.5);
+    --muted-foreground: oklch(0.485 0.034 322.5);
     --accent: oklch(0.96 0.003 325.6);
     --accent-foreground: oklch(0.212 0.019 322.12);
-    --destructive: oklch(0.577 0.245 27.325);
+    --destructive: oklch(0.55 0.238 27.325);
     --border: oklch(0.922 0.005 325.62);
     --input: oklch(0.922 0.005 325.62);
     --ring: oklch(0.711 0.019 323.02);
@@ -421,10 +423,10 @@
     --secondary: oklch(0.966 0.005 106.5);
     --secondary-foreground: oklch(0.228 0.013 107.4);
     --muted: oklch(0.966 0.005 106.5);
-    --muted-foreground: oklch(0.58 0.031 107.3);
+    --muted-foreground: oklch(0.5 0.031 107.3);
     --accent: oklch(0.966 0.005 106.5);
     --accent-foreground: oklch(0.228 0.013 107.4);
-    --destructive: oklch(0.577 0.245 27.325);
+    --destructive: oklch(0.55 0.238 27.325);
     --border: oklch(0.93 0.007 106.5);
     --input: oklch(0.93 0.007 106.5);
     --ring: oklch(0.737 0.021 106.9);
@@ -489,10 +491,10 @@
     --secondary: oklch(0.963 0.002 197.1);
     --secondary-foreground: oklch(0.218 0.008 223.9);
     --muted: oklch(0.963 0.002 197.1);
-    --muted-foreground: oklch(0.56 0.021 213.5);
+    --muted-foreground: oklch(0.49 0.021 213.5);
     --accent: oklch(0.963 0.002 197.1);
     --accent-foreground: oklch(0.218 0.008 223.9);
-    --destructive: oklch(0.577 0.245 27.325);
+    --destructive: oklch(0.55 0.238 27.325);
     --border: oklch(0.925 0.005 214.3);
     --input: oklch(0.925 0.005 214.3);
     --ring: oklch(0.723 0.014 214.4);
@@ -557,10 +559,10 @@
     --secondary: oklch(0.96 0.002 17.2);
     --secondary-foreground: oklch(0.214 0.009 43.1);
     --muted: oklch(0.96 0.002 17.2);
-    --muted-foreground: oklch(0.547 0.021 43.1);
+    --muted-foreground: oklch(0.49 0.021 43.1);
     --accent: oklch(0.96 0.002 17.2);
     --accent-foreground: oklch(0.214 0.009 43.1);
-    --destructive: oklch(0.577 0.245 27.325);
+    --destructive: oklch(0.55 0.238 27.325);
     --border: oklch(0.922 0.005 34.3);
     --input: oklch(0.922 0.005 34.3);
     --ring: oklch(0.714 0.014 41.2);

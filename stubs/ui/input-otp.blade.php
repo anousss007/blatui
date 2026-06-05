@@ -3,6 +3,7 @@
     'maxlength' => 6,
     'value' => '',
     'disabled' => false,
+    'ariaLabel' => 'One-time password',
 ])
 
 <div
@@ -24,6 +25,7 @@
         inputmode="numeric"
         autocomplete="one-time-code"
         pattern="[0-9]*"
+        aria-label="{{ $ariaLabel }}"
         @if ($name) name="{{ $name }}" @endif
         @if ($disabled) disabled @endif
         class="absolute inset-0 z-10 h-full w-full cursor-default opacity-0 disabled:cursor-not-allowed"

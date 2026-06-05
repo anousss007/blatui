@@ -28,6 +28,8 @@
         <div
             x-show="open"
             @click="open = false"
+            role="presentation"
+            aria-hidden="true"
             data-slot="sheet-overlay"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0"
@@ -40,10 +42,13 @@
 
         <div
             x-show="open"
-            x-trap.noscroll="open"
+            x-trap.noscroll.inert="open"
             @keydown.escape.window="open = false"
+            :id="$id('blat-sheet')"
+            x-blat-labelledby="{ label: '[data-slot=sheet-title]', description: '[data-slot=sheet-description]' }"
             role="dialog"
             aria-modal="true"
+            tabindex="-1"
             data-slot="sheet-content"
             data-side="{{ $side }}"
             x-transition:enter="transition ease-in-out duration-500"
@@ -62,7 +67,7 @@
                     @click="open = false"
                     class="ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none"
                 >
-                    <x-lucide-x class="size-4" />
+                    <x-lucide-x class="size-4" aria-hidden="true" />
                     <span class="sr-only">Close</span>
                 </button>
             @endif

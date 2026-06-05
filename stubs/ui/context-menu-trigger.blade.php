@@ -1,7 +1,9 @@
 <div
     data-slot="context-menu-trigger"
-    @contextmenu.prevent="open = true; x = $event.clientX; y = $event.clientY"
-    {{ $attributes }}
+    x-init="_trigger = $el"
+    tabindex="-1"
+    @contextmenu="openAt($event)"
+    {{ $attributes->twMerge('outline-none') }}
 >
     {{ $slot }}
 </div>

@@ -5,6 +5,7 @@
     'step' => 1,
     'value' => 0,
     'disabled' => false,
+    'ariaLabel' => 'Value',
 ])
 
 <div
@@ -30,7 +31,11 @@
         start(e) { if (this.disabled) return; this.dragging = true; this.setFromClientX(e.clientX); },
         move(e) { if (this.dragging) this.setFromClientX(e.clientX); },
         stop() { this.dragging = false; },
-        bump(d) { if (this.disabled) return; this.value = Math.max(this.min, Math.min(this.max, this.value + d * this.step)); }
+        clamp(v) { return Math.max(this.min, Math.min(this.max, v)); },
+        bump(d) { if (this.disabled) return; this.value = this.clamp(this.value + d * this.step); },
+        page(d) { if (this.disabled) return; this.value = this.clamp(this.value + d * Math.max(this.step, (this.max - this.min) / 10)); },
+        toMin() { if (!this.disabled) this.value = this.min; },
+        toMax() { if (!this.disabled) this.value = this.max; }
     }"
     @pointermove.window="move($event)"
     @pointerup.window="stop()"
@@ -50,7 +55,10 @@
     <span
         data-slot="slider-thumb"
         role="slider"
-        tabindex="0"
+        aria-orientation="horizontal"
+        aria-label="{{ $ariaLabel }}"
+        :tabindex="disabled ? -1 : 0"
+        :aria-disabled="disabled"
         :aria-valuemin="min"
         :aria-valuemax="max"
         :aria-valuenow="value"
@@ -59,6 +67,10 @@
         @keydown.down.prevent="bump(-1)"
         @keydown.right.prevent="bump(1)"
         @keydown.up.prevent="bump(1)"
+        @keydown.home.prevent="toMin()"
+        @keydown.end.prevent="toMax()"
+        @keydown.page-up.prevent="page(1)"
+        @keydown.page-down.prevent="page(-1)"
         :style="`left: ${percent}%`"
         class="border-primary bg-background ring-ring/50 absolute top-1/2 block size-4 shrink-0 -translate-x-1/2 -translate-y-1/2 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
     ></span>

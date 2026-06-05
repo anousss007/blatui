@@ -13,11 +13,17 @@
     <div
         x-show="open"
         x-cloak
+        x-init="_list = $el"
         {!! $anchorAttr !!}
-        @click.outside="open = false"
-        @keydown.escape.window="open = false"
-        x-trap="open"
+        @click.outside="close(false)"
+        @keydown.escape.prevent.stop="close()"
+        @keydown.tab.prevent.stop="close()"
+        @keydown.enter.prevent.stop="document.activeElement?.click()"
+        @keydown.space.prevent.stop="document.activeElement?.click()"
+        @keydown="$blatNav($event, { selector: '[role=option]' }); $blatType($event, '[role=option]')"
+        :id="$id('blat-listbox')"
         role="listbox"
+        tabindex="-1"
         data-slot="select-content"
         :data-state="open ? 'open' : 'closed'"
         x-transition:enter="transition ease-out duration-150"

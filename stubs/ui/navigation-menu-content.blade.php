@@ -5,6 +5,8 @@
     @mouseenter="active = id"
     @click.outside="if (active === id) active = null"
     @keydown.escape.window="active = null"
+    :id="id"
+    :aria-labelledby="id + '-trigger'"
     data-slot="navigation-menu-content"
     :data-state="active === id ? 'open' : 'closed'"
     x-transition:enter="transition ease-out duration-200"

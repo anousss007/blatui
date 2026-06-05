@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-05
+
+Accessibility overhaul of every shipped component (`blatui:add`) and the
+foundations — WAI-ARIA / Base-UI parity, full keyboard + focus management, and
+WCAG AA color contrast.
+
+### Added
+- Reusable a11y engine in the `blatui-core.js` foundation: `x-blat-trigger`,
+  `x-blat-labelledby`, `x-blat-field`, the `blatMenu` / `blatMenubar` /
+  `blatSelect` / `blatCommand` Alpine components, and `$blatNav` / `$blatType`.
+- `field-error` accepts a `:messages` array (single → text, multiple → list).
+
+### Changed
+- All component stubs rebuilt to WAI-ARIA / Base-UI accessibility: correct
+  roles/states, complete keyboard support (arrows, Home/End, typeahead, Esc),
+  focus trap + restore, ARIA on the real controls; calendar is a full
+  `role="grid"` with keyboard navigation.
+- Foundations CSS tuned to **WCAG AA contrast** (light + dark, all base colors).
+- `registry.json` regenerated.
+
+### Fixed
+- axe-core findings: unlabeled controls, invalid `aria-orientation`, nested
+  interactive elements, listbox child roles, and missing accessible names.
+
 ## [1.1.0] - 2026-06-05
 
 ### Added

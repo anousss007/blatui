@@ -11,7 +11,6 @@
     role="switch"
     @if ($id) id="{{ $id }}" @endif
     x-data="{ checked: @js((bool) $checked) }"
-    x-init="$watch('checked', v => $refs.input.checked = v)"
     :data-state="checked ? 'checked' : 'unchecked'"
     :aria-checked="checked"
     @click="checked = !checked"
@@ -24,15 +23,7 @@
         :data-state="checked ? 'checked' : 'unchecked'"
         class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"
     ></span>
-    <input
-        type="checkbox"
-        x-ref="input"
-        tabindex="-1"
-        aria-hidden="true"
-        class="sr-only"
-        @if ($name) name="{{ $name }}" @endif
-        value="{{ $value }}"
-        @checked($checked)
-        @disabled($disabled)
-    />
+    @if ($name)
+        <input type="hidden" :name="checked ? @js($name) : null" value="{{ $value }}">
+    @endif
 </button>

@@ -16,6 +16,7 @@
         {!! $anchorAttr !!}
         @mouseenter="show()"
         @mouseleave="hide()"
+        tabindex="-1"
         data-slot="hover-card-content"
         data-side="{{ $side }}"
         :data-state="open ? 'open' : 'closed'"

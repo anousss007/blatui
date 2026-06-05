@@ -21,6 +21,8 @@
             return this.type === 'multiple' ? this.open.includes(v) : this.open === v;
         },
     }"
+    x-id="['blat-accordion-trigger', 'blat-accordion-panel']"
+    @keydown="$blatNav($event, { selector: '[data-slot=accordion-trigger]', orientation: 'vertical', loop: false, requireMatch: true })"
     {{ $attributes }}
 >
     {{ $slot }}

@@ -2,6 +2,7 @@
     'align' => 'center',
     'side' => 'bottom',
     'sideOffset' => 4,
+    'label' => 'Popover',
 ])
 
 @php
@@ -17,6 +18,10 @@
         @click.outside="open = false"
         @keydown.escape.window="open = false"
         x-trap="open"
+        :id="$id('blat-popover')"
+        role="dialog"
+        aria-label="{{ $label }}"
+        tabindex="-1"
         data-slot="popover-content"
         data-side="{{ $side }}"
         :data-state="open ? 'open' : 'closed'"

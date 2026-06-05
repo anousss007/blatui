@@ -377,6 +377,7 @@ const calendar = (cfg = {}) => ({
     rangeFrom: null,
     rangeTo: null,
     hover: null,
+    focusedDate: null,
 
     init() {
         this.startMonth = cfg.startMonth ? _parse(cfg.startMonth) : null;
@@ -393,6 +394,8 @@ const calendar = (cfg = {}) => ({
         if (cfg.defaultMonth) base = _parse(cfg.defaultMonth.length === 7 ? cfg.defaultMonth + '-01' : cfg.defaultMonth);
         else base = this.single || this.rangeFrom || (this.multiple && this.multiple[0]) || this.startMonth || new Date();
         this.view = new Date(base.getFullYear(), base.getMonth(), 1);
+        // Roving focus anchor for the grid (APG date-picker keyboard pattern).
+        this.focusedDate = this.single || this.rangeFrom || (this.multiple && this.multiple[0]) || new Date(base.getFullYear(), base.getMonth(), base.getDate());
         // weekday headers
         const ref = new Date(2023, 0, 1);
         for (let i = 0; i < 7; i++) {
@@ -523,8 +526,72 @@ const calendar = (cfg = {}) => ({
         if (!this.endMonth) return true;
         return _addMonths(this.view, this.numberOfMonths) <= new Date(this.endMonth.getFullYear(), this.endMonth.getMonth(), 1);
     },
-    prev() { if (this.canPrev) this.view = _addMonths(this.view, -1); },
-    next() { if (this.canNext) this.view = _addMonths(this.view, 1); },
+    prev() {
+        if (!this.canPrev) return;
+        this.view = _addMonths(this.view, -1);
+        this.focusedDate = new Date(this.focusedDate.getFullYear(), this.focusedDate.getMonth() - 1, this.focusedDate.getDate());
+    },
+    next() {
+        if (!this.canNext) return;
+        this.view = _addMonths(this.view, 1);
+        this.focusedDate = new Date(this.focusedDate.getFullYear(), this.focusedDate.getMonth() + 1, this.focusedDate.getDate());
+    },
+
+    // ---- grid roving focus + keyboard (APG date-picker dialog grid) ----
+    isFocused(d) { return _sameDay(d, this.focusedDate); },
+    dayLabel(d) {
+        const base = d.toLocaleDateString(this.locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        let label = this.isToday(d) ? 'Today, ' + base : base;
+        if (this.isSelected(d)) label += ', selected';
+        return label;
+    },
+    _viewContains(d) {
+        const start = new Date(this.view.getFullYear(), this.view.getMonth(), 1);
+        const end = new Date(this.view.getFullYear(), this.view.getMonth() + this.numberOfMonths, 0);
+        return d >= start && d <= end;
+    },
+    _focus(d) {
+        this.focusedDate = d;
+        if (!this._viewContains(d)) this.view = new Date(d.getFullYear(), d.getMonth(), 1);
+        // Use $root (not $el): when invoked from a day button's @keydown, $el is the
+        // button, but $root is always the calendar component element. Defer to a
+        // macrotask so the moved focus isn't reverted to the event target.
+        const key = _ymd(d);
+        setTimeout(() => {
+            const el = this.$root.querySelector('[data-day="' + key + '"]');
+            if (el) el.focus();
+        }, 0);
+    },
+    moveFocus(days) {
+        const d = new Date(this.focusedDate);
+        d.setDate(d.getDate() + days);
+        this._focus(d);
+    },
+    moveFocusMonths(n) {
+        const d = new Date(this.focusedDate);
+        d.setMonth(d.getMonth() + n);
+        this._focus(d);
+    },
+    focusWeekEdge(end) {
+        const d = new Date(this.focusedDate);
+        const offset = (d.getDay() - this.weekStart + 7) % 7;
+        d.setDate(d.getDate() + (end ? 6 - offset : -offset));
+        this._focus(d);
+    },
+    onDayKeydown(e, d) {
+        const k = e.key;
+        if (k === 'ArrowLeft') this.moveFocus(-1);
+        else if (k === 'ArrowRight') this.moveFocus(1);
+        else if (k === 'ArrowUp') this.moveFocus(-7);
+        else if (k === 'ArrowDown') this.moveFocus(7);
+        else if (k === 'Home') this.focusWeekEdge(false);
+        else if (k === 'End') this.focusWeekEdge(true);
+        else if (k === 'PageUp') this.moveFocusMonths(-1);
+        else if (k === 'PageDown') this.moveFocusMonths(1);
+        else if (k === 'Enter' || k === ' ') { this.select(d); this.focusedDate = d; }
+        else return;
+        e.preventDefault();
+    },
 
     // ---- dropdown caption ----
     get years() {
@@ -701,8 +768,376 @@ window.exportTheme = function () {
 };
 
 // ---------------------------------------------------------------------------
-// Register every BlatUI Alpine piece — plugins, the theme store and the chart +
-// calendar components — into an Alpine instance. Call this BEFORE Alpine.start().
+// Accessibility primitives
+//
+// shadcn/ui inherits a flawless ARIA layer from Radix' `asChild` slot-merging:
+// the popup ARIA (haspopup/expanded/controls) lands on the *real* focusable
+// control, never on a wrapper. Our Blade triggers wrap a real <button> in a
+// `display:contents` span, so without help the ARIA would sit on the
+// non-focusable span. These directives port Radix' behaviour to Alpine.
+// ---------------------------------------------------------------------------
+
+// Find the genuine focusable control a trigger wrapper stands for. The wrapper
+// is usually a `display:contents` span whose first interactive descendant is the
+// actual <button>/<a>; fall back to the element itself when it is focusable.
+function resolveControl(el) {
+    const focusableSel = 'button, [href], input, select, textarea, [tabindex]';
+    if (el.matches(focusableSel) && el.getAttribute('tabindex') !== '-1') return el;
+    return (
+        el.querySelector('button:not([tabindex="-1"]), a[href]:not([tabindex="-1"]), input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])') ||
+        el.firstElementChild ||
+        el
+    );
+}
+
+let _blatId = 0;
+function ensureId(node, prefix = 'blat') {
+    if (!node.id) node.id = `${prefix}-${++_blatId}-${Math.random().toString(36).slice(2, 7)}`;
+    return node.id;
+}
+
+// x-blat-trigger="{ haspopup: 'menu', controls: $id('blat-content'), state: 'open' }"
+//   Mirrors disclosure/popup ARIA onto the real control inside the wrapper.
+//   `haspopup` → aria-haspopup (dialog|menu|listbox|tree|grid|true)
+//   `controls` → aria-controls (the popup content id)
+//   `state`    → reactive boolean expression for expanded state (default 'open')
+//   `labelledby`/`describedby` → static id refs (e.g. tooltip describing a trigger)
+function blatTriggerDirective(el, { expression }, { evaluate, effect }) {
+    const cfg = expression ? evaluate(expression) : {};
+    const control = resolveControl(el);
+    if (!control) return;
+    // For triggers whose slot may be plain text (tooltip/hover-card), make the
+    // resolved control keyboard-focusable when it isn't already.
+    if (cfg.focusable && !control.matches('button, a[href], input, select, textarea, [tabindex]')) {
+        control.tabIndex = 0;
+    }
+    if (cfg.id && !control.id) control.id = cfg.id;
+    if (cfg.haspopup) control.setAttribute('aria-haspopup', cfg.haspopup === true ? 'true' : cfg.haspopup);
+    if (cfg.controls) control.setAttribute('aria-controls', cfg.controls);
+    if (cfg.labelledby) control.setAttribute('aria-labelledby', cfg.labelledby);
+    if (cfg.describedby) control.setAttribute('aria-describedby', cfg.describedby);
+    if (cfg.state === null) return; // opt out of expanded tracking (plain tooltip/hovercard target)
+    const stateExpr = cfg.state || 'open';
+    effect(() => {
+        let open = false;
+        try {
+            open = !!evaluate(stateExpr);
+        } catch (e) {
+            /* state not yet in scope */
+        }
+        control.setAttribute('aria-expanded', open ? 'true' : 'false');
+        control.setAttribute('data-state', open ? 'open' : 'closed');
+    });
+}
+
+// x-blat-labelledby="{ label: '[data-slot=dialog-title]', description: '[data-slot=dialog-description]' }"
+//   Wires aria-labelledby / aria-describedby on a dialog/popover container from
+//   whichever title/description slots the author actually rendered (Radix does
+//   this through context; we resolve it from the DOM so absent slots add no
+//   dangling idref).
+function blatLabelledByDirective(el, { expression }, { evaluate }) {
+    const cfg = expression ? evaluate(expression) : {};
+    const wire = (sel, attr) => {
+        if (!sel) return;
+        const node = el.querySelector(sel);
+        if (node) el.setAttribute(attr, ensureId(node, 'blat-label'));
+    };
+    // Slots render synchronously inside the teleported content; a microtask is
+    // enough to let x-show/x-cloak settle without a visible reflow.
+    queueMicrotask(() => {
+        wire(cfg.label, 'aria-labelledby');
+        wire(cfg.description, 'aria-describedby');
+    });
+}
+
+// x-blat-field — wires a form field's control to its label/description/error:
+//   aria-describedby ← description + error ids, aria-invalid + data-invalid when
+//   an error is present, and label[for] ← control id when not already set. Radix/
+//   Base UI do this through React context; we resolve it from the rendered DOM.
+function blatFieldDirective(el) {
+    queueMicrotask(() => {
+        const control = el.querySelector(
+            'input:not([type=hidden]), textarea, select, [role="checkbox"], [role="switch"], [role="radiogroup"], [role="combobox"], [role="slider"], [role="spinbutton"]',
+        );
+        if (!control) return;
+        const ids = [];
+        const desc = el.querySelector('[data-slot="field-description"]');
+        const err = el.querySelector('[data-slot="field-error"]');
+        if (desc) ids.push(ensureId(desc, 'field-desc'));
+        if (err) ids.push(ensureId(err, 'field-err'));
+        if (ids.length) {
+            const prev = control.getAttribute('aria-describedby');
+            control.setAttribute('aria-describedby', [prev, ...ids].filter(Boolean).join(' '));
+        }
+        if (err) {
+            control.setAttribute('aria-invalid', 'true');
+            el.setAttribute('data-invalid', 'true');
+        }
+        const label = el.querySelector('[data-slot="field-label"]');
+        if (label && !label.getAttribute('for')) {
+            label.setAttribute('for', ensureId(control, 'field-control'));
+        }
+    });
+}
+
+// $blatNav(event[, opts]) — APG roving focus for composite widgets (menus,
+// listboxes, toolbars). Moves DOM focus among the matching items in response to
+// arrow / Home / End keys, wrapping by default. Does not change selection — that
+// is the widget's job. opts: { selector, orientation: 'vertical'|'horizontal'|
+// 'both', loop: true }.
+function blatNavMagic(el) {
+    return (e, opts = {}) => {
+        if (!e || !e.key) return;
+        const selector = opts.selector || '[role^="menuitem"], [role="option"]';
+        const orientation = opts.orientation || 'vertical';
+        const loop = opts.loop !== false;
+        const horiz = orientation === 'horizontal' || orientation === 'both';
+        const vert = orientation === 'vertical' || orientation === 'both';
+        const items = Array.from(el.querySelectorAll(selector)).filter(
+            (i) => i.offsetParent !== null && i.getAttribute('aria-disabled') !== 'true' && !i.hasAttribute('disabled'),
+        );
+        if (!items.length) return;
+        const cur = items.indexOf(document.activeElement);
+        // When the focus isn't already on one of the items, opt out (used by
+        // accordion, whose panels contain their own focusable content).
+        if (opts.requireMatch && cur < 0) return;
+        let idx = null;
+        if ((vert && e.key === 'ArrowDown') || (horiz && e.key === 'ArrowRight')) idx = cur < 0 ? 0 : cur + 1;
+        else if ((vert && e.key === 'ArrowUp') || (horiz && e.key === 'ArrowLeft')) idx = cur < 0 ? items.length - 1 : cur - 1;
+        else if (e.key === 'Home' || e.key === 'PageUp') idx = 0;
+        else if (e.key === 'End' || e.key === 'PageDown') idx = items.length - 1;
+        else return;
+        if (loop) idx = (idx + items.length) % items.length;
+        else idx = Math.max(0, Math.min(items.length - 1, idx));
+        const target = items[idx];
+        if (target) {
+            target.focus();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    };
+}
+
+// $blatType(event[, selector]) — APG typeahead for menus/listboxes. Buffers the
+// keys typed within 500ms and moves focus to the next matching item, wrapping.
+function blatTypeMagic(el) {
+    const DEFAULT = '[role^="menuitem"], [role="option"], [role="menuitemradio"], [role="menuitemcheckbox"]';
+    return (e, selector = DEFAULT) => {
+        if (!e || e.key == null || e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) return;
+        const items = Array.from(el.querySelectorAll(selector)).filter(
+            (i) => !i.hasAttribute('disabled') && i.getAttribute('aria-disabled') !== 'true' && i.offsetParent !== null,
+        );
+        if (!items.length) return;
+        el._blatBuf = (el._blatBuf || '') + e.key.toLowerCase();
+        clearTimeout(el._blatBufT);
+        el._blatBufT = setTimeout(() => (el._blatBuf = ''), 500);
+        const start = items.indexOf(document.activeElement);
+        const ordered = items.slice(start + 1).concat(items.slice(0, start + 1));
+        const match = ordered.find((i) => (i.textContent || '').trim().toLowerCase().startsWith(el._blatBuf));
+        if (match) {
+            match.focus();
+            e.preventDefault();
+        }
+    };
+}
+
+// blatMenu — shared disclosure + roving-focus engine for menu widgets
+// (dropdown-menu, context-menu). Mirrors the WAI-ARIA menu-button pattern:
+//   * openMenu('first'|'last'|undefined) — open and place focus (a keyboard open
+//     lands on the first/last item; a pointer open lands on the menu container).
+//   * closeMenu(returnFocus) — close and (by default) restore focus to trigger.
+// Item-to-item arrow navigation is handled by $blatNav on the content element;
+// this object owns open state + initial/closing focus only.
+const blatMenu = (config = {}) => ({
+    open: config.open ?? false,
+    x: 0,
+    y: 0,
+    _menu: null,
+    _trigger: null,
+    // Context-menu entry point: open at the pointer position with first item focused.
+    openAt(ev) {
+        if (ev) {
+            ev.preventDefault();
+            this.x = ev.clientX;
+            this.y = ev.clientY;
+            this._trigger = ev.currentTarget || this._trigger;
+        }
+        this.openMenu('first');
+    },
+    get _items() {
+        if (!this._menu) return [];
+        return Array.from(this._menu.querySelectorAll('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')).filter(
+            (i) => i.getAttribute('aria-disabled') !== 'true' && !i.hasAttribute('disabled') && i.offsetParent !== null,
+        );
+    },
+    openMenu(focus) {
+        this.open = true;
+        this.$nextTick(() => {
+            if (!this._menu) return;
+            const items = this._items;
+            if (focus === 'first') (items[0] || this._menu).focus();
+            else if (focus === 'last') (items[items.length - 1] || this._menu).focus();
+            else this._menu.focus();
+        });
+    },
+    toggleMenu() {
+        this.open ? this.closeMenu(false) : this.openMenu();
+    },
+    closeMenu(returnFocus = true) {
+        if (!this.open) return;
+        this.open = false;
+        if (returnFocus && this._trigger) this.$nextTick(() => this._trigger.focus());
+    },
+});
+
+// blatMenubar — WAI-ARIA menubar engine. Triggers share one `active` (the open
+// menu's id) and a roving tabindex (`rovingId`); ArrowLeft/Right move between
+// triggers (and switch the open menu when one is open); Down/Enter open a menu
+// with its first item focused. Each menu's content keys off `active === id`.
+const blatMenubar = () => ({
+    active: null,
+    rovingId: null,
+    triggers: [],
+    register(id, el) {
+        this.triggers.push({ id, el });
+        if (this.rovingId === null) this.rovingId = id;
+    },
+    _idx(id) {
+        return this.triggers.findIndex((t) => t.id === id);
+    },
+    _items(id) {
+        const m = document.getElementById(id);
+        return m
+            ? Array.from(m.querySelectorAll('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')).filter(
+                  (x) => x.getAttribute('aria-disabled') !== 'true' && x.offsetParent !== null,
+              )
+            : [];
+    },
+    focusTrigger(id) {
+        const t = this.triggers.find((x) => x.id === id);
+        if (t) {
+            this.rovingId = id;
+            t.el.focus();
+        }
+    },
+    openMenu(id, focusFirst = true) {
+        this.active = id;
+        this.rovingId = id;
+        if (focusFirst) this.$nextTick(() => (this._items(id)[0] || document.getElementById(id))?.focus());
+    },
+    toggleMenu(id) {
+        this.active === id ? this.closeMenu(false) : this.openMenu(id);
+    },
+    moveTrigger(dir, fromId) {
+        if (!this.triggers.length) return;
+        const i = this._idx(fromId);
+        if (i < 0) return;
+        const next = this.triggers[(i + dir + this.triggers.length) % this.triggers.length].id;
+        this.active !== null ? this.openMenu(next) : this.focusTrigger(next);
+    },
+    closeMenu(returnFocus = true) {
+        const id = this.active;
+        this.active = null;
+        if (returnFocus && id) this.focusTrigger(id);
+    },
+});
+
+// blatSelect — WAI-ARIA listbox/combobox engine for the <Select>. Opening focuses
+// the selected option (or the first); arrow/typeahead navigation is handled by
+// $blatNav/$blatType on the listbox; Enter/Space on a focused option selects and
+// closes, restoring focus to the trigger.
+const blatSelect = (config = {}) => ({
+    open: false,
+    value: config.value != null ? String(config.value) : '',
+    label: '',
+    _list: null,
+    _trigger: null,
+    get _options() {
+        return this._list
+            ? Array.from(this._list.querySelectorAll('[role="option"]')).filter(
+                  (o) => o.getAttribute('aria-disabled') !== 'true' && o.offsetParent !== null,
+              )
+            : [];
+    },
+    openList() {
+        this.open = true;
+        this.$nextTick(() => {
+            if (!this._list) return;
+            const opts = this._options;
+            (opts.find((o) => o.dataset.value === this.value) || opts[0] || this._list).focus();
+        });
+    },
+    toggleList() {
+        this.open ? this.close(false) : this.openList();
+    },
+    close(returnFocus = true) {
+        if (!this.open) return;
+        this.open = false;
+        if (returnFocus && this._trigger) this.$nextTick(() => this._trigger.focus());
+    },
+    selectOption(val, lbl) {
+        this.value = String(val);
+        this.label = lbl;
+        this.close();
+    },
+});
+
+// blatCommand — command-palette engine implementing the editable-combobox +
+// listbox APG pattern with aria-activedescendant. Focus stays on the input; the
+// "active" option is tracked by id and exposed via aria-activedescendant, moved
+// with Arrow/Home/End, and triggered with Enter. Items register themselves and
+// filter on the query.
+const blatCommand = () => ({
+    query: '',
+    activeId: null,
+    _entries: [],
+    registerItem(el, keyword, disabled) {
+        const id = ensureId(el, 'blat-cmd-item');
+        this._entries.push({ id, el, keyword: (keyword || '').toLowerCase(), disabled: !!disabled });
+        return id;
+    },
+    matches(kw) {
+        return (kw || '').toLowerCase().includes(this.query.toLowerCase());
+    },
+    get _visible() {
+        return this._entries.filter((i) => !i.disabled && this.matches(i.keyword) && i.el.offsetParent !== null);
+    },
+    get visibleCount() {
+        return this._entries.filter((i) => this.matches(i.keyword)).length;
+    },
+    ensureActive() {
+        const vis = this._visible;
+        if (!vis.length) {
+            this.activeId = null;
+        } else if (!vis.some((i) => i.id === this.activeId)) {
+            this.activeId = vis[0].id;
+        }
+    },
+    move(dir) {
+        const vis = this._visible;
+        if (!vis.length) return;
+        let idx = vis.findIndex((i) => i.id === this.activeId);
+        idx = idx < 0 ? (dir > 0 ? 0 : vis.length - 1) : (idx + dir + vis.length) % vis.length;
+        this.activeId = vis[idx].id;
+        vis[idx].el.scrollIntoView({ block: 'nearest' });
+    },
+    edge(pos) {
+        const vis = this._visible;
+        if (!vis.length) return;
+        const it = pos === 'last' ? vis[vis.length - 1] : vis[0];
+        this.activeId = it.id;
+        it.el.scrollIntoView({ block: 'nearest' });
+    },
+    selectActive() {
+        const it = this._entries.find((i) => i.id === this.activeId);
+        if (it && !it.disabled) it.el.click();
+    },
+});
+
+// ---------------------------------------------------------------------------
+// Register every BlatUI Alpine piece — plugins, the theme store, the chart +
+// calendar components and the a11y primitives — into an Alpine instance.
+// Call this BEFORE Alpine.start().
 //
 //   Greenfield (no Alpine yet): the published blatui.js does this for you.
 //   Existing Alpine app:        import { registerBlatUI } from './blatui-core.js'
@@ -715,4 +1150,13 @@ export function registerBlatUI(Alpine) {
     Alpine.store('theme', themeStore);
     Alpine.data('shadcnChart', shadcnChart);
     Alpine.data('calendar', calendar);
+    Alpine.data('blatMenu', blatMenu);
+    Alpine.data('blatMenubar', blatMenubar);
+    Alpine.data('blatSelect', blatSelect);
+    Alpine.data('blatCommand', blatCommand);
+    Alpine.directive('blat-trigger', blatTriggerDirective);
+    Alpine.directive('blat-labelledby', blatLabelledByDirective);
+    Alpine.directive('blat-field', blatFieldDirective);
+    Alpine.magic('blatNav', blatNavMagic);
+    Alpine.magic('blatType', blatTypeMagic);
 }

@@ -20,6 +20,8 @@
         <div
             x-show="open"
             @click="open = false"
+            role="presentation"
+            aria-hidden="true"
             data-slot="drawer-overlay"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0"
@@ -32,10 +34,13 @@
 
         <div
             x-show="open"
-            x-trap.noscroll="open"
+            x-trap.noscroll.inert="open"
             @keydown.escape.window="open = false"
+            :id="$id('blat-drawer')"
+            x-blat-labelledby="{ label: '[data-slot=drawer-title]', description: '[data-slot=drawer-description]' }"
             role="dialog"
             aria-modal="true"
+            tabindex="-1"
             data-slot="drawer-content"
             :data-vaul-drawer-direction="direction"
             x-bind:class="{
@@ -54,6 +59,7 @@
         >
             <div
                 x-show="direction === 'bottom'"
+                aria-hidden="true"
                 class="bg-muted mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block"
             ></div>
             {{ $slot }}

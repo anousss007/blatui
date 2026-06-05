@@ -14,6 +14,7 @@
         x-show="open"
         x-cloak
         {!! $anchorAttr !!}
+        :id="$id('blat-tooltip')"
         role="tooltip"
         data-slot="tooltip-content"
         data-side="{{ $side }}"
@@ -27,6 +28,6 @@
         {{ $attributes->twMerge('bg-primary text-primary-foreground fixed z-50 w-fit rounded-md px-3 py-1.5 text-xs text-balance') }}
     >
         {{ $slot }}
-        <span class="bg-primary fill-primary absolute left-1/2 -bottom-1 size-2.5 -translate-x-1/2 rotate-45 rounded-[2px]"></span>
+        <span aria-hidden="true" class="bg-primary fill-primary absolute left-1/2 -bottom-1 size-2.5 -translate-x-1/2 rotate-45 rounded-[2px]"></span>
     </div>
 </template>

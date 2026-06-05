@@ -6,6 +6,7 @@
     'config' => [],
     'labels' => [],
     'height' => 250,
+    'label' => 'Chart',
 ])
 
 @php
@@ -35,6 +36,8 @@
 
 <div
     data-slot="chart"
+    role="img"
+    aria-label="{{ $label }}"
     style="{{ $styleVars }}"
     x-data="shadcnChart({{ \Illuminate\Support\Js::from($payload) }})"
     {{ $attributes->twMerge('flex aspect-video justify-center text-xs w-full [&_.apexcharts-tooltip]:!rounded-lg [&_.apexcharts-tooltip]:!border [&_.apexcharts-tooltip]:!border-border [&_.apexcharts-tooltip]:!bg-popover [&_.apexcharts-tooltip]:!text-popover-foreground [&_.apexcharts-tooltip]:!shadow-xl') }}

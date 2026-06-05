@@ -17,6 +17,7 @@
         }
     }"
     @calendar-change="value = $event.detail; open = false"
+    x-id="['blat-datepicker']"
     {{ $attributes->twMerge('relative '.$width) }}
 >
     @if ($name)
@@ -27,10 +28,13 @@
         type="button"
         x-ref="trigger"
         @click="open = !open"
+        aria-haspopup="dialog"
+        :aria-expanded="open"
+        :aria-controls="$id('blat-datepicker')"
         :class="!value && 'text-muted-foreground'"
         class="{{ $width }} border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-left text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
     >
-        <x-lucide-calendar class="size-4 opacity-50" />
+        <x-lucide-calendar class="size-4 opacity-50" aria-hidden="true" />
         <span x-text="label || @js($placeholder)"></span>
     </button>
 
@@ -41,6 +45,10 @@
         @click.outside="open = false"
         @keydown.escape.window="open = false"
         x-trap="open"
+        :id="$id('blat-datepicker')"
+        role="dialog"
+        aria-label="Choose date"
+        tabindex="-1"
         class="bg-popover text-popover-foreground z-50 w-auto origin-top overflow-hidden rounded-md border p-0 shadow-md"
         x-transition:enter="transition ease-out duration-150"
         x-transition:enter-start="opacity-0 scale-95"
