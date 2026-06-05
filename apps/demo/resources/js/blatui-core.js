@@ -30,6 +30,8 @@ const themeStore = {
     shadow: localStorage.getItem('theme:shadow') || 'default',
     spacing: localStorage.getItem('theme:spacing') || 'default',
     tracking: localStorage.getItem('theme:tracking') || 'normal',
+    inputStyle: localStorage.getItem('theme:inputStyle') || 'outline',
+    fontHeading: localStorage.getItem('theme:fontHeading') || 'sans',
 
     init() {
         this.apply();
@@ -38,7 +40,7 @@ const themeStore = {
         });
         // Keep every same-origin document in sync (e.g. block-preview iframes):
         // localStorage writes in one document fire a `storage` event in the others.
-        const defaults = { mode: 'system', base: 'neutral', preset: 'default', radius: '0.625', font: 'sans', shadow: 'default', spacing: 'default', tracking: 'normal' };
+        const defaults = { mode: 'system', base: 'neutral', preset: 'default', radius: '0.625', font: 'sans', shadow: 'default', spacing: 'default', tracking: 'normal', inputStyle: 'outline', fontHeading: 'sans' };
         window.addEventListener('storage', (e) => {
             if (!e.key || !e.key.startsWith('theme:')) return;
             const key = e.key.slice('theme:'.length);
@@ -67,13 +69,15 @@ const themeStore = {
     setShadow(shadow) { this.set('shadow', shadow); },
     setSpacing(spacing) { this.set('spacing', spacing); },
     setTracking(tracking) { this.set('tracking', tracking); },
+    setInputStyle(inputStyle) { this.set('inputStyle', inputStyle); },
+    setFontHeading(fontHeading) { this.set('fontHeading', fontHeading); },
 
     toggle() {
         this.setMode(this.isDark ? 'light' : 'dark');
     },
 
     reset() {
-        ['mode', 'base', 'preset', 'radius', 'font', 'shadow', 'spacing', 'tracking'].forEach((k) =>
+        ['mode', 'base', 'preset', 'radius', 'font', 'shadow', 'spacing', 'tracking', 'inputStyle', 'fontHeading'].forEach((k) =>
             localStorage.removeItem('theme:' + k),
         );
         this.mode = 'system';
@@ -84,6 +88,8 @@ const themeStore = {
         this.shadow = 'default';
         this.spacing = 'default';
         this.tracking = 'normal';
+        this.inputStyle = 'outline';
+        this.fontHeading = 'sans';
         this.apply();
     },
 
@@ -97,6 +103,8 @@ const themeStore = {
         this.attr(root, 'data-shadow', this.shadow, 'default');
         this.attr(root, 'data-spacing', this.spacing, 'default');
         this.attr(root, 'data-tracking', this.tracking, 'normal');
+        this.attr(root, 'data-input-style', this.inputStyle, 'outline');
+        this.attr(root, 'data-font-heading', this.fontHeading, 'sans');
         root.setAttribute('data-radius', this.radius);
     },
 

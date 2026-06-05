@@ -34,7 +34,7 @@
                             'bg-card hover:border-ring hover:bg-accent/30' => $has,
                             'opacity-50 cursor-not-allowed' => ! $has,
                         ])>
-                        <span class="font-medium capitalize">{{ str_replace('-', ' ', $slug) }}</span>
+                        <span class="font-medium capitalize">{{ config('docs.labels.'.$slug) ?? str_replace('-', ' ', $slug) }}</span>
                         @if ($has)
                             <x-lucide-arrow-right class="text-muted-foreground size-4" />
                         @else

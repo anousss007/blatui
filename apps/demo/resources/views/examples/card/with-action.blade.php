@@ -23,9 +23,9 @@
             <x-ui.avatar>
                 <x-ui.avatar-fallback>SC</x-ui.avatar-fallback>
             </x-ui.avatar>
-            <div class="flex-1 text-sm">
-                <div class="font-medium">Sofia Carter</div>
-                <div class="text-muted-foreground">sofia@example.com</div>
+            <div class="min-w-0 flex-1 text-sm">
+                <div class="truncate font-medium">Sofia Carter</div>
+                <div class="truncate text-muted-foreground">sofia@example.com</div>
             </div>
             <x-ui.badge variant="outline">Owner</x-ui.badge>
         </div>
@@ -33,9 +33,9 @@
             <x-ui.avatar>
                 <x-ui.avatar-fallback>JD</x-ui.avatar-fallback>
             </x-ui.avatar>
-            <div class="flex-1 text-sm">
-                <div class="font-medium">Jackson Doe</div>
-                <div class="text-muted-foreground">jackson@example.com</div>
+            <div class="min-w-0 flex-1 text-sm">
+                <div class="truncate font-medium">Jackson Doe</div>
+                <div class="truncate text-muted-foreground">jackson@example.com</div>
             </div>
             <x-ui.badge variant="outline">Member</x-ui.badge>
         </div>

@@ -30,6 +30,11 @@ return [
         ],
     ],
 
+    // Display-name overrides for slugs whose humanized form is wrong (acronyms, etc.).
+    'labels' => [
+        'input-otp' => 'Input OTP',
+    ],
+
     // Optional one-line descriptions shown on each component page.
     'descriptions' => [
         'button' => 'Displays a button or a component that looks like a button.',

@@ -41,7 +41,7 @@
                                                 'hover:bg-accent/60 text-foreground' => $active !== $slug && $has,
                                                 'text-muted-foreground/50 cursor-not-allowed' => ! $has,
                                             ])>
-                                            <span class="capitalize">{{ str_replace('-', ' ', $slug) }}</span>
+                                            <span class="capitalize">{{ config('docs.labels.'.$slug) ?? str_replace('-', ' ', $slug) }}</span>
                                             @unless ($has)
                                                 <span class="text-muted-foreground/40 text-[10px]">soon</span>
                                             @endunless

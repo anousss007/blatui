@@ -60,7 +60,7 @@
                             </x-ui.field-group>
                         </form>
                         <div class="bg-muted relative hidden md:block">
-                            <img src="/placeholder.svg" alt=""
+                            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&q=80&auto=format&fit=crop" alt=""
                                 class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale" />
                         </div>
                     </x-ui.card-content>

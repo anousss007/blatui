@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-05
+
+Competitive parity pass — every component's example coverage expanded, a real-world
+Examples gallery added, and the theme customizer extended to match and exceed
+comparable libraries.
+
+### Added
+- 100+ new component examples across all 55 components — variants, sizes, states and
+  real-world compositions (220 example files total).
+- Examples gallery merged into `/blocks` (`#examples`): product, pricing, blog,
+  profile, testimonial, payment, share, feedback dialog and more, with real Unsplash
+  imagery.
+- Theme customizer: 2 base colors (slate, gray → 9 total), an **input-style**
+  dimension (outline / fill / inset), and a **heading + body font split** with 14
+  webfont families served via Bunny — all surfaced in the Customize panel.
+- `button`: `xs` size plus an icon size scale (`icon-xs` / `icon-sm` / `icon-lg`).
+- `config('docs.labels')` display-name overrides (e.g. "Input OTP").
+
+### Fixed
+- `nav-main` block: Alpine `aria-expanded` / `aria-controls` bindings (`:` → `::`).
+- Card team-member / share rows: trailing badge overflow (`min-w-0` + `truncate`).
+
 ## [1.2.0] - 2026-06-05
 
 Full accessibility overhaul — every component brought to WAI-ARIA / Base-UI parity

@@ -52,7 +52,7 @@
             </div>
         </div>
         <div class="bg-muted relative hidden lg:block">
-            <img src="/placeholder.svg" alt=""
+            <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&q=80&auto=format&fit=crop" alt=""
                 class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale" />
         </div>
     </div>

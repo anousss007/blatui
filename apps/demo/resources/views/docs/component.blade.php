@@ -9,7 +9,7 @@
         })
         ->values();
 
-    $title = \Illuminate\Support\Str::headline($slug);
+    $title = config('docs.labels.'.$slug) ?? \Illuminate\Support\Str::headline($slug);
     $description = config('docs.descriptions.'.$slug);
 @endphp
 

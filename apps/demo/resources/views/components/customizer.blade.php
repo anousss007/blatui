@@ -35,8 +35,8 @@
             {{-- Base color --}}
             <div class="space-y-1.5">
                 <span class="text-xs font-medium">Base color</span>
-                <div class="grid grid-cols-7 gap-2">
-                    @foreach (['neutral' => 'oklch(0.205 0 0)', 'stone' => 'oklch(0.216 0.006 56.043)', 'zinc' => 'oklch(0.21 0.006 285.885)', 'mauve' => 'oklch(0.212 0.019 322.12)', 'olive' => 'oklch(0.228 0.013 107.4)', 'mist' => 'oklch(0.218 0.008 223.9)', 'taupe' => 'oklch(0.214 0.009 43.1)'] as $val => $swatch)
+                <div class="grid grid-cols-9 gap-2">
+                    @foreach (['neutral' => 'oklch(0.205 0 0)', 'stone' => 'oklch(0.216 0.006 56.043)', 'zinc' => 'oklch(0.21 0.006 285.885)', 'slate' => 'oklch(0.208 0.042 265.755)', 'gray' => 'oklch(0.21 0.034 264.665)', 'mauve' => 'oklch(0.212 0.019 322.12)', 'olive' => 'oklch(0.228 0.013 107.4)', 'mist' => 'oklch(0.218 0.008 223.9)', 'taupe' => 'oklch(0.214 0.009 43.1)'] as $val => $swatch)
                         <button type="button" @click="$store.theme.setBase('{{ $val }}')" title="{{ ucfirst($val) }}"
                             :data-active="$store.theme.base === '{{ $val }}'"
                             class="border-input data-[active=true]:ring-ring data-[active=true]:ring-2 ring-offset-background flex h-8 items-center justify-center rounded-md border ring-offset-2 transition-all"
@@ -74,13 +74,56 @@
                 </div>
             </div>
 
-            {{-- Font --}}
+            {{-- Input style --}}
             <div class="space-y-1.5">
-                <span class="text-xs font-medium">Font</span>
-                <div class="grid grid-cols-4 gap-2">
-                    @foreach (['sans' => 'Sans', 'system' => 'System', 'serif' => 'Serif', 'mono' => 'Mono'] as $val => $lbl)
+                <span class="text-xs font-medium">Input style</span>
+                <div class="grid grid-cols-3 gap-2">
+                    @foreach (['outline' => 'Outline', 'fill' => 'Fill', 'inset' => 'Inset'] as $val => $lbl)
+                        <button type="button" @click="$store.theme.setInputStyle('{{ $val }}')"
+                            :data-active="$store.theme.inputStyle === '{{ $val }}'"
+                            class="border-input data-[active=true]:border-primary data-[active=true]:bg-accent inline-flex h-8 items-center justify-center rounded-md border text-xs font-medium transition-colors hover:bg-accent">{{ $lbl }}</button>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Fonts: body + heading (independent) --}}
+            @php
+                $fontOptions = [
+                    'sans' => ['Default', "'Instrument Sans', sans-serif"],
+                    'inter' => ['Inter', "'Inter', sans-serif"],
+                    'geist' => ['Geist', "'Geist', sans-serif"],
+                    'manrope' => ['Manrope', "'Manrope', sans-serif"],
+                    'jakarta' => ['Jakarta', "'Plus Jakarta Sans', sans-serif"],
+                    'space-grotesk' => ['Grotesk', "'Space Grotesk', sans-serif"],
+                    'dm-sans' => ['DM Sans', "'DM Sans', sans-serif"],
+                    'outfit' => ['Outfit', "'Outfit', sans-serif"],
+                    'sora' => ['Sora', "'Sora', sans-serif"],
+                    'lora' => ['Lora', "'Lora', serif"],
+                    'source-serif' => ['Source', "'Source Serif 4', serif"],
+                    'system' => ['System', 'system-ui, sans-serif'],
+                    'serif' => ['Serif', 'ui-serif, Georgia, serif'],
+                    'mono' => ['Mono', 'ui-monospace, monospace'],
+                ];
+            @endphp
+            <div class="space-y-1.5">
+                <span class="text-xs font-medium">Body font</span>
+                <div class="grid grid-cols-3 gap-2">
+                    @foreach ($fontOptions as $val => [$lbl, $family])
                         <button type="button" @click="$store.theme.setFont('{{ $val }}')"
                             :data-active="$store.theme.font === '{{ $val }}'"
+                            style="font-family: {{ $family }}"
+                            class="border-input data-[active=true]:border-primary data-[active=true]:bg-accent inline-flex h-8 items-center justify-center rounded-md border text-xs font-medium transition-colors hover:bg-accent">{{ $lbl }}</button>
+                    @endforeach
+                </div>
+            </div>
+            <div class="space-y-1.5">
+                <span class="text-xs font-medium">Heading font</span>
+                <p class="text-muted-foreground text-[11px]">"Default" follows the body font.</p>
+                <div class="grid grid-cols-3 gap-2">
+                    @foreach ($fontOptions as $val => [$lbl, $family])
+                        <button type="button" @click="$store.theme.setFontHeading('{{ $val }}')"
+                            :data-active="$store.theme.fontHeading === '{{ $val }}'"
+                            style="font-family: {{ $family }}"
                             class="border-input data-[active=true]:border-primary data-[active=true]:bg-accent inline-flex h-8 items-center justify-center rounded-md border text-xs font-medium transition-colors hover:bg-accent">{{ $lbl }}</button>
                     @endforeach
                 </div>

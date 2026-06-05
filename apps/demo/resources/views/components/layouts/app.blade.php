@@ -56,6 +56,11 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/favicon.svg">
 
+    {{-- Customizer font families (privacy-friendly Bunny mirror; graceful fallback offline) --}}
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+    <link rel="stylesheet" href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700|geist:400,500,600,700|inter:400,500,600,700|lora:400,500,600,700|manrope:400,500,600,700|outfit:400,500,600,700|plus-jakarta-sans:400,500,600,700|sora:400,500,600,700|source-serif-4:400,500,600,700|space-grotesk:400,500,600,700">
+
+
     {{-- No-flash: apply every persisted theme dimension before first paint --}}
     <script>
         (function () {
@@ -74,6 +79,8 @@
             set('data-shadow', get('shadow', 'default'), 'default');
             set('data-spacing', get('spacing', 'default'), 'default');
             set('data-tracking', get('tracking', 'normal'), 'normal');
+            set('data-input-style', get('inputStyle', 'outline'), 'outline');
+            set('data-font-heading', get('fontHeading', 'sans'), 'sans');
             root.setAttribute('data-radius', get('radius', '0.625'));
         })();
     </script>

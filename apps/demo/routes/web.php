@@ -32,6 +32,9 @@ Route::get('/sitemap.xml', function () {
 
 Route::view('/blocks', 'blocks.index')->name('blocks.index');
 
+// Examples merged into the Blocks gallery; keep the URL working.
+Route::redirect('/examples', '/blocks#examples');
+
 Route::get('/blocks/{block}/raw', function (string $block) {
     abort_unless(preg_match('/^[a-z0-9-]+$/', $block) && view()->exists("blocks.$block"), 404);
 

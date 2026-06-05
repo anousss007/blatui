@@ -6,7 +6,7 @@
         @foreach ($items as $item)
             <x-ui.sidebar-menu-item>
                 <x-ui.collapsible :open="$item['isActive'] ?? false" class="group/collapsible" ::data-state="open ? 'open' : 'closed'">
-                    <x-ui.sidebar-menu-button x-on:click="open = !open" :aria-expanded="open" :aria-controls="$id('blat-collapsible')" ::data-state="open ? 'open' : 'closed'">
+                    <x-ui.sidebar-menu-button x-on:click="open = !open" ::aria-expanded="open" ::aria-controls="$id('blat-collapsible')" ::data-state="open ? 'open' : 'closed'">
                         @isset($item['icon'])
                             <x-dynamic-component :component="'lucide-'.$item['icon']" aria-hidden="true" />
                         @endisset

@@ -1,6 +1,7 @@
 <x-ui.card class="w-full max-w-sm overflow-hidden pt-0">
-    {{-- Cover image: decorative placeholder here (use a real <img> with descriptive alt in your app) --}}
-    <div class="bg-muted aspect-video w-full" aria-hidden="true"></div>
+    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop"
+        alt="Snowy mountain peaks rising above the clouds at sunset"
+        class="aspect-video w-full object-cover" />
     <x-ui.card-header>
         <x-ui.card-title>Exploring the mountains</x-ui.card-title>
         <x-ui.card-description>A short trip above the clouds.</x-ui.card-description>
