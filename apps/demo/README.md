@@ -62,7 +62,10 @@ Point your two Vite entrypoints at the published foundations — **replace** eac
 import "./blatui.js";
 ```
 
-The full step-by-step guide lives at **/docs**.
+**Existing project?** Everything is additive — requires **Tailwind v4** (`npx @tailwindcss/upgrade`
+from v3); **add** `@import "./blatui.css";` to your app.css; and if you already run Alpine, import
+`{ registerBlatUI }` from `./blatui-core.js` and call `registerBlatUI(Alpine)` instead of importing
+`blatui.js`. The full step-by-step guide lives at **/docs**.
 
 ## Usage
 

@@ -109,6 +109,43 @@ php artisan blatui:list</x-code-block>
                 </div>
             </x-step>
 
+            {{-- Existing project --}}
+            <div class="mt-10 border-t pt-10">
+                <h2 class="mb-2 text-2xl font-bold tracking-tight">Installing into an existing project</h2>
+                <p class="text-muted-foreground mb-6 text-sm">Already have a Laravel app with Tailwind set up? Everything is <span class="text-foreground font-medium">additive</span> — you don't replace your files.</p>
+
+                <div class="space-y-5">
+                    <div class="bg-muted/40 flex items-start gap-3 rounded-lg border p-4 text-sm">
+                        <x-lucide-info class="text-primary mt-0.5 size-4 shrink-0" />
+                        <div>
+                            <span class="text-foreground font-medium">Tailwind v4 is required.</span>
+                            <span class="text-muted-foreground">BlatUI relies on v4-only features (<code class="bg-muted rounded px-1 text-xs">@theme inline</code>, oklch tokens). If you're still on Tailwind v3, migrate first:</span>
+                            <div class="mt-2"><x-code-block label="Terminal" icon="terminal">npx @tailwindcss/upgrade</x-code-block></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="mb-1 text-sm font-medium">CSS — add, don't replace</p>
+                        <p class="text-muted-foreground mb-2 text-sm">Append the import to your existing <code class="bg-muted rounded px-1 text-xs">app.css</code> (below your <code class="bg-muted rounded px-1 text-xs">@import "tailwindcss"</code>). The foundations layer on top of your own styles.</p>
+                        <x-code-block label="resources/css/app.css" icon="palette">@import "tailwindcss";
+/* …your existing styles… */
+@import "./blatui.css";</x-code-block>
+                    </div>
+
+                    <div>
+                        <p class="mb-1 text-sm font-medium">JS — already running Alpine?</p>
+                        <p class="text-muted-foreground mb-2 text-sm">Don't import <code class="bg-muted rounded px-1 text-xs">blatui.js</code> (it would boot a second Alpine). Register BlatUI into <span class="text-foreground font-medium">your</span> Alpine instance instead, before you start it:</p>
+                        <x-code-block label="resources/js/app.js" icon="file-code">import Alpine from 'alpinejs'
+import { registerBlatUI } from './blatui-core.js'
+
+registerBlatUI(Alpine)   // plugins + theme store + chart/calendar engines
+
+window.Alpine = Alpine
+Alpine.start()</x-code-block>
+                    </div>
+                </div>
+            </div>
+
             {{-- Next steps --}}
             <div class="mt-8 border-t pt-10">
                 <h2 class="mb-5 text-2xl font-bold tracking-tight">What's next</h2>
