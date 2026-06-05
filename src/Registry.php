@@ -2,72 +2,73 @@
 
 namespace BlatUI;
 
-use Illuminate\Support\Str;
+use RuntimeException;
 
 /**
- * Discovers BlatUI component "families" from the bundled Blade stubs and
- * resolves their inter-component + package dependencies. This powers the
- * copy-paste distribution model (shadcn-style): `blatui:add <component>`
- * copies a family and everything it needs into the consuming project.
+ * Reads the BlatUI component manifest (registry.json) that ships alongside the
+ * bundled Blade stubs and answers the queries the CLI needs to copy a family
+ * and everything it depends on into a consuming project.
+ *
+ * The manifest is the single source of truth: it is generated in the demo repo
+ * by `php artisan blatui:registry:build` and copied here by
+ * scripts/sync-package.sh. This class never re-derives families or
+ * dependencies — it trusts the manifest verbatim.
  */
 class Registry
 {
-    /**
-     * Curated family roots. A component slug belongs to the LONGEST root that
-     * is a prefix of it (so `alert-dialog-*` → "alert-dialog", not "alert";
-     * `input-otp-slot` → "input-otp", not "input").
-     */
-    public const ROOTS = [
-        'accordion', 'alert-dialog', 'alert', 'aspect-ratio', 'avatar', 'badge',
-        'breadcrumb', 'button-group', 'button', 'calendar', 'card', 'carousel',
-        'chart', 'checkbox', 'collapsible', 'combobox', 'command-dialog', 'command',
-        'context-menu', 'date-picker', 'dialog', 'drawer', 'dropdown-menu', 'empty',
-        'field', 'hover-card', 'input-otp', 'input-group', 'input', 'item', 'kbd',
-        'label', 'menubar', 'navigation-menu', 'pagination', 'popover', 'progress',
-        'radio-group', 'resizable', 'scroll-area', 'select', 'separator', 'sheet',
-        'sidebar', 'skeleton', 'slider', 'sonner', 'spinner', 'switch', 'table',
-        'tabs', 'textarea', 'toggle-group', 'toggle', 'tooltip',
-    ];
+    /** @var array<string, array{name: string, files: list<string>, dependencies: list<string>, packages: array}> */
+    protected array $manifest;
 
-    public function __construct(
-        protected string $sourceDir = '',
-    ) {
-        if ($this->sourceDir === '') {
-            $this->sourceDir = dirname(__DIR__).'/stubs/ui';
-        }
-    }
+    /** Directory holding the component .blade.php stubs the manifest describes. */
+    protected string $stubsDir;
 
-    /** Roots ordered longest-first so prefix matching is unambiguous. */
-    protected function rootsByLength(): array
+    public function __construct(?string $manifestPath = null, ?string $stubsDir = null)
     {
-        $roots = self::ROOTS;
-        usort($roots, fn ($a, $b) => strlen($b) <=> strlen($a));
+        $manifestPath ??= dirname(__DIR__).'/stubs/registry.json';
+        $this->stubsDir = $stubsDir ?? dirname(__DIR__).'/stubs/ui';
 
-        return $roots;
+        if (! is_file($manifestPath)) {
+            throw new RuntimeException(
+                "BlatUI registry manifest not found at {$manifestPath}. ".
+                'Re-run scripts/sync-package.sh from the demo repo.'
+            );
+        }
+
+        $decoded = json_decode((string) file_get_contents($manifestPath), true);
+
+        if (! is_array($decoded)) {
+            throw new RuntimeException("BlatUI registry manifest at {$manifestPath} is not valid JSON.");
+        }
+
+        $this->manifest = $decoded;
     }
 
-    /** Map a component slug to its family root. */
+    /** Map a component slug to its family root, or null if unknown. */
     public function familyOf(string $slug): ?string
     {
-        foreach ($this->rootsByLength() as $root) {
-            if ($slug === $root || str_starts_with($slug, $root.'-')) {
-                return $root;
+        foreach ($this->manifest as $family => $entry) {
+            if (in_array($slug.'.blade.php', $entry['files'] ?? [], true)) {
+                return $family;
             }
         }
 
         return null;
     }
 
-    /** All slugs present in the source directory. */
+    /** All slugs present across every family. */
     public function slugs(): array
     {
-        $files = glob($this->sourceDir.'/*.blade.php') ?: [];
+        $slugs = [];
 
-        return collect($files)
-            ->map(fn ($f) => Str::beforeLast(basename($f), '.blade.php'))
-            ->sort()
-            ->values()
-            ->all();
+        foreach ($this->families() as $familySlugs) {
+            foreach ($familySlugs as $slug) {
+                $slugs[] = $slug;
+            }
+        }
+
+        sort($slugs);
+
+        return $slugs;
     }
 
     /** Group every slug into its family => [slugs...]. */
@@ -75,56 +76,33 @@ class Registry
     {
         $families = [];
 
-        foreach ($this->slugs() as $slug) {
-            $family = $this->familyOf($slug) ?? $slug;
-            $families[$family][] = $slug;
+        foreach ($this->manifest as $family => $entry) {
+            $families[$family] = array_map(
+                fn (string $file) => basename($file, '.blade.php'),
+                $entry['files'] ?? []
+            );
         }
-
-        ksort($families);
 
         return $families;
     }
 
     public function familyExists(string $family): bool
     {
-        return array_key_exists($family, $this->families());
+        return array_key_exists($family, $this->manifest);
     }
 
     /** Absolute file paths that make up a family. */
     public function filesFor(string $family): array
     {
-        $slugs = $this->families()[$family] ?? [];
+        $files = $this->manifest[$family]['files'] ?? [];
 
-        return array_map(fn ($s) => $this->sourceDir.'/'.$s.'.blade.php', $slugs);
+        return array_map(fn (string $file) => $this->stubsDir.'/'.$file, $files);
     }
 
-    /** Concatenated source of a family (used for dependency scanning). */
-    protected function sourceFor(string $family): string
-    {
-        return collect($this->filesFor($family))
-            ->map(fn ($p) => is_file($p) ? file_get_contents($p) : '')
-            ->implode("\n");
-    }
-
-    /**
-     * Other component families this family references via <x-ui.X ...>,
-     * excluding self-references and its own sub-components.
-     */
+    /** Other component families this family references. */
     public function dependenciesFor(string $family): array
     {
-        $source = $this->sourceFor($family);
-        $own = $this->families()[$family] ?? [];
-
-        preg_match_all('/<x-ui\.([a-z0-9-]+)/i', $source, $matches);
-
-        return collect($matches[1] ?? [])
-            ->reject(fn ($slug) => in_array($slug, $own, true))
-            ->map(fn ($slug) => $this->familyOf($slug) ?? $slug)
-            ->reject(fn ($fam) => $fam === $family)
-            ->unique()
-            ->sort()
-            ->values()
-            ->all();
+        return $this->manifest[$family]['dependencies'] ?? [];
     }
 
     /** Recursively resolve a family + all transitive component dependencies. */
@@ -147,54 +125,20 @@ class Registry
         return $seen;
     }
 
-    /** Composer/npm packages a family needs, inferred from its source. */
+    /** Composer/npm packages a family needs. */
     public function packagesFor(string $family): array
     {
-        $source = $this->sourceFor($family);
-        $packages = [];
-
-        if (str_contains($source, '<x-lucide-')) {
-            $packages['composer'][] = 'mallardduck/blade-lucide-icons';
-        }
-        if (str_contains($source, '->twMerge(')) {
-            $packages['composer'][] = 'gehrisandro/tailwind-merge-laravel';
-        }
-        if (preg_match('/x-anchor/', $source)) {
-            $packages['npm'][] = '@alpinejs/anchor';
-        }
-        if (preg_match('/x-collapse/', $source)) {
-            $packages['npm'][] = '@alpinejs/collapse';
-        }
-        if (preg_match('/x-trap|\$focus/', $source)) {
-            $packages['npm'][] = '@alpinejs/focus';
-        }
-
-        foreach ($packages as $type => $list) {
-            $packages[$type] = array_values(array_unique($list));
-        }
-
-        return $packages;
+        return $this->manifest[$family]['packages'] ?? [];
     }
 
     public function sourceDir(): string
     {
-        return $this->sourceDir;
+        return $this->stubsDir;
     }
 
-    /** Full manifest of every family (for registry.json generation / list). */
+    /** Full manifest of every family. */
     public function manifest(): array
     {
-        $manifest = [];
-
-        foreach (array_keys($this->families()) as $family) {
-            $manifest[$family] = [
-                'name' => $family,
-                'files' => array_map('basename', $this->filesFor($family)),
-                'dependencies' => $this->dependenciesFor($family),
-                'packages' => $this->packagesFor($family),
-            ];
-        }
-
-        return $manifest;
+        return $this->manifest;
     }
 }
