@@ -24,10 +24,13 @@ class BlatuiServiceProvider extends ServiceProvider
             ]);
 
             // Foundations: theme tokens (CSS) + Alpine/chart/calendar engine (JS).
+            // blatui.js is the greenfield bootstrap; blatui-core.js is the engine
+            // (exports registerBlatUI) for apps that already run their own Alpine.
             // php artisan vendor:publish --tag=blatui-foundations
             $this->publishes([
                 dirname(__DIR__).'/stubs/foundations/app.css' => resource_path('css/blatui.css'),
                 dirname(__DIR__).'/stubs/foundations/app.js' => resource_path('js/blatui.js'),
+                dirname(__DIR__).'/stubs/foundations/blatui-core.js' => resource_path('js/blatui-core.js'),
             ], 'blatui-foundations');
         }
     }

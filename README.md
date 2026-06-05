@@ -42,8 +42,9 @@ npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apex
 
 # 3. Publish the foundations (theme tokens + Alpine/chart/calendar engine)
 php artisan vendor:publish --tag=blatui-foundations
-#   → resources/css/blatui.css   (oklch design tokens, presets, light/dark)
-#   → resources/js/blatui.js     (theme store, chart + calendar engines)
+#   → resources/css/blatui.css      (oklch design tokens, presets, light/dark)
+#   → resources/js/blatui.js        (greenfield bootstrap — boots Alpine for you)
+#   → resources/js/blatui-core.js   (engine: registerBlatUI, for apps already running Alpine)
 
 # 4. Verify your setup
 php artisan blatui:init
@@ -67,6 +68,25 @@ import "./blatui.js";
 > The foundations are published once and become *yours* — tweak the tokens, drop
 > the chart engine if you don't need charts, etc. `blatui:init` will tell you
 > what's still missing.
+
+### Installing into an existing project
+
+Everything is **additive** — you don't replace your files.
+
+- **Tailwind v4 is required.** BlatUI uses v4-only features (`@theme inline`, oklch). On
+  Tailwind v3, migrate first with `npx @tailwindcss/upgrade`; `blatui:init` detects the version.
+- **CSS:** add `@import "./blatui.css";` to your existing `app.css`, below `@import "tailwindcss";`.
+- **JS — already running Alpine?** Don't import `blatui.js` (it would boot a second Alpine).
+  Register BlatUI into your own instance instead, before you start it:
+
+```js
+import Alpine from 'alpinejs'
+import { registerBlatUI } from './blatui-core.js'
+
+registerBlatUI(Alpine)   // plugins + theme store + chart/calendar engines
+window.Alpine = Alpine
+Alpine.start()
+```
 
 ## Adding components
 

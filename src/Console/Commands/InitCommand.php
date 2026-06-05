@@ -60,6 +60,24 @@ class InitCommand extends Command
             $this->line('    <fg=yellow>npm install -D apexcharts</>');
         }
 
+        // --- Tailwind CSS v4 (hard requirement) ---
+        // Components use v4-only features (@theme inline, oklch, size-*). A v3
+        // project must migrate first; there is no v3 compatibility mode.
+        if (preg_match('/"tailwindcss":\s*"\D*(\d+)/', $pkgJson, $m)) {
+            $major = (int) $m[1];
+            if ($major >= 4) {
+                $this->components->twoColumnDetail("tailwindcss (v{$major})", '<fg=green>installed</>');
+            } else {
+                $ok = false;
+                $this->components->twoColumnDetail("tailwindcss (v{$major}) <fg=gray>(BlatUI needs v4)</>", '<fg=red>too old</>');
+                $this->line('    <fg=yellow>npx @tailwindcss/upgrade</> <fg=gray>— migrate to Tailwind v4, then re-run blatui:init</>');
+            }
+        } else {
+            $ok = false;
+            $this->components->twoColumnDetail('tailwindcss <fg=gray>(v4 required)</>', '<fg=red>missing</>');
+            $this->line('    <fg=yellow>npm install -D tailwindcss @tailwindcss/vite</>');
+        }
+
         // --- CSS theme tokens ---
         // The foundations only take effect if they're compiled by Vite — i.e.
         // either the tokens live directly in app.css, or the published
@@ -81,21 +99,29 @@ class InitCommand extends Command
             $this->line('    <fg=yellow>php artisan vendor:publish --tag=blatui-foundations</>');
         }
 
-        // --- Alpine bootstrap ---
+        // --- Alpine bootstrap / BlatUI engine ---
+        // Greenfield: app.js does `import "./blatui.js"`. An app that already runs
+        // its own Alpine instead does `import { registerBlatUI } from
+        // "./blatui-core.js"` and calls registerBlatUI(Alpine) before Alpine.start().
         $appJs = is_file(resource_path('js/app.js')) ? file_get_contents(resource_path('js/app.js')) : '';
         $blatuiJsExists = is_file(resource_path('js/blatui.js'));
-        $bootInline = str_contains($appJs, 'Alpine.start');
-        $importsBlatuiJs = str_contains($appJs, 'blatui.js');
+        $importsBootstrap = str_contains($appJs, 'blatui.js') && ! str_contains($appJs, 'blatui-core');
+        $registersEngine = str_contains($appJs, 'blatui-core') || str_contains($appJs, 'registerBlatUI');
+        $hasOwnAlpine = (bool) preg_match('/from\s+[\'"]alpinejs[\'"]/', $appJs);
 
-        if ($bootInline || ($blatuiJsExists && $importsBlatuiJs)) {
-            $this->components->twoColumnDetail('Alpine bootstrap (resources/js/app.js)', '<fg=green>present</>');
-        } elseif ($blatuiJsExists && ! $importsBlatuiJs) {
+        if ($importsBootstrap || $registersEngine) {
+            $this->components->twoColumnDetail('BlatUI engine (resources/js/app.js)', '<fg=green>wired</>');
+        } elseif ($blatuiJsExists && $hasOwnAlpine) {
             $ok = false;
-            $this->components->twoColumnDetail('Alpine bootstrap (published but not imported)', '<fg=red>missing</>');
+            $this->components->twoColumnDetail('BlatUI engine <fg=gray>(you already run Alpine)</>', '<fg=red>not registered</>');
+            $this->line('    <fg=yellow>import { registerBlatUI } from "./blatui-core.js"</> — call <fg=yellow>registerBlatUI(Alpine)</> before your Alpine.start()');
+        } elseif ($blatuiJsExists) {
+            $ok = false;
+            $this->components->twoColumnDetail('BlatUI engine (published but not imported)', '<fg=red>missing</>');
             $this->line('    <fg=yellow>add  import "./blatui.js";  to resources/js/app.js</>');
         } else {
             $ok = false;
-            $this->components->twoColumnDetail('Alpine bootstrap (resources/js)', '<fg=red>missing</>');
+            $this->components->twoColumnDetail('BlatUI engine (resources/js)', '<fg=red>missing</>');
             $this->line('    <fg=yellow>php artisan vendor:publish --tag=blatui-foundations</>');
         }
 

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Composable foundations** for existing projects. The JS engine is now published
+  as `blatui-core.js` (exports `registerBlatUI(Alpine)`) alongside the greenfield
+  `blatui.js` bootstrap — apps that already run their own Alpine register BlatUI
+  into it instead of booting a second instance. The CSS is additive: add
+  `@import "./blatui.css";` to an existing `app.css` rather than replacing it.
+- `blatui:init` now detects the **Tailwind major version** (v4 required; v3 →
+  `npx @tailwindcss/upgrade`) and, when an app already runs Alpine, points to the
+  `registerBlatUI` path instead of `blatui.js`.
+
 ### Fixed
 - **Install flow** — corrected misleading setup docs that didn't work on a clean
   Laravel install: the README/getting-started now document the complete, verified
