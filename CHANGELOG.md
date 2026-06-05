@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-05
+
+Theme-foundation and component enhancements shipped to consumers.
+
+### Added
+- `button`: `xs` size and an icon size scale (`icon-xs` / `icon-sm` / `icon-lg`).
+- Foundations (`app.css`): 9 base-color presets (added slate + gray), a new
+  **input-style** dimension (`[data-input-style]`: outline / fill / inset), a
+  **heading font** token (`--font-heading`) decoupled from the body font, and
+  additional `[data-font]` webfont families.
+- Foundations (`blatui-core.js`): theme store now persists `inputStyle` and
+  `fontHeading` and applies the matching `data-*` attributes.
+
 ## [1.2.0] - 2026-06-05
 
 Accessibility overhaul of every shipped component (`blatui:add`) and the
