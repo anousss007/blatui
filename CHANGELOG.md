@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-06-05
+
 ### Added
 - **Composable foundations** for existing projects. The JS engine is now published
   as `blatui-core.js` (exports `registerBlatUI(Alpine)`) alongside the greenfield
@@ -46,5 +48,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/anousss007/blatui/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/anousss007/blatui/releases/tag/v1.0.0

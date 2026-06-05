@@ -134,7 +134,7 @@ grab the exact source you want rather than installing it:
 
 | Command | Description |
 |---|---|
-| `blatui:init` | Doctor — checks packages, theme tokens, Alpine bootstrap |
+| `blatui:init` | Doctor — checks packages, Tailwind v4, theme tokens, Alpine/engine wiring |
 | `blatui:list [component]` | List all component families, or detail one |
 | `blatui:add <components...>` | Copy components (+ deps) into your project |
 | `vendor:publish --tag=blatui-foundations` | Publish theme CSS + JS engine |
