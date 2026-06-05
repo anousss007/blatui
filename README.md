@@ -9,8 +9,9 @@ A CLI that copies open-source, copy-paste UI components **you own** straight int
 [![Latest Version](https://img.shields.io/packagist/v/blatui/blatui.svg)](https://packagist.org/packages/blatui/blatui)
 [![CI](https://github.com/anousss007/blatui/actions/workflows/ci.yml/badge.svg)](https://github.com/anousss007/blatui/actions/workflows/ci.yml)
 [![License](https://img.shields.io/packagist/l/blatui/blatui.svg)](LICENSE)
+[![Accessibility: WCAG AA](https://img.shields.io/badge/accessibility-WCAG%20AA-22c55e.svg)](https://blatui.remix-it.com)
 
-**55 components · 70 charts · fully themeable · light + dark · MIT**
+**55 components · 70 charts · accessible (WCAG AA) · fully themeable · light + dark · MIT**
 
 [Live demo & docs → blatui.remix-it.com](https://blatui.remix-it.com)
 
@@ -20,6 +21,7 @@ A CLI that copies open-source, copy-paste UI components **you own** straight int
 
 ## Why BlatUI
 
+- **Accessible by default.** WAI-ARIA roles, complete keyboard navigation & focus management, and WCAG AA color contrast — modeled on shadcn/ui's Base UI behavior, verified in a real browser and audited with axe-core. Accessibility isn't an add-on; it ships in every component.
 - **You own the code.** Components are *copied* into your project — not hidden in `vendor/`. Edit them however you like; updating the package never overwrites your edits.
 - **The BLAT stack.** Pure Blade components, a sprinkle of Alpine.js for interactivity, Tailwind CSS v4 for styling. No React, no build-step lock-in.
 - **Faithful to shadcn/ui.** Same design language, component APIs and blocks — ported to the Laravel way.
