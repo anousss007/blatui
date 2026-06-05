@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-05
+
+Full accessibility overhaul — every component brought to WAI-ARIA / Base-UI parity
+(roles, states, keyboard, focus) and audited with axe-core.
+
+### Added
+- Reusable a11y engine in `blatui-core.js`: `x-blat-trigger` (mirrors popup ARIA
+  onto the real focusable control), `x-blat-labelledby`, `x-blat-field` (auto-wires
+  `aria-describedby` / `aria-invalid` / label), the `blatMenu` / `blatMenubar` /
+  `blatSelect` / `blatCommand` Alpine components, and the `$blatNav` / `$blatType`
+  magics (roving arrow/Home/End focus + typeahead).
+- `field-error` accepts a `:messages` array (one → text, several → bulleted list),
+  mirroring shadcn's `<FieldError errors>`.
+- New examples: card variations (image, header action, stats, notifications, login),
+  and field / input hint + error / invalid states.
+
+### Changed
+- WAI-ARIA pass across dialogs, all menu types, the listbox family
+  (select/combobox/command), disclosure (tabs/accordion/collapsible),
+  tooltip/hover-card, every form control, slider, resizable and more: correct
+  roles/states, full keyboard support, focus trap + restore, and ARIA placed on the
+  real controls (not wrapper spans).
+- Calendar is now a full `role="grid"` with per-day labels, roving tabindex and
+  arrow / Home / End / PageUp-Down keyboard navigation.
+- Theme tuned to meet **WCAG AA contrast** in light and dark across every base color
+  (darker `--muted-foreground` and `--destructive`; calendar outside-days no longer
+  rely on opacity).
+
+### Fixed
+- A range of issues surfaced by an axe-core audit: unlabeled triggers/buttons,
+  `aria-orientation` on `role=group`, nested interactive controls inside
+  checkbox/switch, disallowed listbox children, and missing accessible names on
+  dialog / slider / progressbar / combobox.
+
 ## [1.1.0] - 2026-06-05
 
 ### Added

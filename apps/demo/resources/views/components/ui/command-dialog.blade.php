@@ -3,9 +3,9 @@
     'description' => 'Search for a command to run...',
 ])
 
-<div data-slot="command-dialog" x-data="{ open: false }" {{ $attributes }}>
+<div data-slot="command-dialog" x-data="{ open: false }" x-id="['blat-command-dialog']" {{ $attributes }}>
     @isset($trigger)
-        <div @click="open = true">{{ $trigger }}</div>
+        <div @click="open = true" x-blat-trigger="{ haspopup: 'dialog', controls: $id('blat-command-dialog') }">{{ $trigger }}</div>
     @endisset
 
     <template x-teleport="body">
@@ -13,6 +13,8 @@
             <div
                 x-show="open"
                 @click="open = false"
+                role="presentation"
+                aria-hidden="true"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
@@ -24,7 +26,12 @@
             <div
                 x-show="open"
                 @keydown.escape.window="open = false"
-                x-trap.noscroll="open"
+                x-trap.noscroll.inert="open"
+                :id="$id('blat-command-dialog')"
+                x-blat-labelledby="{ label: 'h2', description: 'p' }"
+                role="dialog"
+                aria-modal="true"
+                tabindex="-1"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 scale-95"
                 x-transition:enter-end="opacity-100 scale-100"

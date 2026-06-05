@@ -19,9 +19,9 @@
             </button>
         </div>
     @else
-        <button type="button" @click="copy()" class="absolute right-2 top-2 z-10 inline-flex size-7 items-center justify-center rounded-md text-zinc-400 opacity-0 transition-all hover:bg-white/10 hover:text-zinc-100 group-hover/code:opacity-100">
-            <x-lucide-copy class="size-3.5" x-show="!copied" />
-            <x-lucide-check class="size-3.5 text-emerald-400" x-show="copied" x-cloak />
+        <button type="button" @click="copy()" aria-label="Copy code" class="absolute right-2 top-2 z-10 inline-flex size-7 items-center justify-center rounded-md text-zinc-400 opacity-0 transition-all hover:bg-white/10 hover:text-zinc-100 group-hover/code:opacity-100">
+            <x-lucide-copy class="size-3.5" x-show="!copied" aria-hidden="true" />
+            <x-lucide-check class="size-3.5 text-emerald-400" x-show="copied" x-cloak aria-hidden="true" />
         </button>
     @endif
     {{-- Slot is raw so HTML-entity-encoded snippets (e.g. &lt;x-ui.card&gt;) display as

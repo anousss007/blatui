@@ -16,7 +16,9 @@
                 ? (e.clientX - rect.left) / rect.width * 100
                 : (e.clientY - rect.top) / rect.height * 100;
             this.size = Math.max(10, Math.min(90, pct));
-        }
+        },
+        nudge(delta) { this.size = Math.max(10, Math.min(90, this.size + delta)) },
+        setSize(v) { this.size = Math.max(10, Math.min(90, v)) }
     }"
     @pointermove.window="move($event)"
     @pointerup.window="stop()"

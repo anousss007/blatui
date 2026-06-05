@@ -11,15 +11,17 @@
 
     // Merge any caller-provided @click with the close-on-select behaviour so the
     // two don't collide into duplicate attributes (the browser would keep only one).
+    // closeMenu() (not a bare `open = false`) so keyboard focus returns to the trigger.
     $userClick = $attributes->get('@click') ?? $attributes->get('x-on:click');
     $attributes = $attributes->except(['@click', 'x-on:click']);
-    $clickExpr = collect([$userClick, $closeOnSelect ? 'open = false' : null])->filter()->implode('; ');
+    $clickExpr = collect([$userClick, $closeOnSelect ? 'closeMenu()' : null])->filter()->implode('; ');
 @endphp
 
 @if ($href)
     <a
         href="{{ $href }}"
         role="menuitem"
+        tabindex="-1"
         data-slot="dropdown-menu-item"
         data-variant="{{ $variant }}"
         @if ($inset) data-inset @endif
@@ -34,7 +36,7 @@
         data-slot="dropdown-menu-item"
         data-variant="{{ $variant }}"
         @if ($inset) data-inset @endif
-        @if ($disabled) disabled data-disabled @endif
+        @if ($disabled) disabled data-disabled aria-disabled="true" @endif
         @if ($clickExpr) @click="{{ $clickExpr }}" @endif
         {{ $attributes->twMerge($classes) }}
     >{{ $slot }}</button>

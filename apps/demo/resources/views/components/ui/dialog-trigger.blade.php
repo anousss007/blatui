@@ -1,3 +1,8 @@
-<span @click="open = true" data-slot="dialog-trigger" {{ $attributes->twMerge('inline-block') }}>
+<span
+    @click="open = true"
+    x-blat-trigger="{ haspopup: 'dialog', controls: $id('blat-dialog') }"
+    data-slot="dialog-trigger"
+    {{ $attributes->twMerge('inline-block') }}
+>
     {{ $slot }}
 </span>

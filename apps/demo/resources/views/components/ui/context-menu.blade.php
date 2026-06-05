@@ -1,6 +1,6 @@
 <div
     data-slot="context-menu"
-    x-data="{ open: false, x: 0, y: 0 }"
+    x-data="blatMenu()"
     {{ $attributes }}
 >
     {{ $slot }}

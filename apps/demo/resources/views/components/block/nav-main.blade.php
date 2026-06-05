@@ -4,14 +4,14 @@
     <x-ui.sidebar-group-label>{{ $label }}</x-ui.sidebar-group-label>
     <x-ui.sidebar-menu>
         @foreach ($items as $item)
-            <x-ui.collapsible :open="$item['isActive'] ?? false" class="group/collapsible" ::data-state="open ? 'open' : 'closed'">
-                <x-ui.sidebar-menu-item>
-                    <x-ui.sidebar-menu-button x-on:click="open = !open" ::data-state="open ? 'open' : 'closed'">
+            <x-ui.sidebar-menu-item>
+                <x-ui.collapsible :open="$item['isActive'] ?? false" class="group/collapsible" ::data-state="open ? 'open' : 'closed'">
+                    <x-ui.sidebar-menu-button x-on:click="open = !open" :aria-expanded="open" :aria-controls="$id('blat-collapsible')" ::data-state="open ? 'open' : 'closed'">
                         @isset($item['icon'])
-                            <x-dynamic-component :component="'lucide-'.$item['icon']" />
+                            <x-dynamic-component :component="'lucide-'.$item['icon']" aria-hidden="true" />
                         @endisset
                         <span>{{ $item['title'] }}</span>
-                        <x-lucide-chevron-right class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        <x-lucide-chevron-right class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" aria-hidden="true" />
                     </x-ui.sidebar-menu-button>
                     @if (!empty($item['items']))
                         <x-ui.collapsible-content>
@@ -26,8 +26,8 @@
                             </x-ui.sidebar-menu-sub>
                         </x-ui.collapsible-content>
                     @endif
-                </x-ui.sidebar-menu-item>
-            </x-ui.collapsible>
+                </x-ui.collapsible>
+            </x-ui.sidebar-menu-item>
         @endforeach
     </x-ui.sidebar-menu>
 </x-ui.sidebar-group>

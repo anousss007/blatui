@@ -50,7 +50,7 @@
         'relative inline-flex size-(--cell-size) select-none items-center justify-center rounded-md p-0 text-sm font-normal transition-colors',
         'hover:bg-accent hover:text-accent-foreground',
         'data-[today]:bg-accent data-[today]:text-accent-foreground',
-        'data-[outside]:text-muted-foreground data-[outside]:opacity-50',
+        'data-[outside]:text-muted-foreground',
         'data-[disabled]:text-muted-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none',
         'data-[selected]:bg-primary data-[selected]:text-primary-foreground data-[selected]:hover:bg-primary data-[selected]:hover:text-primary-foreground',
         'data-[range-start]:bg-primary data-[range-start]:text-primary-foreground data-[range-start]:rounded-r-none',
@@ -78,14 +78,17 @@
 
     <div class="relative flex flex-col gap-4 md:flex-row">
         {{-- Navigation --}}
-        <button type="button" @click="prev()" :aria-disabled="!canPrev" class="{{ $navBtn }} absolute left-0 top-0 z-10">
-            <x-lucide-chevron-left class="size-4" />
+        <button type="button" @click="prev()" :aria-disabled="!canPrev" aria-label="Go to the previous month" class="{{ $navBtn }} absolute left-0 top-0 z-10">
+            <x-lucide-chevron-left class="size-4" aria-hidden="true" />
             <span class="sr-only">Previous month</span>
         </button>
-        <button type="button" @click="next()" :aria-disabled="!canNext" class="{{ $navBtn }} absolute right-0 top-0 z-10">
-            <x-lucide-chevron-right class="size-4" />
+        <button type="button" @click="next()" :aria-disabled="!canNext" aria-label="Go to the next month" class="{{ $navBtn }} absolute right-0 top-0 z-10">
+            <x-lucide-chevron-right class="size-4" aria-hidden="true" />
             <span class="sr-only">Next month</span>
         </button>
+
+        {{-- Announce the visible month(s) to assistive tech on navigation --}}
+        <span role="status" aria-live="polite" class="sr-only" x-text="months.map(m => monthLabel(m)).join(', ')"></span>
 
         <template x-for="(m, mi) in months" :key="mi">
             <div class="flex w-full flex-col gap-4">
@@ -94,7 +97,7 @@
                     <template x-if="captionLayout === 'dropdown'">
                         <div class="flex items-center gap-1.5 text-sm font-medium">
                             <div class="relative rounded-md border border-input bg-background px-2 py-1 shadow-xs hover:bg-accent">
-                                <select class="absolute inset-0 cursor-pointer opacity-0" @change="setMonth($event.target.value)">
+                                <select aria-label="Month" class="absolute inset-0 cursor-pointer opacity-0" @change="setMonth($event.target.value)">
                                     <template x-for="(mn, idx) in monthNames" :key="idx">
                                         <option :value="idx" :selected="idx === m.getMonth()" x-text="mn"></option>
                                     </template>
@@ -102,7 +105,7 @@
                                 <span x-text="m.toLocaleString(locale, { month: 'long' })"></span>
                             </div>
                             <div class="relative rounded-md border border-input bg-background px-2 py-1 shadow-xs hover:bg-accent">
-                                <select class="absolute inset-0 cursor-pointer opacity-0" @change="setYear($event.target.value)">
+                                <select aria-label="Year" class="absolute inset-0 cursor-pointer opacity-0" @change="setYear($event.target.value)">
                                     <template x-for="y in years" :key="y">
                                         <option :value="y" :selected="y === m.getFullYear()" x-text="y"></option>
                                     </template>
@@ -117,8 +120,8 @@
                 </div>
 
                 {{-- Grid --}}
-                <table class="w-full border-collapse">
-                    <thead>
+                <table role="grid" aria-multiselectable="false" :aria-label="monthLabel(m)" class="w-full border-collapse">
+                    <thead aria-hidden="true">
                         <tr class="flex">
                             @if ($showWeekNumber)
                                 <th class="text-muted-foreground size-(--cell-size) text-[0.8rem] font-normal" scope="col"></th>
@@ -135,12 +138,17 @@
                                     <td class="text-muted-foreground flex size-(--cell-size) items-center justify-center text-[0.8rem]" x-text="weekNumber(week)"></td>
                                 @endif
                                 <template x-for="(day, di) in week" :key="di">
-                                    <td class="relative flex-1 p-0 text-center">
+                                    <td role="gridcell" :aria-selected="isSelected(day)" class="relative flex-1 p-0 text-center">
                                         <button
                                             type="button"
                                             @click="select(day)"
+                                            @keydown="onDayKeydown($event, day)"
                                             @mouseenter="if (mode === 'range') hover = day"
                                             x-text="day.getDate()"
+                                            :data-day="fmt(day)"
+                                            :tabindex="isFocused(day) ? 0 : -1"
+                                            :aria-label="dayLabel(day)"
+                                            :aria-disabled="isDisabled(day)"
                                             :data-selected="(mode !== 'range' && isSelected(day)) ? true : null"
                                             :data-range-start="(mode === 'range' && rangeIs(day).start) ? true : null"
                                             :data-range-middle="(mode === 'range' && rangeIs(day).middle) ? true : null"

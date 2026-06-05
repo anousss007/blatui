@@ -1,17 +1,26 @@
 <div
-    x-show="subOpen"
+    x-show="open"
     x-cloak
+    x-ref="submenu"
+    x-init="_menu = $el"
     x-anchor.right-start.offset.4="$refs.subtrigger"
+    @keydown.escape.prevent.stop="closeMenu()"
+    @keydown.left.prevent.stop="closeMenu()"
+    @keydown.stop="$blatNav($event); $blatType($event)"
+    :id="$id('blat-ctx-submenu')"
+    :aria-labelledby="$id('blat-ctx-submenu-trigger')"
     role="menu"
+    aria-orientation="vertical"
+    tabindex="-1"
     data-slot="context-menu-sub-content"
-    :data-state="subOpen ? 'open' : 'closed'"
+    :data-state="open ? 'open' : 'closed'"
     x-transition:enter="transition ease-out duration-150"
     x-transition:enter-start="opacity-0 scale-95"
     x-transition:enter-end="opacity-100 scale-100"
     x-transition:leave="transition ease-in duration-100"
     x-transition:leave-start="opacity-100 scale-100"
     x-transition:leave-end="opacity-0 scale-95"
-    {{ $attributes->twMerge('bg-popover text-popover-foreground z-50 min-w-[8rem] origin-top-left overflow-hidden rounded-md border p-1 shadow-lg') }}
+    {{ $attributes->twMerge('bg-popover text-popover-foreground z-50 min-w-[8rem] origin-top-left overflow-hidden rounded-md border p-1 shadow-lg outline-none') }}
 >
     {{ $slot }}
 </div>

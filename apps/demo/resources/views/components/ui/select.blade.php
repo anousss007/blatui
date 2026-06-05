@@ -5,7 +5,8 @@
 
 <div
     data-slot="select"
-    x-data="{ open: false, value: @js((string) $value), label: '' }"
+    x-data="blatSelect({ value: @js((string) $value) })"
+    x-id="['blat-listbox']"
     {{ $attributes->twMerge('relative') }}
 >
     @if ($name)

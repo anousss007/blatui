@@ -5,6 +5,8 @@
         <div
             x-show="open"
             @click="open = false"
+            role="presentation"
+            aria-hidden="true"
             data-slot="dialog-overlay"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0"
@@ -17,10 +19,13 @@
 
         <div
             x-show="open"
-            x-trap.noscroll="open"
+            x-trap.noscroll.inert="open"
             @keydown.escape.window="open = false"
+            :id="$id('blat-dialog')"
+            x-blat-labelledby="{ label: '[data-slot=dialog-title]', description: '[data-slot=dialog-description]' }"
             role="dialog"
             aria-modal="true"
+            tabindex="-1"
             data-slot="dialog-content"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"

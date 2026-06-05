@@ -13,10 +13,11 @@
     <a
         href="{{ $href }}"
         role="menuitem"
+        tabindex="-1"
         data-slot="menubar-item"
         data-variant="{{ $variant }}"
         @if ($inset) data-inset @endif
-        @click="active = null"
+        @click="closeMenu()"
         {{ $attributes->twMerge($classes) }}
     >{{ $slot }}</a>
 @else
@@ -27,8 +28,8 @@
         data-slot="menubar-item"
         data-variant="{{ $variant }}"
         @if ($inset) data-inset @endif
-        @if ($disabled) disabled data-disabled @endif
-        @click="active = null"
+        @if ($disabled) disabled data-disabled aria-disabled="true" @endif
+        @click="closeMenu()"
         {{ $attributes->twMerge($classes) }}
     >{{ $slot }}</button>
 @endif

@@ -231,10 +231,10 @@
                 <div class="ml-auto px-3">
                     <div class="flex items-center gap-2 text-sm">
                         <div class="text-muted-foreground hidden font-medium md:inline-block">Edit Oct 08</div>
-                        <x-ui.button variant="ghost" size="icon" class="h-7 w-7"><x-lucide-star /></x-ui.button>
+                        <x-ui.button variant="ghost" size="icon" class="h-7 w-7"><x-lucide-star aria-hidden="true" /><span class="sr-only">Favorite</span></x-ui.button>
                         <x-ui.popover x-init="open = true">
                             <x-ui.popover-trigger>
-                                <x-ui.button variant="ghost" size="icon" class="h-7 w-7 data-[state=open]:bg-accent" ::data-state="open ? 'open' : 'closed'"><x-lucide-more-horizontal /></x-ui.button>
+                                <x-ui.button variant="ghost" size="icon" class="h-7 w-7 data-[state=open]:bg-accent" ::data-state="open ? 'open' : 'closed'"><x-lucide-more-horizontal aria-hidden="true" /><span class="sr-only">More options</span></x-ui.button>
                             </x-ui.popover-trigger>
                             <x-ui.popover-content class="w-56 overflow-hidden rounded-lg p-0" align="end">
                                 <x-ui.sidebar collapsible="none" class="bg-transparent">

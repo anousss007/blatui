@@ -29,11 +29,13 @@
             <div class="flex items-center gap-2">
                 {{-- viewport sizes --}}
                 <div class="bg-muted text-muted-foreground hidden items-center gap-0.5 rounded-md p-0.5 lg:flex" x-show="tab === 'preview'">
-                    @foreach (['100%' => 'monitor', '768px' => 'tablet', '390px' => 'smartphone'] as $val => $icon)
+                    @foreach (['100%' => ['monitor', 'Desktop'], '768px' => ['tablet', 'Tablet'], '390px' => ['smartphone', 'Mobile']] as $val => $meta)
                         <button type="button" @click="w = '{{ $val }}'"
+                            aria-label="{{ $meta[1] }} view"
+                            :aria-pressed="w === '{{ $val }}'"
                             :class="w === '{{ $val }}' ? 'bg-background text-foreground shadow-sm' : 'hover:text-foreground'"
                             class="inline-flex size-7 items-center justify-center rounded transition-colors">
-                            <x-dynamic-component :component="'lucide-'.$icon" class="size-4" />
+                            <x-dynamic-component :component="'lucide-'.$meta[0]" class="size-4" aria-hidden="true" />
                         </button>
                     @endforeach
                 </div>

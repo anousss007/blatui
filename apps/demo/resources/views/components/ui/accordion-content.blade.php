@@ -1,5 +1,8 @@
 <div
     data-slot="accordion-content"
+    role="region"
+    :id="$id('blat-accordion-panel', _v)"
+    :aria-labelledby="$id('blat-accordion-trigger', _v)"
     x-show="isOpen(_v)"
     x-collapse
     x-cloak

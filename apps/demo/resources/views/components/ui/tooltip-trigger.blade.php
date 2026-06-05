@@ -1,8 +1,6 @@
 <span
     x-ref="trigger"
-    @focus="show()"
-    @blur="hide()"
-    tabindex="0"
+    x-blat-trigger="{ describedby: $id('blat-tooltip'), state: null, focusable: true }"
     data-slot="tooltip-trigger"
     {{ $attributes->twMerge('inline-block') }}
 >

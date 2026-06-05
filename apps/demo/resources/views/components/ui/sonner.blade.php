@@ -28,13 +28,17 @@
         remove(id) { this.toasts = this.toasts.filter(t => t.id !== id) }
     }"
     @toast.window="add($event.detail)"
+    role="region"
+    aria-label="Notifications"
+    tabindex="-1"
     class="fixed z-[100] flex max-h-screen w-full flex-col {{ $isTop ? '' : 'flex-col-reverse' }} gap-2 p-4 sm:max-w-[420px] {{ $posClass }}"
     {{ $attributes }}
 >
     <template x-for="t in toasts" :key="t.id">
         <div
-            role="status"
-            aria-live="polite"
+            :role="t.type === 'error' || t.type === 'warning' ? 'alert' : 'status'"
+            :aria-live="t.type === 'error' || t.type === 'warning' ? 'assertive' : 'polite'"
+            aria-atomic="true"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-2"
             x-transition:enter-end="opacity-100 translate-y-0"
@@ -59,7 +63,7 @@
                 class="text-foreground/50 hover:text-foreground shrink-0 transition-colors"
                 aria-label="Close"
             >
-                <x-lucide-x class="size-4" />
+                <x-lucide-x class="size-4" aria-hidden="true" />
             </button>
         </div>
     </template>

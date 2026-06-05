@@ -1,5 +1,5 @@
 <x-ui.select>
-    <x-ui.select-trigger class="w-[180px]">
+    <x-ui.select-trigger class="w-[180px]" aria-label="Select a fruit">
         <x-ui.select-value placeholder="Select a fruit" />
     </x-ui.select-trigger>
     <x-ui.select-content>

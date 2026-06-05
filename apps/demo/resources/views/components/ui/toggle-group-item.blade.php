@@ -29,9 +29,12 @@
     data-slot="toggle-group-item"
     data-variant="{{ $variant }}"
     data-size="{{ $size }}"
+    data-value="{{ $value }}"
     @click="toggle(@js($value))"
+    @focus="rovingValue = @js($value)"
     :data-state="isOn(@js($value)) ? 'on' : 'off'"
     :aria-pressed="isOn(@js($value))"
+    :tabindex="rovingValue === @js($value) ? 0 : -1"
     @if ($disabled) disabled @endif
     {{ $attributes->twMerge($classes) }}
 >

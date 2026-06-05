@@ -357,10 +357,11 @@
                                         <x-ui.table>
                                             <x-ui.table-header class="bg-muted sticky top-0 z-10">
                                                 <x-ui.table-row>
-                                                    <x-ui.table-head class="w-8"></x-ui.table-head>
+                                                    <x-ui.table-head class="w-8"><span class="sr-only">Drag to reorder</span></x-ui.table-head>
                                                     <x-ui.table-head>
+                                                        <span class="sr-only">Select</span>
                                                         <div class="flex items-center justify-center">
-                                                            <button type="button" role="checkbox" x-on:click="toggleAll(!allPageSelected)" :data-state="allPageSelected ? 'checked' : 'unchecked'" :aria-checked="allPageSelected" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary size-4 shrink-0 rounded-[4px] border shadow-xs flex items-center justify-center">
+                                                            <button type="button" role="checkbox" aria-label="Select all rows" x-on:click="toggleAll(!allPageSelected)" :data-state="allPageSelected ? 'checked' : 'unchecked'" :aria-checked="allPageSelected" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary size-4 shrink-0 rounded-[4px] border shadow-xs flex items-center justify-center">
                                                                 <span x-show="allPageSelected" x-cloak><x-lucide-check class="size-3.5" /></span>
                                                             </button>
                                                         </div>
@@ -371,7 +372,7 @@
                                                     <x-ui.table-head><div class="w-full text-right">Target</div></x-ui.table-head>
                                                     <x-ui.table-head><div class="w-full text-right">Limit</div></x-ui.table-head>
                                                     <x-ui.table-head>Reviewer</x-ui.table-head>
-                                                    <x-ui.table-head></x-ui.table-head>
+                                                    <x-ui.table-head><span class="sr-only">Actions</span></x-ui.table-head>
                                                 </x-ui.table-row>
                                             </x-ui.table-header>
                                             <x-ui.table-body>
@@ -385,7 +386,7 @@
                                                         </x-ui.table-cell>
                                                         <x-ui.table-cell>
                                                             <div class="flex items-center justify-center">
-                                                                <button type="button" role="checkbox" x-on:click="selected[row.id] = !selected[row.id]" :data-state="selected[row.id] ? 'checked' : 'unchecked'" :aria-checked="!!selected[row.id]" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary size-4 shrink-0 rounded-[4px] border shadow-xs flex items-center justify-center">
+                                                                <button type="button" role="checkbox" aria-label="Select row" x-on:click="selected[row.id] = !selected[row.id]" :data-state="selected[row.id] ? 'checked' : 'unchecked'" :aria-checked="!!selected[row.id]" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary size-4 shrink-0 rounded-[4px] border shadow-xs flex items-center justify-center">
                                                                     <span x-show="selected[row.id]" x-cloak><x-lucide-check class="size-3.5" /></span>
                                                                 </button>
                                                             </div>
@@ -406,12 +407,10 @@
                                                             </x-ui.badge>
                                                         </x-ui.table-cell>
                                                         <x-ui.table-cell>
-                                                            <label class="sr-only">Target</label>
-                                                            <input :value="row.target" class="dark:bg-transparent dark:hover:bg-input/30 hover:bg-input/30 focus-visible:border focus-visible:bg-background h-8 w-16 rounded-md border-transparent bg-transparent text-right shadow-none" />
+                                                            <input :value="row.target" :aria-label="'Target for ' + row.header" class="dark:bg-transparent dark:hover:bg-input/30 hover:bg-input/30 focus-visible:border focus-visible:bg-background h-8 w-16 rounded-md border-transparent bg-transparent text-right shadow-none" />
                                                         </x-ui.table-cell>
                                                         <x-ui.table-cell>
-                                                            <label class="sr-only">Limit</label>
-                                                            <input :value="row.limit" class="dark:bg-transparent dark:hover:bg-input/30 hover:bg-input/30 focus-visible:border focus-visible:bg-background h-8 w-16 rounded-md border-transparent bg-transparent text-right shadow-none" />
+                                                            <input :value="row.limit" :aria-label="'Limit for ' + row.header" class="dark:bg-transparent dark:hover:bg-input/30 hover:bg-input/30 focus-visible:border focus-visible:bg-background h-8 w-16 rounded-md border-transparent bg-transparent text-right shadow-none" />
                                                         </x-ui.table-cell>
                                                         <x-ui.table-cell>
                                                             <span x-show="row.reviewer !== 'Assign reviewer'" x-text="row.reviewer"></span>
@@ -448,7 +447,7 @@
                                             <div class="hidden items-center gap-2 lg:flex">
                                                 <span class="text-sm font-medium">Rows per page</span>
                                                 <x-ui.select value="10">
-                                                    <x-ui.select-trigger size="sm" class="w-20">
+                                                    <x-ui.select-trigger size="sm" class="w-20" aria-label="Rows per page">
                                                         <x-ui.select-value placeholder="10" />
                                                     </x-ui.select-trigger>
                                                     <x-ui.select-content side="top">

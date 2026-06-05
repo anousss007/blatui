@@ -28,7 +28,7 @@
         data-slot="sidebar-menu-button"
         data-sidebar="menu-button"
         data-size="{{ $size }}"
-        @if ($isActive) data-active="true" @endif
+        @if ($isActive) data-active="true" aria-current="page" @endif
         {{ $attributes->twMerge($classes) }}
     >{{ $slot }}</a>
 @else

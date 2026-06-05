@@ -26,9 +26,9 @@
         x-data="{ copied: false, copy() { navigator.clipboard.writeText('php artisan blatui:add {{ $slug }}'); this.copied = true; setTimeout(() => this.copied = false, 1500); } }">
         <x-lucide-terminal class="text-muted-foreground size-4 shrink-0" />
         <span class="flex-1 truncate">php artisan blatui:add {{ $slug }}</span>
-        <button type="button" @click="copy()" class="text-muted-foreground hover:text-foreground shrink-0">
-            <x-lucide-copy class="size-4" x-show="!copied" />
-            <x-lucide-check class="size-4 text-emerald-500" x-show="copied" x-cloak />
+        <button type="button" @click="copy()" aria-label="Copy install command" class="text-muted-foreground hover:text-foreground shrink-0">
+            <x-lucide-copy class="size-4" x-show="!copied" aria-hidden="true" />
+            <x-lucide-check class="size-4 text-emerald-500" x-show="copied" x-cloak aria-hidden="true" />
         </button>
     </div>
 

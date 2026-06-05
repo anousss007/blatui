@@ -30,8 +30,8 @@
         <x-ui.sidebar-provider class="flex flex-col">
             <header class="bg-background sticky top-0 z-50 flex w-full items-center border-b">
                 <div class="flex h-(--header-height) w-full items-center gap-2 px-4">
-                    <x-ui.button class="h-8 w-8" variant="ghost" size="icon" x-on:click="toggle()">
-                        <x-lucide-sidebar />
+                    <x-ui.button class="h-8 w-8" variant="ghost" size="icon" x-on:click="toggle()" aria-label="Toggle Sidebar">
+                        <x-lucide-sidebar aria-hidden="true" />
                     </x-ui.button>
                     <x-ui.separator orientation="vertical" class="mr-2 h-4" />
                     <x-ui.breadcrumb class="hidden sm:block">
