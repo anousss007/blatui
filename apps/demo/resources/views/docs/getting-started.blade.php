@@ -55,7 +55,7 @@ php artisan blatui:add button card input</x-code-block>
                 <x-code-block label="Terminal" icon="terminal">npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts</x-code-block>
             </x-step>
 
-            <x-step :n="3" title="Publish &amp; import the foundations">
+            <x-step :n="3" title="Publish & import the foundations">
                 <p class="text-muted-foreground text-sm">Publish the theme CSS and the Alpine/chart/calendar engine. They land in <code class="bg-muted rounded px-1 py-0.5 text-xs">resources/css/blatui.css</code> and <code class="bg-muted rounded px-1 py-0.5 text-xs">resources/js/blatui.js</code> — and they're yours to edit.</p>
                 <x-code-block label="Terminal" icon="terminal">php artisan vendor:publish --tag=blatui-foundations</x-code-block>
                 <p class="text-muted-foreground text-sm">Then point your two Vite entrypoints at them — <span class="text-foreground font-medium">replace</span> the contents of each file:</p>
