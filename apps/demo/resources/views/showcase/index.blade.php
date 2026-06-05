@@ -21,8 +21,13 @@
             </h1>
             <p class="text-muted-foreground mx-auto mt-6 max-w-xl text-lg text-balance">
                 The complete shadcn/ui experience — faithfully ported to Blade, Alpine &amp; Tailwind v4.
-                No npm runtime, no lock-in. Just clean components you own.
+                Beautiful <span class="text-foreground font-medium">and</span> accessible by default. No npm runtime, no lock-in.
             </p>
+            <ul class="text-muted-foreground mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm" aria-label="Accessibility highlights">
+                <li class="inline-flex items-center gap-1.5"><x-lucide-circle-check class="size-4 text-emerald-500" aria-hidden="true" /> WAI-ARIA</li>
+                <li class="inline-flex items-center gap-1.5"><x-lucide-circle-check class="size-4 text-emerald-500" aria-hidden="true" /> Full keyboard &amp; focus</li>
+                <li class="inline-flex items-center gap-1.5"><x-lucide-circle-check class="size-4 text-emerald-500" aria-hidden="true" /> WCAG&nbsp;AA contrast</li>
+            </ul>
             <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <x-ui.button href="/components" size="lg">Browse components <x-lucide-arrow-right /></x-ui.button>
                 <x-ui.button href="/blocks" size="lg" variant="outline">Explore blocks</x-ui.button>
@@ -141,6 +146,7 @@
         </div>
         <div class="grid gap-4 md:grid-cols-3">
             @foreach ([
+                ['accessibility', 'Accessible by default', 'WAI-ARIA roles, full keyboard navigation, focus management and WCAG AA contrast — every component audited with axe-core.'],
                 ['copy', 'You own the code', 'Components are copied into your project with one Artisan command. No black-box dependency.'],
                 ['paintbrush', 'Themeable to the core', 'Every token is a CSS variable. Recolor, restyle and export your theme in seconds.'],
                 ['zap', 'Zero JS runtime', 'No React, no build-step lock-in. Just Blade + a sprinkle of Alpine you can read.'],

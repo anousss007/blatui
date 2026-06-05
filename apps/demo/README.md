@@ -6,7 +6,7 @@
 
 Open-source, copy-paste UI components for Laravel. No JS runtime lock-in, no black-box dependency — you own every line.
 
-**55 components · 62 blocks · 70 charts** · fully themeable · light + dark · MIT licensed
+**55 components · 62 blocks · 70 charts** · **accessible (WCAG AA)** · fully themeable · light + dark · MIT licensed
 
 ### 🌐 [**Live demo & docs → blatui.remix-it.com**](https://blatui.remix-it.com)
 
@@ -18,6 +18,7 @@ Install the CLI: [**`composer require blatui/blatui`**](https://github.com/anous
 
 ## Why BlatUI
 
+- **Accessible by default.** WAI-ARIA roles, full keyboard navigation & focus management, and WCAG AA contrast — every component modeled on shadcn/ui's Base UI behavior, verified in a real browser and audited with axe-core.
 - **You own the code.** Components are copied into your project with one Artisan command — edit them however you like.
 - **The BLAT stack.** Pure Blade components, a sprinkle of Alpine.js for interactivity, Tailwind CSS v4 for styling. No React, no build-step lock-in.
 - **Faithful to shadcn/ui.** Same design language, component APIs and blocks — ported to the Laravel way.
