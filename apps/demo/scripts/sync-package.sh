@@ -14,13 +14,16 @@
 set -euo pipefail
 
 DEMO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PKG_DIR="${1:-$DEMO_DIR/../blat-ui-package}"
+PKG_DIR="${1:-$DEMO_DIR/../blatui-package}"
 
 if [[ ! -d "$PKG_DIR/stubs" ]]; then
   echo "✗ Package not found at: $PKG_DIR" >&2
-  echo "  Pass the path explicitly: bash scripts/sync-package.sh /path/to/blat-ui-package" >&2
+  echo "  Pass the path explicitly: bash scripts/sync-package.sh /path/to/blatui-package" >&2
   exit 1
 fi
+
+echo "→ Rebuilding registry.json from the authored components"
+( cd "$DEMO_DIR" && php artisan blatui:registry:build )
 
 echo "→ Syncing components → $PKG_DIR/stubs/ui"
 rm -f "$PKG_DIR"/stubs/ui/*.blade.php
@@ -30,6 +33,9 @@ echo "→ Syncing foundations (CSS + JS)"
 cp "$DEMO_DIR"/resources/css/app.css "$PKG_DIR"/stubs/foundations/app.css
 cp "$DEMO_DIR"/resources/js/app.js  "$PKG_DIR"/stubs/foundations/app.js
 
+echo "→ Syncing registry manifest → $PKG_DIR/stubs/registry.json"
+cp "$DEMO_DIR"/registry.json "$PKG_DIR"/stubs/registry.json
+
 UI_COUNT=$(ls "$PKG_DIR"/stubs/ui/*.blade.php | wc -l | tr -d ' ')
-echo "✓ Synced ${UI_COUNT} component files + foundations."
+echo "✓ Synced ${UI_COUNT} component files + foundations + registry.json."
 echo "  Next: cd $PKG_DIR && git status"

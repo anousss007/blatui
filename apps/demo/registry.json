@@ -189,6 +189,7 @@
     "chart": {
         "name": "chart",
         "files": [
+            "chart.blade.php",
             "chart-container.blade.php",
             "chart-tooltip-content.blade.php"
         ],
