@@ -129,7 +129,7 @@
                     <span class="text-xs font-semibold">Apply to your app</span>
                 </div>
                 <p class="text-muted-foreground mb-2.5 text-xs leading-relaxed">
-                    Copy these CSS variables and paste them over the <code class="bg-muted rounded px-1 py-0.5 text-[11px]">:root</code> and <code class="bg-muted rounded px-1 py-0.5 text-[11px]">.dark</code> blocks in your <code class="bg-muted rounded px-1 py-0.5 text-[11px]">app.css</code>.
+                    Copy your complete theme and paste it as your <code class="bg-muted rounded px-1 py-0.5 text-[11px]">resources/css/app.css</code> — the Tailwind import, every token and the <code class="bg-muted rounded px-1 py-0.5 text-[11px]">@theme</code> mapping are all included, so it works as-is.
                 </p>
                 <x-ui.button size="sm" class="w-full" @click="copyCss()">
                     <template x-if="!copied"><span class="inline-flex items-center gap-1.5"><x-lucide-clipboard class="size-3.5" /> Copy theme CSS</span></template>

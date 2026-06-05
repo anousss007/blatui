@@ -36,20 +36,33 @@ composer require blatui/blatui
 
 # 2. Peer dependencies
 composer require gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons
-npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts
+npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts tw-animate-css
 
-# 3. Verify your setup (checks packages, theme tokens, Alpine)
+# 3. Publish the foundations (theme CSS + Alpine/chart engine)
+php artisan vendor:publish --tag=blatui-foundations
+
+# 4. Verify your setup (checks packages, tokens, Alpine, imports)
 php artisan blatui:init
 
-# 4. Add components — copied into resources/views/components/ui
-php artisan blatui:add button card dialog
+# 5. Add components — copied into resources/views/components/ui
+php artisan blatui:add button card input
 
-# 5. Browse everything available
+# 6. Browse everything available
 php artisan blatui:list
 ```
 
-Then add the shadcn design tokens to `resources/css/app.css` and bootstrap Alpine in
-`resources/js/app.js`. The full step-by-step guide lives at **/docs**.
+Point your two Vite entrypoints at the published foundations — **replace** each file's contents:
+
+```css
+/* resources/css/app.css */
+@import "./blatui.css";
+```
+```js
+// resources/js/app.js
+import "./blatui.js";
+```
+
+The full step-by-step guide lives at **/docs**.
 
 ## Usage
 

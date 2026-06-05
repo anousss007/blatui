@@ -29,10 +29,16 @@
             {{-- TL;DR --}}
             <div class="border-primary/20 from-primary/5 mb-12 rounded-2xl border bg-gradient-to-br to-transparent p-6">
                 <h2 class="flex items-center gap-2 text-sm font-semibold"><x-lucide-zap class="text-primary size-4" /> TL;DR — already on Laravel + Tailwind v4?</h2>
-                <p class="text-muted-foreground mt-1 mb-4 text-sm">Run these three and start building.</p>
-                <x-code-block label="Terminal" icon="terminal">composer require blatui/blatui
-php artisan blatui:init
-php artisan blatui:add button card dialog</x-code-block>
+                <p class="text-muted-foreground mt-1 mb-4 text-sm">Install, publish the foundations, wire two entrypoints, then start building.</p>
+                <x-code-block label="Terminal" icon="terminal">composer require blatui/blatui gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons
+npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts tw-animate-css
+php artisan vendor:publish --tag=blatui-foundations</x-code-block>
+                <p class="text-muted-foreground mt-3 mb-2 text-sm">Point your two Vite entrypoints at the published foundations (replace each file's contents):</p>
+                <x-code-block label="resources/css/app.css" icon="palette">@import "./blatui.css";</x-code-block>
+                <x-code-block label="resources/js/app.js" icon="file-code">import "./blatui.js";</x-code-block>
+                <p class="text-muted-foreground mt-3 mb-2 text-sm">Verify, then add your first components:</p>
+                <x-code-block label="Terminal" icon="terminal">php artisan blatui:init
+php artisan blatui:add button card input</x-code-block>
             </div>
 
             <h2 id="installation" class="mb-6 scroll-mt-20 text-2xl font-bold tracking-tight">Step-by-step</h2>
@@ -49,71 +55,32 @@ php artisan blatui:add button card dialog</x-code-block>
                 <x-code-block label="Terminal" icon="terminal">npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts</x-code-block>
             </x-step>
 
-            <x-step :n="3" title="Add the theme tokens">
-                <p class="text-muted-foreground text-sm">Drop the shadcn design tokens into <code class="bg-muted rounded px-1 py-0.5 text-xs">resources/css/app.css</code>. This is the heart of the theming system — every component reads these CSS variables.</p>
-                <x-code-block label="resources/css/app.css" icon="palette">@import "tailwindcss";
-@custom-variant dark (&:is(.dark *));
-
-:root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.97 0 0);
-  --border: oklch(0.922 0 0);
-  /* …card, popover, secondary, accent, destructive, ring, chart-1…5, sidebar… */
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  /* …dark overrides… */
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --radius-lg: var(--radius);
-  /* …map every token… */
-}</x-code-block>
+            <x-step :n="3" title="Publish &amp; import the foundations">
+                <p class="text-muted-foreground text-sm">Publish the theme CSS and the Alpine/chart/calendar engine. They land in <code class="bg-muted rounded px-1 py-0.5 text-xs">resources/css/blatui.css</code> and <code class="bg-muted rounded px-1 py-0.5 text-xs">resources/js/blatui.js</code> — and they're yours to edit.</p>
+                <x-code-block label="Terminal" icon="terminal">php artisan vendor:publish --tag=blatui-foundations</x-code-block>
+                <p class="text-muted-foreground text-sm">Then point your two Vite entrypoints at them — <span class="text-foreground font-medium">replace</span> the contents of each file:</p>
+                <x-code-block label="resources/css/app.css" icon="palette">@import "./blatui.css";</x-code-block>
+                <x-code-block label="resources/js/app.js" icon="file-code">import "./blatui.js";</x-code-block>
                 <div class="bg-muted/40 flex items-start gap-2 rounded-lg border p-3 text-sm">
                     <x-lucide-sparkles class="text-primary mt-0.5 size-4 shrink-0" />
-                    <span class="text-muted-foreground">Don't copy by hand — open <span class="text-foreground font-medium">Customize</span> (top-right), pick your colors, and hit <span class="text-foreground font-medium">Copy theme CSS</span> to grab the complete, ready-to-paste <code class="bg-muted rounded px-1 text-xs">:root</code> / <code class="bg-muted rounded px-1 text-xs">.dark</code> block.</span>
+                    <span class="text-muted-foreground"><code class="bg-muted rounded px-1 text-xs">blatui.css</code> bundles Tailwind, <code class="bg-muted rounded px-1 text-xs">tw-animate-css</code>, the design tokens and the <code class="bg-muted rounded px-1 text-xs">@theme</code> mapping; <code class="bg-muted rounded px-1 text-xs">blatui.js</code> boots Alpine + its plugins and lazy-loads ApexCharts. Want a custom palette? Open <span class="text-foreground font-medium">Customize</span> (top-right), tune it, and hit <span class="text-foreground font-medium">Copy theme CSS</span> for a complete, ready-to-paste <code class="bg-muted rounded px-1 text-xs">app.css</code>.</span>
                 </div>
             </x-step>
 
-            <x-step :n="4" title="Bootstrap Alpine">
-                <p class="text-muted-foreground text-sm">Register Alpine and its plugins in <code class="bg-muted rounded px-1 py-0.5 text-xs">resources/js/app.js</code>. The plugins drive popovers, accordions and focus traps.</p>
-                <x-code-block label="resources/js/app.js" icon="file-code">import Alpine from 'alpinejs'
-import anchor from '@alpinejs/anchor'
-import collapse from '@alpinejs/collapse'
-import focus from '@alpinejs/focus'
-
-Alpine.plugin(anchor)
-Alpine.plugin(collapse)
-Alpine.plugin(focus)
-
-window.Alpine = Alpine
-Alpine.start()</x-code-block>
-            </x-step>
-
-            <x-step :n="5" title="Verify your setup">
-                <p class="text-muted-foreground text-sm">Run the doctor. It checks every foundation — packages, theme tokens, Alpine bootstrap — and tells you exactly what's missing.</p>
+            <x-step :n="4" title="Verify your setup">
+                <p class="text-muted-foreground text-sm">Run the doctor. It checks every package, the theme tokens and the Alpine bootstrap — and that the foundations are actually imported — then tells you exactly what's missing.</p>
                 <x-code-block label="Terminal" icon="terminal">php artisan blatui:init</x-code-block>
             </x-step>
 
-            <x-step :n="6" title="Add components">
+            <x-step :n="5" title="Add components">
                 <p class="text-muted-foreground text-sm">Copy components — and their dependencies — straight into <code class="bg-muted rounded px-1 py-0.5 text-xs">resources/views/components/ui</code>. They're yours now: edit freely.</p>
-                <x-code-block label="Terminal" icon="terminal">php artisan blatui:add button card dialog
+                <x-code-block label="Terminal" icon="terminal">php artisan blatui:add button card input
 
 # browse everything that's available
 php artisan blatui:list</x-code-block>
             </x-step>
 
-            <x-step :n="7" title="Use them" :last="true">
+            <x-step :n="6" title="Use them" :last="true">
                 <p class="text-muted-foreground text-sm">Every component is a Blade tag under the <code class="bg-muted rounded px-1 py-0.5 text-xs">ui</code> namespace. Compose away:</p>
                 <x-code-block label="resources/views/welcome.blade.php" icon="code">&lt;x-ui.card class="max-w-sm"&gt;
     &lt;x-ui.card-header&gt;
@@ -162,7 +129,7 @@ php artisan blatui:list</x-code-block>
             <div class="sticky top-20 space-y-3 text-sm">
                 <p class="text-muted-foreground text-xs font-semibold tracking-wide uppercase">On this page</p>
                 <ul class="space-y-2">
-                    @foreach (['Install the package' => '1', 'Peer dependencies' => '2', 'Theme tokens' => '3', 'Bootstrap Alpine' => '4', 'Verify setup' => '5', 'Add components' => '6', 'Use them' => '7'] as $label => $n)
+                    @foreach (['Install the package' => '1', 'Peer dependencies' => '2', 'Foundations' => '3', 'Verify setup' => '4', 'Add components' => '5', 'Use them' => '6'] as $label => $n)
                         <li><a href="#installation" class="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors">
                             <span class="bg-muted flex size-5 items-center justify-center rounded text-[11px] font-medium">{{ $n }}</span>{{ $label }}
                         </a></li>

@@ -549,12 +549,124 @@ Alpine.data('calendar', (cfg = {}) => ({
 }));
 
 // ---------------------------------------------------------------------------
-// Theme export — resolve the CURRENT customization (base color, accent, radius)
-// into concrete CSS variables the user can paste into their own app.css.
-// Reads computed :root values in both light and dark and emits two blocks.
+// Theme export — resolve the CURRENT customization (base color, accent, radius,
+// font, shadow, spacing, tracking) into a COMPLETE, self-contained
+// resources/css/app.css the user can paste as-is.
+//
+// We emit the full foundations scaffold (the Tailwind + tw-animate-css imports,
+// the @source globs and the @theme inline mapping) followed by the live
+// :root/.dark tokens. The @theme inline mapping is what turns the tokens into
+// utilities (bg-background, shadow-md, tracking-wide, …) — without it Tailwind
+// generates nothing and a pasted theme renders unstyled. The :root block also
+// carries every token the mapping references (spacing, fonts, shadows…), so
+// nothing resolves to `var(--undefined)`.
+//
+// NOTE: THEME_SCAFFOLD mirrors the head of resources/css/app.css. If you change
+// the @theme inline mapping or @source globs there, mirror them here too.
 // ---------------------------------------------------------------------------
+const THEME_SCAFFOLD = `@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../vendor/mallardduck/blade-lucide-icons/resources/svg/*.svg';
+@source '../../storage/framework/views/*.php';
+@source '../views';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    /* Fonts */
+    --font-sans: var(--font-sans);
+    --font-serif: var(--font-serif);
+    --font-mono: var(--font-mono);
+
+    /* Radius scale (derived from --radius) */
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+
+    /* Spacing base (every p-*, gap-*, w-*… derives from this) */
+    --spacing: var(--spacing);
+
+    /* Letter-spacing scale (derived from --tracking-normal) */
+    --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
+    --tracking-tight: calc(var(--tracking-normal) - 0.025em);
+    --tracking-normal: var(--tracking-normal);
+    --tracking-wide: calc(var(--tracking-normal) + 0.025em);
+    --tracking-wider: calc(var(--tracking-normal) + 0.05em);
+    --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+    /* Box-shadow scale */
+    --shadow-2xs: var(--shadow-2xs);
+    --shadow-xs: var(--shadow-xs);
+    --shadow-sm: var(--shadow-sm);
+    --shadow: var(--shadow);
+    --shadow-md: var(--shadow-md);
+    --shadow-lg: var(--shadow-lg);
+    --shadow-xl: var(--shadow-xl);
+    --shadow-2xl: var(--shadow-2xl);
+
+    /* Colors */
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+
+    --animate-caret-blink: caret-blink 1.25s ease-out infinite;
+
+    @keyframes caret-blink {
+        0%,
+        70%,
+        100% {
+            opacity: 1;
+        }
+        20%,
+        50% {
+            opacity: 0;
+        }
+    }
+}`;
+
+// Every token the @theme inline mapping references — all must land in :root so
+// the pasted file is fully self-contained.
 const THEME_TOKENS = [
-    '--radius',
+    // Geometry / rhythm
+    '--radius', '--spacing', '--tracking-normal',
+    // Fonts
+    '--font-sans', '--font-serif', '--font-mono',
+    // Shadows
+    '--shadow-2xs', '--shadow-xs', '--shadow-sm', '--shadow',
+    '--shadow-md', '--shadow-lg', '--shadow-xl', '--shadow-2xl',
+    // Colors
     '--background', '--foreground',
     '--card', '--card-foreground',
     '--popover', '--popover-foreground',
@@ -587,8 +699,10 @@ window.exportTheme = function () {
     root.classList.add('dark');
     const dark = _readTokens();
     root.classList.toggle('dark', wasDark);
-    const fmt = (o) => THEME_TOKENS.filter((t) => o[t]).map((t) => `  ${t}: ${o[t]};`).join('\n');
-    return `:root {\n${fmt(light)}\n}\n\n.dark {\n${fmt(dark)}\n}`;
+    const fmt = (o, keys) => keys.filter((t) => o[t]).map((t) => `  ${t}: ${o[t]};`).join('\n');
+    // :root carries the full token set; .dark only overrides what actually differs.
+    const darkKeys = THEME_TOKENS.filter((t) => dark[t] && dark[t] !== light[t]);
+    return `${THEME_SCAFFOLD}\n\n:root {\n${fmt(light, THEME_TOKENS)}\n}\n\n.dark {\n${fmt(dark, darkKeys)}\n}\n`;
 };
 
 window.Alpine = Alpine;
