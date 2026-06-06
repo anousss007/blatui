@@ -22,5 +22,5 @@
     <span class="absolute right-2 flex size-3.5 items-center justify-center">
         <x-lucide-check class="size-4" x-show="value === {!! $jsVal !!}" x-cloak aria-hidden="true" />
     </span>
-    <span x-ref="label">{{ $slot }}</span>
+    <span x-ref="label" class="flex items-center gap-2">{{ $slot }}</span>
 </div>
