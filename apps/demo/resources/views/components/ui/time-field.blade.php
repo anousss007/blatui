@@ -133,17 +133,17 @@
         </div>
     @else
         {{-- Native time input: free segmented editing, keyboard, mobile wheel, IME. --}}
+        {{-- Conditional attrs use :bindings (Blade omits null/false). Never put @if inside an <x-...> tag. --}}
         <x-ui.input
             type="time"
-            @if ($id) id="{{ $id }}" @endif
-            @if ($step) step="{{ $step }}" @endif
-            @if ($min) min="{{ $min }}" @endif
-            @if ($max) max="{{ $max }}" @endif
-            @if ($disabled) disabled @endif
-            :value="value"
-            @input="fromInput($event.target.value)"
-            class="bg-background w-fit appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-            {{ $attributes->only([]) }}
+            :id="$id"
+            :step="$step"
+            :min="$min"
+            :max="$max"
+            :disabled="$disabled"
+            x-bind:value="value"
+            x-on:input="fromInput($event.target.value)"
+            class="bg-background w-auto [&::-webkit-calendar-picker-indicator]:hidden"
         />
     @endif
 </div>
