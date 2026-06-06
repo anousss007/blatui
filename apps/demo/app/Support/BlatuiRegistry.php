@@ -21,12 +21,12 @@ class BlatuiRegistry
         'accordion', 'alert-dialog', 'alert', 'aspect-ratio', 'avatar', 'badge',
         'breadcrumb', 'button-group', 'button', 'calendar', 'card', 'carousel',
         'chart', 'checkbox', 'collapsible', 'combobox', 'command-dialog', 'command',
-        'context-menu', 'date-picker', 'dialog', 'drawer', 'dropdown-menu', 'empty',
+        'context-menu', 'datetime-picker', 'date-picker', 'dialog', 'drawer', 'dropdown-menu', 'empty',
         'field', 'hover-card', 'input-otp', 'input-group', 'input', 'item', 'kbd',
         'label', 'menubar', 'navigation-menu', 'pagination', 'popover', 'progress',
         'radio-group', 'resizable', 'scroll-area', 'select', 'separator', 'sheet',
         'sidebar', 'skeleton', 'slider', 'sonner', 'spinner', 'switch', 'table',
-        'tabs', 'textarea', 'toggle-group', 'toggle', 'tooltip',
+        'tabs', 'textarea', 'time-field', 'toggle-group', 'toggle', 'tooltip',
     ];
 
     public function __construct(

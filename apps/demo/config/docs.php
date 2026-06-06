@@ -8,6 +8,7 @@ return [
             'button', 'button-group', 'input', 'input-group', 'input-otp', 'textarea',
             'label', 'field', 'checkbox', 'radio-group', 'switch', 'select', 'combobox',
             'slider', 'toggle', 'toggle-group', 'calendar', 'date-picker',
+            'datetime-picker', 'time-field',
         ],
         'Layout' => [
             'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar',
@@ -33,6 +34,7 @@ return [
     // Display-name overrides for slugs whose humanized form is wrong (acronyms, etc.).
     'labels' => [
         'input-otp' => 'Input OTP',
+        'datetime-picker' => 'Date & Time Picker',
     ],
 
     // Optional one-line descriptions shown on each component page.
@@ -55,6 +57,8 @@ return [
         'toggle-group' => 'A set of two-state buttons that can be toggled on or off.',
         'calendar' => 'A date field component that allows users to enter and edit dates.',
         'date-picker' => 'A date picker component with a calendar popover.',
+        'datetime-picker' => 'Pick a date and a time together — single or range — in one popover.',
+        'time-field' => 'A time input with native and dropdown variants, 12/24-hour and seconds.',
 
         'card' => 'Displays a card with header, content, and footer.',
         'aspect-ratio' => 'Displays content within a desired ratio.',
