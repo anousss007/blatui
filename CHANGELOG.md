@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-06-06
+
+Two new Forms & Input components.
+
+### Added
+- `datetime-picker`: date and time in one popover, modes **single** and
+  **range** — composes `calendar` and `time-field`. Timezone-naive
+  `Y-m-d\TH:i` value, hidden inputs (`name`, or `name[from]` / `name[to]`),
+  and a locale-aware trigger label honoring `hour-cycle` (auto / 12 / 24).
+- `time-field`: a time control with a native `<input type=time>` variant and a
+  dropdown (`select`) variant (hour / minute / second + AM-PM), 12/24-hour,
+  seconds, and stepped minutes.
+
+### Fixed
+- `select-item`: option icons now sit inline with their label instead of
+  stacking above the text.
+
 ## [1.3.0] - 2026-06-05
 
 Theme-foundation and component enhancements shipped to consumers.
@@ -85,6 +102,9 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/anousss007/blatui/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/anousss007/blatui/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/anousss007/blatui/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/anousss007/blatui/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/anousss007/blatui/releases/tag/v1.0.0

@@ -323,6 +323,27 @@
             ]
         }
     },
+    "datetime-picker": {
+        "name": "datetime-picker",
+        "files": [
+            "datetime-picker.blade.php"
+        ],
+        "dependencies": [
+            "button",
+            "calendar",
+            "time-field"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor",
+                "@alpinejs/focus"
+            ]
+        }
+    },
     "dialog": {
         "name": "dialog",
         "files": [
@@ -870,6 +891,21 @@
         "dependencies": [],
         "packages": {
             "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "time-field": {
+        "name": "time-field",
+        "files": [
+            "time-field.blade.php"
+        ],
+        "dependencies": [
+            "input"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
             ]
         }
