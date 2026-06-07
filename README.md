@@ -40,7 +40,7 @@ composer require blatui/blatui
 
 # 2. Peer packages used by the components
 composer require gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons
-npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts tw-animate-css
+npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts
 
 # 3. Publish the foundations (theme tokens + Alpine/chart/calendar engine)
 php artisan vendor:publish --tag=blatui-foundations
@@ -63,7 +63,7 @@ Point your two Vite entrypoints at the published foundations — **replace** eac
 import "./blatui.js";
 ```
 
-> `blatui.css` brings Tailwind, `tw-animate-css`, the design tokens and the `@theme`
+> `blatui.css` brings Tailwind, the design tokens and the `@theme`
 > mapping; `blatui.js` boots Alpine + its plugins and lazy-loads ApexCharts. Run
 > `blatui:init` to confirm everything (packages, tokens, imports) is wired up.
 

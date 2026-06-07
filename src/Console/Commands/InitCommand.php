@@ -41,7 +41,6 @@ class InitCommand extends Command
             '@alpinejs/anchor' => 'positioning for popovers/menus',
             '@alpinejs/collapse' => 'accordion/collapsible animation',
             '@alpinejs/focus' => 'focus traps for dialogs',
-            'tw-animate-css' => 'animation utilities the theme CSS imports',
         ] as $package => $why) {
             if (str_contains($pkgJson, '"'.$package.'"')) {
                 $this->components->twoColumnDetail($package, '<fg=green>installed</>');

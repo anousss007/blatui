@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- The unused `tw-animate-css` npm dependency. Components animate via Alpine
+  `x-transition`, so the published foundation (`blatui.css`) no longer imports
+  it; it is dropped from the install docs and the `blatui:init` checks.
+
 ## [1.3.2] - 2026-06-07
 
 ### Changed
