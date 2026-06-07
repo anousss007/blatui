@@ -6,6 +6,7 @@
         'components' => ['label' => 'Components', 'href' => '/components'],
         'blocks' => ['label' => 'Blocks', 'href' => '/blocks'],
         'charts' => ['label' => 'Charts', 'href' => '/charts'],
+        'themes' => ['label' => 'Themes', 'href' => '/themes'],
     ];
 @endphp
 

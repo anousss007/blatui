@@ -112,10 +112,22 @@
     <link rel="stylesheet" href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700|geist:400,500,600,700|inter:400,500,600,700|lora:400,500,600,700|manrope:400,500,600,700|outfit:400,500,600,700|plus-jakarta-sans:400,500,600,700|sora:400,500,600,700|source-serif-4:400,500,600,700|space-grotesk:400,500,600,700">
 
 
-    {{-- No-flash: apply every persisted theme dimension before first paint --}}
+    {{-- No-flash: apply every persisted theme dimension before first paint.
+         A ?t= shared-theme link is decoded and adopted (persisted) up front so
+         it both paints correctly and becomes the working theme. --}}
     <script>
         (function () {
             const root = document.documentElement;
+            try {
+                const p = new URLSearchParams(location.search).get('t');
+                if (p) {
+                    const shared = JSON.parse(atob(p.replace(/-/g, '+').replace(/_/g, '/')));
+                    if (shared && typeof shared === 'object') {
+                        ['mode', 'base', 'preset', 'radius', 'font', 'shadow', 'spacing', 'tracking', 'inputStyle', 'fontHeading']
+                            .forEach((k) => { if (shared[k] != null) localStorage.setItem('theme:' + k, String(shared[k])); });
+                    }
+                }
+            } catch (e) { /* malformed share link — ignore */ }
             const get = (k, d) => localStorage.getItem('theme:' + k) || d;
             const mode = get('mode', 'system');
             const dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
