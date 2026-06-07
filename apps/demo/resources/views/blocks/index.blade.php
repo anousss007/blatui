@@ -5,7 +5,7 @@
         ->reject(fn ($n) => $n === 'index')
         ->values();
 
-    $order = ['dashboard' => 'Dashboard', 'sidebar' => 'Sidebar', 'login' => 'Login', 'signup' => 'Sign Up', 'calendar' => 'Calendars'];
+    $order = ['marketing' => 'Marketing', 'pricing' => 'Pricing', 'dashboard' => 'Dashboard', 'sidebar' => 'Sidebar', 'login' => 'Login', 'signup' => 'Sign Up', 'calendar' => 'Calendars'];
 
     $groups = collect($order)->mapWithKeys(function ($label, $prefix) use ($files) {
         $items = $files->filter(fn ($n) => str_starts_with($n, $prefix.'-'))->sort()->values();
