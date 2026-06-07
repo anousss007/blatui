@@ -37,7 +37,7 @@ composer require blatui/blatui
 
 # 2. Peer dependencies
 composer require gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons
-npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts tw-animate-css
+npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts
 
 # 3. Publish the foundations (theme CSS + Alpine/chart engine)
 php artisan vendor:publish --tag=blatui-foundations
