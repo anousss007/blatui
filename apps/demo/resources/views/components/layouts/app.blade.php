@@ -12,10 +12,29 @@
     $canonical = url()->current();
     $jsonLd = json_encode([
         '@context' => 'https://schema.org',
-        '@type' => 'WebSite',
-        'name' => $brand,
-        'url' => config('brand.url'),
-        'description' => config('brand.description'),
+        '@graph' => [
+            [
+                '@type' => 'WebSite',
+                '@id' => config('brand.url').'/#website',
+                'name' => $brand,
+                'url' => config('brand.url'),
+                'description' => config('brand.description'),
+            ],
+            [
+                '@type' => 'SoftwareApplication',
+                '@id' => config('brand.url').'/#software',
+                'name' => $brand,
+                'applicationCategory' => 'DeveloperApplication',
+                'operatingSystem' => 'Any',
+                'description' => config('brand.description'),
+                'url' => config('brand.url'),
+                'softwareHelp' => config('brand.url').'/docs',
+                'license' => 'https://opensource.org/licenses/MIT',
+                'isAccessibleForFree' => true,
+                'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'USD'],
+                'codeRepository' => config('brand.package'),
+            ],
+        ],
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 @endphp
 
@@ -51,6 +70,38 @@
 
     {{-- Structured data --}}
     <script type="application/ld+json">{!! $jsonLd !!}</script>
+
+    {{-- Agent discovery: machine-readable resources for AI agents --}}
+    <link rel="alternate" type="text/markdown" href="{{ $canonical }}.md" title="Markdown">
+    <link rel="llms-txt" type="text/markdown" href="{{ url('/llms.txt') }}" title="LLM index">
+    <link rel="sitemap" type="application/xml" href="{{ url('/sitemap.xml') }}">
+    <link rel="api-catalog" href="{{ url('/.well-known/api-catalog') }}">
+    <link rel="mcp-server" href="{{ url('/.well-known/mcp/server-card.json') }}">
+    <link rel="agent-card" href="{{ url('/.well-known/agent-card.json') }}">
+    <meta name="mcp-endpoint" content="{{ url('/mcp') }}">
+
+    {{-- WebMCP: expose in-page tools to a browser agent when the API exists --}}
+    <script>
+        (function () {
+            const mc = navigator.modelContext;
+            if (!mc || typeof mc.registerTool !== 'function') return;
+            const origin = location.origin;
+            mc.registerTool({
+                name: 'search_blatui',
+                description: 'Search BlatUI components, blocks and charts by name or description.',
+                inputSchema: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] },
+                async execute({ query }) {
+                    const res = await fetch(origin + '/registry.json');
+                    const data = await res.json();
+                    const q = String(query || '').toLowerCase();
+                    const hits = (data.items || []).filter(i =>
+                        (i.name + ' ' + (i.title || '') + ' ' + (i.description || '')).toLowerCase().includes(q)
+                    ).slice(0, 25).map(i => `- [${i.type}] ${i.name}${i.description ? ' — ' + i.description : ''}`);
+                    return { content: [{ type: 'text', text: hits.join('\n') || 'No matches.' }] };
+                },
+            });
+        })();
+    </script>
 
     {{-- Icons --}}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">

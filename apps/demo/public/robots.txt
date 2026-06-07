@@ -1,4 +1,47 @@
+# BlatUI — open-source UI components for Laravel. AI agents welcome.
+# Discovery: /llms.txt · /registry.json · /.well-known/mcp/server-card.json
+
 User-agent: *
 Allow: /
+# Content Signals (IETF AI Preferences): this content may be used for search,
+# as AI input/grounding, and for AI training. BlatUI is MIT-licensed.
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 
-Sitemap: /sitemap.xml
+# Explicitly welcome the major AI crawlers and agents.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://blatui.remix-it.com/sitemap.xml
