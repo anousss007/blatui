@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-06-07
+
+### Changed
+- `blatui:add` now only lists the peer packages (composer / npm) that aren't
+  **already installed**, checking `composer.json` / `package.json` the same way
+  `blatui:init` does. Following the README's up-front install no longer leaves
+  `blatui:add` suggesting `composer require` for packages you already have.
+
 ## [1.3.1] - 2026-06-06
 
 Two new Forms & Input components.
@@ -102,7 +110,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.3.2...HEAD
+[1.3.2]: https://github.com/anousss007/blatui/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/anousss007/blatui/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/anousss007/blatui/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/anousss007/blatui/compare/v1.1.0...v1.2.0

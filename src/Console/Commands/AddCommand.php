@@ -87,6 +87,14 @@ class AddCommand extends Command
         $composerPkgs = array_values(array_unique($composerPkgs));
         $npmPkgs = array_values(array_unique($npmPkgs));
 
+        // Only suggest peer packages the project doesn't already have — checked
+        // the same way blatui:init does — so following the README's up-front
+        // install doesn't leave blatui:add recommending packages already present.
+        $composerJson = is_file(base_path('composer.json')) ? (string) file_get_contents(base_path('composer.json')) : '';
+        $packageJson = is_file(base_path('package.json')) ? (string) file_get_contents(base_path('package.json')) : '';
+        $composerPkgs = array_values(array_filter($composerPkgs, fn ($p) => ! str_contains($composerJson, $p)));
+        $npmPkgs = array_values(array_filter($npmPkgs, fn ($p) => ! str_contains($packageJson, '"'.$p.'"')));
+
         if ($composerPkgs || $npmPkgs) {
             $this->newLine();
             $this->components->info('Required packages:');
