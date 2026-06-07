@@ -5,12 +5,15 @@ namespace BlatUI;
 use BlatUI\Console\Commands\AddCommand;
 use BlatUI\Console\Commands\InitCommand;
 use BlatUI\Console\Commands\ListCommand;
+use BlatUI\Console\Commands\McpCommand;
 use Illuminate\Support\ServiceProvider;
 
 class BlatuiServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->mergeConfigFrom(dirname(__DIR__).'/config/blatui.php', 'blatui');
+
         $this->app->singleton(Registry::class, fn () => new Registry);
     }
 
@@ -21,6 +24,7 @@ class BlatuiServiceProvider extends ServiceProvider
                 InitCommand::class,
                 ListCommand::class,
                 AddCommand::class,
+                McpCommand::class,
             ]);
 
             // Foundations: theme tokens (CSS) + Alpine/chart/calendar engine (JS).
