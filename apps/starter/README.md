@@ -55,10 +55,3 @@ auth on top and keep the BlatUI forms:
 composer require laravel/breeze --dev
 php artisan breeze:install blade
 ```
-
----
-
-> **Maintainer note:** this kit currently resolves `blatui/blatui` from a local
-> path repository (see `composer.json`). Before publishing the kit, remove the
-> `repositories.blatui` path entry and the `minimum-stability: dev` line so it
-> installs the released `blatui/blatui` from Packagist.

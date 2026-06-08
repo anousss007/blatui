@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fb9404aece6d24f025bd483b82d49f95",
+    "content-hash": "b80968275587e5ac8e71865dd071acb3",
     "packages": [
         {
             "name": "blade-ui-kit/blade-icons",
@@ -89,11 +89,17 @@
         },
         {
             "name": "blatui/blatui",
-            "version": "dev-main",
+            "version": "v1.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/anousss007/blatui.git",
+                "reference": "80610b9328e5ebbccb57cac2d536bda3df1495e6"
+            },
             "dist": {
-                "type": "path",
-                "url": "../blatui",
-                "reference": "0b4c84e9f2e55e7b8077904001d3f62432165f77"
+                "type": "zip",
+                "url": "https://api.github.com/repos/anousss007/blatui/zipball/80610b9328e5ebbccb57cac2d536bda3df1495e6",
+                "reference": "80610b9328e5ebbccb57cac2d536bda3df1495e6",
+                "shasum": ""
             },
             "require": {
                 "illuminate/console": "^11.0 || ^12.0 || ^13.0",
@@ -120,11 +126,7 @@
                     "BlatUI\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "BlatUI\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -151,9 +153,7 @@
                 "issues": "https://github.com/anousss007/blatui/issues",
                 "source": "https://github.com/anousss007/blatui"
             },
-            "transport-options": {
-                "relative": true
-            }
+            "time": "2026-06-08T10:41:49+00:00"
         },
         {
             "name": "brick/math",
@@ -8634,10 +8634,8 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "dev",
-    "stability-flags": {
-        "blatui/blatui": 20
-    },
+    "minimum-stability": "stable",
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
