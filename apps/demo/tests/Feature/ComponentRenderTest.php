@@ -173,6 +173,16 @@ class ComponentRenderTest extends TestCase
         $this->assertSame('1', $grab($this->render('<x-ui.date-picker :week-start="1" />')));  // forwarded by the picker
     }
 
+    public function test_date_picker_min_reaches_calendar_as_date_bound(): void
+    {
+        // min/max are forwarded to the calendar as date bounds (cfg minDate). The two out-of-range
+        // modes (disable = struck/unclickable, flag = red + selectable + invalid) are verified
+        // in-browser via Playwright (~/pw-debug/oor.js).
+        $html = $this->render('<x-ui.date-picker min="2026-06-10" max="2026-06-20" />');
+        $this->assertStringContainsString('minDate', $html);
+        $this->assertStringContainsString('2026-06-10', $html);
+    }
+
     public function test_calendar_can_hide_outside_days(): void
     {
         // show-outside-days="false" flags the root; CSS hides outside day cells + collapses all-outside rows.

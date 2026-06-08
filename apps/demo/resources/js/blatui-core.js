@@ -159,6 +159,9 @@ const calendar = (cfg = {}) => ({
     minDays: cfg.min || null,
     maxDays: cfg.max || null,
     disabledCfg: cfg.disabled || null,
+    minDate: cfg.minDate ? _parse(cfg.minDate) : null,
+    maxDate: cfg.maxDate ? _parse(cfg.maxDate) : null,
+    outOfRange: cfg.outOfRange || 'disable',  // 'disable' (prevent) | 'flag' (allow + red)
     modifiers: cfg.modifiers || {},
     modifiersClass: cfg.modifiersClass || {},
     startMonth: null,
@@ -250,7 +253,13 @@ const calendar = (cfg = {}) => ({
     // ---- predicates ----
     isOutside(d, m) { return d.getMonth() !== m.getMonth(); },
     isToday(d) { return _sameDay(d, new Date()); },
+    isOutOfRange(d) {
+        return !!((this.minDate && d < this.minDate) || (this.maxDate && d > this.maxDate));
+    },
     isDisabled(d) {
+        // Out-of-range dates are disabled UNLESS outOfRange === 'flag' (then they stay selectable
+        // but are flagged red via data-out-of-range + the picker's invalid state).
+        if (this.outOfRange !== 'flag' && this.isOutOfRange(d)) return true;
         if (this.startMonth && d < new Date(this.startMonth.getFullYear(), this.startMonth.getMonth(), 1)) return true;
         if (this.endMonth && d > new Date(this.endMonth.getFullYear(), this.endMonth.getMonth() + 1, 0)) return true;
         const c = this.disabledCfg;

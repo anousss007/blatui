@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`out-of-range` mode on `date-picker` / `datetime-picker` / `calendar`** — `disable` (default:
+  out-of-range dates are struck-through and unselectable) or `flag` (selectable but shown red, and
+  selecting one flags the field invalid). `min`/`max` now act as real date bounds on the calendar
+  (previously they were span counts and didn't gate single-date selection). Verified in-browser.
+
 ## [1.6.6] - 2026-06-08
 
 ### Fixed

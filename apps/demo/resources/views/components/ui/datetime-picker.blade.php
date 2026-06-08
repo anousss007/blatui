@@ -27,6 +27,7 @@
     'max' => null,
     'minNights' => null,
     'maxNights' => null,
+    'outOfRange' => 'disable',  // 'disable' (prevent out-of-range dates) | 'flag' (allow + red)
     'weekStart' => 0,
     'numberOfMonths' => null,
     'defaultMonth' => null,
@@ -195,8 +196,9 @@
             :number-of-months="$months"
             :default-month="$defaultMonth"
             :show-outside-days="$showOutsideDays"
-            :min="$minDate"
-            :max="$maxDate"
+            :min-date="$minDate"
+            :max-date="$maxDate"
+            :out-of-range="$outOfRange"
             class="rounded-none border-0"
         />
 

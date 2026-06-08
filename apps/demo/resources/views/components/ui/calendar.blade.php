@@ -19,6 +19,9 @@
     'modifiersClass' => [],
     'buttonVariant' => 'ghost',
     'showOutsideDays' => true,
+    'minDate' => null,   // out-of-range date bound (Y-m-d)
+    'maxDate' => null,
+    'outOfRange' => 'disable',  // 'disable' (prevent selection) | 'flag' (allow + show red)
 ])
 
 @php
@@ -38,6 +41,9 @@
         'disableNavigation' => (bool) $disableNavigation,
         'min' => $min,
         'max' => $max,
+        'minDate' => $minDate,
+        'maxDate' => $maxDate,
+        'outOfRange' => $outOfRange,
         'disabled' => $disabled,
         'defaultMonth' => $defaultMonth,
         'startMonth' => $startMonth,
@@ -58,6 +64,8 @@
         'data-[today]:bg-accent data-[today]:text-accent-foreground',
         'data-[outside]:text-muted-foreground',
         'data-[disabled]:text-muted-foreground data-[disabled]:opacity-40 data-[disabled]:line-through data-[disabled]:pointer-events-none',
+        // outOfRange="flag": selectable but flagged red (overridden by the selected/range styles below).
+        'data-[out-of-range]:text-destructive data-[out-of-range]:hover:bg-destructive/10 data-[out-of-range]:hover:text-destructive',
         'data-[selected]:bg-primary data-[selected]:text-primary-foreground data-[selected]:hover:bg-primary data-[selected]:hover:text-primary-foreground',
         'data-[range-start]:bg-primary data-[range-start]:text-primary-foreground data-[range-start]:rounded-r-none',
         'data-[range-end]:bg-primary data-[range-end]:text-primary-foreground data-[range-end]:rounded-l-none',
@@ -163,6 +171,7 @@
                                             :data-today="isToday(day) ? true : null"
                                             :data-outside="day.__outside ? true : null"
                                             :data-disabled="isDisabled(day) ? true : null"
+                                            :data-out-of-range="(outOfRange === 'flag' && isOutOfRange(day)) ? true : null"
                                             :class="modifierClass(day)"
                                             class="{{ $dayBtn }}"
                                         ></button>
