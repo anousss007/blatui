@@ -14,7 +14,8 @@ return [
             'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar',
         ],
         'Data Display' => [
-            'avatar', 'badge', 'table', 'carousel', 'chart', 'icon', 'item', 'kbd', 'marquee', 'progress', 'skeleton',
+            'avatar', 'badge', 'table', 'carousel', 'chart', 'icon', 'item', 'kbd', 'marquee',
+            'typewriter', 'text-reveal', 'progress', 'skeleton',
         ],
         'Feedback' => [
             'alert', 'banner', 'empty', 'spinner', 'sonner', 'tooltip', 'hover-card',
@@ -83,6 +84,8 @@ return [
         'alert' => 'Displays a callout for user attention, with semantic status tones.',
         'banner' => 'A full-width, dismissible announcement bar with semantic tones.',
         'marquee' => 'A seamless, infinite scroll of its content — logos, testimonials, badges.',
+        'typewriter' => 'Types and deletes a cycling list of words — for hero headlines and taglines.',
+        'text-reveal' => 'Brightens its words one by one as the element scrolls up through the viewport.',
         'empty' => 'An empty state for when there is no data to display.',
         'spinner' => 'An animated loading indicator.',
         'sonner' => 'An opinionated toast notification component. Includes a sonner-flash bridge that turns Laravel session flashes into toasts.',
