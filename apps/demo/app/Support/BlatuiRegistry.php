@@ -37,13 +37,26 @@ class BlatuiRegistry
         }
     }
 
+    /** @var list<string>|null */
+    protected ?array $rootsCache = null;
+
+    /** @var list<string>|null */
+    protected ?array $slugsCache = null;
+
+    /** @var array<string, list<string>>|null */
+    protected ?array $familiesCache = null;
+
     /** Roots ordered longest-first so prefix matching is unambiguous. */
     protected function rootsByLength(): array
     {
+        if ($this->rootsCache !== null) {
+            return $this->rootsCache;
+        }
+
         $roots = self::ROOTS;
         usort($roots, fn ($a, $b) => strlen($b) <=> strlen($a));
 
-        return $roots;
+        return $this->rootsCache = $roots;
     }
 
     /** Map a component slug to its family root. */
@@ -58,21 +71,36 @@ class BlatuiRegistry
         return null;
     }
 
-    /** All slugs present in the source directory. */
+    /** All slugs present in the source directory (memoized per instance). */
     public function slugs(): array
     {
+        if ($this->slugsCache !== null) {
+            return $this->slugsCache;
+        }
+
         $files = glob($this->sourceDir.'/*.blade.php') ?: [];
 
-        return collect($files)
+        return $this->slugsCache = collect($files)
             ->map(fn ($f) => Str::beforeLast(basename($f), '.blade.php'))
             ->sort()
             ->values()
             ->all();
     }
 
-    /** Group every slug into its family => [slugs...]. */
+    /**
+     * Group every slug into its family => [slugs...].
+     *
+     * Memoized: this is called hundreds of times while resolving block/chart
+     * dependencies, and re-globbing the directory each time made building the
+     * full registry index O(n²) — fast on SSD, but enough to blow PHP's
+     * max_execution_time on a slower disk.
+     */
     public function families(): array
     {
+        if ($this->familiesCache !== null) {
+            return $this->familiesCache;
+        }
+
         $families = [];
 
         foreach ($this->slugs() as $slug) {
@@ -82,7 +110,7 @@ class BlatuiRegistry
 
         ksort($families);
 
-        return $families;
+        return $this->familiesCache = $families;
     }
 
     public function familyExists(string $family): bool
@@ -98,10 +126,13 @@ class BlatuiRegistry
         return array_map(fn ($s) => $this->sourceDir.'/'.$s.'.blade.php', $slugs);
     }
 
-    /** Concatenated source of a family (used for dependency scanning). */
+    /** @var array<string, string> */
+    protected array $sourceCache = [];
+
+    /** Concatenated source of a family (memoized — read once, scanned twice). */
     protected function sourceFor(string $family): string
     {
-        return collect($this->filesFor($family))
+        return $this->sourceCache[$family] ??= collect($this->filesFor($family))
             ->map(fn ($p) => is_file($p) ? file_get_contents($p) : '')
             ->implode("\n");
     }
