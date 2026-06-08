@@ -162,4 +162,12 @@ class ComponentRenderTest extends TestCase
         $html = $this->render('<x-ui.date-picker mode="range" :min-nights="3" />');
         $this->assertStringContainsString('minNights: 3', $html);
     }
+
+    /** Anchored popovers teleport to <body> so an overflow-hidden ancestor never clips them. */
+    public function test_anchored_popovers_teleport_to_body(): void
+    {
+        $this->assertStringContainsString('x-teleport="body"', $this->render('<x-ui.date-picker name="d" />'));
+        $this->assertStringContainsString('x-teleport="body"', $this->render('<x-ui.datetime-picker name="dt" />'));
+        $this->assertStringContainsString('x-teleport="body"', $this->render('<x-ui.combobox name="c" :options="[\'a\',\'b\']" />'));
+    }
 }

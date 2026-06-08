@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-06-08
+
+### Fixed
+- **Popover clipping.** `date-picker` / `datetime-picker` / `combobox` teleport their popover to
+  `<body>` so an `overflow-hidden` ancestor (card, table cell, the docs preview) no longer crops
+  them. The docs example `<x-preview>` also no longer clips overflowing popovers.
+
 ## [1.6.1] - 2026-06-08
 
 ### Fixed

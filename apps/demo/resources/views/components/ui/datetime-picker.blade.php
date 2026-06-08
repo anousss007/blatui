@@ -165,6 +165,9 @@
         <span class="truncate" x-text="label || @js($placeholder)"></span>
     </button>
 
+    {{-- Teleported to <body> so the popover is never clipped by an overflow-hidden ancestor
+         (a card, table cell, the docs preview…). x-anchor still positions it at the trigger. --}}
+    <template x-teleport="body">
     <div
         x-show="open"
         x-cloak
@@ -226,4 +229,5 @@
             <x-ui.button type="button" size="sm" ::disabled="invalid" @click="open = false">Done</x-ui.button>
         </div>
     </div>
+    </template>
 </div>
