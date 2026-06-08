@@ -41,6 +41,18 @@ php artisan vendor:publish --tag=blatui-foundations</x-code-block>
 php artisan blatui:add button card input</x-code-block>
             </div>
 
+            {{-- AI editor callout --}}
+            <a href="{{ route('docs.mcp') }}" class="hover:border-ring mb-12 flex items-center gap-3 rounded-xl border p-4 transition-colors">
+                <span class="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+                    <x-lucide-server class="size-4" />
+                </span>
+                <span class="min-w-0">
+                    <span class="block text-sm font-semibold">Using an AI editor?</span>
+                    <span class="text-muted-foreground block text-sm">Connect the BlatUI MCP server so your agent can search, read &amp; install components — plus Laravel Boost integration.</span>
+                </span>
+                <x-lucide-arrow-right class="text-muted-foreground ml-auto size-4 shrink-0" />
+            </a>
+
             <h2 id="installation" class="mb-6 scroll-mt-20 text-2xl font-bold tracking-tight">Step-by-step</h2>
 
             <x-step :n="1" title="Install the package">

@@ -10,10 +10,12 @@ Route::view('/', 'showcase.index');
 
 Route::view('/docs', 'docs.getting-started')->name('docs.getting-started');
 
+Route::view('/docs/mcp', 'docs.mcp')->name('docs.mcp');
+
 Route::view('/themes', 'themes.index')->name('themes');
 
 Route::get('/sitemap.xml', function () {
-    $urls = ['/', '/docs', '/components', '/blocks', '/charts', '/themes'];
+    $urls = ['/', '/docs', '/docs/mcp', '/components', '/blocks', '/charts', '/themes'];
     foreach (glob(resource_path('views/examples/*'), GLOB_ONLYDIR) as $d) {
         $urls[] = '/components/'.basename($d);
     }
