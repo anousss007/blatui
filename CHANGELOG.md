@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-06-08
+
+### Fixed
+- **Anchored popovers are no longer clipped by an `overflow-hidden` ancestor.** `date-picker`,
+  `datetime-picker` and `combobox` now teleport their popover/listbox to `<body>` (like
+  `popover` / `select` / `dropdown-menu` already do), so placing one inside a card, table cell,
+  or any clipping container shows the full popover. `x-anchor` still positions it at the trigger.
+  (`navigation-menu` is intentionally left inline — it opens on hover and is not used inside
+  clipping containers.)
+
 ## [1.6.1] - 2026-06-08
 
 ### Fixed

@@ -66,6 +66,8 @@
         <x-lucide-chevrons-up-down class="size-4 shrink-0 opacity-50" aria-hidden="true" />
     </button>
 
+    {{-- Teleported to <body> so the listbox is never clipped by an overflow-hidden ancestor. --}}
+    <template x-teleport="body">
     <div
         x-show="open"
         x-cloak
@@ -124,4 +126,5 @@
             </div>
         </div>
     </div>
+    </template>
 </div>
