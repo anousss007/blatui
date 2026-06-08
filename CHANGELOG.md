@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-06-08
+
+### ⚠️ Breaking
+- **`card` is now a simple padded box by default.** The base `<x-ui.card>` renders
+  `bg-card rounded-xl border p-6 shadow-sm` (no flex / gap / py) — the dominant "just a box"
+  case is now the cheapest default. **Composed cards** (using `card-header` / `card-content` /
+  `card-footer`) must opt into the old layout with `variant="sectioned"`:
+  `<x-ui.card variant="sectioned">…</x-ui.card>`. After `php artisan blatui:add card`, add
+  `variant="sectioned"` to every card that composes header/content/footer.
+
+### Added
+- **Semantic status tones.** New foundation tokens `--success` / `--warning` / `--info`
+  (+ `-foreground`) plus a reusable `tone` axis on `badge` and `alert`
+  (`tone="success|warning|danger|info|neutral"`; badges add `variant="soft|solid|outline"`).
+  `danger` reuses the existing `--destructive`. Status badges are finally first-class.
+- **`link`** — an inline, prose text link (`default` / `muted` / `subtle` variants, `external`).
+- **`rating`** — a star rating input (hover preview, keyboard, hidden field for forms,
+  `readonly`, `sm|default|lg`).
+- **`icon`** — a thin Lucide wrapper that auto-mirrors directional arrows/chevrons under RTL,
+  plus a `.blat-rtl-flip` utility.
+- **Dispatchable overlays.** `dialog` / `sheet` / `alert-dialog` accept an `id` to open/close
+  from anywhere via `$dispatch('open-dialog-{id}')` / `$dispatch('close-dialog-{id}')`; their
+  triggers accept `for="{id}"`. A single shared modal now works from triggers inside a
+  `@foreach` / server-rendered table — no per-row modal markup.
+- **Form sizes.** `size="sm|default|lg"` on `input`, `textarea` and `select` (trigger).
+- **Native form controls.** A `native` prop on `select` and `checkbox` renders a
+  BlatUI-styled *native* `<select>` / `<input type=checkbox>` (submits without JS, name-bound),
+  plus `@apply`-able `.blat-input` / `.blat-textarea` / `.blat-select` / `.blat-checkbox` /
+  `.blat-radio` / `.blat-label` utilities for hand-rolled controls.
+- **Button** — optional `before` / `after` named icon slots and an `as` (element
+  polymorphism) prop.
+- **`sonner-flash`** — a server-flash → toast bridge mapping
+  `session('success'|'error'|'warning'|'info'|'status')` to sonner toasts (incl. a Fortify
+  status map). Ships with the `sonner` family.
+- **`date-picker` range** — `mode="range"` (was single-only) with `name[from]`/`name[to]`, a
+  two-month calendar, and a `defaultMonth` prop.
+- **Picker bounds & range limits.** `datetime-picker` accepts a full-datetime `min`/`max`
+  (`Y-m-d\TH:i`): the date part bounds the calendar, the time part bounds the edge day
+  (validated for the `input` *and* `select` time variants). Both pickers gain
+  `min-nights` / `max-nights` (range length) and a hard `end ≥ start` check — invalid
+  selections show inline errors, mark `aria-invalid`, and disable confirming / closing.
+- **`blatui:doctor`** — scans Blade views for `<x-ui.button>` inside a `<form>` with no `type`
+  (renders `type=button`, silently won't submit) and reports each `file:line`.
+
+### Changed
+- **`datetime-picker` range** now shows a two-month calendar by default (new `numberOfMonths`
+  / `defaultMonth` props) for a proper date-range-with-times UX.
+
+### Fixed
+- Components that render Lucide via `<x-dynamic-component :component="'lucide-…'">` (e.g.
+  `icon`) now correctly declare the `mallardduck/blade-lucide-icons` dependency in the registry.
+
 ## [1.5.0] - 2026-06-08
 
 ### Changed

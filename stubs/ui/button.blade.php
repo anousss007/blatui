@@ -3,6 +3,7 @@
     'size' => 'default',
     'href' => null,
     'type' => 'button',
+    'as' => null,
 ])
 
 @php
@@ -29,14 +30,21 @@
     ];
 
     $classes = $base.' '.($variants[$variant] ?? $variants['default']).' '.($sizes[$size] ?? $sizes['default']);
+
+    // Element polymorphism: explicit `as`/`tag`, else <a> when `href`, else <button>.
+    // `type` is emitted only for a real <button>; `href` only for an <a>.
+    $tag = $as ?: ($href ? 'a' : 'button');
 @endphp
 
-@if ($href)
-    <a href="{{ $href }}" data-slot="button" {{ $attributes->twMerge($classes) }}>
-        {{ $slot }}
-    </a>
-@else
-    <button type="{{ $type }}" data-slot="button" {{ $attributes->twMerge($classes) }}>
-        {{ $slot }}
-    </button>
-@endif
+{{-- The base classes already size & space svgs (gap + [&_svg] sizing), so `before`/`after`
+     icon slots need no per-call-site markup. --}}
+<{{ $tag }}
+    data-slot="button"
+    @if ($tag === 'a' && $href) href="{{ $href }}" @endif
+    @if ($tag === 'button') type="{{ $type }}" @endif
+    {{ $attributes->twMerge($classes) }}
+>
+    @isset($before){{ $before }}@endisset
+    {{ $slot }}
+    @isset($after){{ $after }}@endisset
+</{{ $tag }}>

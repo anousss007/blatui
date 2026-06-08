@@ -63,6 +63,12 @@
     --color-accent-foreground: var(--accent-foreground);
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-info: var(--info);
+    --color-info-foreground: var(--info-foreground);
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
@@ -142,6 +148,15 @@
     /* Darkened from 0.577 → 0.55 so destructive text clears AA 4.5:1 on white (was 4.49:1). */
     --destructive: oklch(0.55 0.238 27.325);
     --destructive-foreground: oklch(0.985 0 0);
+    /* Semantic status tones — preset-independent (live once here, not per data-base).
+       Tuned so text-{tone} clears WCAG AA 4.5:1 on a /10 tint and white clears AA on the
+       solid fill. `danger` reuses --destructive. */
+    --success: oklch(0.52 0.13 150);
+    --success-foreground: oklch(0.985 0.018 155);
+    --warning: oklch(0.56 0.12 70);
+    --warning-foreground: oklch(0.987 0.022 95);
+    --info: oklch(0.54 0.15 250);
+    --info-foreground: oklch(0.985 0.015 255);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
@@ -177,6 +192,13 @@
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
     --destructive-foreground: oklch(0.985 0 0);
+    /* Semantic status tones — dark: lighter fills, so text-{tone} reads on dark surfaces. */
+    --success: oklch(0.7 0.15 155);
+    --success-foreground: oklch(0.21 0.05 155);
+    --warning: oklch(0.78 0.14 82);
+    --warning-foreground: oklch(0.26 0.05 75);
+    --info: oklch(0.7 0.14 245);
+    --info-foreground: oklch(0.21 0.05 250);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
@@ -1375,4 +1397,47 @@
     [x-cloak] {
         display: none !important;
     }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Native-control styling utilities                                           */
+/*  Drop these on a raw <input>/<select>/<textarea>/<input type=checkbox> to    */
+/*  get the BlatUI look on a NATIVE control (submits without JS, name-bound).    */
+/*  They mirror the matching <x-ui.*> components — keep in sync when those       */
+/*  change. Pairs with the `native` prop on x-ui.select / x-ui.checkbox.         */
+/* -------------------------------------------------------------------------- */
+@layer components {
+    .blat-input {
+        @apply border-input placeholder:text-muted-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
+    }
+    .blat-textarea {
+        @apply border-input placeholder:text-muted-foreground dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
+    }
+    /* Native <select>: same shell as the input, plus appearance-none + a chevron.
+       Chevron is a static gray SVG so it needs no JS; flips side under RTL. */
+    .blat-select {
+        @apply border-input dark:bg-input/30 flex h-9 w-full min-w-0 appearance-none rounded-md border bg-transparent py-1 ps-3 pe-9 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23717182' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 0.625rem center;
+        background-size: 1rem;
+    }
+    [dir='rtl'] .blat-select {
+        background-position: left 0.625rem center;
+    }
+    /* Native checkboxes/radios: accent-color is the no-JS way to brand them. */
+    .blat-checkbox {
+        @apply border-input accent-primary size-4 shrink-0 rounded-[4px] border shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .blat-radio {
+        @apply border-input accent-primary size-4 shrink-0 rounded-full border shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .blat-label {
+        @apply flex items-center gap-2 text-sm font-medium leading-none select-none;
+    }
+}
+
+/* Mirror directional icons (arrows/chevrons) under RTL. Apply on the icon. */
+[dir='rtl'] .blat-rtl-flip {
+    transform: scaleX(-1);
 }

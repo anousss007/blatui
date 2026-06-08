@@ -5,7 +5,13 @@
       value        single: "Y-m-d\TH:i" (or "Y-m-d H:i"); range: ['from' => ..., 'to' => ...]
       hourCycle    auto | 12 | 24
       timeVariant  input | select   (forwarded to <x-ui.time-field>)
-      min / max    date bounds (Y-m-d) for the calendar
+      min / max    bound, "Y-m-d" OR full "Y-m-d\TH:i". The date part bounds the calendar; the
+                   time part bounds the time-of-day on that boundary day (validated for both
+                   time variants).
+      minNights / maxNights  range length bound (nights between from and to).
+      numberOfMonths  calendar months shown (defaults: single -> 1, range -> 2)
+    A range is "valid" only when it sits within [min, max], end >= start, and its length is
+    within [minNights, maxNights]; otherwise the errors show and "Done" is disabled.
 --}}
 @props([
     'mode' => 'single',
@@ -19,7 +25,11 @@
     'captionLayout' => 'dropdown',
     'min' => null,
     'max' => null,
+    'minNights' => null,
+    'maxNights' => null,
     'weekStart' => 0,
+    'numberOfMonths' => null,
+    'defaultMonth' => null,
     'width' => null,
 ])
 
@@ -36,6 +46,9 @@
 
     $isRange = $mode === 'range';
 
+    // Range shows two months by default (like a typical date-range picker); single shows one.
+    $months = $numberOfMonths !== null ? max(1, (int) $numberOfMonths) : ($isRange ? 2 : 1);
+
     [$initDate, $initTime] = $parseDT($isRange ? null : $value);
 
     $fromDate = $fromTime = $toDate = $toTime = null;
@@ -45,10 +58,14 @@
     }
     $calRange = array_filter(['from' => $fromDate, 'to' => $toDate], fn ($x) => $x !== null) ?: null;
 
+    // Split min/max into date (-> calendar) and time (-> validation) parts.
+    [$minDate, $minTime] = $parseDT($min);
+    [$maxDate, $maxTime] = $parseDT($max);
+
     $placeholder ??= $isRange ? 'Pick a date range' : 'Pick a date & time';
     $width ??= $isRange ? 'w-[320px]' : 'w-[280px]';
 
-    $triggerCls = 'border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-left text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]';
+    $triggerCls = 'border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-left text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20';
 @endphp
 
 <div
@@ -61,6 +78,10 @@
         date: @js($initDate), time: @js($initTime),
         from: @js($fromDate), timeFrom: @js($fromTime),
         to: @js($toDate), timeTo: @js($toTime),
+        minDate: @js($minDate), minTime: @js($minTime),
+        maxDate: @js($maxDate), maxTime: @js($maxTime),
+        minNights: @js($minNights !== null ? (int) $minNights : null),
+        maxNights: @js($maxNights !== null ? (int) $maxNights : null),
         onTime(d) {
             if (this.mode === 'range') {
                 if (d.part === 'to') this.timeTo = d.value; else this.timeFrom = d.value;
@@ -69,6 +90,11 @@
             }
         },
         combined(d, t) { return d ? d + 'T' + (t || '00:00') : ''; },
+        ms(d, t) { return d ? new Date(d + 'T' + (t || '00:00')).getTime() : null; },
+        get loMs() { return this.minDate ? this.ms(this.minDate, this.minTime || '00:00') : null; },
+        get hiMs() { return this.maxDate ? this.ms(this.maxDate, this.maxTime || '23:59:59') : null; },
+        nights(a, b) { return (a && b) ? Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000) : null; },
+        plural(n) { return n > 1 ? 's' : ''; },
         fmt(d, t) {
             if (!d) return '';
             const dt = new Date(d + 'T' + (t || '00:00'));
@@ -80,10 +106,26 @@
             if (this.cycle !== 'auto') to.hourCycle = this.cycle === '12' ? 'h12' : 'h23';
             return ds + ', ' + dt.toLocaleTimeString(undefined, to);
         },
-        get invalid() {
-            return this.mode === 'range' && this.from && this.to && this.from === this.to
-                && this.timeFrom && this.timeTo && this.timeTo < this.timeFrom;
+        get errors() {
+            const e = [];
+            const lo = this.loMs, hi = this.hiMs;
+            if (this.mode === 'range') {
+                const f = this.ms(this.from, this.timeFrom);
+                const t = this.ms(this.to, this.timeTo);
+                if (f !== null && lo !== null && f < lo) e.push('Start is before the earliest allowed date/time.');
+                if (t !== null && hi !== null && t > hi) e.push('End is after the latest allowed date/time.');
+                if (f !== null && t !== null && t < f) e.push('End is before start.');
+                const n = this.nights(this.from, this.to);
+                if (n !== null && this.minNights !== null && n < this.minNights) e.push('Minimum ' + this.minNights + ' night' + this.plural(this.minNights) + '.');
+                if (n !== null && this.maxNights !== null && n > this.maxNights) e.push('Maximum ' + this.maxNights + ' night' + this.plural(this.maxNights) + '.');
+            } else {
+                const v = this.ms(this.date, this.time);
+                if (v !== null && lo !== null && v < lo) e.push('Before the earliest allowed date/time.');
+                if (v !== null && hi !== null && v > hi) e.push('After the latest allowed date/time.');
+            }
+            return e;
         },
+        get invalid() { return this.errors.length > 0; },
         get label() {
             if (this.mode === 'range') {
                 if (!this.from) return '';
@@ -101,10 +143,10 @@
 >
     @if ($name)
         @if ($isRange)
-            <input type="hidden" name="{{ $name }}[from]" :value="combined(from, timeFrom)">
-            <input type="hidden" name="{{ $name }}[to]" :value="combined(to, timeTo)">
+            <input type="hidden" name="{{ $name }}[from]" :value="combined(from, timeFrom)" :aria-invalid="invalid ? 'true' : null">
+            <input type="hidden" name="{{ $name }}[to]" :value="combined(to, timeTo)" :aria-invalid="invalid ? 'true' : null">
         @else
-            <input type="hidden" name="{{ $name }}" :value="combined(date, time)">
+            <input type="hidden" name="{{ $name }}" :value="combined(date, time)" :aria-invalid="invalid ? 'true' : null">
         @endif
     @endif
 
@@ -115,7 +157,8 @@
         aria-haspopup="dialog"
         :aria-expanded="open"
         :aria-controls="$id('blat-datetimepicker')"
-        :class="!label && 'text-muted-foreground'"
+        :aria-invalid="invalid ? 'true' : null"
+        :class="{ 'text-muted-foreground': !label }"
         class="{{ $width }} {{ $triggerCls }}"
     >
         <x-lucide-calendar class="size-4 opacity-50" aria-hidden="true" />
@@ -143,8 +186,10 @@
             :value="$isRange ? $calRange : $initDate"
             :caption-layout="$captionLayout"
             :week-start="$weekStart"
-            :min="$min"
-            :max="$max"
+            :number-of-months="$months"
+            :default-month="$defaultMonth"
+            :min="$minDate"
+            :max="$maxDate"
             class="rounded-none border-0"
         />
 
@@ -158,17 +203,27 @@
                     <span class="text-sm font-medium">End</span>
                     <x-ui.time-field part="to" :value="$toTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
                 </div>
-                <p x-show="invalid" x-cloak class="text-destructive text-xs" role="alert">End time is before start time.</p>
             @else
                 <div class="flex items-center justify-between gap-3">
                     <span class="text-sm font-medium">Time</span>
                     <x-ui.time-field :value="$initTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
                 </div>
             @endif
+
+            <template x-if="errors.length">
+                <ul class="flex flex-col gap-0.5" role="alert">
+                    <template x-for="msg in errors" :key="msg">
+                        <li class="text-destructive flex items-start gap-1 text-xs">
+                            <x-lucide-circle-alert class="mt-0.5 size-3 shrink-0" aria-hidden="true" />
+                            <span x-text="msg"></span>
+                        </li>
+                    </template>
+                </ul>
+            </template>
         </div>
 
         <div class="flex justify-end border-t p-3">
-            <x-ui.button type="button" size="sm" @click="open = false">Done</x-ui.button>
+            <x-ui.button type="button" size="sm" ::disabled="invalid" @click="open = false">Done</x-ui.button>
         </div>
     </div>
 </div>

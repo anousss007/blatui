@@ -3,6 +3,7 @@
 namespace BlatUI;
 
 use BlatUI\Console\Commands\AddCommand;
+use BlatUI\Console\Commands\DoctorCommand;
 use BlatUI\Console\Commands\InitCommand;
 use BlatUI\Console\Commands\ListCommand;
 use BlatUI\Console\Commands\McpCommand;
@@ -24,6 +25,7 @@ class BlatuiServiceProvider extends ServiceProvider
                 InitCommand::class,
                 ListCommand::class,
                 AddCommand::class,
+                DoctorCommand::class,
                 McpCommand::class,
             ]);
 
