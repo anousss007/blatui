@@ -485,6 +485,22 @@
             ]
         }
     },
+    "gallery": {
+        "name": "gallery",
+        "files": [
+            "gallery.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
+            ]
+        }
+    },
     "hover-card": {
         "name": "hover-card",
         "files": [
@@ -1051,6 +1067,19 @@
         "dependencies": [],
         "packages": {
             "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "video": {
+        "name": "video",
+        "files": [
+            "video.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
             ]
         }
