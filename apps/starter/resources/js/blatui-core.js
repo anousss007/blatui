@@ -1,0 +1,1170 @@
+import anchor from '@alpinejs/anchor';
+import focus from '@alpinejs/focus';
+import collapse from '@alpinejs/collapse';
+
+// ApexCharts is ~140kb gzipped — load it on demand (only on pages with charts)
+// instead of shipping it in the main bundle. Returns the constructor.
+let _apexPromise = null;
+function loadApex() {
+    if (window.ApexCharts) return Promise.resolve(window.ApexCharts);
+    if (!_apexPromise) {
+        _apexPromise = import('apexcharts').then((m) => {
+            window.ApexCharts = m.default || m;
+            return window.ApexCharts;
+        });
+    }
+    return _apexPromise;
+}
+
+// ---------------------------------------------------------------------------
+// Theme store — dark mode + color preset + radius, persisted to localStorage.
+// Mirrors the data-attributes that resources/css/app.css keys off of.
+// ---------------------------------------------------------------------------
+const themeStore = {
+    // Every dimension shadcn exposes, each persisted independently.
+    mode: localStorage.getItem('theme:mode') || 'system',
+    base: localStorage.getItem('theme:base') || 'neutral',
+    preset: localStorage.getItem('theme:preset') || 'default',
+    radius: localStorage.getItem('theme:radius') || '0.625',
+    font: localStorage.getItem('theme:font') || 'sans',
+    shadow: localStorage.getItem('theme:shadow') || 'default',
+    spacing: localStorage.getItem('theme:spacing') || 'default',
+    tracking: localStorage.getItem('theme:tracking') || 'normal',
+    inputStyle: localStorage.getItem('theme:inputStyle') || 'outline',
+    fontHeading: localStorage.getItem('theme:fontHeading') || 'sans',
+
+    init() {
+        this.apply();
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (this.mode === 'system') this.apply();
+        });
+        // Keep every same-origin document in sync (e.g. block-preview iframes):
+        // localStorage writes in one document fire a `storage` event in the others.
+        const defaults = { mode: 'system', base: 'neutral', preset: 'default', radius: '0.625', font: 'sans', shadow: 'default', spacing: 'default', tracking: 'normal', inputStyle: 'outline', fontHeading: 'sans' };
+        window.addEventListener('storage', (e) => {
+            if (!e.key || !e.key.startsWith('theme:')) return;
+            const key = e.key.slice('theme:'.length);
+            if (key in defaults) {
+                this[key] = e.newValue ?? defaults[key];
+                this.apply();
+            }
+        });
+    },
+
+    get isDark() {
+        return this.mode === 'dark' || (this.mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    },
+
+    set(key, value) {
+        this[key] = value;
+        localStorage.setItem('theme:' + key, value);
+        this.apply();
+    },
+
+    setMode(mode) { this.set('mode', mode); },
+    setBase(base) { this.set('base', base); },
+    setPreset(preset) { this.set('preset', preset); },
+    setRadius(radius) { this.set('radius', radius); },
+    setFont(font) { this.set('font', font); },
+    setShadow(shadow) { this.set('shadow', shadow); },
+    setSpacing(spacing) { this.set('spacing', spacing); },
+    setTracking(tracking) { this.set('tracking', tracking); },
+    setInputStyle(inputStyle) { this.set('inputStyle', inputStyle); },
+    setFontHeading(fontHeading) { this.set('fontHeading', fontHeading); },
+
+    toggle() {
+        this.setMode(this.isDark ? 'light' : 'dark');
+    },
+
+    reset() {
+        ['mode', 'base', 'preset', 'radius', 'font', 'shadow', 'spacing', 'tracking', 'inputStyle', 'fontHeading'].forEach((k) =>
+            localStorage.removeItem('theme:' + k),
+        );
+        this.mode = 'system';
+        this.base = 'neutral';
+        this.preset = 'default';
+        this.radius = '0.625';
+        this.font = 'sans';
+        this.shadow = 'default';
+        this.spacing = 'default';
+        this.tracking = 'normal';
+        this.inputStyle = 'outline';
+        this.fontHeading = 'sans';
+        this.apply();
+    },
+
+    apply() {
+        const root = document.documentElement;
+        root.classList.toggle('dark', this.isDark);
+        // Attributes only emitted when non-default, so :root keeps the defaults.
+        this.attr(root, 'data-base', this.base, 'neutral');
+        this.attr(root, 'data-theme', this.preset, 'default');
+        this.attr(root, 'data-font', this.font, 'sans');
+        this.attr(root, 'data-shadow', this.shadow, 'default');
+        this.attr(root, 'data-spacing', this.spacing, 'default');
+        this.attr(root, 'data-tracking', this.tracking, 'normal');
+        this.attr(root, 'data-input-style', this.inputStyle, 'outline');
+        this.attr(root, 'data-font-heading', this.fontHeading, 'sans');
+        root.setAttribute('data-radius', this.radius);
+    },
+
+    attr(root, name, value, fallback) {
+        if (value && value !== fallback) root.setAttribute(name, value);
+        else root.removeAttribute(name);
+    },
+};
+
+// ---------------------------------------------------------------------------
+// Toast helper — dispatches an event the <x-ui.sonner /> Toaster listens for.
+//   toast('Saved')                       → simple message
+//   toast({ title, description, type })  → full control (type: default|success|error|warning|info)
+// ---------------------------------------------------------------------------
+window.toast = (opts) => {
+    const detail = typeof opts === 'string' ? { title: opts } : (opts || {});
+    window.dispatchEvent(new CustomEvent('toast', { detail }));
+};
+['success', 'error', 'warning', 'info'].forEach((type) => {
+    window.toast[type] = (opts) => {
+        const detail = typeof opts === 'string' ? { title: opts } : (opts || {});
+        window.dispatchEvent(new CustomEvent('toast', { detail: { ...detail, type } }));
+    };
+});
+
+// ---------------------------------------------------------------------------
+// Charts — ApexCharts wrapper that mirrors shadcn's <ChartContainer>.
+//   * Resolves CSS-variable / oklch colors to concrete rgb() so ApexCharts'
+//     gradient + shade utilities work.
+//   * Re-renders on dark-mode / theme-preset / base-color changes.
+//   * Exposed as the Alpine component `shadcnChart` and composable helpers on
+//     window.Chart for bespoke blocks (e.g. the interactive dashboard chart).
+// ---------------------------------------------------------------------------
+const _colorProbe = document.createElement('span');
+_colorProbe.style.cssText = 'position:absolute;width:0;height:0;opacity:0;pointer-events:none;';
+const _colorCanvas = document.createElement('canvas').getContext('2d');
+
+// OKLCH → sRGB. shadcn v4 declares every token in oklch, and neither
+// getComputedStyle nor canvas reliably down-converts it, so we do it by hand.
+function oklchToRgb(str) {
+    const m = str.match(/oklch\(\s*([\d.]+%?)\s+([\d.]+%?)\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+%?))?\s*\)/i);
+    if (!m) return null;
+    const L = m[1].endsWith('%') ? parseFloat(m[1]) / 100 : parseFloat(m[1]);
+    const C = m[2].endsWith('%') ? (parseFloat(m[2]) / 100) * 0.4 : parseFloat(m[2]);
+    const H = parseFloat(m[3]);
+    const hr = (H * Math.PI) / 180;
+    const a = C * Math.cos(hr);
+    const b = C * Math.sin(hr);
+    const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+    const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+    const s_ = L - 0.0894841775 * a - 1.291485548 * b;
+    const l3 = l_ ** 3, m3 = m_ ** 3, s3 = s_ ** 3;
+    const lr = 4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3;
+    const lg = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3;
+    const lb = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3;
+    const g = (x) => (x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055);
+    const u = (x) => Math.round(Math.min(1, Math.max(0, g(x))) * 255);
+    const A = m[4] != null ? (m[4].endsWith('%') ? parseFloat(m[4]) / 100 : parseFloat(m[4])) : 1;
+    const [R, G, B] = [u(lr), u(lg), u(lb)];
+    return A < 1 ? `rgba(${R}, ${G}, ${B}, ${A})` : `rgb(${R}, ${G}, ${B})`;
+}
+
+// Canvas normalises hsl / named / lab / #hex to rgb.
+function toRenderColor(value) {
+    if (/^oklch/i.test(value)) return oklchToRgb(value) || value;
+    try {
+        _colorCanvas.fillStyle = '#000000';
+        _colorCanvas.fillStyle = value;
+        return _colorCanvas.fillStyle;
+    } catch (e) {
+        return value;
+    }
+}
+
+function resolveColor(value) {
+    if (Array.isArray(value)) return value.map(resolveColor);
+    if (typeof value !== 'string') return value;
+    if (!/var\(|oklch|oklab|hsl|color-mix|lab\(|lch\(|^#|^rgb/.test(value)) return value;
+    let v = value;
+    // Step 1: resolve CSS custom properties (var(--x)) to their computed value.
+    if (v.includes('var(')) {
+        if (!_colorProbe.isConnected) document.body.appendChild(_colorProbe);
+        _colorProbe.style.color = '';
+        _colorProbe.style.color = v;
+        v = getComputedStyle(_colorProbe).color || v;
+    }
+    // Step 2: normalise whatever color space we got to rgb for ApexCharts.
+    return toRenderColor(v);
+}
+
+function themeColor(name, fallback = '') {
+    const v = resolveColor(`var(${name})`);
+    return v || fallback;
+}
+
+function isDark() {
+    return document.documentElement.classList.contains('dark');
+}
+
+function isPlainObject(v) {
+    return v && typeof v === 'object' && !Array.isArray(v);
+}
+
+function deepMerge(target, source) {
+    const out = { ...target };
+    for (const key in source) {
+        if (isPlainObject(source[key]) && isPlainObject(out[key])) {
+            out[key] = deepMerge(out[key], source[key]);
+        } else {
+            out[key] = source[key];
+        }
+    }
+    return out;
+}
+
+// Recursively resolve any color-looking string leaves inside an options object.
+function resolveColorsDeep(obj) {
+    if (Array.isArray(obj)) return obj.map(resolveColorsDeep);
+    if (isPlainObject(obj)) {
+        const out = {};
+        for (const k in obj) out[k] = resolveColorsDeep(obj[k]);
+        return out;
+    }
+    if (typeof obj === 'string' && /var\(|oklch/.test(obj)) return resolveColor(obj);
+    return obj;
+}
+
+function chartBaseOptions() {
+    const muted = themeColor('--muted-foreground');
+    const border = themeColor('--border');
+    const card = themeColor('--popover');
+    return {
+        chart: {
+            fontFamily: 'inherit',
+            background: 'transparent',
+            toolbar: { show: false },
+            zoom: { enabled: false },
+            parentHeightOffset: 0,
+            animations: { enabled: true, speed: 350 },
+            redrawOnParentResize: true,
+        },
+        grid: {
+            borderColor: border,
+            strokeDashArray: 4,
+            xaxis: { lines: { show: false } },
+            padding: { left: 8, right: 8, top: 0, bottom: 0 },
+        },
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 2, lineCap: 'round' },
+        legend: {
+            fontSize: '12px',
+            labels: { colors: muted },
+            markers: { width: 8, height: 8, radius: 2 },
+            itemMargin: { horizontal: 8, vertical: 4 },
+        },
+        tooltip: {
+            theme: isDark() ? 'dark' : 'light',
+            style: { fontSize: '12px', fontFamily: 'inherit' },
+        },
+        xaxis: {
+            labels: { style: { colors: muted, fontSize: '12px', fontFamily: 'inherit' } },
+            axisBorder: { show: false },
+            axisTicks: { show: false },
+            crosshairs: { stroke: { color: border, dashArray: 0 } },
+        },
+        yaxis: {
+            labels: { style: { colors: muted, fontSize: '12px', fontFamily: 'inherit' } },
+        },
+        states: { hover: { filter: { type: 'lighten', value: 0.05 } } },
+        plotOptions: { bar: { borderRadius: 6, borderRadiusApplication: 'end' } },
+    };
+}
+
+function buildChartOptions(raw) {
+    const base = chartBaseOptions();
+    const top = {
+        chart: { type: raw.type || 'line', height: raw.height || 250 },
+        series: raw.series || [],
+        colors: resolveColor(raw.colors || []),
+    };
+    if (Array.isArray(raw.labels)) top.labels = raw.labels;
+    const merged = deepMerge(base, top);
+    return deepMerge(merged, resolveColorsDeep(raw.options || {}));
+}
+
+window.Chart = { resolveColor, themeColor, isDark, deepMerge, buildChartOptions, load: loadApex };
+
+function observeTheme(callback) {
+    let timer = null;
+    const obs = new MutationObserver(() => {
+        clearTimeout(timer);
+        timer = setTimeout(callback, 60);
+    });
+    obs.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'data-theme', 'data-base'],
+    });
+    return obs;
+}
+window.Chart.observeTheme = observeTheme;
+
+const shadcnChart = (raw = {}) => ({
+    _chart: null,
+    _raw: raw,
+    _obs: null,
+    _ready: false,
+    init() {
+        this.$nextTick(async () => {
+            if (!this.$refs.canvas) return;
+            const ApexCharts = await loadApex();
+            this._chart = new ApexCharts(this.$refs.canvas, buildChartOptions(this._raw));
+            await this._chart.render();
+            this._ready = true;
+            // Re-theme only AFTER the first render is committed.
+            this._obs = observeTheme(() => this._rerender());
+        });
+    },
+    _rerender() {
+        if (this._chart && this._ready) {
+            try {
+                this._chart.updateOptions(buildChartOptions(this._raw), false, false);
+            } catch (e) { /* ignore transient theme races */ }
+        }
+    },
+    setSeries(series) {
+        this._raw.series = series;
+        if (this._chart && this._ready) this._chart.updateSeries(series, true);
+    },
+    setRaw(patch) {
+        this._raw = deepMerge(this._raw, patch);
+        this._rerender();
+    },
+    destroy() {
+        if (this._chart) this._chart.destroy();
+        if (this._obs) this._obs.disconnect();
+    },
+});
+
+// ---------------------------------------------------------------------------
+// Calendar — Alpine day-picker mirroring shadcn/react-day-picker's <Calendar>.
+//   Supports: mode single|multiple|range, numberOfMonths, captionLayout
+//   label|dropdown, showWeekNumber, disabled matchers (array | {before,after,
+//   dayOfWeek}), min/max, required, startMonth/endMonth, disableNavigation,
+//   modifiers + modifier classNames, weekStart.
+// ---------------------------------------------------------------------------
+function _ymd(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function _parse(s) {
+    if (!s) return null;
+    if (s instanceof Date) return new Date(s.getFullYear(), s.getMonth(), s.getDate());
+    const p = String(s).split('-').map(Number);
+    return new Date(p[0], (p[1] || 1) - 1, p[2] || 1);
+}
+function _sameDay(a, b) { return a && b && _ymd(a) === _ymd(b); }
+function _addMonths(d, n) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
+
+const calendar = (cfg = {}) => ({
+    mode: cfg.mode || 'single',
+    locale: cfg.locale || 'en-US',
+    numberOfMonths: cfg.numberOfMonths || 1,
+    weekStart: cfg.weekStart || 0,
+    captionLayout: cfg.captionLayout || 'label',
+    showWeekNumber: !!cfg.showWeekNumber,
+    disableNavigation: !!cfg.disableNavigation,
+    minDays: cfg.min || null,
+    maxDays: cfg.max || null,
+    disabledCfg: cfg.disabled || null,
+    modifiers: cfg.modifiers || {},
+    modifiersClass: cfg.modifiersClass || {},
+    startMonth: null,
+    endMonth: null,
+    view: null,
+    weekdays: [],
+    // selection state
+    single: null,
+    multiple: [],
+    rangeFrom: null,
+    rangeTo: null,
+    hover: null,
+    focusedDate: null,
+
+    init() {
+        this.startMonth = cfg.startMonth ? _parse(cfg.startMonth) : null;
+        this.endMonth = cfg.endMonth ? _parse(cfg.endMonth) : null;
+        // seed selection
+        if (this.mode === 'single') this.single = cfg.value ? _parse(cfg.value) : null;
+        else if (this.mode === 'multiple') this.multiple = (cfg.value || []).map(_parse);
+        else if (this.mode === 'range') {
+            this.rangeFrom = cfg.value && cfg.value.from ? _parse(cfg.value.from) : null;
+            this.rangeTo = cfg.value && cfg.value.to ? _parse(cfg.value.to) : null;
+        }
+        // default month
+        let base = null;
+        if (cfg.defaultMonth) base = _parse(cfg.defaultMonth.length === 7 ? cfg.defaultMonth + '-01' : cfg.defaultMonth);
+        else base = this.single || this.rangeFrom || (this.multiple && this.multiple[0]) || this.startMonth || new Date();
+        this.view = new Date(base.getFullYear(), base.getMonth(), 1);
+        // Roving focus anchor for the grid (APG date-picker keyboard pattern).
+        this.focusedDate = this.single || this.rangeFrom || (this.multiple && this.multiple[0]) || new Date(base.getFullYear(), base.getMonth(), base.getDate());
+        // weekday headers
+        const ref = new Date(2023, 0, 1);
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(ref);
+            d.setDate(ref.getDate() + ((this.weekStart + i + 7 - ref.getDay()) % 7));
+            this.weekdays.push(d.toLocaleString(this.locale, { weekday: 'narrow' }));
+        }
+        // External "Today" hook (used by calendar-10 etc.)
+        window.addEventListener('calendar:today', () => {
+            const t = new Date();
+            this.view = new Date(t.getFullYear(), t.getMonth(), 1);
+            if (this.mode === 'single') { this.single = t; this.emit(_ymd(t)); }
+        });
+        // External "set date" hook (used by preset blocks, e.g. calendar-19).
+        // Detail may be a 'YYYY-MM-DD' string or a Date; single mode only.
+        window.addEventListener('calendar:set', (e) => {
+            const t = _parse(e.detail);
+            if (!t) return;
+            this.view = new Date(t.getFullYear(), t.getMonth(), 1);
+            if (this.mode === 'single') { this.single = t; this.emit(_ymd(t)); }
+        });
+    },
+
+    // ---- grid building ----
+    get months() {
+        return Array.from({ length: this.numberOfMonths }, (_, i) => _addMonths(this.view, i));
+    },
+    monthLabel(m) { return m.toLocaleString(this.locale, { month: 'long', year: 'numeric' }); },
+    weeksFor(m) {
+        const year = m.getFullYear(), month = m.getMonth();
+        const first = new Date(year, month, 1);
+        const offset = (first.getDay() - this.weekStart + 7) % 7;
+        const start = new Date(year, month, 1 - offset);
+        const weeks = [];
+        for (let w = 0; w < 6; w++) {
+            const days = [];
+            for (let d = 0; d < 7; d++) {
+                const day = new Date(start);
+                day.setDate(start.getDate() + w * 7 + d);
+                days.push(day);
+            }
+            weeks.push(days);
+        }
+        return weeks;
+    },
+    weekNumber(week) {
+        const d = new Date(week[0]);
+        d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+        const firstThu = new Date(d.getFullYear(), 0, 4);
+        return 1 + Math.round(((d - firstThu) / 86400000 - 3 + ((firstThu.getDay() + 6) % 7)) / 7);
+    },
+
+    // ---- predicates ----
+    isOutside(d, m) { return d.getMonth() !== m.getMonth(); },
+    isToday(d) { return _sameDay(d, new Date()); },
+    isDisabled(d) {
+        if (this.startMonth && d < new Date(this.startMonth.getFullYear(), this.startMonth.getMonth(), 1)) return true;
+        if (this.endMonth && d > new Date(this.endMonth.getFullYear(), this.endMonth.getMonth() + 1, 0)) return true;
+        const c = this.disabledCfg;
+        if (!c) return false;
+        if (Array.isArray(c)) return c.some((x) => _sameDay(_parse(x), d));
+        if (typeof c === 'object') {
+            if (c.before && d < _parse(c.before)) return true;
+            if (c.after && d > _parse(c.after)) return true;
+            if (c.dayOfWeek && c.dayOfWeek.includes(d.getDay())) return true;
+        }
+        return false;
+    },
+    isSelected(d) {
+        if (this.mode === 'single') return _sameDay(this.single, d);
+        if (this.mode === 'multiple') return this.multiple.some((x) => _sameDay(x, d));
+        return this.rangeIs(d).selected;
+    },
+    rangeIs(d) {
+        const from = this.rangeFrom, to = this.rangeTo || (this.rangeFrom && this.hover);
+        if (!from) return {};
+        const lo = to && to < from ? to : from;
+        const hi = to && to < from ? from : to;
+        const isStart = _sameDay(d, lo);
+        const isEnd = hi ? _sameDay(d, hi) : isStart;
+        const inMid = hi && d > lo && d < hi;
+        return { selected: isStart || isEnd || inMid, start: isStart, end: isEnd, middle: inMid };
+    },
+    modifierClass(d) {
+        let cls = '';
+        for (const name in this.modifiers) {
+            const list = this.modifiers[name] || [];
+            if (list.some((x) => _sameDay(_parse(x), d))) cls += ' ' + (this.modifiersClass[name] || '');
+        }
+        return cls;
+    },
+
+    // ---- interaction ----
+    select(d) {
+        if (this.isDisabled(d)) return;
+        if (this.mode === 'single') {
+            this.single = _sameDay(this.single, d) && !cfg.required ? null : d;
+            this.emit(this.single ? _ymd(this.single) : null);
+        } else if (this.mode === 'multiple') {
+            const i = this.multiple.findIndex((x) => _sameDay(x, d));
+            if (i >= 0) this.multiple.splice(i, 1);
+            else if (!this.maxDays || this.multiple.length < this.maxDays) this.multiple.push(d);
+            this.emit(this.multiple.map(_ymd));
+        } else {
+            if (!this.rangeFrom || (this.rangeFrom && this.rangeTo)) {
+                this.rangeFrom = d; this.rangeTo = null;
+            } else {
+                let from = this.rangeFrom, to = d;
+                if (to < from) [from, to] = [to, from];
+                const span = Math.round((to - from) / 86400000) + 1;
+                if (this.minDays && span < this.minDays) { this.rangeFrom = d; this.rangeTo = null; }
+                else if (this.maxDays && span > this.maxDays) { this.rangeFrom = d; this.rangeTo = null; }
+                else { this.rangeFrom = from; this.rangeTo = to; }
+            }
+            this.emit({ from: this.rangeFrom ? _ymd(this.rangeFrom) : null, to: this.rangeTo ? _ymd(this.rangeTo) : null });
+        }
+    },
+    emit(value) { this.$dispatch('calendar-change', value); },
+
+    // ---- navigation ----
+    get canPrev() {
+        if (this.disableNavigation) return false;
+        if (!this.startMonth) return true;
+        return _addMonths(this.view, -1) >= new Date(this.startMonth.getFullYear(), this.startMonth.getMonth(), 1);
+    },
+    get canNext() {
+        if (this.disableNavigation) return false;
+        if (!this.endMonth) return true;
+        return _addMonths(this.view, this.numberOfMonths) <= new Date(this.endMonth.getFullYear(), this.endMonth.getMonth(), 1);
+    },
+    prev() {
+        if (!this.canPrev) return;
+        this.view = _addMonths(this.view, -1);
+        this.focusedDate = new Date(this.focusedDate.getFullYear(), this.focusedDate.getMonth() - 1, this.focusedDate.getDate());
+    },
+    next() {
+        if (!this.canNext) return;
+        this.view = _addMonths(this.view, 1);
+        this.focusedDate = new Date(this.focusedDate.getFullYear(), this.focusedDate.getMonth() + 1, this.focusedDate.getDate());
+    },
+
+    // ---- grid roving focus + keyboard (APG date-picker dialog grid) ----
+    isFocused(d) { return _sameDay(d, this.focusedDate); },
+    dayLabel(d) {
+        const base = d.toLocaleDateString(this.locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        let label = this.isToday(d) ? 'Today, ' + base : base;
+        if (this.isSelected(d)) label += ', selected';
+        return label;
+    },
+    _viewContains(d) {
+        const start = new Date(this.view.getFullYear(), this.view.getMonth(), 1);
+        const end = new Date(this.view.getFullYear(), this.view.getMonth() + this.numberOfMonths, 0);
+        return d >= start && d <= end;
+    },
+    _focus(d) {
+        this.focusedDate = d;
+        if (!this._viewContains(d)) this.view = new Date(d.getFullYear(), d.getMonth(), 1);
+        // Use $root (not $el): when invoked from a day button's @keydown, $el is the
+        // button, but $root is always the calendar component element. Defer to a
+        // macrotask so the moved focus isn't reverted to the event target.
+        const key = _ymd(d);
+        setTimeout(() => {
+            const el = this.$root.querySelector('[data-day="' + key + '"]');
+            if (el) el.focus();
+        }, 0);
+    },
+    moveFocus(days) {
+        const d = new Date(this.focusedDate);
+        d.setDate(d.getDate() + days);
+        this._focus(d);
+    },
+    moveFocusMonths(n) {
+        const d = new Date(this.focusedDate);
+        d.setMonth(d.getMonth() + n);
+        this._focus(d);
+    },
+    focusWeekEdge(end) {
+        const d = new Date(this.focusedDate);
+        const offset = (d.getDay() - this.weekStart + 7) % 7;
+        d.setDate(d.getDate() + (end ? 6 - offset : -offset));
+        this._focus(d);
+    },
+    onDayKeydown(e, d) {
+        const k = e.key;
+        if (k === 'ArrowLeft') this.moveFocus(-1);
+        else if (k === 'ArrowRight') this.moveFocus(1);
+        else if (k === 'ArrowUp') this.moveFocus(-7);
+        else if (k === 'ArrowDown') this.moveFocus(7);
+        else if (k === 'Home') this.focusWeekEdge(false);
+        else if (k === 'End') this.focusWeekEdge(true);
+        else if (k === 'PageUp') this.moveFocusMonths(-1);
+        else if (k === 'PageDown') this.moveFocusMonths(1);
+        else if (k === 'Enter' || k === ' ') { this.select(d); this.focusedDate = d; }
+        else return;
+        e.preventDefault();
+    },
+
+    // ---- dropdown caption ----
+    get years() {
+        const start = this.startMonth ? this.startMonth.getFullYear() : new Date().getFullYear() - 100;
+        const end = this.endMonth ? this.endMonth.getFullYear() : new Date().getFullYear() + 10;
+        return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    },
+    get monthNames() {
+        return Array.from({ length: 12 }, (_, i) => new Date(2023, i, 1).toLocaleString(this.locale, { month: 'long' }));
+    },
+    setMonth(m) { this.view = new Date(this.view.getFullYear(), Number(m), 1); },
+    setYear(y) { this.view = new Date(Number(y), this.view.getMonth(), 1); },
+
+    // ---- form value helpers ----
+    fmt(d) { return d ? _ymd(d) : ''; },
+    get multipleValue() { return this.multiple.map(_ymd).join(','); },
+});
+
+// ---------------------------------------------------------------------------
+// Theme export — resolve the CURRENT customization (base color, accent, radius,
+// font, shadow, spacing, tracking) into a COMPLETE, self-contained
+// resources/css/app.css the user can paste as-is.
+//
+// We emit the full foundations scaffold (the Tailwind + tw-animate-css imports,
+// the @source globs and the @theme inline mapping) followed by the live
+// :root/.dark tokens. The @theme inline mapping is what turns the tokens into
+// utilities (bg-background, shadow-md, tracking-wide, …) — without it Tailwind
+// generates nothing and a pasted theme renders unstyled. The :root block also
+// carries every token the mapping references (spacing, fonts, shadows…), so
+// nothing resolves to `var(--undefined)`.
+//
+// NOTE: THEME_SCAFFOLD mirrors the head of resources/css/app.css. If you change
+// the @theme inline mapping or @source globs there, mirror them here too.
+// ---------------------------------------------------------------------------
+const THEME_SCAFFOLD = `@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../vendor/mallardduck/blade-lucide-icons/resources/svg/*.svg';
+@source '../../storage/framework/views/*.php';
+@source '../views';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    /* Fonts */
+    --font-sans: var(--font-sans);
+    --font-serif: var(--font-serif);
+    --font-mono: var(--font-mono);
+
+    /* Radius scale (derived from --radius) */
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+
+    /* Spacing base (every p-*, gap-*, w-*… derives from this) */
+    --spacing: var(--spacing);
+
+    /* Letter-spacing scale (derived from --tracking-normal) */
+    --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
+    --tracking-tight: calc(var(--tracking-normal) - 0.025em);
+    --tracking-normal: var(--tracking-normal);
+    --tracking-wide: calc(var(--tracking-normal) + 0.025em);
+    --tracking-wider: calc(var(--tracking-normal) + 0.05em);
+    --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+    /* Box-shadow scale */
+    --shadow-2xs: var(--shadow-2xs);
+    --shadow-xs: var(--shadow-xs);
+    --shadow-sm: var(--shadow-sm);
+    --shadow: var(--shadow);
+    --shadow-md: var(--shadow-md);
+    --shadow-lg: var(--shadow-lg);
+    --shadow-xl: var(--shadow-xl);
+    --shadow-2xl: var(--shadow-2xl);
+
+    /* Colors */
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+
+    --animate-caret-blink: caret-blink 1.25s ease-out infinite;
+
+    @keyframes caret-blink {
+        0%,
+        70%,
+        100% {
+            opacity: 1;
+        }
+        20%,
+        50% {
+            opacity: 0;
+        }
+    }
+}`;
+
+// Every token the @theme inline mapping references — all must land in :root so
+// the pasted file is fully self-contained.
+const THEME_TOKENS = [
+    // Geometry / rhythm
+    '--radius', '--spacing', '--tracking-normal',
+    // Fonts
+    '--font-sans', '--font-serif', '--font-mono',
+    // Shadows
+    '--shadow-2xs', '--shadow-xs', '--shadow-sm', '--shadow',
+    '--shadow-md', '--shadow-lg', '--shadow-xl', '--shadow-2xl',
+    // Colors
+    '--background', '--foreground',
+    '--card', '--card-foreground',
+    '--popover', '--popover-foreground',
+    '--primary', '--primary-foreground',
+    '--secondary', '--secondary-foreground',
+    '--muted', '--muted-foreground',
+    '--accent', '--accent-foreground',
+    '--destructive', '--destructive-foreground',
+    '--border', '--input', '--ring',
+    '--chart-1', '--chart-2', '--chart-3', '--chart-4', '--chart-5',
+    '--sidebar', '--sidebar-foreground', '--sidebar-primary', '--sidebar-primary-foreground',
+    '--sidebar-accent', '--sidebar-accent-foreground', '--sidebar-border', '--sidebar-ring',
+];
+
+function _readTokens() {
+    const cs = getComputedStyle(document.documentElement);
+    const out = {};
+    THEME_TOKENS.forEach((t) => {
+        const v = cs.getPropertyValue(t).trim();
+        if (v) out[t] = v;
+    });
+    return out;
+}
+
+window.exportTheme = function () {
+    const root = document.documentElement;
+    const wasDark = root.classList.contains('dark');
+    root.classList.remove('dark');
+    const light = _readTokens();
+    root.classList.add('dark');
+    const dark = _readTokens();
+    root.classList.toggle('dark', wasDark);
+    const fmt = (o, keys) => keys.filter((t) => o[t]).map((t) => `  ${t}: ${o[t]};`).join('\n');
+    // :root carries the full token set; .dark only overrides what actually differs.
+    const darkKeys = THEME_TOKENS.filter((t) => dark[t] && dark[t] !== light[t]);
+    return `${THEME_SCAFFOLD}\n\n:root {\n${fmt(light, THEME_TOKENS)}\n}\n\n.dark {\n${fmt(dark, darkKeys)}\n}\n`;
+};
+
+// ---------------------------------------------------------------------------
+// Accessibility primitives
+//
+// shadcn/ui inherits a flawless ARIA layer from Radix' `asChild` slot-merging:
+// the popup ARIA (haspopup/expanded/controls) lands on the *real* focusable
+// control, never on a wrapper. Our Blade triggers wrap a real <button> in a
+// `display:contents` span, so without help the ARIA would sit on the
+// non-focusable span. These directives port Radix' behaviour to Alpine.
+// ---------------------------------------------------------------------------
+
+// Find the genuine focusable control a trigger wrapper stands for. The wrapper
+// is usually a `display:contents` span whose first interactive descendant is the
+// actual <button>/<a>; fall back to the element itself when it is focusable.
+function resolveControl(el) {
+    const focusableSel = 'button, [href], input, select, textarea, [tabindex]';
+    if (el.matches(focusableSel) && el.getAttribute('tabindex') !== '-1') return el;
+    return (
+        el.querySelector('button:not([tabindex="-1"]), a[href]:not([tabindex="-1"]), input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])') ||
+        el.firstElementChild ||
+        el
+    );
+}
+
+let _blatId = 0;
+function ensureId(node, prefix = 'blat') {
+    if (!node.id) node.id = `${prefix}-${++_blatId}-${Math.random().toString(36).slice(2, 7)}`;
+    return node.id;
+}
+
+// x-blat-trigger="{ haspopup: 'menu', controls: $id('blat-content'), state: 'open' }"
+//   Mirrors disclosure/popup ARIA onto the real control inside the wrapper.
+//   `haspopup` → aria-haspopup (dialog|menu|listbox|tree|grid|true)
+//   `controls` → aria-controls (the popup content id)
+//   `state`    → reactive boolean expression for expanded state (default 'open')
+//   `labelledby`/`describedby` → static id refs (e.g. tooltip describing a trigger)
+function blatTriggerDirective(el, { expression }, { evaluate, effect }) {
+    const cfg = expression ? evaluate(expression) : {};
+    const control = resolveControl(el);
+    if (!control) return;
+    // For triggers whose slot may be plain text (tooltip/hover-card), make the
+    // resolved control keyboard-focusable when it isn't already.
+    if (cfg.focusable && !control.matches('button, a[href], input, select, textarea, [tabindex]')) {
+        control.tabIndex = 0;
+    }
+    if (cfg.id && !control.id) control.id = cfg.id;
+    if (cfg.haspopup) control.setAttribute('aria-haspopup', cfg.haspopup === true ? 'true' : cfg.haspopup);
+    if (cfg.controls) control.setAttribute('aria-controls', cfg.controls);
+    if (cfg.labelledby) control.setAttribute('aria-labelledby', cfg.labelledby);
+    if (cfg.describedby) control.setAttribute('aria-describedby', cfg.describedby);
+    if (cfg.state === null) return; // opt out of expanded tracking (plain tooltip/hovercard target)
+    const stateExpr = cfg.state || 'open';
+    effect(() => {
+        let open = false;
+        try {
+            open = !!evaluate(stateExpr);
+        } catch (e) {
+            /* state not yet in scope */
+        }
+        control.setAttribute('aria-expanded', open ? 'true' : 'false');
+        control.setAttribute('data-state', open ? 'open' : 'closed');
+    });
+}
+
+// x-blat-labelledby="{ label: '[data-slot=dialog-title]', description: '[data-slot=dialog-description]' }"
+//   Wires aria-labelledby / aria-describedby on a dialog/popover container from
+//   whichever title/description slots the author actually rendered (Radix does
+//   this through context; we resolve it from the DOM so absent slots add no
+//   dangling idref).
+function blatLabelledByDirective(el, { expression }, { evaluate }) {
+    const cfg = expression ? evaluate(expression) : {};
+    const wire = (sel, attr) => {
+        if (!sel) return;
+        const node = el.querySelector(sel);
+        if (node) el.setAttribute(attr, ensureId(node, 'blat-label'));
+    };
+    // Slots render synchronously inside the teleported content; a microtask is
+    // enough to let x-show/x-cloak settle without a visible reflow.
+    queueMicrotask(() => {
+        wire(cfg.label, 'aria-labelledby');
+        wire(cfg.description, 'aria-describedby');
+    });
+}
+
+// x-blat-field — wires a form field's control to its label/description/error:
+//   aria-describedby ← description + error ids, aria-invalid + data-invalid when
+//   an error is present, and label[for] ← control id when not already set. Radix/
+//   Base UI do this through React context; we resolve it from the rendered DOM.
+function blatFieldDirective(el) {
+    queueMicrotask(() => {
+        const control = el.querySelector(
+            'input:not([type=hidden]), textarea, select, [role="checkbox"], [role="switch"], [role="radiogroup"], [role="combobox"], [role="slider"], [role="spinbutton"]',
+        );
+        if (!control) return;
+        const ids = [];
+        const desc = el.querySelector('[data-slot="field-description"]');
+        const err = el.querySelector('[data-slot="field-error"]');
+        if (desc) ids.push(ensureId(desc, 'field-desc'));
+        if (err) ids.push(ensureId(err, 'field-err'));
+        if (ids.length) {
+            const prev = control.getAttribute('aria-describedby');
+            control.setAttribute('aria-describedby', [prev, ...ids].filter(Boolean).join(' '));
+        }
+        if (err) {
+            control.setAttribute('aria-invalid', 'true');
+            el.setAttribute('data-invalid', 'true');
+        }
+        const label = el.querySelector('[data-slot="field-label"]');
+        if (label && !label.getAttribute('for')) {
+            label.setAttribute('for', ensureId(control, 'field-control'));
+        }
+    });
+}
+
+// $blatNav(event[, opts]) — APG roving focus for composite widgets (menus,
+// listboxes, toolbars). Moves DOM focus among the matching items in response to
+// arrow / Home / End keys, wrapping by default. Does not change selection — that
+// is the widget's job. opts: { selector, orientation: 'vertical'|'horizontal'|
+// 'both', loop: true }.
+function blatNavMagic(el) {
+    return (e, opts = {}) => {
+        if (!e || !e.key) return;
+        const selector = opts.selector || '[role^="menuitem"], [role="option"]';
+        const orientation = opts.orientation || 'vertical';
+        const loop = opts.loop !== false;
+        const horiz = orientation === 'horizontal' || orientation === 'both';
+        const vert = orientation === 'vertical' || orientation === 'both';
+        const items = Array.from(el.querySelectorAll(selector)).filter(
+            (i) => i.offsetParent !== null && i.getAttribute('aria-disabled') !== 'true' && !i.hasAttribute('disabled'),
+        );
+        if (!items.length) return;
+        const cur = items.indexOf(document.activeElement);
+        // When the focus isn't already on one of the items, opt out (used by
+        // accordion, whose panels contain their own focusable content).
+        if (opts.requireMatch && cur < 0) return;
+        let idx = null;
+        if ((vert && e.key === 'ArrowDown') || (horiz && e.key === 'ArrowRight')) idx = cur < 0 ? 0 : cur + 1;
+        else if ((vert && e.key === 'ArrowUp') || (horiz && e.key === 'ArrowLeft')) idx = cur < 0 ? items.length - 1 : cur - 1;
+        else if (e.key === 'Home' || e.key === 'PageUp') idx = 0;
+        else if (e.key === 'End' || e.key === 'PageDown') idx = items.length - 1;
+        else return;
+        if (loop) idx = (idx + items.length) % items.length;
+        else idx = Math.max(0, Math.min(items.length - 1, idx));
+        const target = items[idx];
+        if (target) {
+            target.focus();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    };
+}
+
+// $blatType(event[, selector]) — APG typeahead for menus/listboxes. Buffers the
+// keys typed within 500ms and moves focus to the next matching item, wrapping.
+function blatTypeMagic(el) {
+    const DEFAULT = '[role^="menuitem"], [role="option"], [role="menuitemradio"], [role="menuitemcheckbox"]';
+    return (e, selector = DEFAULT) => {
+        if (!e || e.key == null || e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) return;
+        const items = Array.from(el.querySelectorAll(selector)).filter(
+            (i) => !i.hasAttribute('disabled') && i.getAttribute('aria-disabled') !== 'true' && i.offsetParent !== null,
+        );
+        if (!items.length) return;
+        el._blatBuf = (el._blatBuf || '') + e.key.toLowerCase();
+        clearTimeout(el._blatBufT);
+        el._blatBufT = setTimeout(() => (el._blatBuf = ''), 500);
+        const start = items.indexOf(document.activeElement);
+        const ordered = items.slice(start + 1).concat(items.slice(0, start + 1));
+        const match = ordered.find((i) => (i.textContent || '').trim().toLowerCase().startsWith(el._blatBuf));
+        if (match) {
+            match.focus();
+            e.preventDefault();
+        }
+    };
+}
+
+// blatMenu — shared disclosure + roving-focus engine for menu widgets
+// (dropdown-menu, context-menu). Mirrors the WAI-ARIA menu-button pattern:
+//   * openMenu('first'|'last'|undefined) — open and place focus (a keyboard open
+//     lands on the first/last item; a pointer open lands on the menu container).
+//   * closeMenu(returnFocus) — close and (by default) restore focus to trigger.
+// Item-to-item arrow navigation is handled by $blatNav on the content element;
+// this object owns open state + initial/closing focus only.
+const blatMenu = (config = {}) => ({
+    open: config.open ?? false,
+    x: 0,
+    y: 0,
+    _menu: null,
+    _trigger: null,
+    // Context-menu entry point: open at the pointer position with first item focused.
+    openAt(ev) {
+        if (ev) {
+            ev.preventDefault();
+            this.x = ev.clientX;
+            this.y = ev.clientY;
+            this._trigger = ev.currentTarget || this._trigger;
+        }
+        this.openMenu('first');
+    },
+    get _items() {
+        if (!this._menu) return [];
+        return Array.from(this._menu.querySelectorAll('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')).filter(
+            (i) => i.getAttribute('aria-disabled') !== 'true' && !i.hasAttribute('disabled') && i.offsetParent !== null,
+        );
+    },
+    openMenu(focus) {
+        this.open = true;
+        this.$nextTick(() => {
+            if (!this._menu) return;
+            const items = this._items;
+            if (focus === 'first') (items[0] || this._menu).focus();
+            else if (focus === 'last') (items[items.length - 1] || this._menu).focus();
+            else this._menu.focus();
+        });
+    },
+    toggleMenu() {
+        this.open ? this.closeMenu(false) : this.openMenu();
+    },
+    closeMenu(returnFocus = true) {
+        if (!this.open) return;
+        this.open = false;
+        if (returnFocus && this._trigger) this.$nextTick(() => this._trigger.focus());
+    },
+});
+
+// blatMenubar — WAI-ARIA menubar engine. Triggers share one `active` (the open
+// menu's id) and a roving tabindex (`rovingId`); ArrowLeft/Right move between
+// triggers (and switch the open menu when one is open); Down/Enter open a menu
+// with its first item focused. Each menu's content keys off `active === id`.
+const blatMenubar = () => ({
+    active: null,
+    rovingId: null,
+    triggers: [],
+    register(id, el) {
+        this.triggers.push({ id, el });
+        if (this.rovingId === null) this.rovingId = id;
+    },
+    _idx(id) {
+        return this.triggers.findIndex((t) => t.id === id);
+    },
+    _items(id) {
+        const m = document.getElementById(id);
+        return m
+            ? Array.from(m.querySelectorAll('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')).filter(
+                  (x) => x.getAttribute('aria-disabled') !== 'true' && x.offsetParent !== null,
+              )
+            : [];
+    },
+    focusTrigger(id) {
+        const t = this.triggers.find((x) => x.id === id);
+        if (t) {
+            this.rovingId = id;
+            t.el.focus();
+        }
+    },
+    openMenu(id, focusFirst = true) {
+        this.active = id;
+        this.rovingId = id;
+        if (focusFirst) this.$nextTick(() => (this._items(id)[0] || document.getElementById(id))?.focus());
+    },
+    toggleMenu(id) {
+        this.active === id ? this.closeMenu(false) : this.openMenu(id);
+    },
+    moveTrigger(dir, fromId) {
+        if (!this.triggers.length) return;
+        const i = this._idx(fromId);
+        if (i < 0) return;
+        const next = this.triggers[(i + dir + this.triggers.length) % this.triggers.length].id;
+        this.active !== null ? this.openMenu(next) : this.focusTrigger(next);
+    },
+    closeMenu(returnFocus = true) {
+        const id = this.active;
+        this.active = null;
+        if (returnFocus && id) this.focusTrigger(id);
+    },
+});
+
+// blatSelect — WAI-ARIA listbox/combobox engine for the <Select>. Opening focuses
+// the selected option (or the first); arrow/typeahead navigation is handled by
+// $blatNav/$blatType on the listbox; Enter/Space on a focused option selects and
+// closes, restoring focus to the trigger.
+const blatSelect = (config = {}) => ({
+    open: false,
+    value: config.value != null ? String(config.value) : '',
+    label: '',
+    _list: null,
+    _trigger: null,
+    get _options() {
+        return this._list
+            ? Array.from(this._list.querySelectorAll('[role="option"]')).filter(
+                  (o) => o.getAttribute('aria-disabled') !== 'true' && o.offsetParent !== null,
+              )
+            : [];
+    },
+    openList() {
+        this.open = true;
+        this.$nextTick(() => {
+            if (!this._list) return;
+            const opts = this._options;
+            (opts.find((o) => o.dataset.value === this.value) || opts[0] || this._list).focus();
+        });
+    },
+    toggleList() {
+        this.open ? this.close(false) : this.openList();
+    },
+    close(returnFocus = true) {
+        if (!this.open) return;
+        this.open = false;
+        if (returnFocus && this._trigger) this.$nextTick(() => this._trigger.focus());
+    },
+    selectOption(val, lbl) {
+        this.value = String(val);
+        this.label = lbl;
+        this.close();
+    },
+});
+
+// blatCommand — command-palette engine implementing the editable-combobox +
+// listbox APG pattern with aria-activedescendant. Focus stays on the input; the
+// "active" option is tracked by id and exposed via aria-activedescendant, moved
+// with Arrow/Home/End, and triggered with Enter. Items register themselves and
+// filter on the query.
+const blatCommand = () => ({
+    query: '',
+    activeId: null,
+    _entries: [],
+    registerItem(el, keyword, disabled) {
+        const id = ensureId(el, 'blat-cmd-item');
+        this._entries.push({ id, el, keyword: (keyword || '').toLowerCase(), disabled: !!disabled });
+        return id;
+    },
+    matches(kw) {
+        return (kw || '').toLowerCase().includes(this.query.toLowerCase());
+    },
+    get _visible() {
+        return this._entries.filter((i) => !i.disabled && this.matches(i.keyword) && i.el.offsetParent !== null);
+    },
+    get visibleCount() {
+        return this._entries.filter((i) => this.matches(i.keyword)).length;
+    },
+    ensureActive() {
+        const vis = this._visible;
+        if (!vis.length) {
+            this.activeId = null;
+        } else if (!vis.some((i) => i.id === this.activeId)) {
+            this.activeId = vis[0].id;
+        }
+    },
+    move(dir) {
+        const vis = this._visible;
+        if (!vis.length) return;
+        let idx = vis.findIndex((i) => i.id === this.activeId);
+        idx = idx < 0 ? (dir > 0 ? 0 : vis.length - 1) : (idx + dir + vis.length) % vis.length;
+        this.activeId = vis[idx].id;
+        vis[idx].el.scrollIntoView({ block: 'nearest' });
+    },
+    edge(pos) {
+        const vis = this._visible;
+        if (!vis.length) return;
+        const it = pos === 'last' ? vis[vis.length - 1] : vis[0];
+        this.activeId = it.id;
+        it.el.scrollIntoView({ block: 'nearest' });
+    },
+    selectActive() {
+        const it = this._entries.find((i) => i.id === this.activeId);
+        if (it && !it.disabled) it.el.click();
+    },
+});
+
+// ---------------------------------------------------------------------------
+// Register every BlatUI Alpine piece — plugins, the theme store, the chart +
+// calendar components and the a11y primitives — into an Alpine instance.
+// Call this BEFORE Alpine.start().
+//
+//   Greenfield (no Alpine yet): the published blatui.js does this for you.
+//   Existing Alpine app:        import { registerBlatUI } from './blatui-core.js'
+//                               and call registerBlatUI(Alpine) before your start.
+// ---------------------------------------------------------------------------
+export function registerBlatUI(Alpine) {
+    Alpine.plugin(anchor);
+    Alpine.plugin(focus);
+    Alpine.plugin(collapse);
+    Alpine.store('theme', themeStore);
+    Alpine.data('shadcnChart', shadcnChart);
+    Alpine.data('calendar', calendar);
+    Alpine.data('blatMenu', blatMenu);
+    Alpine.data('blatMenubar', blatMenubar);
+    Alpine.data('blatSelect', blatSelect);
+    Alpine.data('blatCommand', blatCommand);
+    Alpine.directive('blat-trigger', blatTriggerDirective);
+    Alpine.directive('blat-labelledby', blatLabelledByDirective);
+    Alpine.directive('blat-field', blatFieldDirective);
+    Alpine.magic('blatNav', blatNavMagic);
+    Alpine.magic('blatType', blatTypeMagic);
+}
