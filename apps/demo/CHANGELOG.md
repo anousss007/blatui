@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-06-08
+
+AI-native distribution + a theme editor + new templates.
+
+### Added
+- **Registry distribution** (shadcn-compatible): `/registry.json`, per-item
+  `/r/{name}.json` and `/r/blocks|charts/{name}.json` with the Blade source
+  inlined and absolute `registryDependencies` URLs, so the official shadcn CLI
+  (`npx shadcn add <url>`) and the BlatUI CLI can both install components.
+- **AI discoverability / agent readiness**: `/llms.txt` + `/llms-full.txt`; a
+  hosted MCP server at `POST /mcp` (tools, resources, prompts); `.well-known`
+  cards (MCP server card, A2A agent card, agent skills, RFC 9727 API catalogue);
+  `/openapi.json`; markdown content negotiation; discovery `Link` headers;
+  `robots.txt` AI-bot rules + Content-Signal; SoftwareApplication JSON-LD;
+  a WebMCP shim; and a DNS-AID record. Reaches **level 5 "Agent-Native"** on
+  isitagentready.com.
+- **Theme editor** at `/themes` — live preview, import/export JSON and shareable
+  `?t=` theme links, built on the existing customizer.
+- **Templates**: a `marketing-01` landing page and a `pricing-01` page.
+- **MCP guide** at `/docs/mcp`.
+
+### Fixed
+- The registry index now builds in O(n) (memoized `BlatuiRegistry`), so
+  `/registry.json` no longer times out under load.
+
 ## [1.3.0] - 2026-06-05
 
 Competitive parity pass — every component's example coverage expanded, a real-world
