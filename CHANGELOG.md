@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-06-08
+
+### Changed
+- **Charts are now opt-in.** ApexCharts (~140kb) and the chart engine are no
+  longer part of the base foundation, so apps that only use components never
+  install or bundle them — and `npm run build` no longer requires `apexcharts`.
+  The base `blatui.js` / `blatui-core.js` ship the components engine only. To
+  use `<x-ui.chart>`:
+
+  ```
+  php artisan blatui:add chart
+  npm install -D apexcharts
+  php artisan vendor:publish --tag=blatui-charts
+  ```
+
+  then register it in `app.js`, before `Alpine.start()`:
+
+  ```js
+  import { registerCharts } from './blatui-charts.js';
+  registerCharts(Alpine);
+  ```
+
+  The `chart` component now declares `apexcharts` as its npm dependency, and a
+  new `blatui-charts` publish tag ships the opt-in engine. Existing installs are
+  unaffected until you re-publish the foundations.
+
 ## [1.4.0] - 2026-06-08
 
 ### Added

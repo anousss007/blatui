@@ -197,6 +197,9 @@
         "packages": {
             "composer": [
                 "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "apexcharts"
             ]
         }
     },

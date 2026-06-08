@@ -27,15 +27,23 @@ class BlatuiServiceProvider extends ServiceProvider
                 McpCommand::class,
             ]);
 
-            // Foundations: theme tokens (CSS) + Alpine/chart/calendar engine (JS).
+            // Foundations: theme tokens (CSS) + the Alpine/calendar engine (JS).
             // blatui.js is the greenfield bootstrap; blatui-core.js is the engine
             // (exports registerBlatUI) for apps that already run their own Alpine.
+            // Components only — charts are NOT included here.
             // php artisan vendor:publish --tag=blatui-foundations
             $this->publishes([
                 dirname(__DIR__).'/stubs/foundations/app.css' => resource_path('css/blatui.css'),
                 dirname(__DIR__).'/stubs/foundations/app.js' => resource_path('js/blatui.js'),
                 dirname(__DIR__).'/stubs/foundations/blatui-core.js' => resource_path('js/blatui-core.js'),
             ], 'blatui-foundations');
+
+            // Opt-in chart engine (exports registerCharts). Only needed by apps
+            // that use <x-ui.chart>; pulls in ApexCharts (~140kb, lazy-loaded).
+            // php artisan vendor:publish --tag=blatui-charts
+            $this->publishes([
+                dirname(__DIR__).'/stubs/foundations/blatui-charts.js' => resource_path('js/blatui-charts.js'),
+            ], 'blatui-charts');
         }
     }
 }

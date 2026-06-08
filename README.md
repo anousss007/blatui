@@ -40,7 +40,7 @@ composer require blatui/blatui
 
 # 2. Peer packages used by the components
 composer require gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons
-npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts
+npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus
 
 # 3. Publish the foundations (theme tokens + Alpine/chart/calendar engine)
 php artisan vendor:publish --tag=blatui-foundations
