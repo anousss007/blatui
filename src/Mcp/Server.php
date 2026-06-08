@@ -41,6 +41,11 @@ class Server
                 'initialize' => $this->initialize(),
                 'tools/list' => $this->toolsList(),
                 'tools/call' => $this->toolsCall($message['params'] ?? []),
+                'resources/list' => $this->resourcesList(),
+                'resources/templates/list' => $this->resourceTemplates(),
+                'resources/read' => $this->resourceRead($message['params'] ?? []),
+                'prompts/list' => $this->promptsList(),
+                'prompts/get' => $this->promptsGet($message['params'] ?? []),
                 'ping' => (object) [],
                 default => throw new McpError(-32601, "Method not found: {$method}"),
             };
@@ -61,7 +66,11 @@ class Server
     {
         return [
             'protocolVersion' => self::PROTOCOL_VERSION,
-            'capabilities' => ['tools' => (object) []],
+            'capabilities' => [
+                'tools' => (object) [],
+                'resources' => (object) [],
+                'prompts' => (object) [],
+            ],
             'serverInfo' => ['name' => 'blatui', 'version' => $this->version],
             'instructions' => 'BlatUI is shadcn/ui for Laravel Blade (Blade, Alpine.js, Tailwind v4). '
                 .'Use search_registry to find components/blocks/charts, get_component to read a '
@@ -288,6 +297,107 @@ class Server
         }
 
         return implode("\n", $lines);
+    }
+
+    // ---------------------------------------------------------------------
+    // Resources + prompts
+    // ---------------------------------------------------------------------
+
+    protected function resourcesList(): array
+    {
+        $resources = [];
+        foreach ($this->client->itemsOfType('registry:ui') as $i) {
+            $resources[] = array_filter([
+                'uri' => 'blatui://component/'.$i['name'],
+                'name' => $i['title'] ?? $i['name'],
+                'description' => $i['description'] ?? null,
+                'mimeType' => 'text/plain',
+            ], fn ($v) => $v !== null);
+        }
+
+        return ['resources' => $resources];
+    }
+
+    protected function resourceTemplates(): array
+    {
+        return ['resourceTemplates' => [
+            ['uriTemplate' => 'blatui://component/{name}', 'name' => 'BlatUI component', 'description' => 'Blade source of a component family', 'mimeType' => 'text/plain'],
+            ['uriTemplate' => 'blatui://block/{name}', 'name' => 'BlatUI block', 'description' => 'Full-page block example', 'mimeType' => 'text/plain'],
+            ['uriTemplate' => 'blatui://chart/{name}', 'name' => 'BlatUI chart', 'description' => 'Chart example', 'mimeType' => 'text/plain'],
+        ]];
+    }
+
+    /** @param array<string, mixed> $params */
+    protected function resourceRead(array $params): array
+    {
+        $uri = (string) ($params['uri'] ?? '');
+        if (! preg_match('#^blatui://(component|block|chart)/([a-z0-9-]+)$#', $uri, $m)) {
+            throw new McpError(-32602, "Unknown resource: {$uri}");
+        }
+
+        $item = $m[1] === 'component' ? $this->client->component($m[2]) : $this->client->example($m[1], $m[2]);
+        if ($item === null) {
+            throw new McpError(-32602, "Resource not found: {$uri}");
+        }
+
+        $text = '';
+        foreach ($item['files'] ?? [] as $f) {
+            $text .= ($f['target'] ?? '')."\n".($f['content'] ?? '')."\n\n";
+        }
+
+        return ['contents' => [['uri' => $uri, 'mimeType' => 'text/plain', 'text' => rtrim($text)]]];
+    }
+
+    protected function promptsList(): array
+    {
+        return ['prompts' => [
+            [
+                'name' => 'use-component',
+                'description' => 'Insert a BlatUI component with its source and install command.',
+                'arguments' => [['name' => 'name', 'description' => 'Component slug (e.g. button, dialog).', 'required' => true]],
+            ],
+            [
+                'name' => 'scaffold-page',
+                'description' => 'Scaffold a full page from BlatUI blocks (dashboard, login, signup, marketing, pricing).',
+                'arguments' => [['name' => 'kind', 'description' => 'dashboard | login | signup | marketing | pricing', 'required' => true]],
+            ],
+        ]];
+    }
+
+    /** @param array<string, mixed> $params */
+    protected function promptsGet(array $params): array
+    {
+        $name = (string) ($params['name'] ?? '');
+        $args = $params['arguments'] ?? [];
+
+        if ($name === 'use-component') {
+            $slug = (string) ($args['name'] ?? '');
+            $item = $this->client->component($slug);
+            $body = $item
+                ? $this->renderItem($item, 'php artisan blatui:add '.$slug)
+                : "Component '{$slug}' not found — use the list_components tool to discover names.";
+
+            return [
+                'description' => "Use the BlatUI {$slug} component",
+                'messages' => [['role' => 'user', 'content' => ['type' => 'text',
+                    'text' => "Add the BlatUI \"{$slug}\" component to my Laravel Blade app and use it. Source + install:\n\n".$body]]],
+            ];
+        }
+
+        if ($name === 'scaffold-page') {
+            $kind = (string) ($args['kind'] ?? 'dashboard');
+            $base = $this->client->base();
+
+            return [
+                'description' => "Scaffold a {$kind} page with BlatUI",
+                'messages' => [['role' => 'user', 'content' => ['type' => 'text',
+                    'text' => "Build a {$kind} page for my Laravel app using BlatUI blocks. Browse {$base}/blocks for {$kind}-* examples, "
+                        ."fetch the chosen block from {$base}/r/blocks/<name>.json (write each files[].content to files[].target), "
+                        .'run `php artisan blatui:add` for its registryDependencies, then adapt the content to my app.']]],
+            ];
+        }
+
+        throw new McpError(-32602, "Unknown prompt: {$name}");
     }
 
     // ---------------------------------------------------------------------

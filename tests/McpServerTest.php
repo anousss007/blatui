@@ -96,4 +96,40 @@ class McpServerTest extends TestCase
         $text = $this->callTool($this->server(), 'search_registry', ['query' => 'accordion']);
         $this->assertStringContainsString('accordion', $text);
     }
+
+    public function test_initialize_advertises_resources_and_prompts(): void
+    {
+        $res = $this->server()->handle(['jsonrpc' => '2.0', 'id' => 1, 'method' => 'initialize']);
+
+        $this->assertArrayHasKey('resources', $res['result']['capabilities']);
+        $this->assertArrayHasKey('prompts', $res['result']['capabilities']);
+    }
+
+    public function test_resources_list_and_read_offline(): void
+    {
+        $server = $this->server();
+
+        $list = $server->handle(['jsonrpc' => '2.0', 'id' => 1, 'method' => 'resources/list']);
+        $this->assertContains('blatui://component/button', array_column($list['result']['resources'], 'uri'));
+
+        $read = $server->handle([
+            'jsonrpc' => '2.0', 'id' => 2, 'method' => 'resources/read',
+            'params' => ['uri' => 'blatui://component/button'],
+        ]);
+        $this->assertStringContainsString('@props', $read['result']['contents'][0]['text']);
+    }
+
+    public function test_prompts_list_and_get_offline(): void
+    {
+        $server = $this->server();
+
+        $list = $server->handle(['jsonrpc' => '2.0', 'id' => 1, 'method' => 'prompts/list']);
+        $this->assertContains('use-component', array_column($list['result']['prompts'], 'name'));
+
+        $get = $server->handle([
+            'jsonrpc' => '2.0', 'id' => 2, 'method' => 'prompts/get',
+            'params' => ['name' => 'use-component', 'arguments' => ['name' => 'button']],
+        ]);
+        $this->assertStringContainsString('blatui:add button', $get['result']['messages'][0]['content']['text']);
+    }
 }
