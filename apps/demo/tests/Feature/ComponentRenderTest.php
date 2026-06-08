@@ -163,14 +163,21 @@ class ComponentRenderTest extends TestCase
         $this->assertStringContainsString('minNights: 3', $html);
     }
 
+    public function test_calendar_week_start_accepts_name_or_int(): void
+    {
+        // Extract the weekStart value from the cfg JSON, independent of quote-escaping.
+        $grab = fn (string $html): ?string => preg_match('/weekStart.{0,12}?(\d)(?=[,}])/', $html, $m) ? $m[1] : null;
+
+        $this->assertSame('0', $grab($this->render('<x-ui.calendar />')));                    // Sunday default
+        $this->assertSame('1', $grab($this->render('<x-ui.calendar week-start="monday" />'))); // name resolves to 1
+        $this->assertSame('1', $grab($this->render('<x-ui.date-picker :week-start="1" />')));  // forwarded by the picker
+    }
+
     public function test_calendar_can_hide_outside_days(): void
     {
-        // Default keeps outside days (no invisible toggle on the day cells).
-        $this->assertStringNotContainsString('invisible pointer-events-none', $this->render('<x-ui.calendar />'));
-        // show-outside-days="false" hides outside day cells and collapses all-outside rows.
-        $off = $this->render('<x-ui.date-picker :show-outside-days="false" />');
-        $this->assertStringContainsString('invisible pointer-events-none', $off);
-        $this->assertStringContainsString('week.every', $off);
+        // show-outside-days="false" flags the root; CSS hides outside day cells + collapses all-outside rows.
+        $this->assertStringNotContainsString('data-hide-outside-days', $this->render('<x-ui.calendar />'));
+        $this->assertStringContainsString('data-hide-outside-days', $this->render('<x-ui.date-picker :show-outside-days="false" />'));
     }
 
     /** Anchored popovers teleport to <body> so an overflow-hidden ancestor never clips them. */

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.4] - 2026-06-08
+
+### Fixed
+- **`show-outside-days="false"` works correctly** (1.6.3's Alpine-expression version broke the
+  grid). Reworked to pure CSS (`data-hide-outside-days` + `:has()`): hides prev/next-month days
+  and collapses fully-outside week rows.
+- **Disabled days are clearly distinct** — out-of-range days (with `min`/`max`) now render
+  struck-through and fainter, vs. just slightly muted before.
+
+### Added
+- **`week-start` accepts a day name** (`"monday"`) as well as `0–6` (0 = Sunday).
+
 ## [1.6.3] - 2026-06-08
 
 ### Added

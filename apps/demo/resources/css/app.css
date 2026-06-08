@@ -1441,3 +1441,14 @@
 [dir='rtl'] .blat-rtl-flip {
     transform: scaleX(-1);
 }
+
+/* Calendar: <x-ui.calendar show-outside-days="false"> hides prev/next-month filler days and
+   collapses any week row that is entirely outside the current month. Keys off the
+   data-day / data-outside attributes the calendar already sets on each day button. */
+[data-hide-outside-days] button[data-day][data-outside] {
+    visibility: hidden;
+    pointer-events: none;
+}
+[data-hide-outside-days] tbody tr:not(:has(button[data-day]:not([data-outside]))) {
+    display: none;
+}
