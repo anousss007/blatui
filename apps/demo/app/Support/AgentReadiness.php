@@ -74,6 +74,11 @@ class AgentReadiness
             'description' => $this->brand()['description'],
             'url' => $this->base().'/mcp',
             'preferredTransport' => 'JSONRPC',
+            // A2A discovery: each interface carries a service URL + transport.
+            'supportedInterfaces' => [
+                ['url' => $this->base().'/mcp', 'transport' => 'JSONRPC'],
+                ['url' => $this->base().'/mcp', 'transport' => 'HTTP+JSON'],
+            ],
             'version' => 'latest',
             'provider' => [
                 'organization' => $this->brand()['name'],

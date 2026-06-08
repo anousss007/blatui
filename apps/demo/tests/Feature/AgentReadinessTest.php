@@ -25,6 +25,10 @@ class AgentReadinessTest extends TestCase
         $res->assertOk();
         $res->assertJsonPath('name', 'BlatUI');
         $this->assertNotEmpty($res->json('skills'));
+        // A2A discovery requires interfaces with a service URL + transport.
+        $this->assertNotEmpty($res->json('supportedInterfaces'));
+        $this->assertStringEndsWith('/mcp', $res->json('supportedInterfaces.0.url'));
+        $this->assertNotEmpty($res->json('supportedInterfaces.0.transport'));
     }
 
     public function test_agent_skills_index_and_skill_markdown(): void
