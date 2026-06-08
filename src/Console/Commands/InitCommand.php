@@ -133,6 +133,35 @@ class InitCommand extends Command
 
         $this->line('  '.count($registry->families()).' components available — see <fg=green>php artisan blatui:list</>');
 
+        $this->offerBoostIntegration($composer);
+
         return self::SUCCESS;
+    }
+
+    /**
+     * BlatUI ships Laravel Boost guidelines + a "blatui-development" skill under
+     * resources/boost/. Boost only picks them up when the user runs
+     * boost:update --discover, so — if Boost is installed — offer to run it now,
+     * teaching their AI agent how to use BlatUI right after setup.
+     */
+    protected function offerBoostIntegration(string $composer): void
+    {
+        if (! str_contains($composer, 'laravel/boost')) {
+            return;
+        }
+
+        $this->newLine();
+        $this->components->info('Laravel Boost detected — BlatUI ships AI guidelines + a "blatui-development" skill.');
+
+        $canUpdate = (bool) $this->getApplication()?->has('boost:update');
+
+        if ($canUpdate && $this->input->isInteractive()
+            && $this->confirm('Load BlatUI into your AI agent now? (runs boost:update --discover)', true)) {
+            $this->call('boost:update', ['--discover' => true]);
+
+            return;
+        }
+
+        $this->line('    <fg=yellow>php artisan boost:update --discover</> — loads BlatUI guidelines + skill into your agent');
     }
 }
