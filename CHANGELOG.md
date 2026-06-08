@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-06-08
+
+### Added
+- **MCP server** — `php artisan blatui:mcp` runs a stdio Model Context Protocol
+  server so AI editors (Claude Code, Cursor, VS Code…) can discover and install
+  components in conversation. Tools: `search_registry`, `list_components`,
+  `get_component`, `get_example`, `install_command`; resources
+  (`blatui://component|block|chart/{name}`) and prompts (`use-component`,
+  `scaffold-page`). Works offline from the bundled stubs. No new dependencies.
+- **Open registry** — `blatui:add` can now install from third-party,
+  shadcn-compatible registries by namespace (`@vendor/name`) or full URL,
+  resolving `registryDependencies` recursively with a local-stub fallback.
+  Configure namespaces in the publishable `config/blatui.php`.
+- **Laravel Boost integration** — the package ships
+  `resources/boost/guidelines/core.blade.php` and a `blatui-development` agent
+  skill, auto-discovered by Boost so AI agents learn BlatUI's conventions.
+  `blatui:init` detects Boost and offers to run `boost:update --discover`.
+
 ### Removed
 - The unused `tw-animate-css` npm dependency. Components animate via Alpine
   `x-transition`, so the published foundation (`blatui.css`) no longer imports
