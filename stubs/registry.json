@@ -962,6 +962,18 @@
             ]
         }
     },
+    "text-reveal": {
+        "name": "text-reveal",
+        "files": [
+            "text-reveal.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "textarea": {
         "name": "textarea",
         "files": [
@@ -1028,6 +1040,18 @@
             ],
             "npm": [
                 "@alpinejs/anchor"
+            ]
+        }
+    },
+    "typewriter": {
+        "name": "typewriter",
+        "files": [
+            "typewriter.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
             ]
         }
     }
