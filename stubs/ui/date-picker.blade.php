@@ -20,6 +20,7 @@
     'max' => null,
     'minNights' => null,
     'maxNights' => null,
+    'outOfRange' => 'disable',  // 'disable' (prevent picking out-of-range) | 'flag' (allow + red)
     'showOutsideDays' => true,
     'width' => null,
 ])
@@ -50,10 +51,20 @@
         from: @js($fromDate), to: @js($toDate),
         minNights: @js($minNights !== null ? (int) $minNights : null),
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),
+        minDate: @js($min), maxDate: @js($max),
         fmt(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('default', { year: 'numeric', month: 'short', day: 'numeric' }) : ''; },
         nights() { return (this.from && this.to) ? Math.round((new Date(this.to + 'T00:00:00') - new Date(this.from + 'T00:00:00')) / 86400000) : null; },
         get errors() {
             const e = []; const n = this.nights();
+            // Out-of-range dates — reachable only when outOfRange='flag' (else they're disabled).
+            const lo = this.minDate, hi = this.maxDate;
+            if (this.mode === 'range') {
+                if (this.from && lo && this.from < lo) e.push('Start is before the earliest allowed date.');
+                if (this.to && hi && this.to > hi) e.push('End is after the latest allowed date.');
+            } else if (this.value) {
+                if (lo && this.value < lo) e.push('Date is before the earliest allowed.');
+                if (hi && this.value > hi) e.push('Date is after the latest allowed.');
+            }
             if (n !== null && this.minNights !== null && n < this.minNights) e.push('Minimum ' + this.minNights + ' night' + (this.minNights > 1 ? 's' : '') + '.');
             if (n !== null && this.maxNights !== null && n > this.maxNights) e.push('Maximum ' + this.maxNights + ' night' + (this.maxNights > 1 ? 's' : '') + '.');
             return e;
@@ -128,8 +139,9 @@
             :number-of-months="$months"
             :default-month="$defaultMonth"
             :show-outside-days="$showOutsideDays"
-            :min="$min"
-            :max="$max"
+            :min-date="$min"
+            :max-date="$max"
+            :out-of-range="$outOfRange"
             class="border-0"
         />
 

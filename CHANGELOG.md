@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-06-08
+
+### Added
+- **`out-of-range` mode on `date-picker` / `datetime-picker` / `calendar`** — `disable` (default:
+  out-of-range dates are struck-through and unselectable) or `flag` (selectable but shown red, and
+  selecting one flags the field invalid via `aria-invalid` + an error). `min` / `max` now act as
+  real **date bounds** on the calendar — previously they were interpreted as range *span counts*
+  and didn't gate single-date selection. (Requires re-publishing foundations: the gating logic is
+  in `blatui-core.js`.) Verified in-browser.
+
 ## [1.6.6] - 2026-06-08
 
 ### Fixed
