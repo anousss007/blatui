@@ -199,6 +199,12 @@ class BlatuiRegistry
         if (preg_match('/x-trap|\$focus/', $source)) {
             $packages['npm'][] = '@alpinejs/focus';
         }
+        // Charts are the only component that needs ApexCharts — tie it to the
+        // chart family (via its shadcnChart binding) so it's never forced on
+        // apps that don't use charts.
+        if (str_contains($source, 'shadcnChart')) {
+            $packages['npm'][] = 'apexcharts';
+        }
 
         foreach ($packages as $type => $list) {
             $packages[$type] = array_values(array_unique($list));

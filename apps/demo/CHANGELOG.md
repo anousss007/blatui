@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-06-08
+
+### Changed
+- **Charts are opt-in.** Split the chart engine out of `blatui-core.js` into a
+  separate `blatui-charts.js` (exporting `registerCharts`). Components-only apps
+  no longer pull in ApexCharts (~140kb) or break the build without it. The
+  published bootstrap `blatui.js` is charts-free; the `chart` component declares
+  `apexcharts` as its npm dependency, shipped via a new `blatui-charts` tag.
+
 ## [1.4.0] - 2026-06-08
 
 AI-native distribution + a theme editor + new templates.

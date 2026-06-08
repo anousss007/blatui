@@ -29,10 +29,13 @@ echo "→ Syncing components → $PKG_DIR/stubs/ui"
 rm -f "$PKG_DIR"/stubs/ui/*.blade.php
 cp "$DEMO_DIR"/resources/views/components/ui/*.blade.php "$PKG_DIR"/stubs/ui/
 
-echo "→ Syncing foundations (CSS + JS bootstrap + JS engine)"
-cp "$DEMO_DIR"/resources/css/app.css        "$PKG_DIR"/stubs/foundations/app.css
-cp "$DEMO_DIR"/resources/js/app.js          "$PKG_DIR"/stubs/foundations/app.js
-cp "$DEMO_DIR"/resources/js/blatui-core.js  "$PKG_DIR"/stubs/foundations/blatui-core.js
+# The published bootstrap is the charts-free blatui.js (NOT the demo's app.js,
+# which also registers charts). Charts ship as the opt-in blatui-charts.js.
+echo "→ Syncing foundations (CSS + bootstrap + engine + opt-in charts)"
+cp "$DEMO_DIR"/resources/css/app.css         "$PKG_DIR"/stubs/foundations/app.css
+cp "$DEMO_DIR"/resources/js/blatui.js        "$PKG_DIR"/stubs/foundations/app.js
+cp "$DEMO_DIR"/resources/js/blatui-core.js   "$PKG_DIR"/stubs/foundations/blatui-core.js
+cp "$DEMO_DIR"/resources/js/blatui-charts.js "$PKG_DIR"/stubs/foundations/blatui-charts.js
 
 echo "→ Syncing registry manifest → $PKG_DIR/stubs/registry.json"
 cp "$DEMO_DIR"/registry.json "$PKG_DIR"/stubs/registry.json

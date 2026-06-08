@@ -31,7 +31,7 @@
                 <h2 class="flex items-center gap-2 text-sm font-semibold"><x-lucide-zap class="text-primary size-4" /> TL;DR — already on Laravel + Tailwind v4?</h2>
                 <p class="text-muted-foreground mt-1 mb-4 text-sm">Install, publish the foundations, wire two entrypoints, then start building.</p>
                 <x-code-block label="Terminal" icon="terminal">composer require blatui/blatui gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons
-npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus apexcharts tw-animate-css
+npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus
 php artisan vendor:publish --tag=blatui-foundations</x-code-block>
                 <p class="text-muted-foreground mt-3 mb-2 text-sm">Point your two Vite entrypoints at the published foundations (replace each file's contents):</p>
                 <x-code-block label="resources/css/app.css" icon="palette">@import "./blatui.css";</x-code-block>
@@ -39,6 +39,26 @@ php artisan vendor:publish --tag=blatui-foundations</x-code-block>
                 <p class="text-muted-foreground mt-3 mb-2 text-sm">Verify, then add your first components:</p>
                 <x-code-block label="Terminal" icon="terminal">php artisan blatui:init
 php artisan blatui:add button card input</x-code-block>
+                <div class="border-primary/15 bg-background/40 mt-4 rounded-lg border border-dashed p-3">
+                    <p class="text-muted-foreground text-xs leading-relaxed">
+                        <span class="text-foreground font-medium">Charts are opt-in.</span> ApexCharts (~140kb) isn't installed by default —
+                        only when you add a chart:
+                    </p>
+                    <x-code-block label="Terminal" icon="terminal" class="mt-2">php artisan blatui:add chart
+npm install -D apexcharts
+php artisan vendor:publish --tag=blatui-charts</x-code-block>
+                    <p class="text-muted-foreground mt-2 text-xs leading-relaxed">
+                        Then wire it in <code class="bg-muted rounded px-1 text-[11px]">app.js</code> (swap the one-line bootstrap for the explicit form):
+                    </p>
+                    <x-code-block label="resources/js/app.js" icon="file-code" class="mt-2">import Alpine from 'alpinejs';
+import { registerBlatUI } from './blatui-core.js';
+import { registerCharts } from './blatui-charts.js';
+
+registerBlatUI(Alpine);
+registerCharts(Alpine);
+window.Alpine = Alpine;
+Alpine.start();</x-code-block>
+                </div>
             </div>
 
             {{-- AI editor callout --}}
