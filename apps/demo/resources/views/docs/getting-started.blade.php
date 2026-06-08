@@ -178,6 +178,33 @@ Alpine.start()</x-code-block>
                 </div>
             </div>
 
+            {{-- Server-rendered forms & foundations utilities --}}
+            <div class="mt-10 border-t pt-10">
+                <h2 id="server-forms" class="mb-2 scroll-mt-20 text-2xl font-bold tracking-tight">Server-rendered forms &amp; the foundations utilities</h2>
+                <p class="text-muted-foreground mb-5 text-sm">Building a reusable form-field DX layer (a wrapper that re-emits <code class="bg-muted rounded px-1 text-xs">@{{ $slot }}</code>)? Reach for the <span class="text-foreground font-medium">foundations utilities</span> on raw elements rather than nesting <code class="bg-muted rounded px-1 text-xs">&lt;x-ui.*&gt;</code> form controls inside that slot.</p>
+
+                <div class="border-destructive/30 bg-destructive/5 mb-5 rounded-lg border p-4 text-sm">
+                    <p class="flex items-center gap-2 font-semibold"><x-lucide-triangle-alert class="text-destructive size-4 shrink-0" /> Footgun: <code class="bg-muted rounded px-1 text-xs">&lt;x-ui.*&gt;</code> as slot content of an <code class="bg-muted rounded px-1 text-xs">@@aware</code> anonymous component may not compile.</p>
+                    <p class="text-muted-foreground mt-2 leading-relaxed">When a <code class="bg-muted rounded px-1 text-xs">&lt;x-ui.input/.textarea/.select&gt;</code> is passed <span class="text-foreground font-medium">as the slot content</span> of an anonymous wrapper that re-wraps the slot through another anonymous component using <code class="bg-muted rounded px-1 text-xs">@@aware</code>, the inner tag is <span class="text-foreground font-medium">left literal</span> in the output. A content component leaves an orphan <code class="bg-muted rounded px-1 text-xs">@@endif</code> &rarr; <span class="text-foreground font-medium">ParseError (500)</span>; a self-closing one renders an unknown <code class="bg-muted rounded px-1 text-xs">&lt;x-ui.input&gt;</code> element that produces <span class="text-foreground font-medium">no <code class="bg-muted rounded px-1 text-xs">&lt;input&gt;</code> at all</span> — the field is silently absent.</p>
+                    <p class="mt-2 font-medium">⚠️ This passes every render test. A <code class="bg-muted rounded px-1 text-xs">GET</code> &rarr; <code class="bg-muted rounded px-1 text-xs">assertOk()</code> still returns 200, and POST-based feature tests still pass — only a <span class="font-semibold">browser test that actually fills the field</span> catches it. (Direct, un-wrapped use compiles fine; the bug only appears <span class="italic">through</span> the <code class="bg-muted rounded px-1 text-xs">@@aware</code> slot layer.)</p>
+                </div>
+
+                <p class="text-muted-foreground mb-2 text-sm"><span class="text-foreground font-medium">The fix:</span> in any DX layer that re-wraps a slot, render raw elements styled by the foundations utilities — zero <code class="bg-muted rounded px-1 text-xs">&lt;x-ui.*&gt;</code> in the slot, and it's just as &ldquo;native&rdquo;. The utilities are the twin of the components' class-strings, shipped in <code class="bg-muted rounded px-1 text-xs">blatui.css</code>:</p>
+                <div class="mb-4 flex flex-wrap gap-2 text-xs">
+                    @foreach (['.blat-input', '.blat-textarea', '.blat-select', '.blat-checkbox', '.blat-radio', '.blat-label'] as $u)
+                        <code class="bg-muted text-foreground rounded-md px-2 py-1 font-medium">{{ $u }}</code>
+                    @endforeach
+                </div>
+                <x-code-block label="resources/views/components/has-field.blade.php" icon="code">&lt;label class="blat-label"&gt;@{{ $label }}&lt;/label&gt;
+&lt;input name="@{{ $name }}" class="blat-input" /&gt;
+&lt;textarea name="@{{ $name }}" class="blat-textarea"&gt;&lt;/textarea&gt;
+&lt;select name="@{{ $name }}" class="blat-select"&gt;...&lt;/select&gt;</x-code-block>
+                <div class="bg-muted/40 mt-4 flex items-start gap-2 rounded-lg border p-3 text-sm">
+                    <x-lucide-stethoscope class="text-primary mt-0.5 size-4 shrink-0" />
+                    <span class="text-muted-foreground"><code class="bg-muted rounded px-1 text-xs">php artisan blatui:doctor</code> flags this for you — it scans your compiled views for any literal <code class="bg-muted rounded px-1 text-xs">&lt;x-ui.*&gt;</code> tag that leaked into the HTML (a tag that failed to compile).</span>
+                </div>
+            </div>
+
             {{-- Next steps --}}
             <div class="mt-8 border-t pt-10">
                 <h2 class="mb-5 text-2xl font-bold tracking-tight">What's next</h2>

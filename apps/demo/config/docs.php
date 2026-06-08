@@ -5,7 +5,7 @@
 return [
     'categories' => [
         'Forms & Input' => [
-            'button', 'button-group', 'input', 'input-group', 'input-otp', 'textarea',
+            'button', 'button-group', 'copy-button', 'input', 'input-group', 'input-otp', 'textarea',
             'label', 'field', 'checkbox', 'radio-group', 'switch', 'select', 'combobox',
             'slider', 'toggle', 'toggle-group', 'rating', 'calendar', 'date-picker',
             'datetime-picker', 'time-field',
@@ -14,10 +14,10 @@ return [
             'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar',
         ],
         'Data Display' => [
-            'avatar', 'badge', 'table', 'carousel', 'chart', 'icon', 'item', 'kbd', 'progress', 'skeleton',
+            'avatar', 'badge', 'table', 'carousel', 'chart', 'icon', 'item', 'kbd', 'marquee', 'progress', 'skeleton',
         ],
         'Feedback' => [
-            'alert', 'empty', 'spinner', 'sonner', 'tooltip', 'hover-card',
+            'alert', 'banner', 'empty', 'spinner', 'sonner', 'tooltip', 'hover-card',
         ],
         'Overlays' => [
             'dialog', 'alert-dialog', 'sheet', 'drawer', 'popover', 'dropdown-menu',
@@ -41,6 +41,7 @@ return [
     'descriptions' => [
         'button' => 'Displays a button or a component that looks like a button.',
         'button-group' => 'Groups related buttons together with consistent styling.',
+        'copy-button' => 'A button that copies text to the clipboard, with a copied state and a live announcement.',
         'input' => 'Displays a form input field or a component that looks like an input field.',
         'input-group' => 'Group inputs with text, buttons, icons, and more.',
         'input-otp' => 'Accessible one-time password component with copy-paste functionality.',
@@ -80,6 +81,8 @@ return [
         'skeleton' => 'Use to show a placeholder while content is loading.',
 
         'alert' => 'Displays a callout for user attention, with semantic status tones.',
+        'banner' => 'A full-width, dismissible announcement bar with semantic tones.',
+        'marquee' => 'A seamless, infinite scroll of its content — logos, testimonials, badges.',
         'empty' => 'An empty state for when there is no data to display.',
         'spinner' => 'An animated loading indicator.',
         'sonner' => 'An opinionated toast notification component. Includes a sonner-flash bridge that turns Laravel session flashes into toasts.',
