@@ -71,6 +71,16 @@ class RegistryDistribution
     // Component items
     // ---------------------------------------------------------------------
 
+    /**
+     * Component dependency names → absolute registry-item URLs, so the official
+     * shadcn CLI resolves them against THIS registry instead of ui.shadcn.com.
+     * Our own RemoteInstaller handles URLs too.
+     */
+    protected function depUrls(array $families): array
+    {
+        return array_map(fn (string $f) => $this->baseUrl().'/r/'.$f.'.json', $families);
+    }
+
     /** Catalogue entry for a component family (no file contents). */
     protected function componentMeta(string $family): array
     {
@@ -91,7 +101,7 @@ class RegistryDistribution
             'title' => $this->title($family),
             'description' => $this->description($family),
             'files' => $files,
-            'registryDependencies' => $this->components->dependenciesFor($family),
+            'registryDependencies' => $this->depUrls($this->components->dependenciesFor($family)),
             'dependencies' => $packages['npm'] ?? [],
             'categories' => array_values(array_filter([$this->categoryOf($family)])),
         ], fn ($v) => $v !== null && $v !== []);
@@ -124,7 +134,7 @@ class RegistryDistribution
             'title' => $this->title($family),
             'description' => $this->description($family),
             'author' => 'BlatUI (https://blatui.remix-it.com)',
-            'registryDependencies' => $this->components->dependenciesFor($family),
+            'registryDependencies' => $this->depUrls($this->components->dependenciesFor($family)),
             'dependencies' => $packages['npm'] ?? [],
             'files' => $files,
             'docs' => $this->installDocs($packages),
@@ -151,7 +161,7 @@ class RegistryDistribution
                 'type' => 'registry:file',
                 'target' => 'resources/views/blocks/'.$name.'.blade.php',
             ]],
-            'registryDependencies' => $this->dependenciesInFile($this->blocksDir().'/'.$name.'.blade.php'),
+            'registryDependencies' => $this->depUrls($this->dependenciesInFile($this->blocksDir().'/'.$name.'.blade.php')),
             'categories' => [Str::before($name, '-') ?: $name],
         ];
     }
@@ -172,7 +182,7 @@ class RegistryDistribution
                 'type' => 'registry:file',
                 'target' => 'resources/views/charts/'.$name.'.blade.php',
             ]],
-            'registryDependencies' => $this->dependenciesInFile($this->chartsDir().'/'.$name.'.blade.php'),
+            'registryDependencies' => $this->depUrls($this->dependenciesInFile($this->chartsDir().'/'.$name.'.blade.php')),
             'categories' => ['chart'],
         ];
     }
@@ -212,7 +222,7 @@ class RegistryDistribution
             'type' => $type,
             'title' => $this->title($name),
             'author' => 'BlatUI (https://blatui.remix-it.com)',
-            'registryDependencies' => $deps,
+            'registryDependencies' => $this->depUrls($deps),
             'dependencies' => $packages['npm'] ?? [],
             'files' => [[
                 'path' => $target,

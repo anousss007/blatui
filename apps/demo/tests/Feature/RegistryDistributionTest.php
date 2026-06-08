@@ -55,6 +55,12 @@ class RegistryDistributionTest extends TestCase
         $res->assertJsonPath('type', 'registry:block');
         $this->assertNotEmpty($res->json('files.0.content'));
 
+        // registryDependencies must be ABSOLUTE registry URLs so the official
+        // shadcn CLI resolves them against us, not ui.shadcn.com.
+        foreach ($res->json('registryDependencies') ?? [] as $dep) {
+            $this->assertMatchesRegularExpression('#^https?://.+/r/[a-z0-9-]+\.json$#', $dep);
+        }
+
         $chart = $dist->chartNames()[0];
         $res = $this->get("/r/charts/{$chart}.json");
         $res->assertOk();
