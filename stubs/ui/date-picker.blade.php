@@ -20,6 +20,7 @@
     'max' => null,
     'minNights' => null,
     'maxNights' => null,
+    'showOutsideDays' => true,
     'width' => null,
 ])
 
@@ -124,6 +125,7 @@
             :week-start="$weekStart"
             :number-of-months="$months"
             :default-month="$defaultMonth"
+            :show-outside-days="$showOutsideDays"
             :min="$min"
             :max="$max"
             class="border-0"

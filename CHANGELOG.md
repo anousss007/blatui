@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.3] - 2026-06-08
+
+### Added
+- **`show-outside-days` on `calendar` / `date-picker` / `datetime-picker`** (default `true`).
+  Set `false` to hide the greyed-out days from the previous/next month — outside days render as
+  empty, non-interactive cells and any week row that is entirely outside the month collapses.
+
 ## [1.6.2] - 2026-06-08
 
 ### Fixed
