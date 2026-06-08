@@ -22,12 +22,17 @@
 ])
 
 @php
+    // weekStart accepts 0–6 (0 = Sunday) OR a day name ("sunday", "monday", …).
+    $weekStartNum = is_numeric($weekStart)
+        ? (((int) $weekStart % 7) + 7) % 7
+        : (['sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3, 'thursday' => 4, 'friday' => 5, 'saturday' => 6][strtolower(trim((string) $weekStart))] ?? 0);
+
     $cfg = array_filter([
         'mode' => $mode,
         'value' => $value,
         'locale' => $locale,
         'numberOfMonths' => (int) $numberOfMonths,
-        'weekStart' => (int) $weekStart,
+        'weekStart' => $weekStartNum,
         'captionLayout' => $captionLayout,
         'showWeekNumber' => (bool) $showWeekNumber,
         'disableNavigation' => (bool) $disableNavigation,
@@ -52,7 +57,7 @@
         'hover:bg-accent hover:text-accent-foreground',
         'data-[today]:bg-accent data-[today]:text-accent-foreground',
         'data-[outside]:text-muted-foreground',
-        'data-[disabled]:text-muted-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none',
+        'data-[disabled]:text-muted-foreground data-[disabled]:opacity-40 data-[disabled]:line-through data-[disabled]:pointer-events-none',
         'data-[selected]:bg-primary data-[selected]:text-primary-foreground data-[selected]:hover:bg-primary data-[selected]:hover:text-primary-foreground',
         'data-[range-start]:bg-primary data-[range-start]:text-primary-foreground data-[range-start]:rounded-r-none',
         'data-[range-end]:bg-primary data-[range-end]:text-primary-foreground data-[range-end]:rounded-l-none',
@@ -64,6 +69,7 @@
     data-slot="calendar"
     x-data="calendar({{ \Illuminate\Support\Js::from($cfg) }})"
     style="--cell-size: 2rem;"
+    @unless ($showOutsideDays) data-hide-outside-days @endunless
     {{ $attributes->twMerge('group/calendar bg-background w-fit rounded-md border p-3') }}
 >
     @if ($name)
@@ -134,8 +140,7 @@
                     </thead>
                     <tbody>
                         <template x-for="(week, wi) in weeksFor(m)" :key="wi">
-                            {{-- showOutsideDays=false: hide a week row that is entirely prev/next-month days. --}}
-                            <tr class="mt-1 flex w-full" @unless ($showOutsideDays) x-show="!week.every((d) => isOutside(d, m))" @endunless>
+                            <tr class="mt-1 flex w-full">
                                 @if ($showWeekNumber)
                                     <td class="text-muted-foreground flex size-(--cell-size) items-center justify-center text-[0.8rem]" x-text="weekNumber(week)"></td>
                                 @endif
@@ -158,12 +163,7 @@
                                             :data-today="isToday(day) ? true : null"
                                             :data-outside="isOutside(day, m) ? true : null"
                                             :data-disabled="isDisabled(day) ? true : null"
-                                            @if ($showOutsideDays)
                                             :class="modifierClass(day)"
-                                            @else
-                                            {{-- outside (prev/next month) days render as empty, non-interactive cells --}}
-                                            :class="[modifierClass(day), isOutside(day, m) ? 'invisible pointer-events-none' : '']"
-                                            @endif
                                             class="{{ $dayBtn }}"
                                         ></button>
                                     </td>

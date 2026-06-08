@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.4] - 2026-06-08
+
+### Fixed
+- **`show-outside-days="false"` now actually works.** The 1.6.3 implementation relied on a
+  runtime Alpine expression that broke the grid (only the first week rendered). Reworked to a
+  pure-CSS approach (a `data-hide-outside-days` flag + `:has()` rules) that hides prev/next-month
+  filler days and collapses fully-outside week rows — no runtime expression to fail.
+- **Disabled (out-of-range) days are now clearly distinct.** With `min`/`max` set, disabled days
+  were only slightly muted; they now render struck-through and fainter so valid vs unavailable
+  dates read at a glance.
+
+### Added
+- **`week-start` accepts a day name** (`week-start="monday"`) in addition to `0–6` (0 = Sunday),
+  on `calendar` / `date-picker` / `datetime-picker`.
+
 ## [1.6.3] - 2026-06-08
 
 ### Added
