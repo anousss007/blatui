@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.5] - 2026-06-08
+
+### Fixed
+- **Calendar: outside-day status was stale after month navigation.** `data-outside` was bound
+  to `isOutside(day, m)`, but the outer-loop `m` goes stale in the nested per-cell bindings
+  after a prev/next navigation, so prev/next-month days were mislabeled. The panel month is now
+  stamped onto each day in `weeksFor` and read directly. Latent for the muted-day styling; it
+  made `show-outside-days="false"` render a near-empty grid after navigating. Verified across
+  months in-browser. (Requires re-publishing foundations: the fix is in `blatui-core.js`.)
+
 ## [1.6.4] - 2026-06-08
 
 ### Fixed

@@ -161,7 +161,7 @@
                                             :data-range-middle="(mode === 'range' && rangeIs(day).middle) ? true : null"
                                             :data-range-end="(mode === 'range' && rangeIs(day).end) ? true : null"
                                             :data-today="isToday(day) ? true : null"
-                                            :data-outside="isOutside(day, m) ? true : null"
+                                            :data-outside="day.__outside ? true : null"
                                             :data-disabled="isDisabled(day) ? true : null"
                                             :class="modifierClass(day)"
                                             class="{{ $dayBtn }}"
