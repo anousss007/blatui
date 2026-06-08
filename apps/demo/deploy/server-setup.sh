@@ -19,7 +19,26 @@ set -euo pipefail
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEPLOY_USER="${DEPLOY_USER:-${SUDO_USER:-$(logname 2>/dev/null || echo "$USER")}}"
 WEB_GROUP="${WEB_GROUP:-www-data}"
-PHP_FPM="${PHP_FPM:-php8.3-fpm}"
+
+# Auto-detect the php-fpm service (Debian/Ubuntu name it phpX.Y-fpm; the version varies).
+# Override with: PHP_FPM=phpX.Y-fpm sudo bash deploy/server-setup.sh
+detect_php_fpm() {
+  local u d
+  for u in $(systemctl list-unit-files --type=service --no-legend 2>/dev/null | awk '{print $1}' | grep -E '^php[0-9.]*-fpm\.service$'); do
+    echo "${u%.service}"; return
+  done
+  for d in /etc/php/*/fpm; do
+    [ -d "$d" ] && { echo "php$(basename "$(dirname "$d")")-fpm"; return; }
+  done
+  systemctl cat php-fpm.service >/dev/null 2>&1 && echo "php-fpm"
+}
+PHP_FPM="${PHP_FPM:-$(detect_php_fpm)}"
+if [ -z "$PHP_FPM" ]; then
+  echo "✗ No php-fpm service found. Set it explicitly:" >&2
+  echo "    PHP_FPM=phpX.Y-fpm sudo bash deploy/server-setup.sh" >&2
+  echo "  (find the name with: systemctl list-units '*fpm*')" >&2
+  exit 1
+fi
 
 if [[ $EUID -ne 0 ]]; then
   echo "✗ Run as root:  sudo bash deploy/server-setup.sh" >&2
@@ -40,6 +59,10 @@ find "$APP_DIR/storage" "$APP_DIR/bootstrap/cache" -type d -exec chmod 2775 {} +
 find "$APP_DIR/storage" "$APP_DIR/bootstrap/cache" -type f -exec chmod 0664 {} +
 
 echo "→ 3/4 php-fpm creates group-writable files (umask 002)"
+# Remove a umask drop-in an earlier run may have left under a wrongly-guessed service name.
+for stale in /etc/systemd/system/php*-fpm.service.d/umask.conf; do
+  [ -e "$stale" ] && [ "$stale" != "/etc/systemd/system/${PHP_FPM}.service.d/umask.conf" ] && rm -f "$stale"
+done
 mkdir -p "/etc/systemd/system/${PHP_FPM}.service.d"
 cat > "/etc/systemd/system/${PHP_FPM}.service.d/umask.conf" <<'EOF'
 [Service]
@@ -49,7 +72,8 @@ systemctl daemon-reload
 systemctl restart "$PHP_FPM"
 
 echo "→ 4/4 opcache picks up changed files every request (no reload needed on deploy)"
-PHP_VER="$(echo "$PHP_FPM" | grep -oE '[0-9]+\.[0-9]+' || echo '8.3')"
+PHP_VER="$(echo "$PHP_FPM" | grep -oE '[0-9]+\.[0-9]+' | head -1)"
+[ -z "$PHP_VER" ] && PHP_VER="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || true)"
 CONF_DIR="/etc/php/${PHP_VER}/fpm/conf.d"
 if [[ -d "$CONF_DIR" ]]; then
   cat > "${CONF_DIR}/99-blatui-opcache.ini" <<'EOF'
