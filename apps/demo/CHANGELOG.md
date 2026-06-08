@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-06-08
+
+### Fixed
+- **`registerBlatUI` no longer auto-applies OS dark.** New `darkMode` option
+  (`'class'` default / `'system'` / `false`); the demo opts into `'system'`. Fixes light-only
+  apps flipping to an unreadable dark on a dark-OS machine.
+- **Deploy: end the storage/cache permission fights.** New `deploy/server-setup.sh` (one-time:
+  shared `www-data` group + setgid + `umask 002` + `opcache.revalidate_freq=0`); `deploy.sh`
+  no longer `chmod`s `www-data`-owned files — no more `Operation not permitted`, no manual
+  php-fpm reload.
+
 ## [1.6.0] - 2026-06-08
 
 ### ⚠️ Breaking

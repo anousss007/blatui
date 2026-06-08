@@ -7,8 +7,14 @@ import collapse from '@alpinejs/collapse';
 // Mirrors the data-attributes that resources/css/app.css keys off of.
 // ---------------------------------------------------------------------------
 const themeStore = {
+    // Dark-mode policy — set via registerBlatUI(Alpine, { darkMode }).
+    //   'class'  (default) light until an explicit toggle; NEVER auto-applies the OS
+    //            prefers-color-scheme (that silently broke light-only apps).
+    //   'system' follow the OS preference by default.
+    //   false    hard light-only (dark disabled, toggle is a no-op).
+    darkMode: 'class',
     // Every dimension shadcn exposes, each persisted independently.
-    mode: localStorage.getItem('theme:mode') || 'system',
+    mode: localStorage.getItem('theme:mode') || 'light',
     base: localStorage.getItem('theme:base') || 'neutral',
     preset: localStorage.getItem('theme:preset') || 'default',
     radius: localStorage.getItem('theme:radius') || '0.625',
@@ -20,13 +26,18 @@ const themeStore = {
     fontHeading: localStorage.getItem('theme:fontHeading') || 'sans',
 
     init() {
+        // No stored choice → fall back per the darkMode policy: 'system' follows the OS,
+        // anything else stays light (dark only after an explicit toggle).
+        if (!localStorage.getItem('theme:mode')) {
+            this.mode = this.darkMode === 'system' ? 'system' : 'light';
+        }
         this.apply();
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             if (this.mode === 'system') this.apply();
         });
         // Keep every same-origin document in sync (e.g. block-preview iframes):
         // localStorage writes in one document fire a `storage` event in the others.
-        const defaults = { mode: 'system', base: 'neutral', preset: 'default', radius: '0.625', font: 'sans', shadow: 'default', spacing: 'default', tracking: 'normal', inputStyle: 'outline', fontHeading: 'sans' };
+        const defaults = { mode: this.darkMode === 'system' ? 'system' : 'light', base: 'neutral', preset: 'default', radius: '0.625', font: 'sans', shadow: 'default', spacing: 'default', tracking: 'normal', inputStyle: 'outline', fontHeading: 'sans' };
         window.addEventListener('storage', (e) => {
             if (!e.key || !e.key.startsWith('theme:')) return;
             const key = e.key.slice('theme:'.length);
@@ -38,6 +49,7 @@ const themeStore = {
     },
 
     get isDark() {
+        if (this.darkMode === false) return false;
         return this.mode === 'dark' || (this.mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     },
 
@@ -59,6 +71,7 @@ const themeStore = {
     setFontHeading(fontHeading) { this.set('fontHeading', fontHeading); },
 
     toggle() {
+        if (this.darkMode === false) return;
         this.setMode(this.isDark ? 'light' : 'dark');
     },
 
@@ -66,7 +79,7 @@ const themeStore = {
         ['mode', 'base', 'preset', 'radius', 'font', 'shadow', 'spacing', 'tracking', 'inputStyle', 'fontHeading'].forEach((k) =>
             localStorage.removeItem('theme:' + k),
         );
-        this.mode = 'system';
+        this.mode = this.darkMode === 'system' ? 'system' : 'light';
         this.base = 'neutral';
         this.preset = 'default';
         this.radius = '0.625';
@@ -925,7 +938,11 @@ const blatCommand = () => ({
 //   Existing Alpine app:        import { registerBlatUI } from './blatui-core.js'
 //                               and call registerBlatUI(Alpine) before your start.
 // ---------------------------------------------------------------------------
-export function registerBlatUI(Alpine) {
+export function registerBlatUI(Alpine, options = {}) {
+    // darkMode: 'class' (default — light until an explicit toggle), 'system' (follow the OS
+    // prefers-color-scheme), or false (hard light-only). The default does NOT auto-apply the
+    // OS dark preference, so a light-only app never flips to an unreadable dark on a dark OS.
+    if (options.darkMode !== undefined) themeStore.darkMode = options.darkMode;
     Alpine.plugin(anchor);
     Alpine.plugin(focus);
     Alpine.plugin(collapse);

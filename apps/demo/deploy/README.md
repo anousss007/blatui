@@ -45,14 +45,23 @@ sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d demo.blatui.dev
 ```
 
-Set the web user (www-data) as owner of writable dirs:
+## 5. Permissions (once) — stop the deploy/php-fpm chmod fights
+
+php-fpm writes cache/session/view files as `www-data`; your deploy runs as your login user.
+Only a file's owner may `chmod` it, so without this step every deploy spews
+`chmod: Operation not permitted` and you have to reload php-fpm by hand. Fix it once:
 
 ```bash
-sudo chown -R www-data:www-data storage bootstrap/cache
+sudo bash deploy/server-setup.sh
 ```
+
+It adds the deploy user to the `www-data` group, sets a shared-group + setgid +
+group-writable layout on `storage` and `bootstrap/cache`, makes php-fpm create
+group-writable files (`umask 002`), and sets `opcache.revalidate_freq=0` so a deploy is
+picked up immediately. **Log out/in once** afterwards so the group change applies.
 
 ## Updating later
 
 ```bash
-cd /var/www/blatui-demo && bash deploy/deploy.sh
+cd /var/www/blatui && bash deploy/deploy.sh
 ```
