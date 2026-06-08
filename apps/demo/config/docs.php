@@ -14,8 +14,8 @@ return [
             'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar',
         ],
         'Data Display' => [
-            'avatar', 'badge', 'table', 'carousel', 'chart', 'icon', 'item', 'kbd', 'marquee',
-            'typewriter', 'text-reveal', 'progress', 'skeleton',
+            'avatar', 'badge', 'table', 'carousel', 'gallery', 'video', 'chart', 'icon', 'item',
+            'kbd', 'marquee', 'typewriter', 'text-reveal', 'progress', 'skeleton',
         ],
         'Feedback' => [
             'alert', 'banner', 'empty', 'spinner', 'sonner', 'tooltip', 'hover-card',
@@ -74,6 +74,8 @@ return [
         'badge' => 'Displays a badge, with semantic status tones (success, warning, danger, info, neutral).',
         'table' => 'A responsive table component.',
         'carousel' => 'A carousel with motion and swipe.',
+        'gallery' => 'A thumbnail grid that opens a full-screen lightbox with keyboard navigation.',
+        'video' => 'A styled HTML5 video player with a custom poster and play overlay.',
         'chart' => 'Beautiful charts, built using ApexCharts.',
         'icon' => 'A thin wrapper over Lucide icons that auto-mirrors directional arrows under RTL.',
         'item' => 'A flexible component for displaying content with media, title, and actions.',
