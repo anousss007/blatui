@@ -69,9 +69,6 @@
                 : '';
         },
     }"
-    @calendar-change="mode === 'range'
-        ? (from = $event.detail.from, to = $event.detail.to, (from && to && !invalid) && (open = false))
-        : (value = $event.detail, open = false)"
     x-id="['blat-datepicker']"
     {{ $attributes->twMerge('relative '.$width) }}
 >
@@ -108,6 +105,11 @@
         x-anchor.bottom-start.offset.4="$refs.trigger"
         @click.outside="open = false"
         @keydown.escape.window="open = false"
+        {{-- Listener lives here (inside the teleported popover) so it catches the calendar's
+             bubbling event; the popover shares the picker's x-data scope, so `value` updates. --}}
+        @calendar-change="mode === 'range'
+            ? (from = $event.detail.from, to = $event.detail.to, (from && to && !invalid) && (open = false))
+            : (value = $event.detail, open = false)"
         x-trap="open"
         :id="$id('blat-datepicker')"
         role="dialog"

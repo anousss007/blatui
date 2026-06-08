@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.6] - 2026-06-08
+
+### Fixed
+- **`date-picker` / `datetime-picker` selection wasn't saved** after the 1.6.2 teleport. The
+  calendar now lives in a `<body>` portal, so its `calendar-change` (and the time-field's
+  `time-change`) bubbled to `<body>`, never reaching the `@calendar-change` listener on the
+  picker root — the hidden input and trigger label stayed empty. Moved the listeners inside the
+  teleported popover (which contains the calendar and shares the picker's scope). Verified
+  in-browser: clicking a day now updates the input and label. Affects single and range.
+
 ## [1.6.5] - 2026-06-08
 
 ### Fixed
