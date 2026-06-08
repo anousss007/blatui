@@ -215,7 +215,7 @@
                         {{-- Section cards --}}
                         <div class="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
                             @foreach ($cards as $card)
-                                <x-ui.card class="@container/card">
+                                <x-ui.card variant="sectioned" class="@container/card">
                                     <x-ui.card-header>
                                         <x-ui.card-description>{{ $card['desc'] }}</x-ui.card-description>
                                         <x-ui.card-title class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">{{ $card['value'] }}</x-ui.card-title>
@@ -239,7 +239,7 @@
 
                         {{-- Interactive area chart --}}
                         <div class="px-4 lg:px-6">
-            <x-ui.card class="@container/card"
+            <x-ui.card variant="sectioned" class="@container/card"
                                 x-data="{
                                     range: '90d',
                                     chart: null,

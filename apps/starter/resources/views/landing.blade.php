@@ -80,7 +80,7 @@
                             ];
                         @endphp
                         @foreach ($features as [$icon, $title, $desc])
-                            <x-ui.card class="h-full">
+                            <x-ui.card variant="sectioned" class="h-full">
                                 <x-ui.card-header>
                                     <span class="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-lg">
                                         <x-dynamic-component :component="'lucide-'.$icon" class="size-5" />
