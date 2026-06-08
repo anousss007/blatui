@@ -18,6 +18,7 @@
     'modifiers' => [],
     'modifiersClass' => [],
     'buttonVariant' => 'ghost',
+    'showOutsideDays' => true,
 ])
 
 @php
@@ -133,7 +134,8 @@
                     </thead>
                     <tbody>
                         <template x-for="(week, wi) in weeksFor(m)" :key="wi">
-                            <tr class="mt-1 flex w-full">
+                            {{-- showOutsideDays=false: hide a week row that is entirely prev/next-month days. --}}
+                            <tr class="mt-1 flex w-full" @unless ($showOutsideDays) x-show="!week.every((d) => isOutside(d, m))" @endunless>
                                 @if ($showWeekNumber)
                                     <td class="text-muted-foreground flex size-(--cell-size) items-center justify-center text-[0.8rem]" x-text="weekNumber(week)"></td>
                                 @endif
@@ -156,7 +158,12 @@
                                             :data-today="isToday(day) ? true : null"
                                             :data-outside="isOutside(day, m) ? true : null"
                                             :data-disabled="isDisabled(day) ? true : null"
+                                            @if ($showOutsideDays)
                                             :class="modifierClass(day)"
+                                            @else
+                                            {{-- outside (prev/next month) days render as empty, non-interactive cells --}}
+                                            :class="[modifierClass(day), isOutside(day, m) ? 'invisible pointer-events-none' : '']"
+                                            @endif
                                             class="{{ $dayBtn }}"
                                         ></button>
                                     </td>

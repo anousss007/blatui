@@ -30,6 +30,7 @@
     'weekStart' => 0,
     'numberOfMonths' => null,
     'defaultMonth' => null,
+    'showOutsideDays' => true,
     'width' => null,
 ])
 
@@ -191,6 +192,7 @@
             :week-start="$weekStart"
             :number-of-months="$months"
             :default-month="$defaultMonth"
+            :show-outside-days="$showOutsideDays"
             :min="$minDate"
             :max="$maxDate"
             class="rounded-none border-0"

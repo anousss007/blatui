@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.3] - 2026-06-08
+
+### Added
+- **`show-outside-days` (default true)** on `calendar`, `date-picker` and `datetime-picker`.
+  `false` hides the prev/next-month filler days and collapses fully-outside week rows.
+
 ## [1.6.2] - 2026-06-08
 
 ### Fixed

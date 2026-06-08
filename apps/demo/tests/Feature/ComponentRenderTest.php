@@ -163,6 +163,16 @@ class ComponentRenderTest extends TestCase
         $this->assertStringContainsString('minNights: 3', $html);
     }
 
+    public function test_calendar_can_hide_outside_days(): void
+    {
+        // Default keeps outside days (no invisible toggle on the day cells).
+        $this->assertStringNotContainsString('invisible pointer-events-none', $this->render('<x-ui.calendar />'));
+        // show-outside-days="false" hides outside day cells and collapses all-outside rows.
+        $off = $this->render('<x-ui.date-picker :show-outside-days="false" />');
+        $this->assertStringContainsString('invisible pointer-events-none', $off);
+        $this->assertStringContainsString('week.every', $off);
+    }
+
     /** Anchored popovers teleport to <body> so an overflow-hidden ancestor never clips them. */
     public function test_anchored_popovers_teleport_to_body(): void
     {
