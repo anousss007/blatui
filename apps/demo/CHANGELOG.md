@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-06-08
+
 ### Added
 - **`out-of-range` mode on `date-picker` / `datetime-picker` / `calendar`** — `disable` (default:
   out-of-range dates are struck-through and unselectable) or `flag` (selectable but shown red, and
