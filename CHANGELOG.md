@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-06-08
+
+### Fixed
+- **Dark mode no longer auto-applies the OS preference (footgun).** `registerBlatUI` defaulted
+  the theme store to `mode: 'system'`, so on a dark-OS machine it added `.dark` to `<html>` at
+  boot — silently flipping light-only apps to an unreadable dark (invisible in dev/CI; only on
+  a real dark-OS machine). The default is now light-until-toggled.
+
+### Added
+- **`registerBlatUI(Alpine, { darkMode })`** — `'class'` (default: light until an explicit
+  toggle, never auto-OS-dark), `'system'` (follow `prefers-color-scheme`), or `false` (hard
+  light-only). **To keep the previous OS-following behavior, pass `{ darkMode: 'system' }`.**
+
 ## [1.6.0] - 2026-06-08
 
 ### ⚠️ Breaking
