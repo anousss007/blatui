@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.5] - 2026-06-08
+
+### Fixed
+- **Calendar outside-day status was stale after month navigation** (`isOutside(day, m)` used the
+  outer-loop `m`, which goes stale in nested per-cell bindings). The panel month is now stamped
+  on each day in `weeksFor`. Fixes `show-outside-days="false"` rendering a near-empty grid after
+  navigating to another month. Verified in-browser across months.
+
 ## [1.6.4] - 2026-06-08
 
 ### Fixed

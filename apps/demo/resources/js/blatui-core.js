@@ -229,6 +229,11 @@ const calendar = (cfg = {}) => ({
             for (let d = 0; d < 7; d++) {
                 const day = new Date(start);
                 day.setDate(start.getDate() + w * 7 + d);
+                // Stamp prev/next-month status here, where the panel month is correct. The
+                // template reads day.__outside instead of isOutside(day, m): the outer-loop `m`
+                // goes stale in the nested per-cell bindings after a month navigation, which
+                // mislabels outside days (only visible once outside days are hidden/collapsed).
+                day.__outside = day.getMonth() !== month;
                 days.push(day);
             }
             weeks.push(days);
