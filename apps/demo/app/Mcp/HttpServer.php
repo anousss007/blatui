@@ -95,7 +95,11 @@ class HttpServer
             $result = match ($method) {
                 'initialize' => [
                     'protocolVersion' => self::PROTOCOL_VERSION,
-                    'capabilities' => ['tools' => (object) []],
+                    'capabilities' => [
+                        'tools' => (object) [],
+                        'resources' => (object) [],
+                        'prompts' => (object) [],
+                    ],
                     'serverInfo' => ['name' => 'blatui', 'version' => 'latest'],
                     'instructions' => 'BlatUI is shadcn/ui for Laravel Blade. Search components/blocks/charts, '
                         .'read their Blade source, and get the exact `php artisan blatui:add` install command. '
@@ -103,6 +107,11 @@ class HttpServer
                 ],
                 'tools/list' => ['tools' => self::toolDefinitions()],
                 'tools/call' => $this->callTool($message['params'] ?? []),
+                'resources/list' => $this->resourcesList(),
+                'resources/templates/list' => $this->resourceTemplates(),
+                'resources/read' => $this->resourceRead($message['params'] ?? []),
+                'prompts/list' => $this->promptsList(),
+                'prompts/get' => $this->promptsGet($message['params'] ?? []),
                 'ping' => (object) [],
                 default => throw new \RuntimeException("Method not found: {$method}", -32601),
             };
@@ -235,6 +244,114 @@ class HttpServer
         }
 
         return implode("\n", $out);
+    }
+
+    // ---------------------------------------------------------------------
+    // Resources — components/blocks/charts as readable MCP resources
+    // ---------------------------------------------------------------------
+
+    protected function resourcesList(): array
+    {
+        $resources = [];
+        foreach ($this->items() as $i) {
+            if (($i['type'] ?? '') !== 'registry:ui') {
+                continue;
+            }
+            $resources[] = array_filter([
+                'uri' => 'blatui://component/'.$i['name'],
+                'name' => $i['title'] ?? $i['name'],
+                'description' => $i['description'] ?? null,
+                'mimeType' => 'text/plain',
+            ], fn ($v) => $v !== null);
+        }
+
+        return ['resources' => $resources];
+    }
+
+    protected function resourceTemplates(): array
+    {
+        return ['resourceTemplates' => [
+            ['uriTemplate' => 'blatui://component/{name}', 'name' => 'BlatUI component', 'description' => 'Blade source of a component family', 'mimeType' => 'text/plain'],
+            ['uriTemplate' => 'blatui://block/{name}', 'name' => 'BlatUI block', 'description' => 'Full-page block example', 'mimeType' => 'text/plain'],
+            ['uriTemplate' => 'blatui://chart/{name}', 'name' => 'BlatUI chart', 'description' => 'Chart example', 'mimeType' => 'text/plain'],
+        ]];
+    }
+
+    protected function resourceRead(array $params): array
+    {
+        $uri = (string) ($params['uri'] ?? '');
+        if (! preg_match('#^blatui://(component|block|chart)/([a-z0-9-]+)$#', $uri, $m)) {
+            throw new \RuntimeException("Unknown resource: {$uri}", -32602);
+        }
+
+        $item = match ($m[1]) {
+            'block' => $this->dist->blockItem($m[2]),
+            'chart' => $this->dist->chartItem($m[2]),
+            default => $this->dist->componentItem($m[2]),
+        };
+        if ($item === null) {
+            throw new \RuntimeException("Resource not found: {$uri}", -32602);
+        }
+
+        $text = '';
+        foreach ($item['files'] ?? [] as $f) {
+            $text .= ($f['target'] ?? '')."\n".($f['content'] ?? '')."\n\n";
+        }
+
+        return ['contents' => [['uri' => $uri, 'mimeType' => 'text/plain', 'text' => rtrim($text)]]];
+    }
+
+    // ---------------------------------------------------------------------
+    // Prompts — reusable agent workflows
+    // ---------------------------------------------------------------------
+
+    protected function promptsList(): array
+    {
+        return ['prompts' => [
+            [
+                'name' => 'use-component',
+                'description' => 'Insert a BlatUI component with its source and install command.',
+                'arguments' => [['name' => 'name', 'description' => 'Component slug (e.g. button, dialog).', 'required' => true]],
+            ],
+            [
+                'name' => 'scaffold-page',
+                'description' => 'Scaffold a full page from BlatUI blocks (dashboard, login, signup, marketing, pricing).',
+                'arguments' => [['name' => 'kind', 'description' => 'dashboard | login | signup | marketing | pricing', 'required' => true]],
+            ],
+        ]];
+    }
+
+    protected function promptsGet(array $params): array
+    {
+        $name = (string) ($params['name'] ?? '');
+        $args = $params['arguments'] ?? [];
+        $base = $this->dist->baseUrl();
+
+        if ($name === 'use-component') {
+            $slug = (string) ($args['name'] ?? '');
+            $item = $this->dist->componentItem($slug);
+            $body = $item ? $this->render($item) : "Component '{$slug}' not found — use the list_components tool to discover names.";
+
+            return [
+                'description' => "Use the BlatUI {$slug} component",
+                'messages' => [['role' => 'user', 'content' => ['type' => 'text',
+                    'text' => "Add the BlatUI \"{$slug}\" component to my Laravel Blade app and use it. Source + install:\n\n".$body]]],
+            ];
+        }
+
+        if ($name === 'scaffold-page') {
+            $kind = (string) ($args['kind'] ?? 'dashboard');
+
+            return [
+                'description' => "Scaffold a {$kind} page with BlatUI",
+                'messages' => [['role' => 'user', 'content' => ['type' => 'text',
+                    'text' => "Build a {$kind} page for my Laravel app using BlatUI blocks. Browse {$base}/blocks for {$kind}-* examples, "
+                        ."fetch the chosen block from {$base}/r/blocks/<name>.json (write each files[].content to files[].target), "
+                        .'run `php artisan blatui:add` for its registryDependencies, then adapt the content to my app.']]],
+            ];
+        }
+
+        throw new \RuntimeException("Unknown prompt: {$name}", -32602);
     }
 
     // ---------------------------------------------------------------------

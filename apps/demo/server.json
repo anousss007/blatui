@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.anousss007/blatui",
+  "description": "shadcn/ui for Laravel Blade — discover, read and install BlatUI components, blocks and charts.",
+  "repository": {
+    "url": "https://github.com/anousss007/blatui",
+    "source": "github"
+  },
+  "websiteUrl": "https://blatui.remix-it.com",
+  "version": "1.0.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://blatui.remix-it.com/mcp"
+    }
+  ]
+}

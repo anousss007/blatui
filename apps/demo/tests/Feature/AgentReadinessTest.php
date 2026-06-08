@@ -108,6 +108,46 @@ class AgentReadinessTest extends TestCase
         $this->get('/mcp')->assertStatus(405);
     }
 
+    public function test_mcp_initialize_advertises_resources_and_prompts(): void
+    {
+        $res = $this->postJson('/mcp', ['jsonrpc' => '2.0', 'id' => 1, 'method' => 'initialize']);
+
+        $res->assertOk();
+        $this->assertArrayHasKey('resources', $res->json('result.capabilities'));
+        $this->assertArrayHasKey('prompts', $res->json('result.capabilities'));
+    }
+
+    public function test_mcp_resources_list_and_read(): void
+    {
+        $list = $this->postJson('/mcp', ['jsonrpc' => '2.0', 'id' => 1, 'method' => 'resources/list']);
+        $list->assertOk();
+        $uris = collect($list->json('result.resources'))->pluck('uri');
+        $this->assertContains('blatui://component/button', $uris);
+
+        $read = $this->postJson('/mcp', [
+            'jsonrpc' => '2.0', 'id' => 2, 'method' => 'resources/read',
+            'params' => ['uri' => 'blatui://component/button'],
+        ]);
+        $read->assertOk();
+        $this->assertStringContainsString('@props', $read->json('result.contents.0.text'));
+    }
+
+    public function test_mcp_prompts_list_and_get(): void
+    {
+        $list = $this->postJson('/mcp', ['jsonrpc' => '2.0', 'id' => 1, 'method' => 'prompts/list']);
+        $list->assertOk();
+        $names = collect($list->json('result.prompts'))->pluck('name');
+        $this->assertContains('use-component', $names);
+        $this->assertContains('scaffold-page', $names);
+
+        $get = $this->postJson('/mcp', [
+            'jsonrpc' => '2.0', 'id' => 2, 'method' => 'prompts/get',
+            'params' => ['name' => 'use-component', 'arguments' => ['name' => 'button']],
+        ]);
+        $get->assertOk();
+        $this->assertStringContainsString('blatui:add button', $get->json('result.messages.0.content.text'));
+    }
+
     // --- Content negotiation + discovery headers --------------------------
 
     public function test_llms_txt_is_markdown(): void

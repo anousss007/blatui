@@ -53,7 +53,11 @@ class AgentReadiness
             'transports' => [
                 ['type' => 'streamable-http', 'url' => $this->base().'/mcp'],
             ],
-            'capabilities' => ['tools' => (object) []],
+            'capabilities' => [
+                'tools' => (object) [],
+                'resources' => (object) [],
+                'prompts' => (object) [],
+            ],
             'tools' => array_map(
                 fn ($t) => ['name' => $t['name'], 'description' => $t['description']],
                 HttpServer::toolDefinitions(),
