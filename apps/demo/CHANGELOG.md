@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.6] - 2026-06-08
+
+### Fixed
+- **`date-picker` / `datetime-picker` selection wasn't saved to the input** after the teleport
+  (calendar's `calendar-change`/`time-change` bubbled to `<body>`, not the picker root). Moved
+  the listeners inside the teleported popover. Verified in-browser.
+
 ## [1.6.5] - 2026-06-08
 
 ### Fixed
