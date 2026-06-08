@@ -10,10 +10,12 @@
 
 <div
     x-data="{ tab: 'preview', copied: false, copy() { navigator.clipboard.writeText(this.$refs.code.innerText); this.copied = true; clearTimeout(this._t); this._t = setTimeout(() => this.copied = false, 1600); } }"
-    {{ $attributes->twMerge('not-prose group/preview my-6 overflow-hidden rounded-xl border') }}
+    {{-- No overflow-hidden here: it would clip anchored popovers (calendar, select, dropdown…)
+         that overflow the frame. Corners are rounded on the inner panes instead. --}}
+    {{ $attributes->twMerge('not-prose group/preview my-6 rounded-xl border') }}
 >
     {{-- Toolbar --}}
-    <div class="bg-muted/40 flex items-center justify-between border-b px-2 py-1.5">
+    <div class="bg-muted/40 flex items-center justify-between rounded-t-xl border-b px-2 py-1.5">
         <div class="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-md p-0.5">
             <button type="button" @click="tab = 'preview'"
                 :class="tab === 'preview' ? 'bg-background text-foreground shadow-sm' : 'hover:text-foreground'"
@@ -31,12 +33,12 @@
 
     {{-- Preview pane --}}
     <div x-show="tab === 'preview'"
-        class="bg-background flex {{ $previewClass }} items-center justify-center p-10">
+        class="bg-background flex {{ $previewClass }} items-center justify-center rounded-b-xl p-10">
         @include('examples.'.$file)
     </div>
 
     {{-- Code pane --}}
-    <div x-show="tab === 'code'" x-cloak class="relative max-h-[600px] overflow-auto bg-zinc-950 dark:bg-zinc-900">
+    <div x-show="tab === 'code'" x-cloak class="relative max-h-[600px] overflow-auto rounded-b-xl bg-zinc-950 dark:bg-zinc-900">
         <pre class="p-4 text-[13px] leading-relaxed"><code x-ref="code" class="font-mono text-zinc-100">{{ $source }}</code></pre>
     </div>
 </div>
