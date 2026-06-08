@@ -101,4 +101,38 @@ class BlatuiTest extends TestCase
         @unlink($dir.'/ok.blade.php');
         @rmdir($dir);
     }
+
+    public function test_doctor_flags_leaked_xui_tag_in_compiled_view(): void
+    {
+        $src = sys_get_temp_dir().'/blatui-src-'.uniqid();
+        $compiled = sys_get_temp_dir().'/blatui-compiled-'.uniqid();
+        @mkdir($src, 0777, true);
+        @mkdir($compiled, 0777, true);
+
+        // A compiled view where an <x-ui.input> failed to compile and leaked into the output.
+        file_put_contents($compiled.'/abc123.php', "<?php /* compiled */ ?>\n<div><x-ui.input type=\"email\" /></div>\n");
+
+        $this->artisan('blatui:doctor', ['path' => $src, '--compiled' => $compiled])->assertFailed();
+
+        @unlink($compiled.'/abc123.php');
+        @rmdir($compiled);
+        @rmdir($src);
+    }
+
+    public function test_doctor_ignores_encoded_xui_in_compiled_view(): void
+    {
+        $src = sys_get_temp_dir().'/blatui-src-'.uniqid();
+        $compiled = sys_get_temp_dir().'/blatui-compiled-ok-'.uniqid();
+        @mkdir($src, 0777, true);
+        @mkdir($compiled, 0777, true);
+
+        // HTML-encoded references (docs showing code) must NOT be flagged.
+        file_put_contents($compiled.'/def456.php', "<?php ?>\n<code>&lt;x-ui.input /&gt;</code>\n");
+
+        $this->artisan('blatui:doctor', ['path' => $src, '--compiled' => $compiled])->assertSuccessful();
+
+        @unlink($compiled.'/def456.php');
+        @rmdir($compiled);
+        @rmdir($src);
+    }
 }

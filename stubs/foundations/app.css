@@ -1452,3 +1452,7 @@
 [data-hide-outside-days] tbody tr:not(:has(button[data-day]:not([data-outside]))) {
     display: none;
 }
+
+/* Marquee (<x-ui.marquee>): seamless infinite scroll of two duplicated content groups. */
+@keyframes blat-marquee-x { to { transform: translateX(-50%); } }
+@keyframes blat-marquee-y { to { transform: translateY(-50%); } }

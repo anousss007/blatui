@@ -7,9 +7,10 @@ use Symfony\Component\Finder\Finder;
 
 class DoctorCommand extends Command
 {
-    protected $signature = 'blatui:doctor {path? : Directory to scan (defaults to resources/views)}';
+    protected $signature = 'blatui:doctor {path? : Directory of Blade views to scan (defaults to resources/views)}
+        {--compiled= : Directory of compiled views to scan for leaked tags (defaults to the framework view cache)}';
 
-    protected $description = 'Scan Blade views for common BlatUI footguns (e.g. an <x-ui.button> in a <form> with no type — it renders type=button and will not submit)';
+    protected $description = 'Scan for common BlatUI footguns: an <x-ui.button> in a <form> with no type (renders type=button, will not submit), and <x-ui.*> tags that leaked into compiled HTML (failed to compile — e.g. nested in an @aware slot)';
 
     public function handle(): int
     {
@@ -21,35 +22,50 @@ class DoctorCommand extends Command
             return self::FAILURE;
         }
 
-        $finder = (new Finder)->files()->in($base)->name('*.blade.php');
-
-        $findings = [];
+        // --- Check 1: typeless <x-ui.button> inside a <form> (source scan) ---
+        $buttonFindings = [];
         $scanned = 0;
-
-        foreach ($finder as $file) {
+        foreach ((new Finder)->files()->in($base)->name('*.blade.php') as $file) {
             $scanned++;
-            $findings = array_merge($findings, $this->scanFile($file->getRealPath(), $file->getContents()));
+            $buttonFindings = array_merge($buttonFindings, $this->scanButtons($file->getRealPath(), $file->getContents()));
         }
 
-        if (empty($findings)) {
+        // --- Check 2: literal <x-ui.*> that leaked into compiled HTML (compiled-view scan) ---
+        $literalFindings = $this->scanCompiledViews();
+
+        $total = count($buttonFindings) + count($literalFindings);
+
+        if ($total === 0) {
             $this->components->info("Scanned {$scanned} Blade file(s) — no BlatUI footguns found.");
 
             return self::SUCCESS;
         }
 
-        $this->components->warn(count($findings).' potential issue(s) across '.$scanned.' Blade file(s):');
+        $this->components->warn($total.' potential issue(s) found:');
         $this->newLine();
 
-        foreach ($findings as $f) {
-            $this->line("  <fg=yellow>⚠</>  <fg=gray>{$f['file']}:{$f['line']}</>");
-            $this->line("      {$f['message']}");
+        if (! empty($buttonFindings)) {
+            $this->line('  <options=bold>Typeless buttons in a form</> — render type="button" and will NOT submit:');
+            foreach ($buttonFindings as $f) {
+                $this->line("  <fg=yellow>⚠</>  <fg=gray>{$f['file']}:{$f['line']}</>");
+                $this->line("      {$f['message']}");
+            }
+            $this->line('  <options=bold>Fix:</> add <fg=green>type="submit"</> to the form\'s submit button (or <fg=green>type="button"</> if it is an action button).');
+            $this->line('  <fg=gray>BlatUI buttons default to type="button" (shadcn-aligned); a migrated native submit button can silently stop submitting.</>');
+            $this->newLine();
         }
 
-        $this->newLine();
-        $this->line('  <options=bold>Fix:</> add <fg=green>type="submit"</> to the form\'s submit button (or <fg=green>type="button"</> if it is an action button).');
-        $this->line('  <fg=gray>BlatUI buttons default to type="button" (shadcn-aligned). A native <button> inside a</>');
-        $this->line('  <fg=gray>form defaults to submit, so submit buttons migrated from native markup can silently stop</>');
-        $this->line('  <fg=gray>submitting with no error. This check does not fail your build — review each finding.</>');
+        if (! empty($literalFindings)) {
+            $this->line('  <options=bold>Un-compiled &lt;x-ui.*&gt; tags in compiled HTML</> — the field/element is silently absent:');
+            foreach ($literalFindings as $f) {
+                $this->line("  <fg=yellow>⚠</>  <fg=gray>{$f['file']}:{$f['line']}</>  <fg=red>{$f['tag']}</>");
+            }
+            $this->line('  <options=bold>Fix:</> a &lt;x-ui.*&gt; left literal in the output failed to compile — usually because it was passed as the');
+            $this->line('  <fg=gray>slot content of an @aware anonymous component that re-wraps the slot. In that DX layer, render a raw</>');
+            $this->line('  <fg=gray>element styled by a foundations utility instead: </><fg=green>.blat-input .blat-textarea .blat-select .blat-checkbox .blat-radio</>');
+            $this->line('  <fg=gray>This passes GET/feature tests (page still renders 200) — only a browser test that fills the field catches it.</>');
+            $this->newLine();
+        }
 
         return self::FAILURE;
     }
@@ -57,7 +73,7 @@ class DoctorCommand extends Command
     /**
      * @return array<int, array{file: string, line: int, message: string}>
      */
-    private function scanFile(string $path, string $content): array
+    private function scanButtons(string $path, string $content): array
     {
         $findings = [];
 
@@ -96,6 +112,40 @@ class DoctorCommand extends Command
                 'line' => $line,
                 'message' => '<x-ui.button> inside a <form> has no type — it renders type="button" and will NOT submit the form.',
             ];
+        }
+
+        return $findings;
+    }
+
+    /**
+     * Scan the compiled view cache for literal <x-ui.*> tags. A component tag that reaches the
+     * compiled PHP un-transformed means it failed to compile (commonly: nested as slot content of
+     * an @aware anonymous component). HTML-encoded references in docs (&lt;x-ui...) won't match.
+     *
+     * @return array<int, array{file: string, line: int, tag: string}>
+     */
+    private function scanCompiledViews(): array
+    {
+        $dir = $this->option('compiled')
+            ?: (function_exists('storage_path') ? storage_path('framework/views') : null);
+        if (! $dir || ! is_dir($dir)) {
+            return [];
+        }
+
+        $findings = [];
+        foreach ((new Finder)->files()->in($dir)->name('*.php') as $file) {
+            $content = $file->getContents();
+            if (stripos($content, '<x-ui.') === false) {
+                continue;
+            }
+            if (! preg_match_all('/<x-ui\.[a-z0-9.\-]+/i', $content, $matches, PREG_OFFSET_CAPTURE)) {
+                continue;
+            }
+            $relative = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getRealPath());
+            foreach ($matches[0] as [$tag, $offset]) {
+                $line = substr_count(substr($content, 0, $offset), "\n") + 1;
+                $findings[] = ['file' => $relative, 'line' => $line, 'tag' => $tag.'…'];
+            }
         }
 
         return $findings;

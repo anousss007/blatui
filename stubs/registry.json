@@ -93,6 +93,19 @@
             ]
         }
     },
+    "banner": {
+        "name": "banner",
+        "files": [
+            "banner.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "breadcrumb": {
         "name": "breadcrumb",
         "files": [
@@ -304,6 +317,19 @@
             ],
             "npm": [
                 "@alpinejs/anchor"
+            ]
+        }
+    },
+    "copy-button": {
+        "name": "copy-button",
+        "files": [
+            "copy-button.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
             ]
         }
     },
@@ -580,6 +606,18 @@
         "name": "link",
         "files": [
             "link.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "marquee": {
+        "name": "marquee",
+        "files": [
+            "marquee.blade.php"
         ],
         "dependencies": [],
         "packages": {
