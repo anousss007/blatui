@@ -127,7 +127,7 @@ php artisan blatui:list</x-code-block>
                 <div class="rounded-xl border p-6">
                     <p class="text-muted-foreground mb-4 text-xs font-medium tracking-wide uppercase">Renders</p>
                     <div class="flex justify-center">
-                        <x-ui.card class="w-full max-w-sm">
+                        <x-ui.card variant="sectioned" class="w-full max-w-sm">
                             <x-ui.card-header>
                                 <x-ui.card-title>Welcome back</x-ui.card-title>
                                 <x-ui.card-description>Sign in to continue.</x-ui.card-description>

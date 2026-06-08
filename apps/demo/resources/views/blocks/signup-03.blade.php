@@ -8,7 +8,7 @@
                 Acme Inc.
             </a>
             <div class="flex flex-col gap-6">
-                <x-ui.card>
+                <x-ui.card variant="sectioned">
                     <x-ui.card-header class="text-center">
                         <x-ui.card-title class="text-xl">Create your account</x-ui.card-title>
                         <x-ui.card-description>

@@ -1,4 +1,4 @@
-<x-ui.card class="w-full max-w-sm overflow-hidden pt-0">
+<x-ui.card variant="sectioned" class="w-full max-w-sm overflow-hidden pt-0">
     <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80&auto=format&fit=crop"
         alt=""
         class="aspect-video w-full object-cover" />

@@ -1,5 +1,5 @@
 <x-ui.collapsible class="w-full max-w-sm">
-    <x-ui.card>
+    <x-ui.card variant="sectioned">
         <x-ui.card-header>
             <x-ui.card-title>Deployment</x-ui.card-title>
             <x-ui.card-description>Production build · 2 minutes ago</x-ui.card-description>

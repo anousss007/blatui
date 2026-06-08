@@ -1,6 +1,6 @@
 <x-layouts.app title="Calendar 27">
     <div class="flex min-h-svh items-center justify-center p-6">
-        <x-ui.card
+        <x-ui.card variant="sectioned"
             class="@container/card w-full max-w-xl"
             x-data="{
                 chart: null,

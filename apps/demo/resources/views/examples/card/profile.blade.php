@@ -1,4 +1,4 @@
-<x-ui.card class="w-full max-w-xs">
+<x-ui.card variant="sectioned" class="w-full max-w-xs">
     <x-ui.card-content class="flex flex-col items-center gap-3 pt-6 text-center">
         <x-ui.avatar class="size-16"><x-ui.avatar-fallback class="text-lg">SC</x-ui.avatar-fallback></x-ui.avatar>
         <div>

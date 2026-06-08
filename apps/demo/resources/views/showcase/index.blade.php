@@ -49,7 +49,7 @@
         <div class="mx-auto max-w-6xl px-6 pb-20">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 {{-- Stat + chart --}}
-                <x-ui.card class="md:col-span-2">
+                <x-ui.card variant="sectioned" class="md:col-span-2">
                     <x-ui.card-header>
                         <x-ui.card-description>Total Revenue</x-ui.card-description>
                         <x-ui.card-title class="text-3xl font-semibold tabular-nums">$1,250.00</x-ui.card-title>
@@ -69,7 +69,7 @@
                 </div>
 
                 {{-- Form card --}}
-                <x-ui.card>
+                <x-ui.card variant="sectioned">
                     <x-ui.card-header>
                         <x-ui.card-title>Create account</x-ui.card-title>
                         <x-ui.card-description>Enter your email to get started.</x-ui.card-description>

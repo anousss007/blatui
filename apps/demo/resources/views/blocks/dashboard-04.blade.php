@@ -78,7 +78,7 @@
                 {{-- Stat cards --}}
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach ($cards as $c)
-                        <x-ui.card>
+                        <x-ui.card variant="sectioned">
                             <x-ui.card-content class="flex items-center gap-4 p-5">
                                 <div class="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
                                     <x-dynamic-component :component="'lucide-'.$c['icon']" class="size-5" />
@@ -94,7 +94,7 @@
 
                 {{-- Goals + Calendar + Team --}}
                 <div class="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
-                    <x-ui.card>
+                    <x-ui.card variant="sectioned">
                         <x-ui.card-header>
                             <x-ui.card-title>Quarterly Goals</x-ui.card-title>
                             <x-ui.card-description>Completion by objective</x-ui.card-description>
@@ -112,7 +112,7 @@
                         </x-ui.card-content>
                     </x-ui.card>
 
-                    <x-ui.card class="flex flex-col">
+                    <x-ui.card variant="sectioned" class="flex flex-col">
                         <x-ui.card-header>
                             <x-ui.card-title>Calendar</x-ui.card-title>
                             <x-ui.card-description>June 2025</x-ui.card-description>
@@ -122,7 +122,7 @@
                         </x-ui.card-content>
                     </x-ui.card>
 
-                    <x-ui.card>
+                    <x-ui.card variant="sectioned">
                         <x-ui.card-header>
                             <x-ui.card-title>Team</x-ui.card-title>
                             <x-ui.card-description>Who's around today</x-ui.card-description>
@@ -147,7 +147,7 @@
                 </div>
 
                 {{-- Project progress --}}
-                <x-ui.card>
+                <x-ui.card variant="sectioned">
                     <x-ui.card-header>
                         <x-ui.card-title>Project Progress</x-ui.card-title>
                         <x-ui.card-description>Status across active projects</x-ui.card-description>

@@ -1,6 +1,6 @@
 <x-layouts.app title="Calendar 12">
     <div class="flex min-h-svh items-center justify-center p-6">
-        <x-ui.card>
+        <x-ui.card variant="sectioned">
             <x-ui.card-header class="relative border-b">
                 <x-ui.card-title>Reserva una cita</x-ui.card-title>
                 <x-ui.card-description>Selecciona las fechas para tu cita</x-ui.card-description>

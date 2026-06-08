@@ -1,7 +1,7 @@
 <x-layouts.app title="Chart Bar Custom Label">
     <div class="flex min-h-svh items-center justify-center p-6">
         <div class="w-full max-w-md">
-            <x-ui.card>
+            <x-ui.card variant="sectioned">
                 <x-ui.card-header>
                     <x-ui.card-title>Bar Chart - Custom Label</x-ui.card-title>
                     <x-ui.card-description>January - June 2024</x-ui.card-description>

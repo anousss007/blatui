@@ -1,4 +1,4 @@
-<x-ui.card class="w-full max-w-sm">
+<x-ui.card variant="sectioned" class="w-full max-w-sm">
     <x-ui.card-header>
         <x-ui.card-title>Create project</x-ui.card-title>
         <x-ui.card-description>Deploy your new project in one-click.</x-ui.card-description>

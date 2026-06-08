@@ -1,7 +1,7 @@
 <x-layouts.app title="Chart Pie Interactive">
     <div class="flex min-h-svh items-center justify-center p-6">
         <div class="w-full max-w-md">
-            <x-ui.card class="flex flex-col">
+            <x-ui.card variant="sectioned" class="flex flex-col">
                 <x-ui.card-header class="flex-row items-start space-y-0 pb-0">
                     <div class="grid gap-1">
                         <x-ui.card-title>Pie Chart - Interactive</x-ui.card-title>

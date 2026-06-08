@@ -1,4 +1,4 @@
-<x-ui.card class="w-full max-w-sm overflow-hidden pt-0">
+<x-ui.card variant="sectioned" class="w-full max-w-sm overflow-hidden pt-0">
     <img src="https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800&q=80&auto=format&fit=crop"
         alt="Solid oak dining table with wooden chairs"
         class="aspect-[4/3] w-full object-cover" />

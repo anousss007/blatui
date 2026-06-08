@@ -1,6 +1,6 @@
 <x-layouts.app title="Calendar 10">
     <div class="flex min-h-svh items-center justify-center p-6">
-        <x-ui.card>
+        <x-ui.card variant="sectioned">
             <x-ui.card-header class="relative">
                 <x-ui.card-title>Appointment</x-ui.card-title>
                 <x-ui.card-description>Find a date</x-ui.card-description>

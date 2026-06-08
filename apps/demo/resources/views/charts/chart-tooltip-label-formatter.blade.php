@@ -1,7 +1,7 @@
 <x-layouts.app title="Chart Tooltip Label Formatter">
     <div class="flex min-h-svh items-center justify-center p-6">
         <div class="w-full max-w-md">
-            <x-ui.card>
+            <x-ui.card variant="sectioned">
                 <x-ui.card-header>
                     <x-ui.card-title>Tooltip - Label Formatter</x-ui.card-title>
                     <x-ui.card-description>Tooltip with label formatter.</x-ui.card-description>

@@ -1,7 +1,7 @@
 <x-layouts.app title="Chart Pie Label List">
     <div class="flex min-h-svh items-center justify-center p-6">
         <div class="w-full max-w-md">
-            <x-ui.card class="flex flex-col">
+            <x-ui.card variant="sectioned" class="flex flex-col">
                 <x-ui.card-header class="items-center pb-0">
                     <x-ui.card-title>Pie Chart - Label List</x-ui.card-title>
                     <x-ui.card-description>January - June 2024</x-ui.card-description>

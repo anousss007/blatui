@@ -10,7 +10,7 @@
         @foreach ($quotes as $q)
             <x-ui.carousel-item>
                 <div class="p-1">
-                    <x-ui.card>
+                    <x-ui.card variant="sectioned">
                         <x-ui.card-content class="flex flex-col gap-4 p-6">
                             <p class="text-sm leading-relaxed">"{{ $q['quote'] }}"</p>
                             <div class="flex items-center gap-3">

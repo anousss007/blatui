@@ -7,14 +7,14 @@ return [
         'Forms & Input' => [
             'button', 'button-group', 'input', 'input-group', 'input-otp', 'textarea',
             'label', 'field', 'checkbox', 'radio-group', 'switch', 'select', 'combobox',
-            'slider', 'toggle', 'toggle-group', 'calendar', 'date-picker',
+            'slider', 'toggle', 'toggle-group', 'rating', 'calendar', 'date-picker',
             'datetime-picker', 'time-field',
         ],
         'Layout' => [
             'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar',
         ],
         'Data Display' => [
-            'avatar', 'badge', 'table', 'carousel', 'chart', 'item', 'kbd', 'progress', 'skeleton',
+            'avatar', 'badge', 'table', 'carousel', 'chart', 'icon', 'item', 'kbd', 'progress', 'skeleton',
         ],
         'Feedback' => [
             'alert', 'empty', 'spinner', 'sonner', 'tooltip', 'hover-card',
@@ -24,7 +24,7 @@ return [
             'context-menu', 'menubar', 'command', 'command-dialog',
         ],
         'Navigation' => [
-            'breadcrumb', 'tabs', 'navigation-menu', 'pagination',
+            'breadcrumb', 'link', 'tabs', 'navigation-menu', 'pagination',
         ],
         'Disclosure' => [
             'accordion', 'collapsible',
@@ -55,6 +55,7 @@ return [
         'slider' => 'An input where the user selects a value from within a given range.',
         'toggle' => 'A two-state button that can be either on or off.',
         'toggle-group' => 'A set of two-state buttons that can be toggled on or off.',
+        'rating' => 'A star rating input with hover preview, keyboard support and a hidden field for forms.',
         'calendar' => 'A date field component that allows users to enter and edit dates.',
         'date-picker' => 'A date picker component with a calendar popover.',
         'datetime-picker' => 'Pick a date and a time together — single or range — in one popover.',
@@ -68,19 +69,20 @@ return [
         'sidebar' => 'A composable, themeable and customizable sidebar component.',
 
         'avatar' => 'An image element with a fallback for representing the user.',
-        'badge' => 'Displays a badge or a component that looks like a badge.',
+        'badge' => 'Displays a badge, with semantic status tones (success, warning, danger, info, neutral).',
         'table' => 'A responsive table component.',
         'carousel' => 'A carousel with motion and swipe.',
         'chart' => 'Beautiful charts, built using ApexCharts.',
+        'icon' => 'A thin wrapper over Lucide icons that auto-mirrors directional arrows under RTL.',
         'item' => 'A flexible component for displaying content with media, title, and actions.',
         'kbd' => 'Used to display textual user input from the keyboard.',
         'progress' => 'Displays an indicator showing the completion progress of a task.',
         'skeleton' => 'Use to show a placeholder while content is loading.',
 
-        'alert' => 'Displays a callout for user attention.',
+        'alert' => 'Displays a callout for user attention, with semantic status tones.',
         'empty' => 'An empty state for when there is no data to display.',
         'spinner' => 'An animated loading indicator.',
-        'sonner' => 'An opinionated toast notification component.',
+        'sonner' => 'An opinionated toast notification component. Includes a sonner-flash bridge that turns Laravel session flashes into toasts.',
         'tooltip' => 'A popup that displays information related to an element when hovered or focused.',
         'hover-card' => 'For sighted users to preview content available behind a link.',
 
@@ -96,6 +98,7 @@ return [
         'command-dialog' => 'A command menu rendered inside a dialog.',
 
         'breadcrumb' => 'Displays the path to the current resource using a hierarchy of links.',
+        'link' => 'An inline, prose-friendly text link with default, muted and subtle variants.',
         'tabs' => 'A set of layered sections of content displayed one panel at a time.',
         'navigation-menu' => 'A collection of links for navigating websites.',
         'pagination' => 'Pagination with page navigation, next and previous links.',

@@ -1,4 +1,4 @@
-<x-ui.card class="w-full max-w-sm overflow-hidden pt-0">
+<x-ui.card variant="sectioned" class="w-full max-w-sm overflow-hidden pt-0">
     <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop"
         alt="Snowy mountain peaks rising above the clouds at sunset"
         class="aspect-video w-full object-cover" />

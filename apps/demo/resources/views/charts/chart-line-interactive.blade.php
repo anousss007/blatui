@@ -1,7 +1,7 @@
 <x-layouts.app title="Chart Line Interactive">
     <div class="flex min-h-svh items-center justify-center p-6">
         <div class="w-full max-w-2xl">
-            <x-ui.card class="py-4 sm:py-0"
+            <x-ui.card variant="sectioned" class="py-4 sm:py-0"
                 x-data="{
                     active: 'desktop',
                     chart: null,

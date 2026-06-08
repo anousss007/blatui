@@ -20,7 +20,7 @@
                     return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' });
                 };
             ">
-            <x-ui.card class="gap-0 p-0">
+            <x-ui.card variant="sectioned" class="gap-0 p-0">
                 <x-ui.card-content class="relative p-0 md:pr-48">
                     <div class="p-6">
                         <x-ui.calendar mode="single" value="2025-06-12" default-month="2025-06-12"

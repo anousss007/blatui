@@ -66,7 +66,7 @@
             </x-ui.sidebar-content>
             <x-ui.sidebar-footer>
                 <div class="p-1">
-                    <x-ui.card class="gap-2 py-4 shadow-none">
+                    <x-ui.card variant="sectioned" class="gap-2 py-4 shadow-none">
                         <x-ui.card-header class="px-4">
                             <x-ui.card-title class="text-sm">Subscribe to our newsletter</x-ui.card-title>
                             <x-ui.card-description>Opt-in to receive updates and news about the sidebar.</x-ui.card-description>

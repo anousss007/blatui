@@ -1,4 +1,4 @@
-<x-ui.card class="w-full max-w-sm">
+<x-ui.card variant="sectioned" class="w-full max-w-sm">
     <x-ui.card-content class="flex flex-col gap-4 pt-6">
         <span class="flex text-amber-500" aria-hidden="true">
             <x-lucide-star class="size-4 fill-current" />

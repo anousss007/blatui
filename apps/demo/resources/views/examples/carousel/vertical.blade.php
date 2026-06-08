@@ -3,7 +3,7 @@
         @foreach (range(1, 5) as $i)
             <x-ui.carousel-item class="h-full">
                 <div class="h-full p-1">
-                    <x-ui.card class="h-full">
+                    <x-ui.card variant="sectioned" class="h-full">
                         <x-ui.card-content class="flex h-full items-center justify-center p-6">
                             <span class="text-4xl font-semibold">{{ $i }}</span>
                         </x-ui.card-content>

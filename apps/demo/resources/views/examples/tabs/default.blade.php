@@ -4,7 +4,7 @@
         <x-ui.tabs-trigger value="password">Password</x-ui.tabs-trigger>
     </x-ui.tabs-list>
     <x-ui.tabs-content value="account">
-        <x-ui.card>
+        <x-ui.card variant="sectioned">
             <x-ui.card-header>
                 <x-ui.card-title>Account</x-ui.card-title>
                 <x-ui.card-description>
@@ -23,7 +23,7 @@
         </x-ui.card>
     </x-ui.tabs-content>
     <x-ui.tabs-content value="password">
-        <x-ui.card>
+        <x-ui.card variant="sectioned">
             <x-ui.card-header>
                 <x-ui.card-title>Password</x-ui.card-title>
                 <x-ui.card-description>

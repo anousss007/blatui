@@ -87,7 +87,7 @@
                 {{-- Stat cards with sparklines --}}
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach ($cards as $i => $c)
-                        <x-ui.card class="@container/card overflow-hidden">
+                        <x-ui.card variant="sectioned" class="@container/card overflow-hidden">
                             <x-ui.card-header class="pb-2">
                                 <x-ui.card-description>{{ $c['label'] }}</x-ui.card-description>
                                 <x-ui.card-title class="text-2xl font-semibold tabular-nums">{{ $c['value'] }}</x-ui.card-title>
@@ -115,7 +115,7 @@
                 </div>
 
                 {{-- Traffic area chart --}}
-                <x-ui.card>
+                <x-ui.card variant="sectioned">
                     <x-ui.card-header>
                         <x-ui.card-title>Traffic</x-ui.card-title>
                         <x-ui.card-description>Visitors vs. previous period</x-ui.card-description>
@@ -140,7 +140,7 @@
 
                 {{-- Sources + Top pages --}}
                 <div class="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-7">
-                    <x-ui.card class="lg:col-span-3">
+                    <x-ui.card variant="sectioned" class="lg:col-span-3">
                         <x-ui.card-header>
                             <x-ui.card-title>Traffic Sources</x-ui.card-title>
                             <x-ui.card-description>Where your visitors come from</x-ui.card-description>
@@ -160,7 +160,7 @@
                         </x-ui.card-content>
                     </x-ui.card>
 
-                    <x-ui.card class="lg:col-span-4">
+                    <x-ui.card variant="sectioned" class="lg:col-span-4">
                         <x-ui.card-header>
                             <x-ui.card-title>Top Pages</x-ui.card-title>
                             <x-ui.card-description>Most visited this month</x-ui.card-description>

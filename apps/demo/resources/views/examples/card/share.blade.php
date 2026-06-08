@@ -1,4 +1,4 @@
-<x-ui.card class="w-full max-w-md">
+<x-ui.card variant="sectioned" class="w-full max-w-md">
     <x-ui.card-header>
         <x-ui.card-title>Share this document</x-ui.card-title>
         <x-ui.card-description>Anyone with the link can view this document.</x-ui.card-description>

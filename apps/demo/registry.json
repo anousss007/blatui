@@ -476,6 +476,18 @@
             ]
         }
     },
+    "icon": {
+        "name": "icon",
+        "files": [
+            "icon.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        }
+    },
     "input": {
         "name": "input",
         "files": [
@@ -556,6 +568,18 @@
         "name": "label",
         "files": [
             "label.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "link": {
+        "name": "link",
+        "files": [
+            "link.blade.php"
         ],
         "dependencies": [],
         "packages": {
@@ -662,6 +686,19 @@
         "files": [
             "radio-group.blade.php",
             "radio-group-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "rating": {
+        "name": "rating",
+        "files": [
+            "rating.blade.php"
         ],
         "dependencies": [],
         "packages": {
@@ -818,7 +855,8 @@
     "sonner": {
         "name": "sonner",
         "files": [
-            "sonner.blade.php"
+            "sonner.blade.php",
+            "sonner-flash.blade.php"
         ],
         "dependencies": [],
         "packages": {

@@ -44,7 +44,7 @@
         @endphp
         <div class="mt-14 grid items-start gap-6 lg:grid-cols-3">
             @foreach ($tiers as $tier)
-                <x-ui.card @class(['relative h-full', 'border-primary shadow-lg' => $tier['featured']])>
+                <x-ui.card variant="sectioned" @class(['relative h-full', 'border-primary shadow-lg' => $tier['featured']])>
                     @if ($tier['featured'])
                         <x-ui.badge class="absolute -top-3 left-1/2 -translate-x-1/2">Most popular</x-ui.badge>
                     @endif

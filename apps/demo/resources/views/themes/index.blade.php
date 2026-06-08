@@ -153,7 +153,7 @@
                     {{-- Card --}}
                     <section class="bg-card rounded-xl border p-6 shadow-sm">
                         <h2 class="text-muted-foreground mb-4 text-xs font-semibold tracking-wide uppercase">Card</h2>
-                        <x-ui.card class="w-full">
+                        <x-ui.card variant="sectioned" class="w-full">
                             <x-ui.card-header>
                                 <x-ui.card-title>Create project</x-ui.card-title>
                                 <x-ui.card-description>Deploy your new project in one click.</x-ui.card-description>

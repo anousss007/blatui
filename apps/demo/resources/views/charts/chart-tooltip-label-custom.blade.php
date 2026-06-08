@@ -1,7 +1,7 @@
 <x-layouts.app title="Chart Tooltip Label Custom">
     <div class="flex min-h-svh items-center justify-center p-6">
         <div class="w-full max-w-md">
-            <x-ui.card>
+            <x-ui.card variant="sectioned">
                 <x-ui.card-header>
                     <x-ui.card-title>Tooltip - Custom label</x-ui.card-title>
                     <x-ui.card-description>Tooltip with custom label from chartConfig.</x-ui.card-description>

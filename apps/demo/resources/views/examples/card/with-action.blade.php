@@ -1,4 +1,4 @@
-<x-ui.card class="w-full max-w-sm">
+<x-ui.card variant="sectioned" class="w-full max-w-sm">
     <x-ui.card-header>
         <x-ui.card-title>Team members</x-ui.card-title>
         <x-ui.card-description>Invite your team to collaborate.</x-ui.card-description>

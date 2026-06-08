@@ -1,4 +1,4 @@
-<x-ui.card class="w-full max-w-sm">
+<x-ui.card variant="sectioned" class="w-full max-w-sm">
     <x-ui.card-header>
         <x-ui.card-title>Premium</x-ui.card-title>
         <x-ui.card-description>For growing teams that need more power.</x-ui.card-description>

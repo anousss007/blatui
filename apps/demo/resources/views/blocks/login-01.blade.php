@@ -2,7 +2,7 @@
     <div class="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
         <div class="w-full max-w-sm">
             <div class="flex flex-col gap-6">
-                <x-ui.card>
+                <x-ui.card variant="sectioned">
                     <x-ui.card-header>
                         <x-ui.card-title>Login to your account</x-ui.card-title>
                         <x-ui.card-description>

@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-06-08
+
+### ⚠️ Breaking
+- **`card` default is now a simple padded box** (`p-6`, no flex/gap/py). Composed cards
+  (header/content/footer) must opt in with `variant="sectioned"`.
+
+### Added
+- **Semantic status tones** — `--success`/`--warning`/`--info` tokens + a `tone` axis on
+  `badge` and `alert` (`success|warning|danger|info|neutral`, badge `variant=soft|solid|outline`).
+- **New components** — `link` (inline prose), `rating` (stars), `icon` (RTL-mirroring Lucide
+  wrapper), and a `sonner-flash` server-flash → toast bridge.
+- **Dispatchable overlays** — `dialog`/`sheet`/`alert-dialog` open by `id` via `$dispatch`,
+  triggers take `for="{id}"` (modals from `@foreach` rows).
+- **Forms** — `size` on input/textarea/select, `native` variants on select/checkbox, plus
+  `.blat-*` `@apply` utilities; button `before`/`after` slots and `as`.
+- **Pickers** — `date-picker` gains `mode="range"`; both pickers gain full-datetime `min`/`max`
+  (date + time), `min-nights`/`max-nights`, and hard end ≥ start validation. `datetime-picker`
+  range is a two-month view.
+
+### Changed
+- `BlatuiRegistry` now detects Lucide used via `<x-dynamic-component>` (dynamic icon deps).
+
 ## [1.5.0] - 2026-06-08
 
 ### Changed

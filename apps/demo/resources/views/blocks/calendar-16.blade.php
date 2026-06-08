@@ -1,6 +1,6 @@
 <x-layouts.app title="Calendar 16">
     <div class="flex min-h-svh items-center justify-center p-6">
-        <x-ui.card class="w-fit py-4">
+        <x-ui.card variant="sectioned" class="w-fit py-4">
             <x-ui.card-content class="px-4">
                 <x-ui.calendar mode="single" value="2025-06-12" default-month="2025-06-12" class="bg-transparent p-0" />
             </x-ui.card-content>

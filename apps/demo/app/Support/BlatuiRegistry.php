@@ -184,7 +184,8 @@ class BlatuiRegistry
         $source = $this->sourceFor($family);
         $packages = [];
 
-        if (str_contains($source, '<x-lucide-')) {
+        // Static (<x-lucide-foo>) or dynamic (<x-dynamic-component :component="'lucide-'.$x">) usage.
+        if (str_contains($source, '<x-lucide-') || str_contains($source, "'lucide-")) {
             $packages['composer'][] = 'mallardduck/blade-lucide-icons';
         }
         if (str_contains($source, '->twMerge(')) {

@@ -1,7 +1,7 @@
 <x-layouts.app title="Chart Area Interactive">
     <div class="flex min-h-svh items-center justify-center p-6">
         <div class="w-full max-w-2xl">
-            <x-ui.card class="pt-0"
+            <x-ui.card variant="sectioned" class="pt-0"
                 x-data="{
                     range: '90d',
                     chart: null,

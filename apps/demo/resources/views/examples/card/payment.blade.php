@@ -1,4 +1,4 @@
-<x-ui.card class="w-full max-w-sm">
+<x-ui.card variant="sectioned" class="w-full max-w-sm">
     <x-ui.card-header>
         <x-ui.card-title>Payment details</x-ui.card-title>
         <x-ui.card-description>Enter your card information to continue.</x-ui.card-description>

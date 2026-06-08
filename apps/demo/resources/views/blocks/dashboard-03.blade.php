@@ -91,7 +91,7 @@
                 {{-- KPI cards --}}
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach ($cards as $c)
-                        <x-ui.card>
+                        <x-ui.card variant="sectioned">
                             <x-ui.card-header>
                                 <x-ui.card-description class="flex items-center gap-2">
                                     <x-dynamic-component :component="'lucide-'.$c['icon']" class="size-4" /> {{ $c['label'] }}
@@ -109,7 +109,7 @@
                 </div>
 
                 {{-- Revenue bar chart --}}
-                <x-ui.card>
+                <x-ui.card variant="sectioned">
                     <x-ui.card-header>
                         <x-ui.card-title>Revenue</x-ui.card-title>
                         <x-ui.card-description>Monthly revenue, this year vs. last year</x-ui.card-description>
@@ -134,7 +134,7 @@
 
                 {{-- Orders + Top products --}}
                 <div class="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-7">
-                    <x-ui.card class="lg:col-span-4">
+                    <x-ui.card variant="sectioned" class="lg:col-span-4">
                         <x-ui.card-header>
                             <x-ui.card-title>Recent Orders</x-ui.card-title>
                             <x-ui.card-description>Latest transactions across your store</x-ui.card-description>
@@ -163,7 +163,7 @@
                         </x-ui.card-content>
                     </x-ui.card>
 
-                    <x-ui.card class="lg:col-span-3">
+                    <x-ui.card variant="sectioned" class="lg:col-span-3">
                         <x-ui.card-header>
                             <x-ui.card-title>Top Products</x-ui.card-title>
                             <x-ui.card-description>Best sellers this month</x-ui.card-description>

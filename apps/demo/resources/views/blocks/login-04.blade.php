@@ -2,7 +2,7 @@
     <div class="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
         <div class="w-full max-w-sm md:max-w-4xl">
             <div class="flex flex-col gap-6">
-                <x-ui.card class="overflow-hidden p-0">
+                <x-ui.card variant="sectioned" class="overflow-hidden p-0">
                     <x-ui.card-content class="grid p-0 md:grid-cols-2">
                         <form class="p-6 md:p-8">
                             <x-ui.field-group>

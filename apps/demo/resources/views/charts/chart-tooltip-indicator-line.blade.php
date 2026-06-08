@@ -1,7 +1,7 @@
 <x-layouts.app title="Chart Tooltip Indicator Line">
     <div class="flex min-h-svh items-center justify-center p-6">
         <div class="w-full max-w-md">
-            <x-ui.card>
+            <x-ui.card variant="sectioned">
                 <x-ui.card-header>
                     <x-ui.card-title>Tooltip - Line Indicator</x-ui.card-title>
                     <x-ui.card-description>Tooltip with line indicator.</x-ui.card-description>
