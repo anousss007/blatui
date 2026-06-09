@@ -2,7 +2,7 @@
     $source = rtrim(file_get_contents(resource_path("views/{$kind}/{$slug}.blade.php")));
     $rawUrl = "/{$kind}/{$slug}/raw";
     $title = \Illuminate\Support\Str::headline($slug);
-    $backLabel = $kind === 'charts' ? 'Charts' : 'Blocks';
+    $backLabel = match ($kind) { 'charts' => 'Charts', 'templates' => 'Templates', default => 'Blocks' };
     $addCmd = "php artisan blatui:add {$kind}/{$slug}";
 @endphp
 

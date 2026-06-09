@@ -5,6 +5,7 @@
         'docs' => ['label' => 'Docs', 'href' => '/docs'],
         'components' => ['label' => 'Components', 'href' => '/components'],
         'blocks' => ['label' => 'Blocks', 'href' => '/blocks'],
+        'templates' => ['label' => 'Templates', 'href' => '/templates'],
         'charts' => ['label' => 'Charts', 'href' => '/charts'],
         'themes' => ['label' => 'Themes', 'href' => '/themes'],
     ];

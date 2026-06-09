@@ -15,11 +15,11 @@ Route::view('/docs/mcp', 'docs.mcp')->name('docs.mcp');
 Route::view('/themes', 'themes.index')->name('themes');
 
 Route::get('/sitemap.xml', function () {
-    $urls = ['/', '/docs', '/docs/mcp', '/components', '/blocks', '/charts', '/themes'];
+    $urls = ['/', '/docs', '/docs/mcp', '/components', '/blocks', '/templates', '/charts', '/themes'];
     foreach (glob(resource_path('views/examples/*'), GLOB_ONLYDIR) as $d) {
         $urls[] = '/components/'.basename($d);
     }
-    foreach (['blocks', 'charts'] as $kind) {
+    foreach (['blocks', 'templates', 'charts'] as $kind) {
         foreach (glob(resource_path("views/{$kind}/*.blade.php")) as $f) {
             $name = basename($f, '.blade.php');
             if ($name !== 'index') {
@@ -54,6 +54,21 @@ Route::get('/blocks/{block}', function (string $block) {
 
     return view('docs.viewer', ['kind' => 'blocks', 'slug' => $block]);
 })->name('blocks.show');
+
+// Templates — full, real-world pages assembled from many components.
+Route::view('/templates', 'templates.index')->name('templates.index');
+
+Route::get('/templates/{template}/raw', function (string $template) {
+    abort_unless(preg_match('/^[a-z0-9-]+$/', $template) && view()->exists("templates.$template"), 404);
+
+    return view("templates.$template");
+})->name('templates.raw');
+
+Route::get('/templates/{template}', function (string $template) {
+    abort_unless(preg_match('/^[a-z0-9-]+$/', $template) && view()->exists("templates.$template"), 404);
+
+    return view('docs.viewer', ['kind' => 'templates', 'slug' => $template]);
+})->name('templates.show');
 
 Route::view('/components', 'docs.index')->name('docs.index');
 
