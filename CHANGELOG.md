@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-06-09
+
+### Added
+- **Seven new components:** `marquee` (seamless infinite scroll), `copy-button` (clipboard copy
+  with a copied state + live announcement), `banner` (dismissible announcement bar with semantic
+  tones), `typewriter` (cycling typed words with a caret), `text-reveal` (scroll-linked word-by-word
+  reveal), `gallery` (thumbnail grid → full-screen lightbox with keyboard nav + focus trap), and
+  `video` (styled HTML5 player with poster + custom play overlay). All ARIA-complete, token-driven
+  and reduced-motion aware.
+- **`input` password & icon affordances:** `type="password"` gains a built-in show/hide eye toggle
+  (opt out with `:toggle="false"`); new `leading` / `trailing` slots for prefix/suffix icons, with
+  RTL-safe padding (`ps`/`pe`).
+- **`sonner` collapsed stack + `expand`:** toasts collapse into a stack and fan out on hover/focus
+  (Sonner-style); the new `expand` prop keeps them always expanded.
+- **`dialog` `fullscreen` variant:** an edge-to-edge takeover instead of the centered box.
+- **Carousel swipe:** touch/pen swipe to change slides (`swipe` prop, on by default; mouse unaffected).
+- **`blatui:doctor`** now also scans compiled views for literal `<x-ui.*>` tags that leaked into the
+  HTML (a tag that failed to compile — e.g. nested as the slot content of an `@aware` component) and
+  points at the foundations utilities as the fix.
+- **Foundations utilities** (`.blat-input` / `.blat-textarea` / `.blat-select` / `.blat-checkbox` /
+  `.blat-radio`) documented as the recommended primitive for server-rendered DX layers that re-wrap a
+  slot, with a getting-started callout on the `@aware`-slot compile footgun.
+
+### Fixed
+- **Vertical carousel** paged by the whole stack height instead of one item — the first "next"
+  scrolled every slide out of view, and slides collapsed instead of filling the frame. The vertical
+  track now uses `h-full` (vertical carousels need a height on `<x-ui.carousel-content>`).
+- **Duplicate toasts** when `<x-ui.sonner>` was mounted more than once on a page.
+
+### Changed
+- `sonner` is now a **singleton** per page (the first-mounted toaster stays active; extras go inert),
+  so mounting it twice no longer renders duplicate overlapping toasts. The `window.toast` API is
+  unchanged.
+- Re-publish foundations (`php artisan vendor:publish --tag=blatui-foundations`) to pick up the
+  `marquee` keyframes added to `app.css`.
+
 ## [1.7.0] - 2026-06-08
 
 ### Added
