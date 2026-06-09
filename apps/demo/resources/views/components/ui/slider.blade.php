@@ -1,7 +1,9 @@
 {{--
-    Slider — single value, or a two-handle min–max range.
-      range   enable two thumbs. With range, pass :value="[low, high]"; a `name` submits
-              {name}[min] and {name}[max] as hidden inputs.
+    Slider — single value, or a two-handle min–max range; horizontal or vertical.
+      range        enable two thumbs. With range, pass :value="[low, high]"; a `name` submits
+                   {name}[min] and {name}[max] as hidden inputs.
+      orientation  horizontal (default) | vertical. Vertical needs a height on the slider
+                   (defaults to h-40).
       min/max/step/value/disabled/ariaLabel as usual.
     A11y: each thumb is role="slider" with live aria-valuenow and bounds; full keyboard
           (arrows, home/end, page up/down). In range mode each thumb's bound is the other handle.
@@ -13,6 +15,7 @@
     'step' => 1,
     'value' => 0,
     'range' => false,
+    'orientation' => 'horizontal',
     'disabled' => false,
     'ariaLabel' => 'Value',
 ])
@@ -23,11 +26,20 @@
         $low = $vals[0] ?? $min;
         $high = $vals[1] ?? $max;
     }
+    $vertical = $orientation === 'vertical';
+    $containerCls = $vertical
+        ? 'relative flex h-40 w-fit touch-none flex-col items-center select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50'
+        : 'relative flex w-full touch-none items-center select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50';
+    $trackCls = $vertical
+        ? 'bg-muted relative grow overflow-hidden rounded-full w-1.5 h-full'
+        : 'bg-muted relative grow overflow-hidden rounded-full h-1.5 w-full';
+    $thumbCls = 'border-primary bg-background ring-ring/50 absolute block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden'
+        .($vertical ? ' left-1/2 -translate-x-1/2 translate-y-1/2' : ' top-1/2 -translate-x-1/2 -translate-y-1/2');
 @endphp
 
 <div
     data-slot="slider"
-    data-orientation="horizontal"
+    data-orientation="{{ $orientation }}"
     @if ($range) data-range @endif
     @if ($disabled) data-disabled @endif
     x-data="{
@@ -36,6 +48,7 @@
         step: {{ $step }},
         disabled: {{ $disabled ? 'true' : 'false' }},
         range: {{ $range ? 'true' : 'false' }},
+        vertical: {{ $vertical ? 'true' : 'false' }},
         value: {{ $range ? 0 : $value }},
         low: {{ $range ? $low : 0 }},
         high: {{ $range ? $high : 0 }},
@@ -47,26 +60,28 @@
         get highPercent() { return this.pct(this.high) },
         clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)) },
         snap(raw) { return this.clamp(Math.round(raw / this.step) * this.step, this.min, this.max) },
-        valAt(clientX) {
+        valAt(e) {
             const r = this.$refs.track.getBoundingClientRect();
-            let ratio = (clientX - r.left) / r.width;
+            let ratio = this.vertical ? (1 - (e.clientY - r.top) / r.height) : ((e.clientX - r.left) / r.width);
             ratio = Math.max(0, Math.min(1, ratio));
             return this.snap(this.min + ratio * (this.max - this.min));
         },
-        nearest(clientX) {
-            const v = this.valAt(clientX);
+        nearest(e) {
+            const v = this.valAt(e);
             return Math.abs(v - this.low) <= Math.abs(v - this.high) ? 'low' : 'high';
         },
+        thumbStyle(p) { return this.vertical ? `bottom: ${p}%` : `left: ${p}%` },
+        fillStyle(a, b) { return this.vertical ? `bottom: ${a}%; height: ${b}%` : `left: ${a}%; width: ${b}%` },
         start(e, thumb) {
             if (this.disabled) return;
             this.dragging = true;
-            if (this.range) { this.active = thumb || this.nearest(e.clientX); this.move(e); }
-            else { this.value = this.valAt(e.clientX); }
+            if (this.range) { this.active = thumb || this.nearest(e); this.move(e); }
+            else { this.value = this.valAt(e); }
         },
         move(e) {
             if (!this.dragging) return;
-            if (!this.range) { this.value = this.valAt(e.clientX); return; }
-            const v = this.valAt(e.clientX);
+            if (!this.range) { this.value = this.valAt(e); return; }
+            const v = this.valAt(e);
             if (this.active === 'low') this.low = this.clamp(v, this.min, this.high);
             else this.high = this.clamp(v, this.low, this.max);
         },
@@ -78,53 +93,53 @@
     }"
     @pointermove.window="move($event)"
     @pointerup.window="stop()"
-    {{ $attributes->twMerge('relative flex w-full touch-none items-center select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50') }}
+    {{ $attributes->twMerge($containerCls) }}
 >
     @if ($range)
         @if ($name)
             <input type="hidden" name="{{ $name }}[min]" :value="low">
             <input type="hidden" name="{{ $name }}[max]" :value="high">
         @endif
-        <span data-slot="slider-track" x-ref="track" @pointerdown="start($event)" class="bg-muted relative grow overflow-hidden rounded-full h-1.5 w-full">
-            <span data-slot="slider-range" class="bg-primary absolute h-full" :style="`left: ${lowPercent}%; width: ${highPercent - lowPercent}%`"></span>
+        <span data-slot="slider-track" x-ref="track" @pointerdown="start($event)" class="{{ $trackCls }}">
+            <span data-slot="slider-range" class="bg-primary absolute {{ $vertical ? 'w-full' : 'h-full' }}" :style="fillStyle(lowPercent, highPercent - lowPercent)"></span>
         </span>
         <span
-            data-slot="slider-thumb" role="slider" aria-orientation="horizontal" aria-label="{{ $ariaLabel }} minimum"
+            data-slot="slider-thumb" role="slider" aria-orientation="{{ $orientation }}" aria-label="{{ $ariaLabel }} minimum"
             :tabindex="disabled ? -1 : 0" :aria-disabled="disabled" :aria-valuemin="min" :aria-valuemax="high" :aria-valuenow="low"
             @pointerdown.stop="start($event, 'low')"
             @keydown.left.prevent="bumpLow(-1)" @keydown.down.prevent="bumpLow(-1)"
             @keydown.right.prevent="bumpLow(1)" @keydown.up.prevent="bumpLow(1)"
             @keydown.home.prevent="low = min" @keydown.end.prevent="low = high"
-            :style="`left: ${lowPercent}%`"
-            class="border-primary bg-background ring-ring/50 absolute top-1/2 block size-4 shrink-0 -translate-x-1/2 -translate-y-1/2 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden"
+            :style="thumbStyle(lowPercent)"
+            class="{{ $thumbCls }}"
         ></span>
         <span
-            data-slot="slider-thumb" role="slider" aria-orientation="horizontal" aria-label="{{ $ariaLabel }} maximum"
+            data-slot="slider-thumb" role="slider" aria-orientation="{{ $orientation }}" aria-label="{{ $ariaLabel }} maximum"
             :tabindex="disabled ? -1 : 0" :aria-disabled="disabled" :aria-valuemin="low" :aria-valuemax="max" :aria-valuenow="high"
             @pointerdown.stop="start($event, 'high')"
             @keydown.left.prevent="bumpHigh(-1)" @keydown.down.prevent="bumpHigh(-1)"
             @keydown.right.prevent="bumpHigh(1)" @keydown.up.prevent="bumpHigh(1)"
             @keydown.home.prevent="high = low" @keydown.end.prevent="high = max"
-            :style="`left: ${highPercent}%`"
-            class="border-primary bg-background ring-ring/50 absolute top-1/2 block size-4 shrink-0 -translate-x-1/2 -translate-y-1/2 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden"
+            :style="thumbStyle(highPercent)"
+            class="{{ $thumbCls }}"
         ></span>
     @else
         @if ($name)
             <input type="hidden" name="{{ $name }}" :value="value">
         @endif
-        <span data-slot="slider-track" x-ref="track" @pointerdown="start($event)" class="bg-muted relative grow overflow-hidden rounded-full h-1.5 w-full">
-            <span data-slot="slider-range" class="bg-primary absolute h-full" :style="`width: ${percent}%`"></span>
+        <span data-slot="slider-track" x-ref="track" @pointerdown="start($event)" class="{{ $trackCls }}">
+            <span data-slot="slider-range" class="bg-primary absolute {{ $vertical ? 'w-full' : 'h-full' }}" :style="fillStyle(0, percent)"></span>
         </span>
         <span
-            data-slot="slider-thumb" role="slider" aria-orientation="horizontal" aria-label="{{ $ariaLabel }}"
+            data-slot="slider-thumb" role="slider" aria-orientation="{{ $orientation }}" aria-label="{{ $ariaLabel }}"
             :tabindex="disabled ? -1 : 0" :aria-disabled="disabled" :aria-valuemin="min" :aria-valuemax="max" :aria-valuenow="value"
             @pointerdown="start($event)"
             @keydown.left.prevent="bump(-1)" @keydown.down.prevent="bump(-1)"
             @keydown.right.prevent="bump(1)" @keydown.up.prevent="bump(1)"
             @keydown.home.prevent="value = min" @keydown.end.prevent="value = max"
             @keydown.page-up.prevent="page(1)" @keydown.page-down.prevent="page(-1)"
-            :style="`left: ${percent}%`"
-            class="border-primary bg-background ring-ring/50 absolute top-1/2 block size-4 shrink-0 -translate-x-1/2 -translate-y-1/2 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+            :style="thumbStyle(percent)"
+            class="{{ $thumbCls }}"
         ></span>
     @endif
 </div>

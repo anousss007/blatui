@@ -5,8 +5,8 @@
 return [
     'categories' => [
         'Forms & Input' => [
-            'button', 'button-group', 'copy-button', 'input', 'input-group', 'input-otp', 'textarea',
-            'label', 'field', 'checkbox', 'radio-group', 'switch', 'select', 'combobox',
+            'button', 'button-group', 'copy-button', 'input', 'input-group', 'input-mask', 'input-otp', 'phone-input', 'textarea',
+            'label', 'field', 'checkbox', 'radio-group', 'switch', 'select', 'combobox', 'autocomplete',
             'slider', 'toggle', 'toggle-group', 'rating', 'calendar', 'date-picker',
             'datetime-picker', 'time-field',
         ],
@@ -14,8 +14,8 @@ return [
             'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar',
         ],
         'Data Display' => [
-            'avatar', 'badge', 'table', 'carousel', 'gallery', 'video', 'chart', 'icon', 'item',
-            'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'skeleton',
+            'avatar', 'badge', 'table', 'data-table', 'carousel', 'gallery', 'video', 'chart', 'icon', 'item',
+            'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'skeleton', 'code-block', 'typography',
         ],
         'Feedback' => [
             'alert', 'banner', 'empty', 'spinner', 'sonner', 'tooltip', 'hover-card',
@@ -25,7 +25,7 @@ return [
             'context-menu', 'menubar', 'command', 'command-dialog',
         ],
         'Navigation' => [
-            'breadcrumb', 'link', 'tabs', 'navigation-menu', 'pagination',
+            'breadcrumb', 'link', 'tabs', 'navigation-menu', 'pagination', 'stepper',
         ],
         'Disclosure' => [
             'accordion', 'collapsible',
@@ -45,6 +45,8 @@ return [
         'copy-button' => 'A button that copies text to the clipboard, with a copied state and a live announcement.',
         'input' => 'Displays a form input field or a component that looks like an input field.',
         'input-group' => 'Group inputs with text, buttons, icons, and more.',
+        'input-mask' => 'A text input that formats its value against a mask as you type.',
+        'phone-input' => 'A phone number field with a searchable country-code selector.',
         'input-otp' => 'Accessible one-time password component with copy-paste functionality.',
         'textarea' => 'Displays a form textarea or a component that looks like a textarea.',
         'label' => 'Renders an accessible label associated with controls.',
@@ -54,6 +56,7 @@ return [
         'switch' => 'A control that allows the user to toggle between an on and off state.',
         'select' => 'Displays a list of options for the user to pick from, triggered by a button.',
         'combobox' => 'Autocomplete input and command palette with a list of suggestions.',
+        'autocomplete' => 'A text input that filters and suggests options as you type.',
         'slider' => 'An input where the user selects a value — single, or a two-handle min–max range.',
         'toggle' => 'A two-state button that can be either on or off.',
         'toggle-group' => 'A set of two-state buttons that can be toggled on or off.',
@@ -72,6 +75,8 @@ return [
 
         'avatar' => 'An image element with a fallback for representing the user.',
         'badge' => 'Displays a badge, with semantic status tones (success, warning, danger, info, neutral).',
+        'code-block' => 'A dark code panel with an optional filename header and a copy button.',
+        'data-table' => 'An interactive table with search, sortable columns, row selection and pagination.',
         'table' => 'A responsive table component.',
         'carousel' => 'A carousel with motion and swipe.',
         'gallery' => 'A thumbnail grid that opens a full-screen lightbox with keyboard navigation.',
@@ -111,6 +116,8 @@ return [
         'tabs' => 'A set of layered sections of content displayed one panel at a time.',
         'navigation-menu' => 'A collection of links for navigating websites.',
         'pagination' => 'Pagination with page navigation, next and previous links.',
+        'stepper' => 'Guides users through a multi-step flow — horizontal or vertical, with completed-step checks.',
+        'typography' => 'Prose text styles — headings, lead, blockquote, lists, inline code and more, via a single variant prop.',
 
         'accordion' => 'A vertically stacked set of interactive headings that each reveal a section of content.',
         'collapsible' => 'An interactive component which expands and collapses a panel.',

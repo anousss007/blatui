@@ -99,6 +99,17 @@
             opacity: 0;
         }
     }
+
+    --animate-progress-indeterminate: progress-indeterminate 1.4s ease-in-out infinite;
+
+    @keyframes progress-indeterminate {
+        0% {
+            left: -40%;
+        }
+        100% {
+            left: 100%;
+        }
+    }
 }
 
 /* -------------------------------------------------------------------------- */

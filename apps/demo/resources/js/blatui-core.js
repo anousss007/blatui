@@ -128,6 +128,23 @@ window.toast = (opts) => {
         window.dispatchEvent(new CustomEvent('toast', { detail: { ...detail, type } }));
     };
 });
+// A persistent loading toast (no auto-dismiss).
+window.toast.loading = (opts) => {
+    const detail = typeof opts === 'string' ? { title: opts } : (opts || {});
+    window.dispatchEvent(new CustomEvent('toast', { detail: { duration: Infinity, ...detail, type: 'loading' } }));
+};
+// Promise toast: shows `loading`, then swaps to `success`/`error` on settle.
+//   toast.promise(p, { loading, success, error }) — success/error may be functions of the value.
+let _toastPromiseId = 0;
+window.toast.promise = (promise, msgs = {}) => {
+    const id = 'tp-' + (++_toastPromiseId);
+    const text = (m, v) => (typeof m === 'function' ? m(v) : m);
+    window.dispatchEvent(new CustomEvent('toast', { detail: { id, type: 'loading', title: text(msgs.loading) || 'Loading…', duration: Infinity } }));
+    Promise.resolve(typeof promise === 'function' ? promise() : promise)
+        .then((data) => window.dispatchEvent(new CustomEvent('toast-update', { detail: { id, type: 'success', title: text(msgs.success, data) || 'Success', duration: 4000 } })))
+        .catch((err) => window.dispatchEvent(new CustomEvent('toast-update', { detail: { id, type: 'error', title: text(msgs.error, err) || 'Error', duration: 4000 } })));
+    return promise;
+};
 
 // ---------------------------------------------------------------------------
 // Calendar — Alpine day-picker mirroring shadcn/react-day-picker's <Calendar>.

@@ -11,7 +11,8 @@
                 variant="outline"
                 size="sm"
                 x-data
-                x-on:click="$dispatch('open-dialog-member', { name: @js($member) })"
+                data-name="{{ $member }}"
+                x-on:click="$dispatch('open-dialog-member', { name: $el.dataset.name })"
             >Remove</x-ui.button>
         </div>
     @endforeach
