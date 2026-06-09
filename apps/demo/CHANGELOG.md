@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-06-09
+
+### Added
+- **Seven new components:** `marquee`, `copy-button`, `banner`, `typewriter`, `text-reveal`,
+  `gallery` (thumbnail grid → full-screen lightbox), and `video`. All ARIA-complete, token-driven
+  and reduced-motion aware.
+- **`input` password & icon affordances:** built-in show/hide eye toggle on `type="password"`
+  (opt out via `:toggle="false"`), plus `leading` / `trailing` icon slots with RTL-safe padding.
+- **`sonner` collapsed stack + `expand`:** toasts collapse and fan out on hover/focus; `expand`
+  keeps them always expanded.
+- **`dialog` `fullscreen` variant** — edge-to-edge takeover.
+- **Carousel swipe** — touch/pen swipe to change slides (`swipe` prop, on by default).
+- **`blatui:doctor`** scans compiled views for leaked literal `<x-ui.*>` tags; getting-started
+  callout on the `@aware`-slot compile footgun + the `.blat-*` foundations utilities.
+
+### Fixed
+- **Vertical carousel** paged by the whole stack height instead of one slide (the vertical track
+  now uses `h-full`; vertical carousels need a height on `<x-ui.carousel-content>`).
+- **Duplicate toasts** when `<x-ui.sonner>` was mounted more than once on a page.
+
+### Changed
+- `sonner` is now a **singleton** per page (first-mounted toaster wins). `window.toast` API unchanged.
+
 ## [1.7.0] - 2026-06-08
 
 ### Added
