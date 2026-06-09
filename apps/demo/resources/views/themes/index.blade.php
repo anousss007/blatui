@@ -165,8 +165,8 @@
                                 </div>
                             </x-ui.card-content>
                             <x-ui.card-footer class="gap-2">
-                                <x-ui.button class="w-full">Deploy</x-ui.button>
-                                <x-ui.button variant="outline" class="w-full">Cancel</x-ui.button>
+                                <x-ui.button class="flex-1">Deploy</x-ui.button>
+                                <x-ui.button variant="outline" class="flex-1">Cancel</x-ui.button>
                             </x-ui.card-footer>
                         </x-ui.card>
                     </section>
