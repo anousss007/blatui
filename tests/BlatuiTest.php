@@ -135,4 +135,40 @@ class BlatuiTest extends TestCase
         @rmdir($compiled);
         @rmdir($src);
     }
+
+    public function test_doctor_ignores_button_inside_a_blade_comment(): void
+    {
+        $dir = sys_get_temp_dir().'/blatui-doctor-cmt-'.uniqid();
+        @mkdir($dir, 0777, true);
+        // A note explaining why a component is NOT used here must not be flagged as a footgun.
+        file_put_contents(
+            $dir.'/note.blade.php',
+            "<form>\n    {{-- avoid <x-ui.button> here, it won't submit --}}\n    <button type=\"submit\">Save</button>\n</form>\n"
+        );
+
+        $this->artisan('blatui:doctor', ['path' => $dir])->assertSuccessful();
+
+        @unlink($dir.'/note.blade.php');
+        @rmdir($dir);
+    }
+
+    public function test_doctor_ignores_xui_tag_inside_a_comment_in_compiled_view(): void
+    {
+        $src = sys_get_temp_dir().'/blatui-src-'.uniqid();
+        $compiled = sys_get_temp_dir().'/blatui-compiled-cmt-'.uniqid();
+        @mkdir($src, 0777, true);
+        @mkdir($compiled, 0777, true);
+
+        // <x-ui.*> mentioned only inside an HTML comment or a PHP comment is not a real leak.
+        file_put_contents(
+            $compiled.'/ghi789.php',
+            "<?php // do not slot <x-ui.input/> through @aware ?>\n<div><!-- was <x-ui.input /> --></div>\n"
+        );
+
+        $this->artisan('blatui:doctor', ['path' => $src, '--compiled' => $compiled])->assertSuccessful();
+
+        @unlink($compiled.'/ghi789.php');
+        @rmdir($compiled);
+        @rmdir($src);
+    }
 }

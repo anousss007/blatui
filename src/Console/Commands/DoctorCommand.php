@@ -77,6 +77,10 @@ class DoctorCommand extends Command
     {
         $findings = [];
 
+        // Don't flag tags that only appear inside comments (e.g. a note explaining why a
+        // component is NOT used here). Masking preserves offsets so line numbers stay accurate.
+        $content = $this->maskComments($content);
+
         if (! preg_match_all('/<x-ui\.button\b[^>]*>/s', $content, $matches, PREG_OFFSET_CAPTURE)) {
             return $findings;
         }
@@ -118,6 +122,31 @@ class DoctorCommand extends Command
     }
 
     /**
+     * Blank out comment bodies (Blade, HTML, and PHP/JS block + line comments) by replacing them
+     * with same-length whitespace. Offsets and line numbers are preserved, so a <x-ui.*> mentioned
+     * only inside a comment no longer triggers a false positive. The // pattern skips URLs (://).
+     */
+    private function maskComments(string $content): string
+    {
+        $patterns = [
+            '/\{\{--.*?--\}\}/s',      // Blade comments
+            '/<!--.*?-->/s',           // HTML comments
+            '/\/\*.*?\*\//s',          // block comments
+            '/(?<![:\/])\/\/[^\n]*/',  // line comments (not part of a URL)
+        ];
+
+        foreach ($patterns as $re) {
+            $content = preg_replace_callback(
+                $re,
+                fn ($m) => preg_replace('/[^\n]/', ' ', $m[0]),
+                $content
+            ) ?? $content;
+        }
+
+        return $content;
+    }
+
+    /**
      * Scan the compiled view cache for literal <x-ui.*> tags. A component tag that reaches the
      * compiled PHP un-transformed means it failed to compile (commonly: nested as slot content of
      * an @aware anonymous component). HTML-encoded references in docs (&lt;x-ui...) won't match.
@@ -134,7 +163,8 @@ class DoctorCommand extends Command
 
         $findings = [];
         foreach ((new Finder)->files()->in($dir)->name('*.php') as $file) {
-            $content = $file->getContents();
+            // Mask comments first so a <x-ui.*> mentioned in an HTML/PHP comment isn't a false hit.
+            $content = $this->maskComments($file->getContents());
             if (stripos($content, '<x-ui.') === false) {
                 continue;
             }

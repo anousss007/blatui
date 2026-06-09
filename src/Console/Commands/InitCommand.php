@@ -124,6 +124,29 @@ class InitCommand extends Command
             $this->line('    <fg=yellow>php artisan vendor:publish --tag=blatui-foundations</>');
         }
 
+        // --- Foundation skew (D1) ---
+        // blatui:add copies Blade stubs only; a `composer require` bump does NOT re-sync the JS
+        // engine. A published-then-customised blatui-core.js can drift behind, so a component
+        // expects an Alpine helper the app never registered ("the prop exists but does nothing").
+        // Compare by *capability* (registered names), not byte-equality, so an intentional fork
+        // that kept all registrations still passes.
+        $appCorePath = resource_path('js/blatui-core.js');
+        $pkgCorePath = dirname(__DIR__, 3).'/stubs/foundations/blatui-core.js';
+        if (is_file($appCorePath) && is_file($pkgCorePath)) {
+            $missing = array_values(array_diff(
+                $this->foundationApi((string) file_get_contents($pkgCorePath)),
+                $this->foundationApi((string) file_get_contents($appCorePath))
+            ));
+            if ($missing) {
+                $ok = false;
+                $this->components->twoColumnDetail('foundation engine (resources/js/blatui-core.js)', '<fg=red>out of date</>');
+                $this->line('    <fg=gray>missing helpers newer components rely on: </><fg=red>'.implode(', ', $missing).'</>');
+                $this->line('    <fg=yellow>php artisan vendor:publish --tag=blatui-foundations --force</> <fg=gray>— re-sync the engine, then re-apply any local customisations</>');
+            } else {
+                $this->components->twoColumnDetail('foundation engine (resources/js/blatui-core.js)', '<fg=green>in sync</>');
+            }
+        }
+
         $this->newLine();
         if ($ok) {
             $this->components->info('All foundations are in place. Add components with: php artisan blatui:add <component>');
@@ -136,6 +159,26 @@ class InitCommand extends Command
         $this->offerBoostIntegration($composer);
 
         return self::SUCCESS;
+    }
+
+    /**
+     * The public API a foundation engine registers: Alpine.data/directive/magic names and window.*
+     * globals. Used to detect a stale published blatui-core.js by capability rather than by
+     * byte-equality (which would always differ for an intentionally customised copy).
+     *
+     * @return array<int, string>
+     */
+    private function foundationApi(string $js): array
+    {
+        $names = [];
+        if (preg_match_all('/Alpine\.(?:data|directive|magic)\(\s*[\'"]([\w-]+)[\'"]/', $js, $m)) {
+            $names = array_merge($names, $m[1]);
+        }
+        if (preg_match_all('/window\.([A-Za-z_]\w*)\s*=(?!=)/', $js, $m)) {
+            $names = array_merge($names, $m[1]);
+        }
+
+        return array_values(array_unique($names));
     }
 
     /**
