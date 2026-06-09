@@ -173,8 +173,8 @@ const calendar = (cfg = {}) => ({
     captionLayout: cfg.captionLayout || 'label',
     showWeekNumber: !!cfg.showWeekNumber,
     disableNavigation: !!cfg.disableNavigation,
-    minDays: cfg.min || null,
-    maxDays: cfg.max || null,
+    minDays: cfg.minDays ?? cfg.min ?? null,   // explicit minDays/maxDays preferred; min/max kept for back-compat
+    maxDays: cfg.maxDays ?? cfg.max ?? null,
     disabledCfg: cfg.disabled || null,
     minDate: cfg.minDate ? _parse(cfg.minDate) : null,
     maxDate: cfg.maxDate ? _parse(cfg.maxDate) : null,
@@ -230,6 +230,19 @@ const calendar = (cfg = {}) => ({
             if (!t) return;
             this.view = new Date(t.getFullYear(), t.getMonth(), 1);
             if (this.mode === 'single') { this.single = t; this.emit(_ymd(t)); }
+        });
+        // External "set range" hook — symmetric to calendar:set, for pushing a range from app
+        // state (pre-fill, re-open on a selection). Range mode only.
+        // Detail: { from: 'YYYY-MM-DD'|Date|null, to: 'YYYY-MM-DD'|Date|null }
+        window.addEventListener('calendar:set-range', (e) => {
+            if (this.mode !== 'range') return;
+            const d = e.detail || {};
+            const from = d.from ? _parse(d.from) : null;
+            const to = d.to ? _parse(d.to) : null;
+            this.rangeFrom = from;
+            this.rangeTo = to;
+            if (from) this.view = new Date(from.getFullYear(), from.getMonth(), 1);
+            this.emit({ from: from ? _ymd(from) : null, to: to ? _ymd(to) : null });
         });
     },
 

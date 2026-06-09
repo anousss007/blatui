@@ -14,7 +14,7 @@
     data-orientation="{{ $orientation }}"
     x-data="{}"
     x-blat-field
-    {{ $attributes->twMerge('group/field flex w-full gap-3 data-[invalid=true]:text-destructive '.($orientations[$orientation] ?? $orientations['vertical'])) }}
+    {{ $attributes->twMerge('group/field flex w-full gap-2 data-[invalid=true]:text-destructive '.($orientations[$orientation] ?? $orientations['vertical'])) }}
 >
     {{ $slot }}
 </div>

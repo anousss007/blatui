@@ -1428,6 +1428,9 @@
        Chevron is a static gray SVG so it needs no JS; flips side under RTL. */
     .blat-select {
         @apply border-input dark:bg-input/30 flex h-9 w-full min-w-0 appearance-none rounded-md border bg-transparent py-1 ps-3 pe-9 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
+        /* Tailwind's `appearance-none` does not emit the -webkit- prefix; without it,
+           iOS/Safari keeps its native ⇕ arrow on top of our custom chevron. */
+        -webkit-appearance: none;
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23717182' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
         background-repeat: no-repeat;
         background-position: right 0.625rem center;

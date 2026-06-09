@@ -9,8 +9,10 @@
     'captionLayout' => 'label',
     'showWeekNumber' => false,
     'disabled' => null,
-    'min' => null,
+    'min' => null,        // range duration bounds in DAYS (legacy name; prefer minDays/maxDays)
     'max' => null,
+    'minDays' => null,    // explicit range-duration bounds in days (clearer than min/max)
+    'maxDays' => null,
     'required' => false,
     'startMonth' => null,
     'endMonth' => null,
@@ -41,6 +43,8 @@
         'disableNavigation' => (bool) $disableNavigation,
         'min' => $min,
         'max' => $max,
+        'minDays' => $minDays,
+        'maxDays' => $maxDays,
         'minDate' => $minDate,
         'maxDate' => $maxDate,
         'outOfRange' => $outOfRange,

@@ -122,4 +122,17 @@ return [
         'accordion' => 'A vertically stacked set of interactive headings that each reveal a section of content.',
         'collapsible' => 'An interactive component which expands and collapses a panel.',
     ],
+
+    // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).
+    'notes' => [
+        'button' => [
+            'Buttons default to <strong><code>type="button"</code></strong> (shadcn-aligned). Inside a <code>&lt;form&gt;</code>, set <code>type="submit"</code> on the submit button — a button migrated from native/Pine with no <code>type</code> will silently <strong>stop submitting</strong>. Run <code>php artisan blatui:doctor</code> to catch typeless buttons in forms.',
+        ],
+        'dropdown-menu' => [
+            'A <code>dropdown-menu-item</code> renders <strong><code>type="button"</code></strong> by default. To submit the surrounding form from a menu item, pass <code>type="submit"</code> (or <code>href</code> to navigate).',
+        ],
+        'field' => [
+            'Building a custom DX layer that re-wraps a slot with an <code>@aware</code> anonymous component? <code>&lt;x-ui.*&gt;</code> passed as that slot\'s content stays <strong>literal</strong> (it never compiles) — the field is silently absent though the page still returns 200. In such layers, render raw elements styled by the foundation utilities (<code>.blat-input .blat-select .blat-checkbox .blat-radio</code>) instead.',
+        ],
+    ],
 ];

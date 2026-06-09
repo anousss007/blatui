@@ -4,6 +4,7 @@
     'inset' => false,
     'disabled' => false,
     'closeOnSelect' => true,
+    'type' => 'button',   // set type="submit" to submit the surrounding <form> (default button = no submit)
 ])
 
 @php
@@ -30,7 +31,7 @@
     >{{ $slot }}</a>
 @else
     <button
-        type="button"
+        type="{{ $type }}"
         role="menuitem"
         tabindex="-1"
         data-slot="dropdown-menu-item"
