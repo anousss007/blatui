@@ -15,7 +15,7 @@ return [
         ],
         'Data Display' => [
             'avatar', 'badge', 'table', 'carousel', 'gallery', 'video', 'chart', 'icon', 'item',
-            'kbd', 'marquee', 'typewriter', 'text-reveal', 'progress', 'skeleton',
+            'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'skeleton',
         ],
         'Feedback' => [
             'alert', 'banner', 'empty', 'spinner', 'sonner', 'tooltip', 'hover-card',
@@ -54,7 +54,7 @@ return [
         'switch' => 'A control that allows the user to toggle between an on and off state.',
         'select' => 'Displays a list of options for the user to pick from, triggered by a button.',
         'combobox' => 'Autocomplete input and command palette with a list of suggestions.',
-        'slider' => 'An input where the user selects a value from within a given range.',
+        'slider' => 'An input where the user selects a value — single, or a two-handle min–max range.',
         'toggle' => 'A two-state button that can be either on or off.',
         'toggle-group' => 'A set of two-state buttons that can be toggled on or off.',
         'rating' => 'A star rating input with hover preview, keyboard support and a hidden field for forms.',
@@ -88,6 +88,7 @@ return [
         'marquee' => 'A seamless, infinite scroll of its content — logos, testimonials, badges.',
         'typewriter' => 'Types and deletes a cycling list of words — for hero headlines and taglines.',
         'text-reveal' => 'Brightens its words one by one as the element scrolls up through the viewport.',
+        'quote' => 'A styled blockquote / testimonial with optional author, role and avatar.',
         'empty' => 'An empty state for when there is no data to display.',
         'spinner' => 'An animated loading indicator.',
         'sonner' => 'An opinionated toast notification component. Includes a sonner-flash bridge that turns Laravel session flashes into toasts.',

@@ -735,6 +735,18 @@
             ]
         }
     },
+    "quote": {
+        "name": "quote",
+        "files": [
+            "quote.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "radio-group": {
         "name": "radio-group",
         "files": [
