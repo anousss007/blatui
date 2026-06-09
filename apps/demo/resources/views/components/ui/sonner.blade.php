@@ -35,7 +35,16 @@
         isTop: {{ $isTop ? 'true' : 'false' }},
         forceExpand: {{ $expand ? 'true' : 'false' }},
         gap: 14,
+        disabled: false,
+        init() {
+            // The toaster is a singleton — if one is already mounted on the page, this extra
+            // instance stays inert (prevents duplicate toasts when x-ui.sonner appears twice).
+            if (window.__blatToasterActive) { this.disabled = true; return; }
+            window.__blatToasterActive = true;
+        },
+        destroy() { if (! this.disabled) window.__blatToasterActive = false; },
         add(t) {
+            if (this.disabled) return;
             const id = Date.now() + Math.random();
             this.toasts.push({ id, type: 'default', duration: 4000, ...t });
             const d = t.duration || 4000;
