@@ -8,6 +8,7 @@
     'width' => 'w-[200px]',
     'searchable' => true,         // false → a plain picker with no search box
     'disabled' => false,
+    'multiple' => false,          // true → pick many; selected render as removable chips, list stays open
 ])
 
 @php
@@ -20,16 +21,24 @@
         ? ['value' => (string) ($o['value'] ?? ''), 'label' => (string) ($o['label'] ?? $o['value'] ?? '')]
         : ['value' => (string) $o, 'label' => (string) $o]
     )->values();
+
+    // Multiple seeds an array of values; single keeps the scalar string.
+    $initialValue = $multiple
+        ? collect(is_array($value) ? $value : (($value === '' || $value === null) ? [] : [$value]))->map(fn ($v) => (string) $v)->values()
+        : (string) $value;
 @endphp
 
 <div
     data-slot="combobox"
     x-data="{
         open: false,
-        value: @js((string) $value),
+        multiple: @js((bool) $multiple),
+        value: @js($initialValue),
         query: '',
         activeValue: null,
         options: @js($opts),
+        isSelected(v) { return this.multiple ? this.value.includes(v) : this.value === v },
+        get selected() { return this.options.filter(o => this.isSelected(o.value)) },
         get label() { const o = this.options.find(o => o.value === this.value); return o ? o.label : '' },
         matches(label) { return label.toLowerCase().includes(this.query.toLowerCase()) },
         get visible() { return this.options.filter(o => this.matches(o.label)) },
@@ -37,21 +46,35 @@
         ensureActive() {
             const v = this.visible;
             if (!v.length) { this.activeValue = null; return }
-            if (!v.some(o => o.value === this.activeValue)) this.activeValue = (v.find(o => o.value === this.value) || v[0]).value;
+            if (!v.some(o => o.value === this.activeValue)) this.activeValue = (v.find(o => this.isSelected(o.value)) || v[0]).value;
         },
         openList() { this.open = true; this.query = ''; this.$nextTick(() => { this.ensureActive(); (this.$refs.search || this.$refs.list)?.focus() }) },
         close(returnFocus = true) { if (!this.open) return; this.open = false; if (returnFocus) this.$nextTick(() => this.$refs.trigger?.focus()) },
         move(dir) { const v = this.visible; if (!v.length) return; let i = v.findIndex(o => o.value === this.activeValue); i = i < 0 ? 0 : (i + dir + v.length) % v.length; this.activeValue = v[i].value },
         edge(pos) { const v = this.visible; if (!v.length) return; this.activeValue = (pos === 'last' ? v[v.length - 1] : v[0]).value },
         selectActive() { if (this.activeValue != null) this.select(this.activeValue) },
-        select(v) { this.value = (this.value === v ? '' : v); this.close(); this.query = '' }
+        select(v) {
+            if (this.multiple) {
+                const i = this.value.indexOf(v);
+                if (i === -1) this.value.push(v); else this.value.splice(i, 1);
+                return; // keep the list open for further picks
+            }
+            this.value = (this.value === v ? '' : v); this.close(); this.query = '';
+        },
+        remove(v) { const i = this.value.indexOf(v); if (i !== -1) this.value.splice(i, 1) }
     }"
     x-id="['blat-combobox-list', 'blat-combobox-opt']"
     x-init="$watch('query', () => ensureActive())"
     {{ $attributes->twMerge('relative '.$width) }}
 >
     @if ($name)
-        <input type="hidden" name="{{ $name }}" :value="value">
+        @if ($multiple)
+            <template x-for="v in value" :key="v">
+                <input type="hidden" name="{{ $name }}[]" :value="v">
+            </template>
+        @else
+            <input type="hidden" name="{{ $name }}" :value="value">
+        @endif
     @endif
 
     <button
@@ -68,10 +91,26 @@
         :aria-expanded="open"
         :aria-controls="$id('blat-combobox-list')"
         @disabled($disabled)
-        class="{{ $width }} border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+        class="{{ $width }} border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex min-h-9 items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-1.5 text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
     >
-        <span x-text="label || @js($placeholder)" :class="{ 'text-muted-foreground': !label }"></span>
-        <x-lucide-chevrons-up-down class="size-4 shrink-0 opacity-50" aria-hidden="true" />
+        {{-- single-select label --}}
+        <span x-show="!multiple" x-text="label || @js($placeholder)" :class="{ 'text-muted-foreground': !label }"></span>
+
+        {{-- multi-select: placeholder when empty, else removable chips --}}
+        <span x-show="multiple && !selected.length" class="text-muted-foreground">{{ $placeholder }}</span>
+        <span x-show="multiple && selected.length" class="flex flex-1 flex-wrap items-center gap-1">
+            <template x-for="o in selected" :key="o.value">
+                <span class="bg-secondary text-secondary-foreground inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium">
+                    <span x-text="o.label"></span>
+                    <span role="button" tabindex="-1" :aria-label="'Remove ' + o.label" @click.stop.prevent="remove(o.value)"
+                        class="hover:text-foreground/70 inline-flex cursor-pointer items-center rounded-sm outline-none">
+                        <x-lucide-x class="size-3" aria-hidden="true" />
+                    </span>
+                </span>
+            </template>
+        </span>
+
+        <x-lucide-chevrons-up-down class="size-4 shrink-0 self-center opacity-50" aria-hidden="true" />
     </button>
 
     {{-- Teleported to <body> so the listbox is never clipped by an overflow-hidden ancestor. --}}
@@ -119,6 +158,7 @@
                 role="listbox"
                 x-ref="list"
                 tabindex="-1"
+                :aria-multiselectable="multiple"
                 :id="$id('blat-combobox-list')"
                 @if (! $searchable)
                     @keydown.down.prevent="move(1)"
@@ -137,11 +177,11 @@
                         x-show="matches(option.label)"
                         @click="select(option.value)"
                         @mouseenter="activeValue = option.value"
-                        :aria-selected="value === option.value"
+                        :aria-selected="isSelected(option.value)"
                         :data-active="activeValue === option.value"
                         class="data-[active=true]:bg-accent data-[active=true]:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none"
                     >
-                        <x-lucide-check class="size-4" x-bind:class="value === option.value ? 'opacity-100' : 'opacity-0'" aria-hidden="true" />
+                        <x-lucide-check class="size-4" x-bind:class="isSelected(option.value) ? 'opacity-100' : 'opacity-0'" aria-hidden="true" />
                         <span x-text="option.label"></span>
                     </div>
                 </template>

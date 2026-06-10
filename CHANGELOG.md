@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.9.1] - 2026-06-10
+## [1.9.2] - 2026-06-10
+
+### Added
+- **Multi-select (`:multiple`) on `select`, `combobox` and `autocomplete`** (synced from the demo) —
+  opt in with `multiple`: selected entries render as removable chips, picking toggles without closing
+  the list, and it submits as `name[]` (binds to a Laravel array field). Pre-select via
+  `:value="['a', 'b']"`. `autocomplete` becomes a tag input.
+- The bundled **`blatui-core.js` engine** gains multi-value support in `blatSelect` (chips, toggle,
+  `isSelected`/`remove`). The `select` multi-select needs this updated engine — after bumping, run
+  `blatui:init` so the foundation-skew check flags an out-of-date installed `blatui-core.js`.
+  `combobox`/`autocomplete` multi-select are self-contained Blade (Alpine inline), no engine bump
+  required.
 
 ### Added
 - **`combobox` `disabled`** (synced from the demo) — the installable `combobox` stub now accepts a

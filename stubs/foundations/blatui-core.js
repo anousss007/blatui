@@ -885,9 +885,19 @@ const blatMenubar = () => ({
 // $blatNav/$blatType on the listbox; Enter/Space on a focused option selects and
 // closes, restoring focus to the trigger.
 const blatSelect = (config = {}) => ({
+    multiple: !!config.multiple,
     open: false,
-    value: config.value != null ? String(config.value) : '',
+    value: config.multiple
+        ? (Array.isArray(config.value)
+              ? config.value.map(String)
+              : config.value != null && config.value !== ''
+                ? [String(config.value)]
+                : [])
+        : config.value != null
+          ? String(config.value)
+          : '',
     label: '',
+    selected: [], // [{ value, label }] — multiple only; seeded by each item + selectOption
     _list: null,
     _trigger: null,
     get _options() {
@@ -897,12 +907,16 @@ const blatSelect = (config = {}) => ({
               )
             : [];
     },
+    isSelected(val) {
+        val = String(val);
+        return this.multiple ? this.value.includes(val) : this.value === val;
+    },
     openList() {
         this.open = true;
         this.$nextTick(() => {
             if (!this._list) return;
             const opts = this._options;
-            (opts.find((o) => o.dataset.value === this.value) || opts[0] || this._list).focus();
+            (opts.find((o) => this.isSelected(o.dataset.value)) || opts[0] || this._list).focus();
         });
     },
     toggleList() {
@@ -914,9 +928,38 @@ const blatSelect = (config = {}) => ({
         if (returnFocus && this._trigger) this.$nextTick(() => this._trigger.focus());
     },
     selectOption(val, lbl) {
-        this.value = String(val);
+        val = String(val);
+        if (this.multiple) {
+            const i = this.value.indexOf(val);
+            if (i === -1) {
+                this.value.push(val);
+                if (!this.selected.some((s) => s.value === val)) this.selected.push({ value: val, label: lbl });
+            } else {
+                this.value.splice(i, 1);
+                const j = this.selected.findIndex((s) => s.value === val);
+                if (j !== -1) this.selected.splice(j, 1);
+            }
+            return; // keep the list open for further picks
+        }
+        this.value = val;
         this.label = lbl;
         this.close();
+    },
+    // Each <select-item> calls this on init so pre-selected chips/labels resolve their text.
+    seedSelected(val, lbl) {
+        val = String(val);
+        if (this.multiple) {
+            if (this.isSelected(val) && !this.selected.some((s) => s.value === val)) this.selected.push({ value: val, label: lbl });
+        } else if (this.value === val) {
+            this.label = lbl;
+        }
+    },
+    remove(val) {
+        val = String(val);
+        const i = this.value.indexOf(val);
+        if (i !== -1) this.value.splice(i, 1);
+        const j = this.selected.findIndex((s) => s.value === val);
+        if (j !== -1) this.selected.splice(j, 1);
     },
 });
 
