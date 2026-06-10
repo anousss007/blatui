@@ -1,13 +1,28 @@
 {{--
     fullscreen  render the dialog edge-to-edge (inset-0) instead of a centered box —
                 useful for mobile-style takeovers, editors, media viewers.
+    position    where the box sits: center (default) | top | bottom | left | right |
+                top-left | top-right | bottom-left | bottom-right.
 --}}
-@props(['showClose' => true, 'fullscreen' => false])
+@props(['showClose' => true, 'fullscreen' => false, 'position' => 'center'])
 
 @php
+    $positions = [
+        'center' => 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+        'top' => 'top-4 left-1/2 -translate-x-1/2',
+        'bottom' => 'bottom-4 left-1/2 -translate-x-1/2',
+        'left' => 'top-1/2 left-4 -translate-y-1/2',
+        'right' => 'top-1/2 right-4 -translate-y-1/2',
+        'top-left' => 'top-4 left-4',
+        'top-right' => 'top-4 right-4',
+        'bottom-left' => 'bottom-4 left-4',
+        'bottom-right' => 'bottom-4 right-4',
+    ];
+    $pos = $positions[$position] ?? $positions['center'];
+
     $box = $fullscreen
         ? 'bg-background fixed inset-0 z-50 flex w-full flex-col gap-4 overflow-y-auto border-0 p-6 shadow-lg'
-        : 'bg-background fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg sm:max-w-lg';
+        : 'bg-background fixed z-50 grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg sm:max-w-lg '.$pos;
 @endphp
 
 <template x-teleport="body">

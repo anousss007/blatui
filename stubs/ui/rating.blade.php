@@ -4,6 +4,8 @@
     'max' => 5,
     'readonly' => false,
     'size' => 'default',
+    'icon' => 'star',              // any lucide icon name (e.g. star, heart)
+    'color' => 'text-amber-500',  // filled colour
     'id' => null,
 ])
 
@@ -47,9 +49,9 @@
             @mouseenter="!readonly && (hover = i)"
             @focus="!readonly && (hover = i)"
             class="rounded-sm outline-none transition-colors not-disabled:cursor-pointer focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-            :class="current >= i ? 'text-amber-500' : 'text-muted-foreground/30'"
+            :class="current >= i ? '{{ $color }}' : 'text-muted-foreground/30'"
         >
-            <x-lucide-star class="{{ $star }}" x-bind:class="current >= i ? 'fill-current' : 'fill-none'" aria-hidden="true" />
+            <x-dynamic-component :component="'lucide-'.$icon" class="{{ $star }}" x-bind:class="current >= i ? 'fill-current' : 'fill-none'" aria-hidden="true" />
         </button>
     </template>
 </div>

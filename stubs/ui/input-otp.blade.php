@@ -3,8 +3,14 @@
     'maxlength' => 6,
     'value' => '',
     'disabled' => false,
+    'alphanumeric' => false,
     'ariaLabel' => 'One-time password',
 ])
+
+@php
+    $inputmode = $alphanumeric ? 'text' : 'numeric';
+    $pattern = $alphanumeric ? '[a-zA-Z0-9]*' : '[0-9]*';
+@endphp
 
 <div
     data-slot="input-otp"
@@ -22,9 +28,9 @@
         :maxlength="max"
         @focus="focused = true"
         @blur="focused = false"
-        inputmode="numeric"
+        inputmode="{{ $inputmode }}"
         autocomplete="one-time-code"
-        pattern="[0-9]*"
+        pattern="{{ $pattern }}"
         aria-label="{{ $ariaLabel }}"
         @if ($name) name="{{ $name }}" @endif
         @if ($disabled) disabled @endif

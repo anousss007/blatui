@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-06-10
+
+### Added
+- **Seven new installable components:** `stepper` (multi-step flow, horizontal/vertical, with
+  completed-step checks), `typography` (prose styles via one `variant` prop), `data-table`,
+  `autocomplete` (type-ahead input), `phone-input`, `input-mask`, and `code-block` — plus
+  `menubar` sub-menus and an `alert-action` slot. `blatui:add <name>` ships them all.
+- **New variants/props on existing components** (synced from the demo): `tabs` `variant`
+  (segmented | underline | pills), `table` `variant="card"` + striping, `select` `:options`
+  shorthand, `combobox` `:searchable="false"`, `switch` `size`, `toggle-group` vertical + group
+  `size`/`variant`, `textarea` character-count/no-resize/read-only, `tooltip` optional arrow,
+  `calendar` `calendar:set-range` + `minDays`/`maxDays`, and more.
+- **`blatui:init` foundation-skew check** — after a package bump, `blatui:add` copies Blade stubs
+  but not the JS engine. `blatui:init` now compares the helpers your installed `blatui-core.js`
+  registers against the bundled engine and warns about any it is missing (so "the prop exists but
+  does nothing" skew is caught). Robust to intentional customisation (compares by capability).
+
+### Fixed
+- **`blatui:doctor` false positives** — `<x-ui.*>` mentioned only inside a comment (Blade, HTML or
+  PHP) is no longer flagged. Comment bodies are masked before scanning (line numbers preserved).
+- **Foundation fixes shipped via the stubs:** `.blat-select` sets `-webkit-appearance: none`
+  (iOS/Safari double-arrow); `sonner-flash` resolves status strings through `__()` (no leaked
+  slug); `select` items read their own label; `toggle-group` items inherit the group's
+  `size`/`variant`. See the demo changelog for the full component-level list.
+
 ## [1.8.0] - 2026-06-09
 
 ### Added

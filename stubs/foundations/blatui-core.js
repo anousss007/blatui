@@ -128,6 +128,23 @@ window.toast = (opts) => {
         window.dispatchEvent(new CustomEvent('toast', { detail: { ...detail, type } }));
     };
 });
+// A persistent loading toast (no auto-dismiss).
+window.toast.loading = (opts) => {
+    const detail = typeof opts === 'string' ? { title: opts } : (opts || {});
+    window.dispatchEvent(new CustomEvent('toast', { detail: { duration: Infinity, ...detail, type: 'loading' } }));
+};
+// Promise toast: shows `loading`, then swaps to `success`/`error` on settle.
+//   toast.promise(p, { loading, success, error }) — success/error may be functions of the value.
+let _toastPromiseId = 0;
+window.toast.promise = (promise, msgs = {}) => {
+    const id = 'tp-' + (++_toastPromiseId);
+    const text = (m, v) => (typeof m === 'function' ? m(v) : m);
+    window.dispatchEvent(new CustomEvent('toast', { detail: { id, type: 'loading', title: text(msgs.loading) || 'Loading…', duration: Infinity } }));
+    Promise.resolve(typeof promise === 'function' ? promise() : promise)
+        .then((data) => window.dispatchEvent(new CustomEvent('toast-update', { detail: { id, type: 'success', title: text(msgs.success, data) || 'Success', duration: 4000 } })))
+        .catch((err) => window.dispatchEvent(new CustomEvent('toast-update', { detail: { id, type: 'error', title: text(msgs.error, err) || 'Error', duration: 4000 } })));
+    return promise;
+};
 
 // ---------------------------------------------------------------------------
 // Calendar — Alpine day-picker mirroring shadcn/react-day-picker's <Calendar>.
@@ -156,8 +173,8 @@ const calendar = (cfg = {}) => ({
     captionLayout: cfg.captionLayout || 'label',
     showWeekNumber: !!cfg.showWeekNumber,
     disableNavigation: !!cfg.disableNavigation,
-    minDays: cfg.min || null,
-    maxDays: cfg.max || null,
+    minDays: cfg.minDays ?? cfg.min ?? null,   // explicit minDays/maxDays preferred; min/max kept for back-compat
+    maxDays: cfg.maxDays ?? cfg.max ?? null,
     disabledCfg: cfg.disabled || null,
     minDate: cfg.minDate ? _parse(cfg.minDate) : null,
     maxDate: cfg.maxDate ? _parse(cfg.maxDate) : null,
@@ -213,6 +230,19 @@ const calendar = (cfg = {}) => ({
             if (!t) return;
             this.view = new Date(t.getFullYear(), t.getMonth(), 1);
             if (this.mode === 'single') { this.single = t; this.emit(_ymd(t)); }
+        });
+        // External "set range" hook — symmetric to calendar:set, for pushing a range from app
+        // state (pre-fill, re-open on a selection). Range mode only.
+        // Detail: { from: 'YYYY-MM-DD'|Date|null, to: 'YYYY-MM-DD'|Date|null }
+        window.addEventListener('calendar:set-range', (e) => {
+            if (this.mode !== 'range') return;
+            const d = e.detail || {};
+            const from = d.from ? _parse(d.from) : null;
+            const to = d.to ? _parse(d.to) : null;
+            this.rangeFrom = from;
+            this.rangeTo = to;
+            if (from) this.view = new Date(from.getFullYear(), from.getMonth(), 1);
+            this.emit({ from: from ? _ymd(from) : null, to: to ? _ymd(to) : null });
         });
     },
 

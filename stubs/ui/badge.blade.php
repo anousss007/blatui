@@ -1,11 +1,20 @@
 @props([
     'variant' => 'default',
     'tone' => null,
+    'size' => 'default',
     'href' => null,
 ])
 
 @php
-    $base = "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden";
+    $base = "inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden";
+
+    // Padding / type scale. Literal strings for the Tailwind scanner.
+    $sizes = [
+        'sm' => 'px-1.5 py-px text-[0.625rem]',
+        'default' => 'px-2 py-0.5 text-xs',
+        'lg' => 'px-3 py-1 text-sm [&>svg]:size-3.5',
+    ];
+    $sizeCls = $sizes[$size] ?? $sizes['default'];
 
     // Brand variants (unchanged) — used when no `tone` is given.
     $variants = [
@@ -48,9 +57,9 @@
 
     if ($tone && isset($tones[$tone])) {
         $intensity = in_array($variant, ['soft', 'solid', 'outline'], true) ? $variant : 'soft';
-        $classes = $base.' '.$tones[$tone][$intensity];
+        $classes = $base.' '.$sizeCls.' '.$tones[$tone][$intensity];
     } else {
-        $classes = $base.' '.($variants[$variant] ?? $variants['default']);
+        $classes = $base.' '.$sizeCls.' '.($variants[$variant] ?? $variants['default']);
     }
 @endphp
 

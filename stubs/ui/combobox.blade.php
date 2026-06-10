@@ -2,13 +2,19 @@
     'name' => null,
     'options' => [],
     'value' => '',
-    'placeholder' => 'Select option...',
-    'searchPlaceholder' => 'Search...',
-    'empty' => 'No results found.',
+    'placeholder' => null,        // translated trigger text; defaults via __() below (no hardcoded English)
+    'searchPlaceholder' => null,
+    'empty' => null,
     'width' => 'w-[200px]',
+    'searchable' => true,         // false → a plain picker with no search box
 ])
 
 @php
+    // i18n-safe defaults: these are translation keys, localise them in your lang files.
+    $placeholder ??= __('Select option...');
+    $searchPlaceholder ??= __('Search...');
+    $empty ??= __('No results found.');
+
     $opts = collect($options)->map(fn ($o) => is_array($o)
         ? ['value' => (string) ($o['value'] ?? ''), 'label' => (string) ($o['label'] ?? $o['value'] ?? '')]
         : ['value' => (string) $o, 'label' => (string) $o]
@@ -32,7 +38,7 @@
             if (!v.length) { this.activeValue = null; return }
             if (!v.some(o => o.value === this.activeValue)) this.activeValue = (v.find(o => o.value === this.value) || v[0]).value;
         },
-        openList() { this.open = true; this.query = ''; this.$nextTick(() => { this.ensureActive(); this.$refs.search?.focus() }) },
+        openList() { this.open = true; this.query = ''; this.$nextTick(() => { this.ensureActive(); (this.$refs.search || this.$refs.list)?.focus() }) },
         close(returnFocus = true) { if (!this.open) return; this.open = false; if (returnFocus) this.$nextTick(() => this.$refs.trigger?.focus()) },
         move(dir) { const v = this.visible; if (!v.length) return; let i = v.findIndex(o => o.value === this.activeValue); i = i < 0 ? 0 : (i + dir + v.length) % v.length; this.activeValue = v[i].value },
         edge(pos) { const v = this.visible; if (!v.length) return; this.activeValue = (pos === 'last' ? v[v.length - 1] : v[0]).value },
@@ -74,12 +80,16 @@
         x-anchor.bottom-start.offset.4="$refs.trigger"
         @click.outside="close(false)"
         @keydown.escape.prevent.stop="close()"
-        class="bg-popover text-popover-foreground z-50 {{ $width }} origin-top overflow-hidden rounded-md border p-0 shadow-md"
+        {{-- Panel matches the TRIGGER width (not the passed `$width` class — applying that to a
+             body-teleported node made it the viewport width). Grows no narrower than the trigger. --}}
+        x-bind:style="$refs.trigger ? ('min-width:' + $refs.trigger.offsetWidth + 'px') : ''"
+        class="bg-popover text-popover-foreground z-50 w-fit origin-top overflow-hidden rounded-md border p-0 shadow-md"
         x-transition:enter="transition ease-out duration-150"
         x-transition:enter-start="opacity-0 scale-95"
         x-transition:enter-end="opacity-100 scale-100"
     >
         <div class="flex h-full w-full flex-col overflow-hidden rounded-md">
+            @if ($searchable)
             <div class="flex h-9 items-center gap-2 border-b px-3">
                 <x-lucide-search class="size-4 shrink-0 opacity-50" aria-hidden="true" />
                 <input
@@ -102,10 +112,20 @@
                     class="placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden"
                 >
             </div>
+            @endif
             <div
                 role="listbox"
+                x-ref="list"
+                tabindex="-1"
                 :id="$id('blat-combobox-list')"
-                class="max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto p-1"
+                @if (! $searchable)
+                    @keydown.down.prevent="move(1)"
+                    @keydown.up.prevent="move(-1)"
+                    @keydown.home.prevent="edge('first')"
+                    @keydown.end.prevent="edge('last')"
+                    @keydown.enter.prevent="selectActive()"
+                @endif
+                class="max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto p-1 outline-hidden"
             >
                 <div x-show="visibleCount === 0" class="py-6 text-center text-sm">{{ $empty }}</div>
                 <template x-for="option in options" :key="option.value">

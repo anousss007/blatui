@@ -45,10 +45,17 @@
         destroy() { if (! this.disabled) window.__blatToasterActive = false; },
         add(t) {
             if (this.disabled) return;
-            const id = Date.now() + Math.random();
-            this.toasts.push({ id, type: 'default', duration: 4000, ...t });
+            const id = t.id != null ? t.id : (Date.now() + Math.random());
+            this.toasts.push({ type: 'default', duration: 4000, ...t, id });
             const d = t.duration || 4000;
             if (d !== Infinity) setTimeout(() => this.remove(id), d);
+        },
+        update(d) {
+            if (this.disabled) return;
+            if (! this.toasts.some(t => t.id === d.id)) return;
+            this.toasts = this.toasts.map(t => t.id === d.id ? { ...t, ...d } : t);
+            const dur = d.duration || 4000;
+            if (dur !== Infinity) setTimeout(() => this.remove(d.id), dur);
         },
         remove(id) {
             this.toasts = this.toasts.filter(t => t.id !== id);
@@ -86,6 +93,7 @@
         }
     }"
     @toast.window="add($event.detail)"
+    @toast-update.window="update($event.detail)"
     role="region"
     aria-label="Notifications"
     tabindex="-1"
@@ -119,10 +127,15 @@
                 <template x-if="t.type === 'error'"><x-lucide-circle-x class="text-destructive mt-0.5 size-4 shrink-0" /></template>
                 <template x-if="t.type === 'warning'"><x-lucide-triangle-alert class="text-amber-500 mt-0.5 size-4 shrink-0" /></template>
                 <template x-if="t.type === 'info'"><x-lucide-info class="text-sky-500 mt-0.5 size-4 shrink-0" /></template>
+                <template x-if="t.type === 'loading'"><x-lucide-loader-circle class="text-muted-foreground mt-0.5 size-4 shrink-0 animate-spin" /></template>
                 <div class="flex-1 space-y-1">
                     <div x-show="t.title" x-text="t.title" class="text-sm font-semibold"></div>
                     <div x-show="t.description" x-text="t.description" class="text-muted-foreground text-sm"></div>
                 </div>
+                <template x-if="t.action">
+                    <button type="button" @click="t.action.onClick && t.action.onClick(); remove(t.id)"
+                        class="border-input hover:bg-accent shrink-0 self-center rounded-md border px-2.5 py-1 text-xs font-medium transition-colors" x-text="t.action.label"></button>
+                </template>
                 <button
                     type="button"
                     @click="remove(t.id)"

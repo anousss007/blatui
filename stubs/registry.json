@@ -22,6 +22,7 @@
         "name": "alert",
         "files": [
             "alert.blade.php",
+            "alert-action.blade.php",
             "alert-description.blade.php",
             "alert-title.blade.php"
         ],
@@ -64,6 +65,22 @@
         "packages": {
             "composer": [
                 "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "autocomplete": {
+        "name": "autocomplete",
+        "files": [
+            "autocomplete.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor"
             ]
         }
     },
@@ -229,6 +246,19 @@
             ]
         }
     },
+    "code-block": {
+        "name": "code-block",
+        "files": [
+            "code-block.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "collapsible": {
         "name": "collapsible",
         "files": [
@@ -326,6 +356,22 @@
             "copy-button.blade.php"
         ],
         "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "data-table": {
+        "name": "data-table",
+        "files": [
+            "data-table.blade.php"
+        ],
+        "dependencies": [
+            "button",
+            "input"
+        ],
         "packages": {
             "composer": [
                 "mallardduck/blade-lucide-icons",
@@ -533,7 +579,8 @@
     "input": {
         "name": "input",
         "files": [
-            "input.blade.php"
+            "input.blade.php",
+            "input-mask.blade.php"
         ],
         "dependencies": [],
         "packages": {
@@ -646,18 +693,25 @@
         "name": "menubar",
         "files": [
             "menubar.blade.php",
+            "menubar-checkbox-item.blade.php",
             "menubar-content.blade.php",
             "menubar-group.blade.php",
             "menubar-item.blade.php",
             "menubar-label.blade.php",
             "menubar-menu.blade.php",
+            "menubar-radio-group.blade.php",
+            "menubar-radio-item.blade.php",
             "menubar-separator.blade.php",
             "menubar-shortcut.blade.php",
+            "menubar-sub.blade.php",
+            "menubar-sub-content.blade.php",
+            "menubar-sub-trigger.blade.php",
             "menubar-trigger.blade.php"
         ],
         "dependencies": [],
         "packages": {
             "composer": [
+                "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
             ],
             "npm": [
@@ -696,6 +750,19 @@
             "pagination-link.blade.php",
             "pagination-next.blade.php",
             "pagination-previous.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "phone-input": {
+        "name": "phone-input",
+        "files": [
+            "phone-input.blade.php"
         ],
         "dependencies": [],
         "packages": {
@@ -944,6 +1011,115 @@
             ]
         }
     },
+    "stepper": {
+        "name": "stepper",
+        "files": [
+            "stepper.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-content": {
+        "name": "stepper-content",
+        "files": [
+            "stepper-content.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-description": {
+        "name": "stepper-description",
+        "files": [
+            "stepper-description.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-indicator": {
+        "name": "stepper-indicator",
+        "files": [
+            "stepper-indicator.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-item": {
+        "name": "stepper-item",
+        "files": [
+            "stepper-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-nav": {
+        "name": "stepper-nav",
+        "files": [
+            "stepper-nav.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-separator": {
+        "name": "stepper-separator",
+        "files": [
+            "stepper-separator.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-title": {
+        "name": "stepper-title",
+        "files": [
+            "stepper-title.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-trigger": {
+        "name": "stepper-trigger",
+        "files": [
+            "stepper-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "switch": {
         "name": "switch",
         "files": [
@@ -1075,6 +1251,18 @@
         "name": "typewriter",
         "files": [
             "typewriter.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "typography": {
+        "name": "typography",
+        "files": [
+            "typography.blade.php"
         ],
         "dependencies": [],
         "packages": {
