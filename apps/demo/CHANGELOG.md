@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.9.1] - 2026-06-10
+## [1.9.2] - 2026-06-10
+
+### Added
+- **Multi-select (`:multiple`) on `select`, `combobox` and `autocomplete`** — opt in with
+  `multiple` and the control accepts many values. Selected entries render as removable chips
+  (each with an `×`), picking an option toggles it **without closing the list**, and the dropdown
+  shows a check on every selected row. `combobox`/`autocomplete` keep filtering while you pick;
+  `autocomplete` becomes a tag input (chips inline before the field, `Backspace` on an empty query
+  removes the last chip). Submits as `name[]` (one hidden input per value), so it binds straight to
+  a Laravel array field. Initial selection via `:value="['a', 'b']"`. New "Multiple" example on each
+  of the three component pages.
 
 ### Added
 - **`combobox` `disabled`** — the combobox now accepts a `disabled` prop (matching `select` and

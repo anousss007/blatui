@@ -5,6 +5,8 @@
                                  layers (submits without JS, name-bound). Put <option>s in
                                  the slot and mark the selected one with `selected`.
       size    sm | default | lg  (native only; height)
+      multiple false (default) -> single pick. true -> pick many; selected render as
+              removable chips in the trigger and the list stays open. Submits as `name[]`.
       options [value => label] shorthand — auto-composes trigger/content/items (or <option>s
               when native). Omit it to use the compositional API via the slot.
       placeholder  trigger text when nothing is selected (pass a translated string; '' by default
@@ -15,6 +17,7 @@
     'value' => '',
     'native' => false,
     'size' => 'default',
+    'multiple' => false,
     'options' => null,
     'placeholder' => '',
 ])
@@ -32,6 +35,11 @@
             }
         }
     }
+
+    // Multiple seeds an array of values; single keeps the scalar string.
+    $selectedValues = collect(is_array($value) ? $value : (($value === '' || $value === null) ? [] : [$value]))
+        ->map(fn ($v) => (string) $v)->values();
+    $initialValue = $multiple ? $selectedValues : (string) $value;
 @endphp
 
 @if ($native)
@@ -40,17 +48,18 @@
         $nativeSize = $nativeSizes[$size] ?? $nativeSizes['default'];
     @endphp
     <select
-        @if ($name) name="{{ $name }}" @endif
+        @if ($name) name="{{ $name }}{{ $multiple ? '[]' : '' }}" @endif
+        @if ($multiple) multiple @endif
         data-slot="select"
         data-size="{{ $size }}"
-        {{ $attributes->twMerge('blat-select '.$nativeSize) }}
+        {{ $attributes->twMerge('blat-select '.($multiple ? 'h-auto min-h-9 py-1' : $nativeSize)) }}
     >
         @if ($hasOptions)
-            @if ($placeholder !== '')
+            @if (! $multiple && $placeholder !== '')
                 <option value="" disabled @selected($value === '')>{{ $placeholder }}</option>
             @endif
             @foreach ($normalized as $val => $lab)
-                <option value="{{ $val }}" @selected((string) $value === (string) $val)>{{ $lab }}</option>
+                <option value="{{ $val }}" @selected($selectedValues->contains((string) $val))>{{ $lab }}</option>
             @endforeach
         @else
             {{ $slot }}
@@ -59,15 +68,21 @@
 @else
     <div
         data-slot="select"
-        x-data="blatSelect({ value: @js((string) $value) })"
+        x-data="blatSelect({ value: @js($initialValue), multiple: @js((bool) $multiple) })"
         x-id="['blat-listbox']"
         {{ $attributes->twMerge('relative') }}
     >
         @if ($name)
-            <input type="hidden" name="{{ $name }}" :value="value">
+            @if ($multiple)
+                <template x-for="v in value" :key="v">
+                    <input type="hidden" name="{{ $name }}[]" :value="v">
+                </template>
+            @else
+                <input type="hidden" name="{{ $name }}" :value="value">
+            @endif
         @endif
         @if ($hasOptions)
-            <x-ui.select-trigger class="w-full">
+            <x-ui.select-trigger :class="'w-full'.($multiple ? ' data-[size=default]:h-auto min-h-9 py-1' : '')">
                 <x-ui.select-value :placeholder="$placeholder" />
             </x-ui.select-trigger>
             <x-ui.select-content>
