@@ -126,7 +126,7 @@ return [
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).
     'notes' => [
         'button' => [
-            'Buttons default to <strong><code>type="button"</code></strong> (shadcn-aligned). Inside a <code>&lt;form&gt;</code>, set <code>type="submit"</code> on the submit button — a button migrated from native/Pine with no <code>type</code> will silently <strong>stop submitting</strong>. Run <code>php artisan blatui:doctor</code> to catch typeless buttons in forms.',
+            'Buttons default to <strong><code>type="button"</code></strong> — a deliberate default. Inside a <code>&lt;form&gt;</code>, set <code>type="submit"</code> on the submit button, or a native button migrated with no <code>type</code> will silently <strong>stop submitting</strong>. Run <code>php artisan blatui:doctor</code> to catch typeless buttons in forms.',
         ],
         'dropdown-menu' => [
             'A <code>dropdown-menu-item</code> renders <strong><code>type="button"</code></strong> by default. To submit the surrounding form from a menu item, pass <code>type="submit"</code> (or <code>href</code> to navigate).',

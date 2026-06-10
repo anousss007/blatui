@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-06-10
+
+### Added
+- **Seven new components:** `stepper` (horizontal/vertical multi-step flow with completed-step
+  checks), `typography` (prose styles — headings, lead, blockquote, list, inline-code, gradient —
+  via one `variant` prop), `data-table`, `autocomplete` (type-ahead input), `phone-input`,
+  `input-mask`, and `code-block`. Plus `menubar` sub-menus (checkbox/radio items, nested
+  sub-content) and an `alert-action` slot.
+- **New variants & props across existing components:** `tabs` `variant` (segmented | underline |
+  pills); `table` `variant="card"` + zebra striping; `select` `:options="[value => label]"`
+  shorthand; `combobox` `:searchable="false"` (panel now sizes to the trigger); `switch` `size`
+  (sm/default/lg) + colour overrides; `toggle` rounded/stat variants; `toggle-group` vertical
+  orientation **and** group-level `size`/`variant` (now inherited by every item); `spinner`
+  `icon` + colours; `textarea` character-count / no-resize / read-only; `slider` range mode;
+  `badge` `size`; `dialog-content` 9 `position`s; `input-otp` `alphanumeric`; `progress`
+  `indeterminate`; `rating` `icon`/`color`; `accordion-trigger` `icon`/`icon-position`.
+- **`tooltip`:** optional, colour-inheriting, side-aware arrow (`:arrow="false"` to hide);
+  `max-width` so long tooltips wrap instead of stretching.
+- **`sonner`:** `toast.promise()` and `toast.loading()`, plus action buttons on toasts.
+- **`calendar`:** `calendar:set-range` event (push a range from app state) and explicit
+  `minDays`/`maxDays` props for range-duration bounds.
+- **Docs:** bold footgun callouts on the `button`, `dropdown-menu` and `field` pages.
+
+### Fixed
+- **`select` showed the wrong label on selection** — every item shared one ref, so picking any
+  option displayed the *last* option's label. Each item now reads its own label.
+- **`toggle-group` `size`/`variant` never reached items** — a size/variant on the group rendered
+  identically on all items; both now inherit from the group.
+- **iOS/Safari `<select>` double arrow** — `.blat-select` now sets `-webkit-appearance: none`.
+- **`tooltip` resized/repositioned on open** (dropped `text-balance` + the scale transition).
+- **`sonner-flash` i18n** — status strings resolve through `__()` and never leak a raw slug.
+- **`dropdown-menu-item`** gains a `type` prop so it can submit a form (`type="submit"`).
+- **`field`** error spacing tightened (`gap-2`).
+
 ## [1.8.0] - 2026-06-09
 
 ### Added
