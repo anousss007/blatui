@@ -51,7 +51,7 @@ class DoctorCommand extends Command
                 $this->line("      {$f['message']}");
             }
             $this->line('  <options=bold>Fix:</> add <fg=green>type="submit"</> to the form\'s submit button (or <fg=green>type="button"</> if it is an action button).');
-            $this->line('  <fg=gray>BlatUI buttons default to type="button" (shadcn-aligned); a migrated native submit button can silently stop submitting.</>');
+            $this->line('  <fg=gray>BlatUI buttons default to type="button" (a deliberate default); a migrated native submit button can silently stop submitting.</>');
             $this->newLine();
         }
 
