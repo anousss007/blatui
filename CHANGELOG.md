@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.1] - 2026-06-10
+
+### Added
+- **`combobox` `disabled`** (synced from the demo) — the installable `combobox` stub now accepts a
+  `disabled` prop, matching `select`/`autocomplete`: it renders the `disabled` attribute on the
+  trigger and dims it, so the listbox can no longer be opened.
+
 ## [1.9.0] - 2026-06-10
 
 ### Added
