@@ -7,6 +7,7 @@
     'empty' => null,
     'width' => 'w-[200px]',
     'searchable' => true,         // false → a plain picker with no search box
+    'disabled' => false,
 ])
 
 @php
@@ -66,7 +67,8 @@
         aria-label="{{ $placeholder }}"
         :aria-expanded="open"
         :aria-controls="$id('blat-combobox-list')"
-        class="{{ $width }} border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+        @disabled($disabled)
+        class="{{ $width }} border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
     >
         <span x-text="label || @js($placeholder)" :class="{ 'text-muted-foreground': !label }"></span>
         <x-lucide-chevrons-up-down class="size-4 shrink-0 opacity-50" aria-hidden="true" />
