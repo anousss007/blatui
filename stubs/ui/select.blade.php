@@ -20,6 +20,7 @@
     'multiple' => false,
     'options' => null,
     'placeholder' => '',
+    'color' => null,
 ])
 
 @php
@@ -40,6 +41,12 @@
     $selectedValues = collect(is_array($value) ? $value : (($value === '' || $value === null) ? [] : [$value]))
         ->map(fn ($v) => (string) $v)->values();
     $initialValue = $multiple ? $selectedValues : (string) $value;
+
+    // `color` brands the trigger's focus ring locally (overrides the ring/primary tokens).
+    $colorStyle = $color ? "--ring: {$color}; --primary: {$color}; --primary-foreground: #ffffff;" : '';
+    $userStyle = (string) $attributes->get('style', '');
+    $style = trim($colorStyle.($colorStyle && $userStyle ? ' ' : '').$userStyle);
+    $attributes = $attributes->except('style');
 @endphp
 
 @if ($native)
@@ -52,6 +59,7 @@
         @if ($multiple) multiple @endif
         data-slot="select"
         data-size="{{ $size }}"
+        @if ($style) style="{{ $style }}" @endif
         {{ $attributes->twMerge('blat-select '.($multiple ? 'h-auto min-h-9 py-1' : $nativeSize)) }}
     >
         @if ($hasOptions)
@@ -70,6 +78,7 @@
         data-slot="select"
         x-data="blatSelect({ value: @js($initialValue), multiple: @js((bool) $multiple) })"
         x-id="['blat-listbox']"
+        @if ($style) style="{{ $style }}" @endif
         {{ $attributes->twMerge('relative') }}
     >
         @if ($name)

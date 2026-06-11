@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.11.0] - 2026-06-11
+## [1.12.0] - 2026-06-11
+
+### Added
+- **`comparison-table`** — a data-driven feature-comparison table (`:tiers` × `:rows`, check / dash /
+  text values, `highlight` column). `blatui:add comparison-table`.
+- **`accent`** — `<x-ui.accent color="#7c3aed">…</x-ui.accent>` recolours every BlatUI component in
+  its subtree from one token override (display:contents, no layout impact). `blatui:add accent`.
+- **`color` prop on `input`, `textarea` and `select`** — brands the focus ring + selection locally,
+  matching the `button` `color` prop; use `accent` to recolour a whole form or section at once.
 
 ### Added
 - **Five new installable components** — `blatui:add countdown timeline terminal sparkline`:
