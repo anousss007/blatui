@@ -481,8 +481,10 @@
                 <p class="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-widest" style="color:var(--q-muted);">Main</p>
                 @foreach ($navItems as [$label, $icon, $active])
                     <a href="#"
-                       @class(['q-nav-item q-nav-active' => $active, 'q-nav-item' => !$active])
-                       class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium"
+                       @class([
+                           'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium q-nav-item',
+                           'q-nav-active' => $active,
+                       ])
                        @if ($active) aria-current="page" @endif
                     >
                         <x-dynamic-component :component="'lucide-'.$icon" class="size-4 shrink-0" />

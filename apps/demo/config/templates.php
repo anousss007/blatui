@@ -51,6 +51,50 @@ return [
             ],
         ],
 
+        // Showcase · Vol. II — ten more art-directed pages across new industries & styles.
+        'Showcase · Vol. II' => [
+            'lumen' => [
+                'title' => 'Lumen — Podcast Platform',
+                'description' => 'A vibrant audio-streaming landing — animated waveforms, duotone artwork, a full player widget, a sticky mini-player and subscribe tiers.',
+            ],
+            'prism' => [
+                'title' => 'Prism — NFT Marketplace',
+                'description' => 'A holographic digital-art marketplace — shifting iridescent gradients, glassy art cards, live auction countdowns and a bids table.',
+            ],
+            'atlas' => [
+                'title' => 'Atlas — Travel & Adventure',
+                'description' => 'A cinematic travel booker — full-bleed landscapes, a search bar, destination tabs, a curated-trips carousel and a booking stepper.',
+            ],
+            'estate' => [
+                'title' => 'Estate — Luxury Real Estate',
+                'description' => 'An elegant property showcase — architectural imagery, gold hairlines, listing cards, a spotlight gallery and a viewing-request form.',
+            ],
+            'sprout' => [
+                'title' => 'Sprout — Kids EdTech',
+                'description' => 'A joyful learning platform — flat-illustrative shapes, bold offset shadows, a gamification panel, an age-tabbed catalog and a schedule.',
+            ],
+            'verdure' => [
+                'title' => 'Verdure — Sustainability',
+                'description' => 'An earthy climate brand — organic blob shapes, an impact chart, a pledge form and project initiatives in a warm, natural palette.',
+            ],
+            'pulse' => [
+                'title' => 'Pulse — Telemedicine',
+                'description' => 'A calm healthcare platform — an animated ECG line, an appointment booker, a doctor directory and a vitals dashboard preview.',
+            ],
+            'brew' => [
+                'title' => 'Brew — Coffee Roaster',
+                'description' => 'A warm specialty-coffee storefront — kraft textures, rising steam, a product grid, a subscription builder and a roast guide.',
+            ],
+            'helix' => [
+                'title' => 'Helix — Biotech',
+                'description' => 'A futuristic science startup — a CSS DNA helix, a research-pipeline stepper, trial-result charts and a publications table.',
+            ],
+            'mono' => [
+                'title' => 'Mono — Photography',
+                'description' => 'An ultra-minimal photo portfolio — full-bleed imagery, a masonry lightbox gallery, cinematic letterboxing and quiet typography.',
+            ],
+        ],
+
         'Marketing' => [
             'saas' => [
                 'title' => 'SaaS Landing',
