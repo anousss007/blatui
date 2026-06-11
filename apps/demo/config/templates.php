@@ -17,13 +17,29 @@ return [
                 'title' => 'Quantum — Web3 Dashboard',
                 'description' => 'A neon-futurist crypto dashboard on a glowing grid — KPI cards, area/donut charts, a markets table, staking and an onboarding stepper.',
             ],
+            'cosmos' => [
+                'title' => 'Cosmos — Space Tourism',
+                'description' => 'A cinematic space-travel landing — a twinkling starfield, a glowing planet, a live launch countdown, destination tabs, a booking stepper and crew.',
+            ],
             'vinyl' => [
                 'title' => 'Vinyl — Music Festival',
                 'description' => 'A vibrant retro-editorial festival poster — spinning vinyl, line-up with bios, a now-playing player, schedule, tickets and a photo gallery.',
             ],
+            'arcade' => [
+                'title' => 'Arcade — Game Studio',
+                'description' => 'A Y2K vaporwave game studio — a neon perspective grid, chrome text, featured games, a leaderboard, achievements and membership tiers.',
+            ],
+            'forge' => [
+                'title' => 'Forge — Developer Platform',
+                'description' => 'A dark terminal-aesthetic dev tool — a typed terminal window, multi-language code tabs, a ⌘K command palette, metrics and pricing.',
+            ],
             'brut' => [
                 'title' => 'Brut — Creative Studio',
                 'description' => 'Neo-brutalist studio portfolio — thick black borders, hard offset shadows, huge type, marquee tickers, a work grid and a project log.',
+            ],
+            'atelier' => [
+                'title' => 'Atelier — Fashion Lookbook',
+                'description' => 'A high-fashion editorial lookbook — oversized serif type, a grayscale magazine grid with hover colour-reveal, a runway carousel and the edit.',
             ],
             'terroir' => [
                 'title' => 'Terroir — Fine Dining',
@@ -36,10 +52,6 @@ return [
         ],
 
         'Marketing' => [
-            'bloom' => [
-                'title' => 'Bloom — Wellness App',
-                'description' => 'A claymorphism wellness / fitness app landing — workouts, habits, sleep, nutrition and pricing.',
-            ],
             'saas' => [
                 'title' => 'SaaS Landing',
                 'description' => 'A complete product landing — hero, logo wall, features, pricing, testimonials and FAQ.',
