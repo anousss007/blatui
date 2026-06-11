@@ -363,6 +363,18 @@
             ]
         }
     },
+    "countdown": {
+        "name": "countdown",
+        "files": [
+            "countdown.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "data-table": {
         "name": "data-table",
         "files": [
@@ -998,6 +1010,18 @@
             ]
         }
     },
+    "sparkline": {
+        "name": "sparkline",
+        "files": [
+            "sparkline.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "spinner": {
         "name": "spinner",
         "files": [
@@ -1166,6 +1190,18 @@
             ]
         }
     },
+    "terminal": {
+        "name": "terminal",
+        "files": [
+            "terminal.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "text-reveal": {
         "name": "text-reveal",
         "files": [
@@ -1198,6 +1234,20 @@
         "dependencies": [
             "input"
         ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "timeline": {
+        "name": "timeline",
+        "files": [
+            "timeline.blade.php",
+            "timeline-item.blade.php"
+        ],
+        "dependencies": [],
         "packages": {
             "composer": [
                 "mallardduck/blade-lucide-icons",

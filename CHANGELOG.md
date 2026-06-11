@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.10.0] - 2026-06-11
+## [1.11.0] - 2026-06-11
+
+### Added
+- **Five new installable components** — `blatui:add countdown timeline terminal sparkline`:
+  - **`countdown`** — a live, timezone-safe countdown to a target date with an expired state.
+  - **`timeline`** (+ `timeline-item`) — a vertical timeline with dots, connectors, icons and timestamps.
+  - **`terminal`** — a terminal / console window for command output and code demos (dark in both themes).
+  - **`sparkline`** — a server-rendered inline trend line from a data array, theme-token coloured.
+- **`progress` circular / ring variant** (`circular` + `size` / `thickness` / `show-value`) — linear behaviour unchanged.
+- **`button` `color` prop** — recolours a button by overriding the primary token locally; the same
+  `style="--primary: …"` wrapper trick recolours any subtree of BlatUI components.
 
 ### Changed
 - **Promoted to a 1.10.0 minor.** This consolidates the additive component features shipped across
