@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-06-11
+
+### Changed
+- **Promoted to a 1.10.0 minor.** This consolidates the additive component features shipped across
+  the 1.9.x line into a proper minor milestone: the `combobox` `disabled` prop (1.9.1) and
+  multi-select `:multiple` on `select` / `combobox` / `autocomplete` (1.9.2, with the updated
+  `blatui-core.js` `blatSelect` engine). No new component code since 1.9.2 and no breaking changes —
+  installing `blatui/blatui:^1.10` gives you exactly the 1.9.2 component set under a minor version.
+
 ## [1.9.2] - 2026-06-10
 
 ### Added
