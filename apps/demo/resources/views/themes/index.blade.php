@@ -216,4 +216,6 @@
             </div>
         </div>
     </div>
+
+    <x-site.footer />
 </x-layouts.app>

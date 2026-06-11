@@ -4,9 +4,23 @@
     $title = \Illuminate\Support\Str::headline($slug);
     $backLabel = match ($kind) { 'charts' => 'Charts', 'templates' => 'Templates', default => 'Blocks' };
     $addCmd = "php artisan blatui:add {$kind}/{$slug}";
+
+    // SEO: a richer per-page title + description. Templates carry curated copy in config.
+    $tplMeta = null;
+    if ($kind === 'templates') {
+        foreach (config('templates.categories', []) as $group) {
+            if (isset($group[$slug])) { $tplMeta = $group[$slug]; break; }
+        }
+    }
+    $pageTitle = $tplMeta['title'] ?? $title;
+    $desc = $tplMeta['description'] ?? match ($kind) {
+        'charts' => "A themeable {$title} chart for Laravel — built on ApexCharts, styled with CSS variables and dark-mode aware. Live preview plus the full Blade source to copy, paste and own.",
+        'templates' => "{$title} — a complete, real-world page template assembled from BlatUI components. Live preview plus the full Blade source to copy, paste and own.",
+        default => "{$title} — a ready-made Laravel UI block built with BlatUI Blade components. Live preview plus the full source to copy, paste and own.",
+    };
 @endphp
 
-<x-layouts.app :title="$title">
+<x-layouts.app :title="$pageTitle" :description="$desc">
     <x-site.header :active="$kind" />
 
     <div class="mx-auto max-w-screen-2xl px-4 py-6 lg:px-6"
@@ -24,6 +38,7 @@
                     <x-lucide-chevron-left class="size-4" /> {{ $backLabel }}
                 </a>
                 <h1 class="mt-1 text-2xl font-bold tracking-tight">{{ $title }}</h1>
+                <p class="text-muted-foreground mt-1 max-w-2xl text-sm">{{ $desc }}</p>
             </div>
 
             <div class="flex items-center gap-2">

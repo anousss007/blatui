@@ -1,0 +1,14 @@
+{
+    "name": "BlatUI — shadcn/ui for the BLAT stack",
+    "short_name": "BlatUI",
+    "description": "Open-source shadcn/ui for the BLAT stack — Blade, Laravel, Alpine.js & Tailwind CSS v4. Components, blocks, charts and templates you copy, paste and own. MIT licensed.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#0a0a0a",
+    "theme_color": "#15803d",
+    "icons": [
+        { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    ],
+    "categories": ["developer", "productivity", "design"]
+}

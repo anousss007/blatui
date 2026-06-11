@@ -40,9 +40,7 @@
             <div class="from-primary/20 h-80 w-[700px] rounded-full bg-gradient-to-b to-transparent blur-3xl"></div>
         </div>
         <div class="mx-auto max-w-6xl px-6 py-14 lg:px-8">
-            <span class="bg-primary/10 text-primary mb-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium">
-                <x-lucide-layout-template class="size-3.5" /> {{ count($examples) }} examples · {{ $total }} blocks
-            </span>
+            <p class="blat-mono blat-brand-text mb-3 text-[11px] font-medium tracking-[0.14em] uppercase">// blocks · {{ $total }} layouts</p>
             <h1 class="text-4xl font-bold tracking-tight md:text-5xl">Blocks &amp; examples</h1>
             <p class="text-muted-foreground mt-3 max-w-2xl text-lg">
                 Real-world component compositions and full-page layouts — product cards, pricing, auth,
@@ -90,4 +88,6 @@
             </section>
         @endforeach
     </div>
+
+    <x-site.footer />
 </x-layouts.app>

@@ -4,37 +4,79 @@
 ])
 
 @php
+    use Illuminate\Support\Str;
+
     $brand = config('brand.name');
+    $base = rtrim(config('brand.url'), '/');
     $description = $description ?: config('brand.description');
     $homeTitle = $brand.' — '.config('brand.tagline');
     // Pages pass a short title ("Blocks"); append the brand unless it's already there.
     $fullTitle = ! $title ? $homeTitle : (str_contains($title, $brand) ? $title : $title.' — '.$brand);
-    $canonical = url()->current();
+
+    // Canonicalisation: a "/raw" standalone (templates/blocks/charts) duplicates its viewer page,
+    // and ?query variants (e.g. theme share links) duplicate the clean URL — point both at the clean
+    // canonical and keep /raw out of the index so ranking signals consolidate on one URL.
+    $path = trim(request()->path(), '/');
+    $isRaw = Str::endsWith($path, '/raw');
+    $cleanPath = $isRaw ? Str::beforeLast($path, '/raw') : $path;
+    $canonical = $cleanPath === '' ? $base.'/' : $base.'/'.$cleanPath;
+    $noindex = $isRaw;
+
+    // Breadcrumb trail derived from the clean path (Home › Section › Page).
+    $crumbs = [['name' => $brand, 'url' => $base.'/']];
+    $acc = '';
+    foreach (array_filter(explode('/', $cleanPath)) as $seg) {
+        $acc .= '/'.$seg;
+        $crumbs[] = ['name' => Str::headline($seg), 'url' => $base.$acc];
+    }
+
+    $graph = [
+        [
+            '@type' => 'WebSite',
+            '@id' => $base.'/#website',
+            'name' => $brand,
+            'url' => $base.'/',
+            'description' => config('brand.description'),
+            'publisher' => ['@id' => $base.'/#org'],
+            'inLanguage' => 'en',
+        ],
+        [
+            '@type' => 'Organization',
+            '@id' => $base.'/#org',
+            'name' => $brand,
+            'url' => $base.'/',
+            'logo' => $base.'/favicon.svg',
+            'sameAs' => array_values(array_filter([config('brand.github'), config('brand.package')])),
+        ],
+        [
+            '@type' => 'SoftwareApplication',
+            '@id' => $base.'/#software',
+            'name' => $brand,
+            'applicationCategory' => 'DeveloperApplication',
+            'operatingSystem' => 'Any',
+            'description' => config('brand.description'),
+            'url' => $base.'/',
+            'softwareHelp' => $base.'/docs',
+            'license' => 'https://opensource.org/licenses/MIT',
+            'isAccessibleForFree' => true,
+            'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'USD'],
+            'codeRepository' => config('brand.package'),
+            'publisher' => ['@id' => $base.'/#org'],
+        ],
+    ];
+
+    if (count($crumbs) > 1) {
+        $graph[] = [
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => array_map(fn ($c, $i) => [
+                '@type' => 'ListItem', 'position' => $i + 1, 'name' => $c['name'], 'item' => $c['url'],
+            ], $crumbs, array_keys($crumbs)),
+        ];
+    }
+
     $jsonLd = json_encode([
         '@context' => 'https://schema.org',
-        '@graph' => [
-            [
-                '@type' => 'WebSite',
-                '@id' => config('brand.url').'/#website',
-                'name' => $brand,
-                'url' => config('brand.url'),
-                'description' => config('brand.description'),
-            ],
-            [
-                '@type' => 'SoftwareApplication',
-                '@id' => config('brand.url').'/#software',
-                'name' => $brand,
-                'applicationCategory' => 'DeveloperApplication',
-                'operatingSystem' => 'Any',
-                'description' => config('brand.description'),
-                'url' => config('brand.url'),
-                'softwareHelp' => config('brand.url').'/docs',
-                'license' => 'https://opensource.org/licenses/MIT',
-                'isAccessibleForFree' => true,
-                'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'USD'],
-                'codeRepository' => config('brand.package'),
-            ],
-        ],
+        '@graph' => $graph,
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 @endphp
 
@@ -47,6 +89,9 @@
     <title>{{ $fullTitle }}</title>
     <meta name="description" content="{{ $description }}">
     <link rel="canonical" href="{{ $canonical }}">
+    <meta name="robots" content="{{ $noindex ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1' }}">
+    <meta name="author" content="{{ $brand }}">
+    <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
 

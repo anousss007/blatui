@@ -1,4 +1,4 @@
-<x-layouts.app title="Get Started" description="Install Shadlara in any Laravel app — step-by-step setup for Blade components, Tailwind v4 theming and Alpine.js. You own every line of code.">
+<x-layouts.app title="Get Started" description="Install BlatUI in any Laravel app — step-by-step setup for Blade components, Tailwind v4 theming and Alpine.js. You own every line of code.">
     <x-site.header active="docs" />
 
     {{-- Hero --}}

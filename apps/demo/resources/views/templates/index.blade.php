@@ -21,9 +21,7 @@
             <div class="from-primary/20 h-80 w-[760px] rounded-full bg-gradient-to-b to-transparent blur-3xl"></div>
         </div>
         <div class="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <span class="bg-primary/10 text-primary mb-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium">
-                <x-lucide-layout-template class="size-3.5" /> {{ $total }} {{ \Illuminate\Support\Str::plural('template', $total) }}
-            </span>
+            <p class="blat-mono blat-brand-text mb-3 text-[11px] font-medium tracking-[0.14em] uppercase">// templates · {{ $total }} pages</p>
             <h1 class="text-4xl font-bold tracking-tight md:text-5xl">Templates</h1>
             <p class="text-muted-foreground mt-3 max-w-2xl text-lg text-balance">
                 Complete, production-shaped pages — a tier above blocks. Each one assembles dozens of
@@ -67,7 +65,5 @@
         @endforelse
     </div>
 
-    <footer class="text-muted-foreground border-t py-8 text-center text-sm">
-        Built with Laravel, Blade, Alpine &amp; Tailwind v4. Every template is yours to copy and own.
-    </footer>
+    <x-site.footer />
 </x-layouts.app>

@@ -15,23 +15,45 @@ Route::view('/docs/mcp', 'docs.mcp')->name('docs.mcp');
 Route::view('/themes', 'themes.index')->name('themes');
 
 Route::get('/sitemap.xml', function () {
-    $urls = ['/', '/docs', '/docs/mcp', '/components', '/blocks', '/templates', '/charts', '/themes'];
-    foreach (glob(resource_path('views/examples/*'), GLOB_ONLYDIR) as $d) {
-        $urls[] = '/components/'.basename($d);
+    $entries = [];
+    $add = function (string $path, string $priority, string $freq, ?string $lastmod = null) use (&$entries) {
+        $entries[] = compact('path', 'priority', 'freq', 'lastmod');
+    };
+
+    // Primary surfaces.
+    $add('/', '1.0', 'weekly');
+    foreach (['/components', '/blocks', '/templates', '/charts', '/docs'] as $p) {
+        $add($p, '0.9', 'weekly');
     }
-    foreach (['blocks', 'templates', 'charts'] as $kind) {
+    $add('/themes', '0.8', 'weekly');
+    $add('/docs/mcp', '0.6', 'monthly');
+
+    // Component pages (one per example directory).
+    foreach (glob(resource_path('views/examples/*'), GLOB_ONLYDIR) as $d) {
+        $add('/components/'.basename($d), '0.8', 'monthly', date('Y-m-d', filemtime($d) ?: time()));
+    }
+
+    // Block / template / chart pages — the clean viewer URLs (the /raw duplicates are noindex).
+    foreach (['templates' => '0.8', 'blocks' => '0.7', 'charts' => '0.6'] as $kind => $priority) {
         foreach (glob(resource_path("views/{$kind}/*.blade.php")) as $f) {
             $name = basename($f, '.blade.php');
             if ($name !== 'index') {
-                $urls[] = "/{$kind}/{$name}";
+                $add("/{$kind}/{$name}", $priority, 'monthly', date('Y-m-d', filemtime($f) ?: time()));
             }
         }
     }
 
     $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
     $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
-    foreach ($urls as $u) {
-        $xml .= '  <url><loc>'.e(url($u)).'</loc></url>'."\n";
+    foreach ($entries as $e) {
+        $xml .= '  <url>'."\n";
+        $xml .= '    <loc>'.e(url($e['path'])).'</loc>'."\n";
+        if ($e['lastmod']) {
+            $xml .= '    <lastmod>'.$e['lastmod'].'</lastmod>'."\n";
+        }
+        $xml .= '    <changefreq>'.$e['freq'].'</changefreq>'."\n";
+        $xml .= '    <priority>'.$e['priority'].'</priority>'."\n";
+        $xml .= '  </url>'."\n";
     }
     $xml .= '</urlset>';
 
