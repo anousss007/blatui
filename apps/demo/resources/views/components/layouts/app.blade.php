@@ -109,7 +109,46 @@
 
     {{-- Customizer font families (privacy-friendly Bunny mirror; graceful fallback offline) --}}
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-    <link rel="stylesheet" href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700|geist:400,500,600,700|inter:400,500,600,700|lora:400,500,600,700|manrope:400,500,600,700|outfit:400,500,600,700|plus-jakarta-sans:400,500,600,700|sora:400,500,600,700|source-serif-4:400,500,600,700|space-grotesk:400,500,600,700">
+    <link rel="stylesheet" href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700|geist:400,500,600,700|inter:400,500,600,700|jetbrains-mono:400,500,600,700|lora:400,500,600,700|manrope:400,500,600,700|outfit:400,500,600,700|plus-jakarta-sans:400,500,600,700|sora:400,500,600,700|source-serif-4:400,500,600,700|space-grotesk:400,500,600,700">
+
+    {{-- Demo-site brand identity (Forge dev-tool aesthetic): a themeable green accent that adapts
+         to light/dark, plus a JetBrains Mono utility. Scoped to the showcase chrome — NOT shipped
+         in the package foundation. --}}
+    <style>
+        :root { --blat-brand: #15803d; --blat-brand-fg: #ffffff; --blat-brand-ink: #15803d; --blat-brand-cyan: #0e7490; }
+        .dark { --blat-brand: #3fb950; --blat-brand-fg: #052e16; --blat-brand-ink: #56d364; --blat-brand-cyan: #39c5cf; }
+        .blat-mono { font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace; }
+        .blat-brand-fill { background: var(--blat-brand); color: var(--blat-brand-fg); }
+        .blat-brand-text { color: var(--blat-brand-ink); }
+        .blat-card { transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+        .blat-card:hover { border-color: color-mix(in srgb, var(--blat-brand) 45%, transparent); }
+        .blat-icon-tile {
+            background: color-mix(in srgb, var(--blat-brand) 12%, transparent);
+            color: var(--blat-brand-ink);
+            border: 1px solid color-mix(in srgb, var(--blat-brand) 25%, transparent);
+        }
+        .blat-pill {
+            background: color-mix(in srgb, var(--blat-brand) 10%, transparent);
+            color: var(--blat-brand-ink);
+            border: 1px solid color-mix(in srgb, var(--blat-brand) 30%, transparent);
+        }
+        .blat-hairline { background: linear-gradient(90deg, transparent, var(--border), transparent); }
+        .blat-dotgrid {
+            background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+        .blat-glow-btn { box-shadow: 0 0 0 0 transparent; transition: box-shadow .2s ease, transform .2s ease; }
+        .blat-glow-btn:hover { box-shadow: 0 0 28px -4px var(--blat-brand); transform: translateY(-1px); }
+        /* Terminal chrome — intentionally dark in BOTH themes (a terminal is a terminal). */
+        .blat-term { background: #0b0f17; border: 1px solid #20262e; border-radius: .7rem; overflow: hidden; box-shadow: 0 1px 0 #ffffff0a inset, 0 24px 60px -20px #00000080; }
+        .blat-term-bar { background: #11161f; border-bottom: 1px solid #20262e; }
+        .blat-term-body { font-family: 'JetBrains Mono', ui-monospace, monospace; color: #e6edf3; }
+        @keyframes blat-caret { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+        .blat-caret { display:inline-block; width:.55ch; height:1.05em; background: var(--blat-brand); vertical-align:text-bottom; animation: blat-caret 1.1s step-end infinite; }
+        @keyframes blat-line-in { from{opacity:0; transform:translateY(3px)} to{opacity:1; transform:translateY(0)} }
+        .blat-term-line { animation: blat-line-in .25s ease both; }
+        @media (prefers-reduced-motion: reduce) { .blat-caret{animation:none;opacity:1} .blat-term-line{animation:none} .blat-glow-btn:hover{transform:none} }
+    </style>
 
 
     {{-- No-flash: apply every persisted theme dimension before first paint.
