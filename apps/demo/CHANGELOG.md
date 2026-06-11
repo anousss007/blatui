@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-06-11
+
+### Added
+- **Showcase templates** — a new, deliberately extravagant tier of full-page templates, each
+  art-directed in a distinct bold style and built to push the component library: **Aurora**
+  (dark glassmorphism AI-SaaS with animated aurora gradients), **Quantum** (neon-futurist web3
+  dashboard with ApexCharts), **Vinyl** (vibrant retro-editorial music festival), **Brut**
+  (neo-brutalist creative studio), **Terroir** (editorial-serif fine dining), and **Bloom**
+  (claymorphism wellness). They live in a new **Showcase** category at the top of `/templates`.
+
+### Note
+- 1.10.0 is the minor that carries the component additions shipped in the 1.9.x line — the
+  `combobox` `disabled` prop (1.9.1) and multi-select `:multiple` on `select` / `combobox` /
+  `autocomplete` (1.9.2). No breaking changes.
+
 ## [1.9.2] - 2026-06-10
 
 ### Added
