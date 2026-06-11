@@ -1,4 +1,16 @@
 {
+    "accent": {
+        "name": "accent",
+        "files": [
+            "accent.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "accordion": {
         "name": "accordion",
         "files": [
@@ -318,6 +330,19 @@
         "packages": {
             "npm": [
                 "@alpinejs/focus"
+            ]
+        }
+    },
+    "comparison-table": {
+        "name": "comparison-table",
+        "files": [
+            "comparison-table.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
             ]
         }
     },

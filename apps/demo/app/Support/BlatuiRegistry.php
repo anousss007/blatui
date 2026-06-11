@@ -27,7 +27,7 @@ class BlatuiRegistry
         'radio-group', 'resizable', 'scroll-area', 'select', 'separator', 'sheet',
         'sidebar', 'skeleton', 'slider', 'sonner', 'sparkline', 'spinner', 'switch', 'table',
         'tabs', 'terminal', 'textarea', 'time-field', 'timeline', 'toggle-group', 'toggle', 'tooltip',
-        'countdown',
+        'accent', 'comparison-table', 'countdown',
     ];
 
     public function __construct(

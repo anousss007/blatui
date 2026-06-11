@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.11.0] - 2026-06-11
+## [1.12.0] - 2026-06-11
+
+### Added
+- **`comparison-table`** — a data-driven feature-comparison table (`:tiers` × `:rows` with check /
+  dash / text values and a `highlight` column). The pattern templates previously hand-rolled in raw
+  `<table>`s, now one component.
+- **`accent`** — wrap any subtree in `<x-ui.accent color="#7c3aed">` and every BlatUI component
+  inside recolours (buttons, badges, checkboxes, switches, focus rings) — no per-component props.
+  Renders as `display:contents` so it never affects layout.
+- **`color` prop on `input`, `textarea` and `select`** — brands the focus ring + text selection
+  locally (overrides the ring/primary tokens), matching the `button` `color` prop. For whole forms
+  or sections, reach for `accent` instead.
 
 ### Added
 - **Five new components**, drawn from patterns the showcase templates kept hand-rolling:

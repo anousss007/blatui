@@ -11,10 +11,10 @@ return [
             'datetime-picker', 'time-field',
         ],
         'Layout' => [
-            'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar',
+            'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar', 'accent',
         ],
         'Data Display' => [
-            'avatar', 'badge', 'table', 'data-table', 'carousel', 'gallery', 'video', 'chart', 'sparkline', 'icon', 'item',
+            'avatar', 'badge', 'table', 'comparison-table', 'data-table', 'carousel', 'gallery', 'video', 'chart', 'sparkline', 'icon', 'item',
             'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'terminal', 'skeleton', 'code-block', 'typography',
         ],
         'Feedback' => [
@@ -72,12 +72,14 @@ return [
         'scroll-area' => 'Augments native scroll functionality for custom, cross-browser styling.',
         'resizable' => 'Accessible resizable panel groups and layouts.',
         'sidebar' => 'A composable, themeable and customizable sidebar component.',
+        'accent' => 'Recolors any subtree of BlatUI components from a single accent colour — no per-component props.',
 
         'avatar' => 'An image element with a fallback for representing the user.',
         'badge' => 'Displays a badge, with semantic status tones (success, warning, danger, info, neutral).',
         'code-block' => 'A dark code panel with an optional filename header and a copy button.',
         'data-table' => 'An interactive table with search, sortable columns, row selection and pagination.',
         'table' => 'A responsive table component.',
+        'comparison-table' => 'A data-driven feature comparison table — tiers × features with checks, dashes and values.',
         'carousel' => 'A carousel with motion and swipe.',
         'gallery' => 'A thumbnail grid that opens a full-screen lightbox with keyboard navigation.',
         'video' => 'A styled HTML5 video player with a custom poster and play overlay.',
