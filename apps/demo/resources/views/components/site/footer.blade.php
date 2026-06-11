@@ -20,6 +20,9 @@
             ['Changelog', config('brand.github').'/blob/main/CHANGELOG.md'],
         ],
     ];
+
+    preg_match('/##\s*\[([0-9][0-9.]*)\]/', @file_get_contents(base_path('CHANGELOG.md')) ?: '', $vm);
+    $version = $vm[1] ?? '';
 @endphp
 
 <footer class="bg-muted/30 border-t">
@@ -69,7 +72,7 @@
             </p>
             <div class="text-muted-foreground flex items-center gap-2 text-xs">
                 <span class="inline-block size-1.5 rounded-full" style="background: var(--blat-brand);"></span>
-                <span class="blat-mono">v1.10.0</span>
+                <span class="blat-mono">v{{ $version }}</span>
                 <span class="opacity-40">·</span>
                 <span>Inspired by shadcn/ui</span>
             </div>

@@ -6,7 +6,7 @@
 
 Open-source, copy-paste UI components for Laravel. No JS runtime lock-in, no black-box dependency — you own every line.
 
-**55 components · 62 blocks · 70 charts** · **accessible (WCAG AA)** · fully themeable · light + dark · MIT licensed
+**81 components · 416 variants · 64 blocks · 70 charts · 34 templates** · **accessible (WCAG AA)** · fully themeable · light + dark · MIT licensed
 
 ### 🌐 [**Live demo & docs → blatui.remix-it.com**](https://blatui.remix-it.com)
 
@@ -89,8 +89,10 @@ Every component is a Blade tag under the `ui` namespace:
 
 | | |
 |---|---|
-| **Components** | 55 — button, dialog, dropdown, select, calendar, tabs, sidebar… |
-| **Blocks** | 62 — 4 dashboards, 16 sidebars, 32 calendars, login & sign-up |
+| **Components** | 81 — button, dialog, select, calendar, tabs, sidebar, countdown, timeline, terminal… |
+| **Variants** | 416 — documented usage examples across the components |
+| **Blocks** | 64 — dashboards, sidebars, calendars, auth, marketing & pricing |
+| **Templates** | 34 — full art-directed pages (SaaS, store, dashboards… + a 20-page Showcase tier) |
 | **Charts** | 70 — area, bar, line, pie, radar, radial (ApexCharts, themed) |
 | **Theming** | CSS-variable design tokens, live customizer, copy-to-clipboard export |
 

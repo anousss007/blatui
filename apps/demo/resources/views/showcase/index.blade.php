@@ -1,4 +1,14 @@
 @php
+    // Live counts — derived from the real sources so the marketing numbers never drift.
+    $countNonIndex = fn ($glob) => collect(glob(resource_path($glob)) ?: [])->reject(fn ($p) => basename($p) === 'index.blade.php')->count();
+    $componentCount = collect(config('docs.categories'))->flatten()->count();
+    $variantCount = count(glob(resource_path('views/examples/*/*.blade.php')) ?: []);
+    $blockCount = $countNonIndex('views/blocks/*.blade.php');
+    $chartCount = $countNonIndex('views/charts/*.blade.php');
+    $templateCount = $countNonIndex('views/templates/*.blade.php');
+    preg_match('/##\s*\[([0-9][0-9.]*)\]/', @file_get_contents(base_path('CHANGELOG.md')) ?: '', $vm);
+    $version = $vm[1] ?? '';
+
     $features = [
         ['icon' => 'accessibility', 'title' => 'Accessible by default', 'desc' => 'WAI-ARIA roles, full keyboard navigation, focus management and WCAG AA contrast — every component audited with axe-core.'],
         ['icon' => 'copy', 'title' => 'You own the code', 'desc' => 'Components are copied into your project with one Artisan command. No black-box dependency, no runtime.'],
@@ -9,10 +19,10 @@
     ];
 
     $explore = [
-        ['Components', '55', 'building blocks', '/components', 'component'],
-        ['Blocks', '62', 'full-page layouts', '/blocks', 'layout-template'],
-        ['Templates', '20', 'art-directed pages', '/templates', 'panels-top-left'],
-        ['Charts', '70', 'data visualizations', '/charts', 'chart-column'],
+        ['Components', (string) $componentCount, $variantCount.' variants to copy', '/components', 'component'],
+        ['Blocks', (string) $blockCount, 'full-page layouts', '/blocks', 'layout-template'],
+        ['Templates', (string) $templateCount, 'art-directed pages', '/templates', 'panels-top-left'],
+        ['Charts', (string) $chartCount, 'data visualizations', '/charts', 'chart-column'],
     ];
 
     $stack = ['Blade', 'Laravel', 'Alpine.js', 'Tailwind CSS', 'Livewire', 'Inertia', 'shadcn registry', 'ApexCharts'];
@@ -45,7 +55,7 @@
             <div>
                 <a href="/components" class="blat-pill mb-5 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium">
                     <span class="inline-block size-1.5 animate-pulse rounded-full" style="background: var(--blat-brand);"></span>
-                    <span class="blat-mono">v1.10.0 · 55 components · 20 templates</span>
+                    <span class="blat-mono">v{{ $version }} · {{ $componentCount }} components · {{ $variantCount }} variants</span>
                 </a>
 
                 <h1 class="text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl" style="line-height: 1.08;">
@@ -212,9 +222,9 @@
 
     {{-- ═══════════════════════════ STATS ═══════════════════════════ --}}
     <section class="bg-muted/30 border-b">
-        <div class="mx-auto grid max-w-5xl grid-cols-2 px-6 md:grid-cols-4">
-            @foreach ([['55', 'Components'], ['62', 'Blocks'], ['70', 'Charts'], ['20', 'Templates']] as [$n, $l])
-                <div class="border-border/60 px-4 py-8 text-center [&:not(:nth-child(2n))]:border-r md:[&:not(:last-child)]:border-r md:[&:nth-child(2)]:border-r-0 lg:[&:nth-child(2)]:border-r">
+        <div class="mx-auto grid max-w-5xl grid-cols-2 px-6 sm:grid-cols-3 md:grid-cols-5">
+            @foreach ([[$componentCount, 'Components'], [$variantCount, 'Variants'], [$blockCount, 'Blocks'], [$chartCount, 'Charts'], [$templateCount, 'Templates']] as [$n, $l])
+                <div class="px-4 py-8 text-center">
                     <div class="blat-mono text-3xl font-bold tracking-tight sm:text-4xl">{{ $n }}</div>
                     <div class="text-muted-foreground mt-1 text-sm">{{ $l }}</div>
                 </div>
@@ -299,8 +309,8 @@
         <div class="mx-auto max-w-screen-xl px-6 py-16 lg:px-8 lg:py-24">
             <div class="mx-auto mb-12 max-w-2xl text-center">
                 <p class="blat-mono blat-brand-text mb-3 text-[11px] font-medium tracking-[0.14em] uppercase">// templates</p>
-                <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">20 art-directed pages. One library.</h2>
-                <p class="text-muted-foreground mt-3 text-lg">Full pages, each in a bold distinct style — proof the same components stretch from brutalist to glassmorphism.</p>
+                <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">{{ $templateCount }} page templates. One library.</h2>
+                <p class="text-muted-foreground mt-3 text-lg">Full pages assembled from the same components — from SaaS landings and storefronts to brutalist studios and glassmorphism dashboards.</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -318,7 +328,7 @@
 
             <div class="mt-8 text-center">
                 <a href="/templates" class="text-foreground inline-flex items-center gap-1.5 text-sm font-medium hover:underline">
-                    Browse all 20 templates <x-lucide-arrow-right class="size-4" />
+                    Browse all {{ $templateCount }} templates <x-lucide-arrow-right class="size-4" />
                 </a>
             </div>
         </div>
