@@ -14,8 +14,8 @@ return [
             'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar',
         ],
         'Data Display' => [
-            'avatar', 'badge', 'table', 'data-table', 'carousel', 'gallery', 'video', 'chart', 'icon', 'item',
-            'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'skeleton', 'code-block', 'typography',
+            'avatar', 'badge', 'table', 'data-table', 'carousel', 'gallery', 'video', 'chart', 'sparkline', 'icon', 'item',
+            'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'terminal', 'skeleton', 'code-block', 'typography',
         ],
         'Feedback' => [
             'alert', 'banner', 'empty', 'spinner', 'sonner', 'tooltip', 'hover-card',
@@ -85,7 +85,11 @@ return [
         'icon' => 'A thin wrapper over Lucide icons that auto-mirrors directional arrows under RTL.',
         'item' => 'A flexible component for displaying content with media, title, and actions.',
         'kbd' => 'Used to display textual user input from the keyboard.',
-        'progress' => 'Displays an indicator showing the completion progress of a task.',
+        'progress' => 'Displays an indicator showing the completion progress of a task — a linear bar or a circular ring.',
+        'countdown' => 'A live countdown to a target date — days, hours, minutes and seconds, with an expired state.',
+        'timeline' => 'A vertical timeline of events, with dots, connecting lines, icons and timestamps.',
+        'terminal' => 'A terminal / console window with traffic-light controls — for command output and code demos.',
+        'sparkline' => 'A tiny inline trend line drawn from a data array — for KPI cards, tables and stats.',
         'skeleton' => 'Use to show a placeholder while content is loading.',
 
         'alert' => 'Displays a callout for user attention, with semantic status tones.',

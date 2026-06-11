@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.10.0] - 2026-06-11
+## [1.11.0] - 2026-06-11
+
+### Added
+- **Five new components**, drawn from patterns the showcase templates kept hand-rolling:
+  - **`countdown`** — a live, timezone-safe countdown to a target date (days / hours / minutes /
+    seconds) with an expired state.
+  - **`timeline`** + **`timeline-item`** — a vertical timeline with dots, connecting lines, icons,
+    timestamps and an `active` marker; the connector auto-hides under the last item.
+  - **`terminal`** — a terminal / console window (traffic-light controls, mono body) for command
+    output and code demos; intentionally dark in both themes.
+  - **`sparkline`** — a tiny inline trend line drawn from a data array (server-rendered SVG),
+    theme-token coloured, for KPI cards, tables and stats.
+- **`progress` circular / ring variant** — `<x-ui.progress circular :value="72" show-value />`,
+  with `size` / `thickness`; recolour via a `text-*` class. Linear behaviour is unchanged.
+- **`button` `color` prop** — `<x-ui.button color="#16a34a">` recolours a single button by
+  overriding the primary token locally (no bespoke styling). The same trick works for any subtree:
+  wrap it in `style="--primary: …"` and every BlatUI component inside recolours.
+- **`table` comparison example** — a feature-matrix pattern (tiers × features with check / dash).
 
 ### Added
 - **Showcase templates** — a new, deliberately extravagant tier of full-page templates, each
