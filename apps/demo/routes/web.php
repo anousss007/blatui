@@ -77,19 +77,36 @@ Route::get('/blocks/{block}', function (string $block) {
     return view('docs.viewer', ['kind' => 'blocks', 'slug' => $block]);
 })->name('blocks.show');
 
+// Full-page HTML cache for static, content-only pages (templates assemble hundreds of
+// components, so re-rendering per request is wasteful). The cache key carries the asset
+// manifest's mtime, so every deploy (which rebuilds assets) busts it automatically. Only
+// active in production — local dev always renders fresh so edits show immediately.
+$cachePage = function (string $cacheKey, Closure $render) {
+    if (! app()->isProduction()) {
+        return $render();
+    }
+
+    $manifest = public_path('build/manifest.json');
+    $sig = is_file($manifest) ? (string) filemtime($manifest) : '0';
+
+    $html = cache()->remember("page:{$cacheKey}:{$sig}", now()->addDays(30), fn () => $render()->render());
+
+    return response($html)->header('X-Blat-Cache', 'full-page');
+};
+
 // Templates — full, real-world pages assembled from many components.
 Route::view('/templates', 'templates.index')->name('templates.index');
 
-Route::get('/templates/{template}/raw', function (string $template) {
+Route::get('/templates/{template}/raw', function (string $template) use ($cachePage) {
     abort_unless(preg_match('/^[a-z0-9-]+$/', $template) && view()->exists("templates.$template"), 404);
 
-    return view("templates.$template");
+    return $cachePage("tpl-raw:{$template}", fn () => view("templates.$template"));
 })->name('templates.raw');
 
-Route::get('/templates/{template}', function (string $template) {
+Route::get('/templates/{template}', function (string $template) use ($cachePage) {
     abort_unless(preg_match('/^[a-z0-9-]+$/', $template) && view()->exists("templates.$template"), 404);
 
-    return view('docs.viewer', ['kind' => 'templates', 'slug' => $template]);
+    return $cachePage("tpl-view:{$template}", fn () => view('docs.viewer', ['kind' => 'templates', 'slug' => $template]));
 })->name('templates.show');
 
 Route::view('/components', 'docs.index')->name('docs.index');
