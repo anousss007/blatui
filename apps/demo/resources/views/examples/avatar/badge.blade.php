@@ -12,7 +12,7 @@
             <x-ui.avatar-image src="https://github.com/leerob.png" alt="@leerob" />
             <x-ui.avatar-fallback>LR</x-ui.avatar-fallback>
         </x-ui.avatar>
-        <span class="border-background bg-background absolute end-0 bottom-0 flex size-5 items-center justify-center rounded-full border-2" aria-label="Verified">
+        <span class="border-background bg-background absolute end-0 bottom-0 flex size-5 items-center justify-center rounded-full border-2" role="img" aria-label="Verified">
             <x-lucide-badge-check class="size-3.5 text-green-600 dark:text-green-400" />
         </span>
     </div>

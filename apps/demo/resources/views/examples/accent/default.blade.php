@@ -7,9 +7,12 @@
     <div class="flex items-center gap-3">
         <x-ui.checkbox id="acc-terms" :checked="true" />
         <x-ui.label for="acc-terms">Email me product updates</x-ui.label>
-        <x-ui.switch :checked="true" class="ml-auto" />
+        <x-ui.switch :checked="true" class="ml-auto" aria-label="Weekly digest" />
     </div>
-    <x-ui.input placeholder="you@example.com" />
+    <div class="space-y-1.5">
+        <x-ui.label for="acc-email">Email</x-ui.label>
+        <x-ui.input id="acc-email" type="email" placeholder="you@example.com" />
+    </div>
     <p class="text-muted-foreground text-xs">
         Every control recolours from one <code>color</code> on the wrapper — buttons, badges,
         checkboxes, switches and focus rings.

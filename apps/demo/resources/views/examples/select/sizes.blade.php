@@ -2,7 +2,7 @@
 <div class="flex flex-wrap items-center gap-3">
     @foreach (['sm' => 'Small', 'default' => 'Default', 'lg' => 'Large'] as $size => $label)
         <x-ui.select>
-            <x-ui.select-trigger size="{{ $size }}" class="w-[150px]">
+            <x-ui.select-trigger size="{{ $size }}" class="w-[150px]" aria-label="{{ $label }} size">
                 <x-ui.select-value placeholder="{{ $label }}" />
             </x-ui.select-trigger>
             <x-ui.select-content>

@@ -8,15 +8,15 @@
 
     $variants = [
         'default' => 'bg-card text-card-foreground',
-        'destructive' => 'text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90',
+        'destructive' => 'text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive',
     ];
 
     // Semantic status tones — soft tinted callouts. Literal strings for the scanner.
     $tones = [
-        'success' => 'border-success/20 bg-success/10 text-success [&>svg]:text-success *:data-[slot=alert-description]:text-success/90',
-        'warning' => 'border-warning/20 bg-warning/10 text-warning [&>svg]:text-warning *:data-[slot=alert-description]:text-warning/90',
-        'danger' => 'border-destructive/20 bg-destructive/10 text-destructive [&>svg]:text-destructive *:data-[slot=alert-description]:text-destructive/90',
-        'info' => 'border-info/20 bg-info/10 text-info [&>svg]:text-info *:data-[slot=alert-description]:text-info/90',
+        'success' => 'border-success/20 bg-success/10 text-success [&>svg]:text-success *:data-[slot=alert-description]:text-success',
+        'warning' => 'border-warning/20 bg-warning/10 text-warning [&>svg]:text-warning *:data-[slot=alert-description]:text-warning',
+        'danger' => 'border-destructive/20 bg-destructive/10 text-destructive [&>svg]:text-destructive *:data-[slot=alert-description]:text-destructive',
+        'info' => 'border-info/20 bg-info/10 text-info [&>svg]:text-info *:data-[slot=alert-description]:text-info',
         'neutral' => 'border-border bg-muted text-foreground [&>svg]:text-foreground *:data-[slot=alert-description]:text-muted-foreground',
     ];
 

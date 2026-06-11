@@ -91,7 +91,7 @@
             @endif
         @endif
         @if ($hasOptions)
-            <x-ui.select-trigger :class="'w-full'.($multiple ? ' data-[size=default]:h-auto min-h-9 py-1' : '')">
+            <x-ui.select-trigger :class="'w-full'.($multiple ? ' data-[size=default]:h-auto min-h-9 py-1' : '')" :ariaLabel="$placeholder !== '' ? $placeholder : 'Select option'">
                 <x-ui.select-value :placeholder="$placeholder" />
             </x-ui.select-trigger>
             <x-ui.select-content>

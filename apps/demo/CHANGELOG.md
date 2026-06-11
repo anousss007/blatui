@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.1] - 2026-06-11
+
+### Accessibility
+A full axe-core (WCAG 2.1 A/AA) audit across every component and variant page —
+**0 critical, 0 serious** violations. Fixes that shipped from it:
+
+- **Status tokens darkened for AA contrast** (`app.css` `:root`): `--destructive`, `--success`,
+  `--warning` and `--info` were nudged darker so `text-*` clears WCAG AA 4.5:1 both on white and on
+  the `/10` soft tint used by alerts/badges. The solid-fill `*-foreground` pairs are unchanged.
+- **`alert`** — dropped the `/90` opacity on `alert-description` text across the destructive variant
+  and all status tones, so descriptions meet AA against the tinted background.
+- **`kbd`** — `aria-label` is invalid on `<kbd>` (it has no naming role); a passed label now renders
+  as visually-hidden `sr-only` text instead, so a symbol like ⌘ can still be spelled out for readers.
+- **`time-field`** — an author `aria-label` is now forwarded onto the real `<input type="time">`
+  rather than landing on the wrapper `<div>`, so the control is actually named.
+- **`select`** — the `:options` shorthand trigger now carries an accessible name (the `placeholder`,
+  or "Select option"), since a `combobox` role isn't named by its value text.
+- **`data-table`** — the select-all and per-row checkbox buttons now have `aria-label`s.
+- **`item-group`** — removed the `role="list"` (its children aren't `listitem`s), which had tripped
+  the list-structure rule.
+
 ## [1.12.0] - 2026-06-11
 
 ### Added
