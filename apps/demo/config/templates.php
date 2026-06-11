@@ -6,7 +6,40 @@
 // titles and descriptions. Categories are shown in listed order.
 return [
     'categories' => [
+        // Showcase tier — deliberately extravagant, each in a distinct bold visual style,
+        // pushing the component library as far as it goes. Self-contained art-directed pages.
+        'Showcase' => [
+            'aurora' => [
+                'title' => 'Aurora — AI Workspace',
+                'description' => 'Dark glassmorphism with animated aurora gradients and neon glow — frosted glass, a bento feature grid, live charts and a ⌘K palette.',
+            ],
+            'quantum' => [
+                'title' => 'Quantum — Web3 Dashboard',
+                'description' => 'A neon-futurist crypto dashboard on a glowing grid — KPI cards, area/donut charts, a markets table, staking and an onboarding stepper.',
+            ],
+            'vinyl' => [
+                'title' => 'Vinyl — Music Festival',
+                'description' => 'A vibrant retro-editorial festival poster — spinning vinyl, line-up with bios, a now-playing player, schedule, tickets and a photo gallery.',
+            ],
+            'brut' => [
+                'title' => 'Brut — Creative Studio',
+                'description' => 'Neo-brutalist studio portfolio — thick black borders, hard offset shadows, huge type, marquee tickers, a work grid and a project log.',
+            ],
+            'terroir' => [
+                'title' => 'Terroir — Fine Dining',
+                'description' => 'An editorial-serif luxury restaurant page — drop caps, pull quotes, a tabbed menu, chef story, dish gallery and an elegant reservation form.',
+            ],
+            'bloom' => [
+                'title' => 'Bloom — Wellness App',
+                'description' => 'A claymorphism wellness landing — soft puffy 3D cards, pastel blobs, progress rings, a habit tracker calendar and a how-it-works stepper.',
+            ],
+        ],
+
         'Marketing' => [
+            'bloom' => [
+                'title' => 'Bloom — Wellness App',
+                'description' => 'A claymorphism wellness / fitness app landing — workouts, habits, sleep, nutrition and pricing.',
+            ],
             'saas' => [
                 'title' => 'SaaS Landing',
                 'description' => 'A complete product landing — hero, logo wall, features, pricing, testimonials and FAQ.',
