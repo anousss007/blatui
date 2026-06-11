@@ -72,7 +72,8 @@
                 <tr class="hover:bg-muted/50 border-b transition-colors">
                     @if ($selectable)
                         <th class="h-10 w-10 px-2 text-left align-middle">
-                            <button type="button" role="checkbox" @click="toggleAll()" :aria-checked="allPageSelected" :data-state="allPageSelected ? 'checked' : 'unchecked'"
+                            <span class="sr-only">Select</span>
+                            <button type="button" role="checkbox" aria-label="Select all rows" @click="toggleAll()" :aria-checked="allPageSelected" :data-state="allPageSelected ? 'checked' : 'unchecked'"
                                 class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none">
                                 <x-lucide-check class="size-3.5" x-show="allPageSelected" x-cloak />
                             </button>
@@ -101,7 +102,7 @@
                     <tr class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors" :data-state="selected.includes(item.i) ? 'selected' : null">
                         @if ($selectable)
                             <td class="w-10 px-2 align-middle">
-                                <button type="button" role="checkbox" @click="toggleRow(item.i)" :aria-checked="selected.includes(item.i)" :data-state="selected.includes(item.i) ? 'checked' : 'unchecked'"
+                                <button type="button" role="checkbox" aria-label="Select row" @click="toggleRow(item.i)" :aria-checked="selected.includes(item.i)" :data-state="selected.includes(item.i) ? 'checked' : 'unchecked'"
                                     class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none">
                                     <x-lucide-check class="size-3.5" x-show="selected.includes(item.i)" x-cloak />
                                 </button>

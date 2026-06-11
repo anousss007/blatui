@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.1] - 2026-06-11
+
+### Accessibility
+Synced from a full axe-core (WCAG 2.1 A/AA) audit of the demo — **0 critical, 0 serious** violations
+across every component and variant.
+
+- **Status tokens darkened for AA contrast** (`foundations/app.css` `:root`): `--destructive`,
+  `--success`, `--warning` and `--info` nudged darker so `text-*` clears WCAG AA 4.5:1 on white and on
+  the `/10` soft tint. Solid-fill `*-foreground` pairs unchanged. **Re-copy `foundations/app.css`** (or
+  re-apply the token block) to pick up the contrast fix.
+- **`alert`** — dropped the `/90` opacity on `alert-description` so it meets AA on the tinted background.
+- **`kbd`** — a passed `aria-label` (invalid on `<kbd>`) now renders as visually-hidden `sr-only` text.
+- **`time-field`** — an author `aria-label` is forwarded onto the real `<input type="time">`.
+- **`select`** — the `:options` shorthand trigger now carries an accessible name (`placeholder` or
+  "Select option") for its `combobox` role.
+- **`data-table`** — select-all and per-row checkbox buttons now have `aria-label`s.
+- **`item-group`** — removed `role="list"` (children aren't `listitem`s).
+
+Re-run `blatui:add` for any of these components to pull the fixes.
+
 ## [1.12.0] - 2026-06-11
 
 ### Added

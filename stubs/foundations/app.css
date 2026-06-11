@@ -156,17 +156,17 @@
     --muted-foreground: oklch(0.49 0 0);
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
-    /* Darkened from 0.577 → 0.55 so destructive text clears AA 4.5:1 on white (was 4.49:1). */
-    --destructive: oklch(0.55 0.238 27.325);
+    /* Darkened to clear AA 4.5:1 for destructive text on white AND on the /10 soft tint. */
+    --destructive: oklch(0.505 0.225 27.325);
     --destructive-foreground: oklch(0.985 0 0);
     /* Semantic status tones — preset-independent (live once here, not per data-base).
        Tuned so text-{tone} clears WCAG AA 4.5:1 on a /10 tint and white clears AA on the
        solid fill. `danger` reuses --destructive. */
-    --success: oklch(0.52 0.13 150);
+    --success: oklch(0.455 0.125 150);
     --success-foreground: oklch(0.985 0.018 155);
-    --warning: oklch(0.56 0.12 70);
+    --warning: oklch(0.48 0.11 65);
     --warning-foreground: oklch(0.987 0.022 95);
-    --info: oklch(0.54 0.15 250);
+    --info: oklch(0.475 0.16 250);
     --info-foreground: oklch(0.985 0.015 255);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
