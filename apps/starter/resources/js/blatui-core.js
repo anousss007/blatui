@@ -962,6 +962,7 @@ const blatMenu = (config = {}) => ({
     y: 0,
     _menu: null,
     _trigger: null,
+    _closeTimer: null,
     // Context-menu entry point: open at the pointer position with first item focused.
     openAt(ev) {
         if (ev) {
@@ -979,6 +980,7 @@ const blatMenu = (config = {}) => ({
         );
     },
     openMenu(focus) {
+        this.cancelClose();
         this.open = true;
         this.$nextTick(() => {
             if (!this._menu) return;
@@ -992,9 +994,21 @@ const blatMenu = (config = {}) => ({
         this.open ? this.closeMenu(false) : this.openMenu();
     },
     closeMenu(returnFocus = true) {
+        this.cancelClose();
         if (!this.open) return;
         this.open = false;
         if (returnFocus && this._trigger) this.$nextTick(() => this._trigger.focus());
+    },
+    // Submenus portal their content to <body> (to escape the scrolling parent
+    // panel), so the wrapper's hover no longer covers the flyout. A short,
+    // cancellable close lets the pointer cross the gap from trigger to submenu
+    // without it snapping shut.
+    closeSoon(delay = 120) {
+        clearTimeout(this._closeTimer);
+        this._closeTimer = setTimeout(() => this.closeMenu(false), delay);
+    },
+    cancelClose() {
+        clearTimeout(this._closeTimer);
     },
 });
 
