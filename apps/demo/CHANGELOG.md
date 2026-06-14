@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.2] - 2026-06-14
+
+### Fixed
+- **Submenus no longer clipped** (`dropdown-menu`, `context-menu`, `menubar`) — sub-content now
+  teleports to `<body>` with `fixed` positioning instead of living inside the parent panel's
+  `overflow-y-auto` clip, so the flyout opens to the side rather than being cut off or forced into
+  a scrollbar. A short, cancellable close delay lets the pointer travel from the trigger to the
+  teleported flyout without it closing. (#2)
+
 ## [1.12.1] - 2026-06-11
 
 ### Accessibility
