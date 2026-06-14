@@ -2,7 +2,7 @@
     <x-ui.context-menu-trigger class="border-input flex h-[150px] w-[300px] items-center justify-center rounded-md border border-dashed text-sm">
         Right click here
     </x-ui.context-menu-trigger>
-    <x-ui.context-menu-content class="w-52">
+    <x-ui.context-menu-content class="w-64">
         <x-ui.context-menu-item inset>
             Back
             <x-ui.context-menu-shortcut>⌘[</x-ui.context-menu-shortcut>
