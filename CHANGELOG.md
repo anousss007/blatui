@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.2] - 2026-06-14
+
+### Fixed
+- **Submenus no longer clipped** (`dropdown-menu`, `context-menu`, `menubar`) — the sub-content
+  flyout lived inside the parent menu panel, which is `fixed max-h-96 overflow-y-auto`; `x-anchor`
+  positioned the flyout but the parent's clip/scroll swallowed it, so it was cut off or pushed
+  into a scrollbar instead of opening to the side. The flyout now teleports to `<body>` with
+  `fixed` positioning — mirroring how the top-level panel already escapes its container — so it
+  flies out cleanly. A short, cancellable close delay (`closeSoon` / `cancelClose` on the menu
+  engine) lets the pointer cross the gap from the trigger to the teleported flyout without it
+  snapping shut. (#2)
+
+  Re-run `blatui:add dropdown-menu context-menu menubar` and re-copy `foundations/blatui-core.js`
+  to pick up the fix.
+
 ## [1.12.1] - 2026-06-11
 
 ### Accessibility
