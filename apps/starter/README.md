@@ -18,7 +18,7 @@ laravel new my-app --using=blatui/starter
 
 - **Laravel 13** · **Tailwind CSS v4** · **Alpine.js 3** · Vite.
 - The full **BlatUI component set** copied into `resources/views/components/ui/`
-  (81 components · 416 variants · 283 files) — you own every line.
+  (156 components · 608 variants · 367 files) — you own every line.
 - Foundations wired: `resources/css/app.css` → `@import './blatui.css'`,
   `resources/js/app.js` → `import './blatui.js'` (boots Alpine + the BlatUI
   engine: components, charts, calendar).

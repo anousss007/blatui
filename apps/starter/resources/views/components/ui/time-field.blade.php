@@ -19,6 +19,11 @@
     $step = $seconds ? max(1, (int) $secondStep) : ((int) $minuteStep > 1 ? (int) $minuteStep * 60 : null);
 
     $selCls = 'appearance-none border-input bg-background dark:bg-input/30 h-9 rounded-md border ps-2.5 pe-7 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:opacity-50 disabled:pointer-events-none';
+
+    // Forward an author-provided aria-label onto the real control — otherwise it lands on the
+    // wrapper div and the native <input type=time> stays unnamed.
+    $ariaLabel = $attributes->get('aria-label');
+    $attributes = $attributes->except('aria-label');
 @endphp
 
 <div
@@ -141,6 +146,7 @@
             :min="$min"
             :max="$max"
             :disabled="$disabled"
+            :aria-label="$ariaLabel"
             x-bind:value="value"
             x-on:input="fromInput($event.target.value)"
             class="bg-background w-auto [&::-webkit-calendar-picker-indicator]:hidden"

@@ -9,8 +9,10 @@
     'captionLayout' => 'label',
     'showWeekNumber' => false,
     'disabled' => null,
-    'min' => null,
+    'min' => null,        // range duration bounds in DAYS (legacy name; prefer minDays/maxDays)
     'max' => null,
+    'minDays' => null,    // explicit range-duration bounds in days (clearer than min/max)
+    'maxDays' => null,
     'required' => false,
     'startMonth' => null,
     'endMonth' => null,
@@ -18,20 +20,34 @@
     'modifiers' => [],
     'modifiersClass' => [],
     'buttonVariant' => 'ghost',
+    'showOutsideDays' => true,
+    'minDate' => null,   // out-of-range date bound (Y-m-d)
+    'maxDate' => null,
+    'outOfRange' => 'disable',  // 'disable' (prevent selection) | 'flag' (allow + show red)
 ])
 
 @php
+    // weekStart accepts 0–6 (0 = Sunday) OR a day name ("sunday", "monday", …).
+    $weekStartNum = is_numeric($weekStart)
+        ? (((int) $weekStart % 7) + 7) % 7
+        : (['sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3, 'thursday' => 4, 'friday' => 5, 'saturday' => 6][strtolower(trim((string) $weekStart))] ?? 0);
+
     $cfg = array_filter([
         'mode' => $mode,
         'value' => $value,
         'locale' => $locale,
         'numberOfMonths' => (int) $numberOfMonths,
-        'weekStart' => (int) $weekStart,
+        'weekStart' => $weekStartNum,
         'captionLayout' => $captionLayout,
         'showWeekNumber' => (bool) $showWeekNumber,
         'disableNavigation' => (bool) $disableNavigation,
         'min' => $min,
         'max' => $max,
+        'minDays' => $minDays,
+        'maxDays' => $maxDays,
+        'minDate' => $minDate,
+        'maxDate' => $maxDate,
+        'outOfRange' => $outOfRange,
         'disabled' => $disabled,
         'defaultMonth' => $defaultMonth,
         'startMonth' => $startMonth,
@@ -51,7 +67,9 @@
         'hover:bg-accent hover:text-accent-foreground',
         'data-[today]:bg-accent data-[today]:text-accent-foreground',
         'data-[outside]:text-muted-foreground',
-        'data-[disabled]:text-muted-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none',
+        'data-[disabled]:text-muted-foreground data-[disabled]:opacity-40 data-[disabled]:line-through data-[disabled]:pointer-events-none',
+        // outOfRange="flag": selectable but flagged red (overridden by the selected/range styles below).
+        'data-[out-of-range]:text-destructive data-[out-of-range]:hover:bg-destructive/10 data-[out-of-range]:hover:text-destructive',
         'data-[selected]:bg-primary data-[selected]:text-primary-foreground data-[selected]:hover:bg-primary data-[selected]:hover:text-primary-foreground',
         'data-[range-start]:bg-primary data-[range-start]:text-primary-foreground data-[range-start]:rounded-r-none',
         'data-[range-end]:bg-primary data-[range-end]:text-primary-foreground data-[range-end]:rounded-l-none',
@@ -63,6 +81,7 @@
     data-slot="calendar"
     x-data="calendar({{ \Illuminate\Support\Js::from($cfg) }})"
     style="--cell-size: 2rem;"
+    @unless ($showOutsideDays) data-hide-outside-days @endunless
     {{ $attributes->twMerge('group/calendar bg-background w-fit rounded-md border p-3') }}
 >
     @if ($name)
@@ -154,8 +173,9 @@
                                             :data-range-middle="(mode === 'range' && rangeIs(day).middle) ? true : null"
                                             :data-range-end="(mode === 'range' && rangeIs(day).end) ? true : null"
                                             :data-today="isToday(day) ? true : null"
-                                            :data-outside="isOutside(day, m) ? true : null"
+                                            :data-outside="day.__outside ? true : null"
                                             :data-disabled="isDisabled(day) ? true : null"
+                                            :data-out-of-range="(outOfRange === 'flag' && isOutOfRange(day)) ? true : null"
                                             :class="modifierClass(day)"
                                             class="{{ $dayBtn }}"
                                         ></button>
