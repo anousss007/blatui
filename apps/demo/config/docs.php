@@ -11,7 +11,7 @@ return [
             'datetime-picker', 'time-field',
         ],
         'Layout' => [
-            'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar', 'accent',
+            'container', 'stack', 'card', 'bento-grid', 'page-header', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar', 'accent', 'visually-hidden',
         ],
         'Data Display' => [
             'avatar', 'badge', 'table', 'comparison-table', 'data-table', 'description-list', 'carousel', 'gallery', 'video', 'chart', 'sparkline', 'stat', 'icon', 'item',
@@ -28,7 +28,7 @@ return [
             'context-menu', 'menubar', 'command', 'command-dialog',
         ],
         'Navigation' => [
-            'breadcrumb', 'link', 'tabs', 'navigation-menu', 'pagination', 'stepper',
+            'breadcrumb', 'link', 'tabs', 'navigation-menu', 'pagination', 'stepper', 'scrollspy', 'bottom-navigation', 'dock', 'speed-dial', 'back-to-top',
         ],
         'Disclosure' => [
             'accordion', 'collapsible',
@@ -163,6 +163,17 @@ return [
         'dot-pattern' => 'A decorative dotted-grid background layer with adjustable size, gap and edge fade.',
         'grid-pattern' => 'A decorative grid / graph-paper background layer with an optional edge fade.',
         'aurora' => 'An animated northern-lights gradient backdrop with your content overlaid.',
+
+        'container' => 'A centered, max-width content wrapper with responsive padding and selectable widths.',
+        'stack' => 'A flexbox layout primitive for vertical or horizontal stacking with gap and alignment.',
+        'bento-grid' => 'A modern bento grid for arranging cards of varying column and row spans.',
+        'page-header' => 'A page title block with a description and optional breadcrumb and action slots.',
+        'visually-hidden' => 'Hide content visually while keeping it available to screen readers, with an optional skip-link mode.',
+        'scrollspy' => 'A table-of-contents nav that highlights the section currently in view.',
+        'bottom-navigation' => 'A mobile bottom tab bar with icons, labels, an active state and badges.',
+        'dock' => 'A macOS-style dock whose icons magnify as the cursor passes over them.',
+        'speed-dial' => 'A floating action button that expands to reveal labelled actions.',
+        'back-to-top' => 'A floating button that appears after scrolling and smoothly returns to the top.',
     ],
 
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).

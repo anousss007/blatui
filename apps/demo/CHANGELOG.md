@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   scroll), `border-beam`, `spotlight-card`, `tilt-card`, `flip-card`, `confetti`,
   `dot-pattern`, `grid-pattern` and `aurora`. Self-contained (scoped keyframes), motion
   respects `prefers-reduced-motion`.
+- **Layout**: `container`, `stack` (flex primitive), `bento-grid` (+ `bento-item`),
+  `page-header` and `visually-hidden` (sr-only / skip-link).
+- **Navigation**: `scrollspy` (table of contents), `bottom-navigation` (mobile tab bar),
+  `dock` (magnifying macOS dock), `speed-dial` (FAB) and `back-to-top`.
 
   All of the above are WCAG 2 AA (axe 0, light + dark).
 
