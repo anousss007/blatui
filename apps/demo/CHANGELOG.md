@@ -39,6 +39,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `knob` (rotary dial) and `repeater` (field-array).
 - **Misc**: `presence` (status dot), `onboarding-tour` (spotlight coachmarks) and
   `infinite-scroll`.
+- **Media** (new **Media** category): `audio-player`, `image` (skeleton + blur-up + error
+  fallback), `qr-code` (dependency-free client-side SVG generator) and `map` (keyless
+  OpenStreetMap embed).
+- **Charts-style data display**: `gantt` (project timeline), `scheduler` (week/day agenda)
+  and `org-chart`.
+- **More effects**: `meteors`, `animated-beam` and `parallax`.
 
   All of the above are WCAG 2 AA (axe 0, light + dark).
 

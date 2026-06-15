@@ -14,7 +14,7 @@ return [
             'container', 'stack', 'card', 'bento-grid', 'page-header', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar', 'accent', 'visually-hidden',
         ],
         'Data Display' => [
-            'avatar', 'avatar-group', 'presence', 'badge', 'table', 'comparison-table', 'data-table', 'tree-table', 'description-list', 'carousel', 'gallery', 'masonry', 'comparison-slider', 'video', 'chart', 'sparkline', 'stat', 'meter', 'heatmap', 'icon', 'item',
+            'avatar', 'avatar-group', 'presence', 'badge', 'table', 'comparison-table', 'data-table', 'tree-table', 'description-list', 'carousel', 'masonry', 'comparison-slider', 'chart', 'sparkline', 'stat', 'meter', 'heatmap', 'gantt', 'scheduler', 'org-chart', 'icon', 'item',
             'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'kanban', 'tree', 'json-viewer', 'diff-viewer', 'skeleton', 'code-block', 'typography',
         ],
         'AI' => [
@@ -37,7 +37,10 @@ return [
             'product-card', 'price', 'quantity-selector', 'variant-selector', 'add-to-cart', 'mini-cart',
         ],
         'Effects' => [
-            'gradient-text', 'number-ticker', 'border-beam', 'spotlight-card', 'tilt-card', 'flip-card', 'confetti', 'dot-pattern', 'grid-pattern', 'aurora',
+            'gradient-text', 'number-ticker', 'border-beam', 'spotlight-card', 'tilt-card', 'flip-card', 'confetti', 'meteors', 'animated-beam', 'parallax', 'dot-pattern', 'grid-pattern', 'aurora',
+        ],
+        'Media' => [
+            'audio-player', 'video', 'image', 'gallery', 'qr-code', 'map',
         ],
     ],
 
@@ -46,6 +49,7 @@ return [
         'input-otp' => 'Input OTP',
         'datetime-picker' => 'Date & Time Picker',
         'json-viewer' => 'JSON Viewer',
+        'qr-code' => 'QR Code',
     ],
 
     // Optional one-line descriptions shown on each component page.
@@ -208,6 +212,17 @@ return [
         'presence' => 'An online / away / busy / offline status dot, optionally pinned to an avatar.',
         'onboarding-tour' => 'A guided product tour that spotlights elements step by step.',
         'infinite-scroll' => 'Loads more content when a sentinel scrolls into view, with a load-more fallback.',
+
+        'audio-player' => 'A custom audio player — play/pause, seek, time and volume — over a native HTML5 audio element.',
+        'image' => 'A smart image with a skeleton, blur-up fade-in and a graceful error fallback.',
+        'qr-code' => 'A client-side QR code generator rendered as a crisp, theme-aware SVG — no dependencies.',
+        'map' => 'A keyless OpenStreetMap embed that drops a pin at any latitude / longitude.',
+        'org-chart' => 'A top-down organisational chart with connector lines, rendered from a tree.',
+        'gantt' => 'A project timeline (Gantt) chart with task bars positioned by date and progress.',
+        'scheduler' => 'A week / day agenda that positions events in time slots.',
+        'meteors' => 'Animated falling meteor streaks behind your content.',
+        'animated-beam' => 'An SVG line with a travelling light gradient connecting two elements.',
+        'parallax' => 'Translates its content as it scrolls for a depth effect.',
     ],
 
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).
