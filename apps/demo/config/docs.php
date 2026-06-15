@@ -33,6 +33,9 @@ return [
         'Disclosure' => [
             'accordion', 'collapsible',
         ],
+        'Effects' => [
+            'gradient-text', 'number-ticker', 'border-beam', 'spotlight-card', 'tilt-card', 'flip-card', 'confetti', 'dot-pattern', 'grid-pattern', 'aurora',
+        ],
     ],
 
     // Display-name overrides for slugs whose humanized form is wrong (acronyms, etc.).
@@ -149,6 +152,17 @@ return [
         'reasoning' => 'A collapsible AI reasoning / "thinking" block that reveals the chain-of-thought behind an answer.',
         'tool-call' => 'A card showing an AI tool invocation — name, status, and collapsible JSON arguments and result.',
         'citation' => 'An inline, LLM-style source reference that reveals the source title, link and snippet in a popover.',
+
+        'gradient-text' => 'Text painted with a gradient fill, with optional animated shimmer and colour presets.',
+        'number-ticker' => 'A number that animates counting up to its target when it scrolls into view.',
+        'border-beam' => 'A container with a light beam continuously travelling around its border.',
+        'spotlight-card' => 'A card with a soft radial spotlight that follows the cursor on hover.',
+        'tilt-card' => 'A card that tilts in 3D toward the cursor, with an optional glare highlight.',
+        'flip-card' => 'A card that flips on hover or click to reveal a back face.',
+        'confetti' => 'A celebratory confetti burst fired from a button or any trigger.',
+        'dot-pattern' => 'A decorative dotted-grid background layer with adjustable size, gap and edge fade.',
+        'grid-pattern' => 'A decorative grid / graph-paper background layer with an optional edge fade.',
+        'aurora' => 'An animated northern-lights gradient backdrop with your content overlaid.',
     ],
 
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).

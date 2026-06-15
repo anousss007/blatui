@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   chain-of-thought), `tool-call` (tool invocation card) and `citation` (inline source popover).
 - **Data display**: `stat` (KPI card with trend + sparkline), `tree` (keyboard-navigable
   tree-view), `json-viewer` (collapsible syntax-highlighted JSON) and `description-list`.
+- **Effects** (new **Effects** category): `gradient-text`, `number-ticker` (count-up on
+  scroll), `border-beam`, `spotlight-card`, `tilt-card`, `flip-card`, `confetti`,
+  `dot-pattern`, `grid-pattern` and `aurora`. Self-contained (scoped keyframes), motion
+  respects `prefers-reduced-motion`.
 
   All of the above are WCAG 2 AA (axe 0, light + dark).
 
