@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Form components**: `number-input` (numeric spinbox with min/max/step), `tags-input`
+  (chip entry with form-array submission), `color-picker` (hue slider + validating hex
+  field + preset swatches), `password-strength` (live 4-segment meter + requirements
+  checklist), `file-upload` (drag-and-drop dropzone with image thumbnails, sizes and
+  per-file progress), `autosize-textarea` (grows to fit content) and `editable`
+  (click-to-edit inline text). All WCAG 2 AA (axe 0, light + dark).
+
 ## [1.12.2] - 2026-06-14
 
 ### Fixed

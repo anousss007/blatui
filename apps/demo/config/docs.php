@@ -5,9 +5,9 @@
 return [
     'categories' => [
         'Forms & Input' => [
-            'button', 'button-group', 'copy-button', 'input', 'input-group', 'input-mask', 'input-otp', 'phone-input', 'textarea',
-            'label', 'field', 'checkbox', 'radio-group', 'switch', 'select', 'combobox', 'autocomplete',
-            'slider', 'toggle', 'toggle-group', 'rating', 'calendar', 'date-picker',
+            'button', 'button-group', 'copy-button', 'input', 'input-group', 'input-mask', 'input-otp', 'number-input', 'phone-input', 'textarea', 'autosize-textarea',
+            'label', 'field', 'checkbox', 'radio-group', 'switch', 'select', 'combobox', 'autocomplete', 'tags-input',
+            'slider', 'toggle', 'toggle-group', 'rating', 'color-picker', 'password-strength', 'file-upload', 'editable', 'calendar', 'date-picker',
             'datetime-picker', 'time-field',
         ],
         'Layout' => [
@@ -65,6 +65,13 @@ return [
         'date-picker' => 'A date picker component with a calendar popover.',
         'datetime-picker' => 'Pick a date and a time together — single or range — in one popover.',
         'time-field' => 'A time input with native and dropdown variants, 12/24-hour and seconds.',
+        'number-input' => 'A numeric stepper with minus/plus buttons that clamp a value to an optional min, max and step.',
+        'tags-input' => 'A tag entry field — type and press Enter or comma to add removable chips, with form-array submission.',
+        'autosize-textarea' => 'A textarea that grows and shrinks to fit its content, with an optional max-rows cap.',
+        'file-upload' => 'A drag-and-drop dropzone with image thumbnails, file sizes and per-file progress bars.',
+        'color-picker' => 'Accessible colour selection with a hue slider, a validating hex field and a preset swatch palette.',
+        'password-strength' => 'A password field with a live strength meter and an optional requirements checklist.',
+        'editable' => 'Click-to-edit inline text that swaps the value for an input, saving on Enter or blur.',
 
         'card' => 'Displays a card with header, content, and footer.',
         'aspect-ratio' => 'Displays content within a desired ratio.',
