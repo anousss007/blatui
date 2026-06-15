@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-06-15
+
+### Added
+- **75 new components** taking the set from 81 to **156**, including four new categories:
+  - **AI** — `chat`, `prompt-input`, `streaming-text`, `reasoning`, `tool-call`, `citation`.
+  - **Effects** — `gradient-text`, `number-ticker`, `border-beam`, `spotlight-card`,
+    `tilt-card`, `flip-card`, `confetti`, `meteors`, `animated-beam`, `parallax`,
+    `dot-pattern`, `grid-pattern`, `aurora`.
+  - **E-commerce** — `product-card`, `price`, `quantity-selector`, `variant-selector`,
+    `add-to-cart`, `mini-cart`.
+  - **Media** — `audio-player`, `image`, `qr-code` (dependency-free SVG), `map` (keyless OSM).
+- Major additions across existing groups: **Forms** (`file-upload`, `color-picker`,
+  `password-strength`, `autosize-textarea`, `editable`, `rich-text-editor`, `markdown-editor`,
+  `signature-pad`, `mention-input`, `segmented-control`, `knob`, `repeater`), **Data display**
+  (`stat`, `tree`, `json-viewer`, `description-list`, `avatar-group`, `meter`, `heatmap`,
+  `comparison-slider`, `masonry`, `diff-viewer`, `kanban`, `tree-table`, `gantt`, `scheduler`,
+  `org-chart`, `presence`), **Navigation** (`scrollspy`, `bottom-navigation`, `dock`,
+  `speed-dial`, `back-to-top`, `infinite-scroll`), **Layout** (`container`, `stack`,
+  `bento-grid`, `page-header`, `visually-hidden`) and **Feedback/Overlays**
+  (`cookie-consent`, `top-progress`, `loading-overlay`, `notification-center`,
+  `onboarding-tour`).
+- Every new component is self-contained (Blade + Alpine + Tailwind design tokens), themeable
+  (light + dark) and **WCAG 2 AA** (axe-core: 0 critical / 0 serious). Install any with
+  `php artisan blatui:add <name>`.
+
 ## [1.12.2] - 2026-06-14
 
 ### Fixed

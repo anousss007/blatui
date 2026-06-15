@@ -11,7 +11,7 @@ A CLI that copies open-source, copy-paste UI components **you own** straight int
 [![License](https://img.shields.io/packagist/l/blatui/blatui.svg)](LICENSE)
 [![Accessibility: WCAG AA](https://img.shields.io/badge/accessibility-WCAG%20AA-22c55e.svg)](https://blatui.remix-it.com)
 
-**81 components · 416 variants · 64 blocks · 70 charts · accessible (WCAG AA) · fully themeable · light + dark · MIT**
+**156 components · 608 variants · 64 blocks · 70 charts · accessible (WCAG AA) · fully themeable · light + dark · MIT**
 
 [Live demo & docs → blatui.remix-it.com](https://blatui.remix-it.com)
 
