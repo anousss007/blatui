@@ -21,17 +21,20 @@ return [
             'chat', 'prompt-input', 'streaming-text', 'reasoning', 'tool-call', 'citation', 'terminal',
         ],
         'Feedback' => [
-            'alert', 'banner', 'empty', 'spinner', 'sonner', 'tooltip', 'hover-card',
+            'alert', 'banner', 'empty', 'spinner', 'loading-overlay', 'top-progress', 'sonner', 'tooltip', 'hover-card', 'cookie-consent',
         ],
         'Overlays' => [
             'dialog', 'alert-dialog', 'sheet', 'drawer', 'popover', 'dropdown-menu',
-            'context-menu', 'menubar', 'command', 'command-dialog',
+            'context-menu', 'menubar', 'command', 'command-dialog', 'notification-center',
         ],
         'Navigation' => [
             'breadcrumb', 'link', 'tabs', 'navigation-menu', 'pagination', 'stepper', 'scrollspy', 'bottom-navigation', 'dock', 'speed-dial', 'back-to-top',
         ],
         'Disclosure' => [
             'accordion', 'collapsible',
+        ],
+        'E-commerce' => [
+            'product-card', 'price', 'quantity-selector', 'variant-selector', 'add-to-cart', 'mini-cart',
         ],
         'Effects' => [
             'gradient-text', 'number-ticker', 'border-beam', 'spotlight-card', 'tilt-card', 'flip-card', 'confetti', 'dot-pattern', 'grid-pattern', 'aurora',
@@ -183,6 +186,17 @@ return [
         'diff-viewer' => 'A line-based text diff with inline or side-by-side views and add/remove tinting.',
         'kanban' => 'A drag-and-drop board of columns whose cards can be moved between them.',
         'tree-table' => 'A table whose rows expand to reveal nested child rows.',
+
+        'product-card' => 'An e-commerce product card with image, badge, rating, price and an add-to-cart action.',
+        'price' => 'A formatted product price with optional struck-through compare-at and a discount badge.',
+        'quantity-selector' => 'A compact − [n] + quantity stepper for product and cart UIs.',
+        'variant-selector' => 'Choose a product variant — size pills or colour swatches — from an accessible radio group.',
+        'add-to-cart' => 'A stateful add-to-cart button that animates idle → adding → added.',
+        'mini-cart' => 'A cart dropdown with line items, quantity steppers, a live subtotal and checkout.',
+        'cookie-consent' => 'A GDPR cookie banner with accept / reject / customize, persisted to localStorage.',
+        'top-progress' => 'An NProgress-style top loading bar with start / set / done controls for navigation.',
+        'loading-overlay' => 'A veil with a spinner shown over its content while busy.',
+        'notification-center' => 'A bell with an unread-count badge that opens an inbox of notifications.',
     ],
 
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).

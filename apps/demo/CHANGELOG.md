@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **More data display**: `avatar-group`, `meter`, `heatmap` (contributions grid), `kanban`
   (drag-and-drop board), `tree-table` (expandable nested rows), `comparison-slider`,
   `masonry` and `diff-viewer` (inline/split).
+- **E-commerce** (new **E-commerce** category): `product-card`, `price`, `quantity-selector`,
+  `variant-selector` (size pills / colour swatches), `add-to-cart` (stateful) and `mini-cart`.
+- **Feedback / overlays**: `cookie-consent`, `top-progress` (NProgress-style bar),
+  `loading-overlay` and `notification-center` (bell inbox).
 
   All of the above are WCAG 2 AA (axe 0, light + dark).
 
