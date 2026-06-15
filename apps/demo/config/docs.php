@@ -14,8 +14,8 @@ return [
             'container', 'stack', 'card', 'bento-grid', 'page-header', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar', 'accent', 'visually-hidden',
         ],
         'Data Display' => [
-            'avatar', 'badge', 'table', 'comparison-table', 'data-table', 'description-list', 'carousel', 'gallery', 'video', 'chart', 'sparkline', 'stat', 'icon', 'item',
-            'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'tree', 'json-viewer', 'skeleton', 'code-block', 'typography',
+            'avatar', 'avatar-group', 'badge', 'table', 'comparison-table', 'data-table', 'tree-table', 'description-list', 'carousel', 'gallery', 'masonry', 'comparison-slider', 'video', 'chart', 'sparkline', 'stat', 'meter', 'heatmap', 'icon', 'item',
+            'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'kanban', 'tree', 'json-viewer', 'diff-viewer', 'skeleton', 'code-block', 'typography',
         ],
         'AI' => [
             'chat', 'prompt-input', 'streaming-text', 'reasoning', 'tool-call', 'citation', 'terminal',
@@ -174,6 +174,15 @@ return [
         'dock' => 'A macOS-style dock whose icons magnify as the cursor passes over them.',
         'speed-dial' => 'A floating action button that expands to reveal labelled actions.',
         'back-to-top' => 'A floating button that appears after scrolling and smoothly returns to the top.',
+
+        'avatar-group' => 'Overlapping stacked avatars with an overflow "+N" count.',
+        'meter' => 'A labelled measurement bar for a value within a range (usage, score, capacity), with status tones.',
+        'heatmap' => 'A GitHub-style contributions heatmap of colour-graded daily counts.',
+        'comparison-slider' => 'A draggable before/after image comparison with a keyboard-operable divider.',
+        'masonry' => 'A Pinterest-style masonry grid built on native CSS columns.',
+        'diff-viewer' => 'A line-based text diff with inline or side-by-side views and add/remove tinting.',
+        'kanban' => 'A drag-and-drop board of columns whose cards can be moved between them.',
+        'tree-table' => 'A table whose rows expand to reveal nested child rows.',
     ],
 
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).

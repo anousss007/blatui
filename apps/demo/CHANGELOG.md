@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `page-header` and `visually-hidden` (sr-only / skip-link).
 - **Navigation**: `scrollspy` (table of contents), `bottom-navigation` (mobile tab bar),
   `dock` (magnifying macOS dock), `speed-dial` (FAB) and `back-to-top`.
+- **More data display**: `avatar-group`, `meter`, `heatmap` (contributions grid), `kanban`
+  (drag-and-drop board), `tree-table` (expandable nested rows), `comparison-slider`,
+  `masonry` and `diff-viewer` (inline/split).
 
   All of the above are WCAG 2 AA (axe 0, light + dark).
 
