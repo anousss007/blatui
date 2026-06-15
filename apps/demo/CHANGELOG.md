@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-06-15
+
 ### Added
 - **Form components**: `number-input` (numeric spinbox with min/max/step), `tags-input`
   (chip entry with form-array submission), `color-picker` (hue slider + validating hex
