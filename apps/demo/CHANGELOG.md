@@ -13,7 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   field + preset swatches), `password-strength` (live 4-segment meter + requirements
   checklist), `file-upload` (drag-and-drop dropzone with image thumbnails, sizes and
   per-file progress), `autosize-textarea` (grows to fit content) and `editable`
-  (click-to-edit inline text). All WCAG 2 AA (axe 0, light + dark).
+  (click-to-edit inline text).
+- **AI components** (new **AI** category): `chat` (composable message thread), `prompt-input`
+  (AI composer with ⌘↵), `streaming-text` (token-by-token reveal), `reasoning` (collapsible
+  chain-of-thought), `tool-call` (tool invocation card) and `citation` (inline source popover).
+- **Data display**: `stat` (KPI card with trend + sparkline), `tree` (keyboard-navigable
+  tree-view), `json-viewer` (collapsible syntax-highlighted JSON) and `description-list`.
+
+  All of the above are WCAG 2 AA (axe 0, light + dark).
 
 ## [1.12.2] - 2026-06-14
 

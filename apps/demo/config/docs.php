@@ -14,8 +14,11 @@ return [
             'card', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar', 'accent',
         ],
         'Data Display' => [
-            'avatar', 'badge', 'table', 'comparison-table', 'data-table', 'carousel', 'gallery', 'video', 'chart', 'sparkline', 'icon', 'item',
-            'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'terminal', 'skeleton', 'code-block', 'typography',
+            'avatar', 'badge', 'table', 'comparison-table', 'data-table', 'description-list', 'carousel', 'gallery', 'video', 'chart', 'sparkline', 'stat', 'icon', 'item',
+            'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'tree', 'json-viewer', 'skeleton', 'code-block', 'typography',
+        ],
+        'AI' => [
+            'chat', 'prompt-input', 'streaming-text', 'reasoning', 'tool-call', 'citation', 'terminal',
         ],
         'Feedback' => [
             'alert', 'banner', 'empty', 'spinner', 'sonner', 'tooltip', 'hover-card',
@@ -36,6 +39,7 @@ return [
     'labels' => [
         'input-otp' => 'Input OTP',
         'datetime-picker' => 'Date & Time Picker',
+        'json-viewer' => 'JSON Viewer',
     ],
 
     // Optional one-line descriptions shown on each component page.
@@ -134,6 +138,17 @@ return [
 
         'accordion' => 'A vertically stacked set of interactive headings that each reveal a section of content.',
         'collapsible' => 'An interactive component which expands and collapses a panel.',
+
+        'description-list' => 'A semantic key/value list (term/description) — horizontal or vertical, with an optional bordered style.',
+        'stat' => 'A KPI metric card with a label, big value, trend arrow with change, optional icon and inline sparkline.',
+        'tree' => 'A collapsible, keyboard-navigable hierarchical tree view with folder and file icons.',
+        'json-viewer' => 'A collapsible, syntax-highlighted JSON tree with per-node expand/collapse and copy.',
+        'chat' => 'A composable chat transcript — role-aware message bubbles with avatars, names, timestamps and a typing indicator.',
+        'prompt-input' => 'An AI chat composer with an auto-growing textarea, attach and send buttons, and ⌘↵ to send.',
+        'streaming-text' => 'Reveals a passage token-by-token, LLM-style, with a blinking caret that stops when complete.',
+        'reasoning' => 'A collapsible AI reasoning / "thinking" block that reveals the chain-of-thought behind an answer.',
+        'tool-call' => 'A card showing an AI tool invocation — name, status, and collapsible JSON arguments and result.',
+        'citation' => 'An inline, LLM-style source reference that reveals the source title, link and snippet in a popover.',
     ],
 
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).
