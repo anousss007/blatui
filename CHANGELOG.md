@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.1] - 2026-06-16
+
+### Fixed
+- **Mobile responsiveness**: `audio-player` no longer overflows narrow screens — the seek bar
+  shrinks and the fine volume slider hides below `sm` (the mute button stays). The horizontal
+  `stepper` rail now scrolls instead of overflowing. Verified across the component set at 320–390 px.
+
 ## [1.13.0] - 2026-06-15
 
 ### Added
