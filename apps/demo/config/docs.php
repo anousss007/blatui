@@ -5,8 +5,8 @@
 return [
     'categories' => [
         'Forms & Input' => [
-            'button', 'button-group', 'copy-button', 'input', 'input-group', 'input-mask', 'input-otp', 'number-input', 'phone-input', 'textarea', 'autosize-textarea',
-            'label', 'field', 'checkbox', 'radio-group', 'switch', 'select', 'combobox', 'autocomplete', 'tags-input',
+            'button', 'button-group', 'copy-button', 'input', 'input-group', 'input-mask', 'input-otp', 'number-input', 'knob', 'phone-input', 'textarea', 'autosize-textarea', 'rich-text-editor', 'markdown-editor',
+            'label', 'field', 'repeater', 'checkbox', 'radio-group', 'switch', 'segmented-control', 'select', 'combobox', 'autocomplete', 'tags-input', 'mention-input', 'signature-pad',
             'slider', 'toggle', 'toggle-group', 'rating', 'color-picker', 'password-strength', 'file-upload', 'editable', 'calendar', 'date-picker',
             'datetime-picker', 'time-field',
         ],
@@ -14,7 +14,7 @@ return [
             'container', 'stack', 'card', 'bento-grid', 'page-header', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar', 'accent', 'visually-hidden',
         ],
         'Data Display' => [
-            'avatar', 'avatar-group', 'badge', 'table', 'comparison-table', 'data-table', 'tree-table', 'description-list', 'carousel', 'gallery', 'masonry', 'comparison-slider', 'video', 'chart', 'sparkline', 'stat', 'meter', 'heatmap', 'icon', 'item',
+            'avatar', 'avatar-group', 'presence', 'badge', 'table', 'comparison-table', 'data-table', 'tree-table', 'description-list', 'carousel', 'gallery', 'masonry', 'comparison-slider', 'video', 'chart', 'sparkline', 'stat', 'meter', 'heatmap', 'icon', 'item',
             'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'kanban', 'tree', 'json-viewer', 'diff-viewer', 'skeleton', 'code-block', 'typography',
         ],
         'AI' => [
@@ -25,10 +25,10 @@ return [
         ],
         'Overlays' => [
             'dialog', 'alert-dialog', 'sheet', 'drawer', 'popover', 'dropdown-menu',
-            'context-menu', 'menubar', 'command', 'command-dialog', 'notification-center',
+            'context-menu', 'menubar', 'command', 'command-dialog', 'notification-center', 'onboarding-tour',
         ],
         'Navigation' => [
-            'breadcrumb', 'link', 'tabs', 'navigation-menu', 'pagination', 'stepper', 'scrollspy', 'bottom-navigation', 'dock', 'speed-dial', 'back-to-top',
+            'breadcrumb', 'link', 'tabs', 'navigation-menu', 'pagination', 'stepper', 'scrollspy', 'bottom-navigation', 'dock', 'speed-dial', 'back-to-top', 'infinite-scroll',
         ],
         'Disclosure' => [
             'accordion', 'collapsible',
@@ -197,6 +197,17 @@ return [
         'top-progress' => 'An NProgress-style top loading bar with start / set / done controls for navigation.',
         'loading-overlay' => 'A veil with a spinner shown over its content while busy.',
         'notification-center' => 'A bell with an unread-count badge that opens an inbox of notifications.',
+
+        'segmented-control' => 'An iOS-style segmented control for picking one option from a small set.',
+        'knob' => 'A rotary dial input — drag, scroll or use the keyboard to set a value.',
+        'signature-pad' => 'Draw a signature on a canvas and capture it as a data URL, with clear and undo.',
+        'rich-text-editor' => 'A lightweight, dependency-free WYSIWYG editor with a formatting toolbar.',
+        'markdown-editor' => 'A Markdown textarea with a live preview, formatting toolbar and Write/Preview tabs.',
+        'mention-input' => 'A textarea that surfaces a suggestion list when you type @ to insert a mention.',
+        'repeater' => 'Addable / removable field rows (a form field-array) that submit as an array.',
+        'presence' => 'An online / away / busy / offline status dot, optionally pinned to an avatar.',
+        'onboarding-tour' => 'A guided product tour that spotlights elements step by step.',
+        'infinite-scroll' => 'Loads more content when a sentinel scrolls into view, with a load-more fallback.',
     ],
 
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).

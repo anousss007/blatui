@@ -34,6 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `variant-selector` (size pills / colour swatches), `add-to-cart` (stateful) and `mini-cart`.
 - **Feedback / overlays**: `cookie-consent`, `top-progress` (NProgress-style bar),
   `loading-overlay` and `notification-center` (bell inbox).
+- **More form controls**: `rich-text-editor` (dependency-free WYSIWYG), `markdown-editor`
+  (live preview), `signature-pad`, `mention-input` (@-mentions), `segmented-control`,
+  `knob` (rotary dial) and `repeater` (field-array).
+- **Misc**: `presence` (status dot), `onboarding-tour` (spotlight coachmarks) and
+  `infinite-scroll`.
 
   All of the above are WCAG 2 AA (axe 0, light + dark).
 
