@@ -28,7 +28,7 @@
             id="tour-search"
             type="text"
             placeholder="Search…"
-            class="border-input bg-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 h-9 flex-1 rounded-md border px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px]"
+            class="border-input bg-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 h-9 min-w-0 flex-1 rounded-md border px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px]"
         />
 
         <x-ui.button id="tour-create" variant="default" size="sm">

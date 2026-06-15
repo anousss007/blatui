@@ -109,7 +109,7 @@
             aria-label="Seek"
             :value="progress"
             @input="seek($event.target.value)"
-            class="bg-muted h-1.5 grow cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] [&::-webkit-slider-thumb]:size-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:size-3.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background"
+            class="bg-muted h-1.5 grow min-w-0 cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] [&::-webkit-slider-thumb]:size-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:size-3.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background"
             :style="`background-image: linear-gradient(to right, var(--color-primary) ${progress}%, transparent ${progress}%)`"
         >
 
@@ -134,7 +134,7 @@
             aria-label="Volume"
             :value="volumePercent"
             @input="setVolume($event.target.value)"
-            class="bg-muted h-1.5 w-16 shrink-0 cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] [&::-webkit-slider-thumb]:size-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:size-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background"
+            class="bg-muted hidden h-1.5 w-16 shrink-0 cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] sm:block [&::-webkit-slider-thumb]:size-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:size-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background"
             :style="`background-image: linear-gradient(to right, var(--color-primary) ${volumePercent}%, transparent ${volumePercent}%)`"
         >
     </div>

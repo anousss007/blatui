@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.1] - 2026-06-16
+
+### Fixed
+- **Mobile responsiveness** (full 156-component audit at 320 / 360 / 390 px): `audio-player`
+  no longer overflows narrow screens — the seek bar shrinks (`min-w-0`) and the fine volume
+  slider hides below `sm` (the mute button stays). The horizontal `stepper` rail now scrolls
+  instead of overflowing. The `scroll-area` and `onboarding-tour` examples and the site header
+  fit down to 320 px. Components are clean at 360 px+.
+
 ## [1.13.0] - 2026-06-15
 
 ### Added

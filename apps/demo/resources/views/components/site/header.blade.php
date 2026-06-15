@@ -12,7 +12,7 @@
 @endphp
 
 <header class="bg-background/80 supports-[backdrop-filter]:bg-background/65 sticky top-0 z-40 border-b backdrop-blur-xl">
-    <div class="mx-auto flex h-14 max-w-screen-2xl items-center gap-3 px-4 lg:px-6">
+    <div class="mx-auto flex h-14 max-w-screen-2xl items-center gap-2 px-3 sm:gap-3 sm:px-4 lg:px-6">
         {{ $leading ?? '' }}
 
         {{-- Wordmark --}}
@@ -20,7 +20,7 @@
             <span class="blat-brand-fill flex size-7 items-center justify-center rounded-md shadow-sm">
                 <x-lucide-terminal class="size-4" />
             </span>
-            <span class="blat-mono text-[15px]">blatui</span>
+            <span class="blat-mono text-[15px] max-[359px]:hidden">blatui</span>
         </a>
 
         {{-- Desktop nav --}}

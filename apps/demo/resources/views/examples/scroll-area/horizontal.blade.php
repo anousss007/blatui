@@ -1,4 +1,4 @@
-<x-ui.scroll-area class="w-96 rounded-md border whitespace-nowrap">
+<x-ui.scroll-area class="w-full max-w-sm rounded-md border whitespace-nowrap">
     <div class="flex w-max gap-4 p-4">
         @foreach (range(1, 10) as $i)
             <figure class="shrink-0">
