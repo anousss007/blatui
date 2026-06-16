@@ -8,7 +8,7 @@ description: Build UIs with BlatUI — shadcn/ui for the Laravel BLAT stack (Bla
 ## When to use this skill
 
 Use this skill when building or editing UI in a Laravel Blade app that has BlatUI
-installed (the `blatui/blatui` package, with components in
+installed (the `anousss007/blatui` package, with components in
 `resources/views/components/ui/`). Prefer BlatUI components over hand-written markup.
 
 ## Core model

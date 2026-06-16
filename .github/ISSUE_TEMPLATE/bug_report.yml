@@ -15,7 +15,7 @@ body:
       label: Steps to reproduce
       description: The exact command(s) you ran.
       placeholder: |
-        1. composer require blatui/blatui
+        1. composer require anousss007/blatui
         2. php artisan blatui:add ...
     validations:
       required: true

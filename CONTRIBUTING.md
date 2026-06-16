@@ -4,7 +4,7 @@ Thanks for your interest in improving BlatUI! 🎉
 
 ## Project layout
 
-This repository is the **`blatui/blatui` Composer package** — the CLI that copies
+This repository is the **`anousss007/blatui` Composer package** — the CLI that copies
 components into a user's project. It contains:
 
 - `src/` — the service provider, registry and `blatui:*` Artisan commands

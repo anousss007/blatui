@@ -99,7 +99,7 @@ Re-run `blatui:add` for any of these components to pull the fixes.
   the 1.9.x line into a proper minor milestone: the `combobox` `disabled` prop (1.9.1) and
   multi-select `:multiple` on `select` / `combobox` / `autocomplete` (1.9.2, with the updated
   `blatui-core.js` `blatSelect` engine). No new component code since 1.9.2 and no breaking changes —
-  installing `blatui/blatui:^1.10` gives you exactly the 1.9.2 component set under a minor version.
+  installing `anousss007/blatui:^1.10` gives you exactly the 1.9.2 component set under a minor version.
 
 ## [1.9.2] - 2026-06-10
 

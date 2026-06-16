@@ -6,9 +6,9 @@
 
 A CLI that copies open-source, copy-paste UI components **you own** straight into your Laravel project.
 
-[![Latest Version](https://img.shields.io/packagist/v/blatui/blatui.svg)](https://packagist.org/packages/blatui/blatui)
+[![Latest Version](https://img.shields.io/packagist/v/anousss007/blatui.svg)](https://packagist.org/packages/anousss007/blatui)
 [![CI](https://github.com/anousss007/blatui/actions/workflows/ci.yml/badge.svg)](https://github.com/anousss007/blatui/actions/workflows/ci.yml)
-[![License](https://img.shields.io/packagist/l/blatui/blatui.svg)](LICENSE)
+[![License](https://img.shields.io/packagist/l/anousss007/blatui.svg)](LICENSE)
 [![Accessibility: WCAG AA](https://img.shields.io/badge/accessibility-WCAG%20AA-22c55e.svg)](https://blatui.remix-it.com)
 
 **156 components · 608 variants · 64 blocks · 70 charts · accessible (WCAG AA) · fully themeable · light + dark · MIT**
@@ -36,7 +36,7 @@ A CLI that copies open-source, copy-paste UI components **you own** straight int
 
 ```bash
 # 1. Install the CLI
-composer require blatui/blatui
+composer require anousss007/blatui
 
 # 2. Peer packages used by the components
 composer require gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons

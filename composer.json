@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "blatui/blatui",
+    "name": "anousss007/blatui",
     "description": "Open-source shadcn/ui for the BLAT stack (Blade, Laravel, Alpine.js, Tailwind CSS v4). A CLI that copies components you own into your Laravel project.",
     "keywords": ["laravel", "blade", "alpinejs", "tailwindcss", "shadcn", "ui", "components", "cli", "blatui"],
     "homepage": "https://github.com/anousss007/blatui",
