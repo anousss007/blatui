@@ -4,8 +4,79 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b80968275587e5ac8e71865dd071acb3",
+    "content-hash": "4c9065b07e57d31a921006079726c46d",
     "packages": [
+        {
+            "name": "anousss007/blatui",
+            "version": "v1.13.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/anousss007/blatui.git",
+                "reference": "b56cbd4c4f5586cd21e769e567eebc7b93f9d9e8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/anousss007/blatui/zipball/b56cbd4c4f5586cd21e769e567eebc7b93f9d9e8",
+                "reference": "b56cbd4c4f5586cd21e769e567eebc7b93f9d9e8",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/console": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/support": "^11.0 || ^12.0 || ^13.0",
+                "php": "^8.2"
+            },
+            "replace": {
+                "blatui/blatui": "self.version"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.18",
+                "orchestra/testbench": "^9.0 || ^10.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "BlatUI\\BlatuiServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BlatUI\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "anousss007",
+                    "homepage": "https://github.com/anousss007"
+                }
+            ],
+            "description": "Open-source shadcn/ui for the BLAT stack (Blade, Laravel, Alpine.js, Tailwind CSS v4). A CLI that copies components you own into your Laravel project.",
+            "homepage": "https://github.com/anousss007/blatui",
+            "keywords": [
+                "alpinejs",
+                "blade",
+                "blatui",
+                "cli",
+                "components",
+                "laravel",
+                "shadcn",
+                "tailwindcss",
+                "ui"
+            ],
+            "support": {
+                "issues": "https://github.com/anousss007/blatui/issues",
+                "source": "https://github.com/anousss007/blatui"
+            },
+            "time": "2026-06-16T13:57:13+00:00"
+        },
         {
             "name": "blade-ui-kit/blade-icons",
             "version": "1.10.0",
@@ -86,74 +157,6 @@
                 }
             ],
             "time": "2026-04-23T19:03:45+00:00"
-        },
-        {
-            "name": "blatui/blatui",
-            "version": "v1.4.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/anousss007/blatui.git",
-                "reference": "80610b9328e5ebbccb57cac2d536bda3df1495e6"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/anousss007/blatui/zipball/80610b9328e5ebbccb57cac2d536bda3df1495e6",
-                "reference": "80610b9328e5ebbccb57cac2d536bda3df1495e6",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/console": "^11.0 || ^12.0 || ^13.0",
-                "illuminate/support": "^11.0 || ^12.0 || ^13.0",
-                "php": "^8.2"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.18",
-                "orchestra/testbench": "^9.0 || ^10.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "BlatUI\\BlatuiServiceProvider"
-                    ]
-                },
-                "branch-alias": {
-                    "dev-main": "1.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "BlatUI\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "anousss007",
-                    "homepage": "https://github.com/anousss007"
-                }
-            ],
-            "description": "Open-source shadcn/ui for the BLAT stack (Blade, Laravel, Alpine.js, Tailwind CSS v4). A CLI that copies components you own into your Laravel project.",
-            "homepage": "https://github.com/anousss007/blatui",
-            "keywords": [
-                "alpinejs",
-                "blade",
-                "blatui",
-                "cli",
-                "components",
-                "laravel",
-                "shadcn",
-                "tailwindcss",
-                "ui"
-            ],
-            "support": {
-                "issues": "https://github.com/anousss007/blatui/issues",
-                "source": "https://github.com/anousss007/blatui"
-            },
-            "time": "2026-06-08T10:41:49+00:00"
         },
         {
             "name": "brick/math",
