@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.2] - 2026-06-16
+
+### Changed
+- **Package renamed `blatui/blatui` → `anousss007/blatui`** — the Composer vendor now matches
+  the GitHub owner. The product (BlatUI), the `BlatUI\` namespace and the component prefix are
+  unchanged. This release declares `replace: { "blatui/blatui": "self.version" }`, and the old
+  package is marked abandoned on Packagist pointing here, so existing `composer require
+  blatui/blatui` installs keep resolving their pinned versions and only see a one-time rename
+  notice. Switch your `composer.json` to `anousss007/blatui` to receive new releases.
+
 ## [1.13.1] - 2026-06-16
 
 ### Fixed

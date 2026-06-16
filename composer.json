@@ -22,6 +22,9 @@
         "orchestra/testbench": "^9.0 || ^10.0",
         "laravel/pint": "^1.18"
     },
+    "replace": {
+        "blatui/blatui": "self.version"
+    },
     "autoload": {
         "psr-4": {
             "BlatUI\\": "src/"
