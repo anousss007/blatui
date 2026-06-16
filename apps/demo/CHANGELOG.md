@@ -402,7 +402,7 @@ Full accessibility overhaul — every component brought to WAI-ARIA / Base-UI pa
 
 ### Changed
 - Dropped the demo's vestigial `blatui:add` / `blatui:list` / `blatui:init`
-  commands — the `blatui/blatui` package is the sole CLI owner.
+  commands — the `anousss007/blatui` package is the sole CLI owner.
 
 ## [1.0.0] - 2026-05-29
 

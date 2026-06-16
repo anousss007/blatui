@@ -4,11 +4,11 @@ Goal: let anyone scaffold a BlatUI-powered app in one command, contesting Flux's
 "ships in the default Laravel starter kits" advantage:
 
 ```bash
-laravel new my-app --using=blatui/starter
+laravel new my-app --using=anousss007/blatui-starter
 ```
 
 `--using` installs a GitHub repo as the app skeleton, so the kit is a normal
-Laravel app repo (`blatui/starter`) wired with BlatUI out of the box.
+Laravel app repo (`anousss007/blatui-starter`) wired with BlatUI out of the box.
 
 ## What the kit ships
 
@@ -32,7 +32,7 @@ Built by composing artifacts that already live in this demo — no new design wo
 
 Expose flavors via the kit's prompts (Laravel asks the kit on install):
 
-- `blatui/starter` — Blade + Alpine (no Livewire).
+- `anousss007/blatui-starter` — Blade + Alpine (no Livewire).
 - A `--livewire` option that swaps the auth + dashboard for Livewire components
   (neutralizes Flux's only real moat: deep `wire:model` integration).
 
@@ -43,8 +43,8 @@ Expose flavors via the kit's prompts (Laravel asks the kit on install):
 2. Add the starter-kit manifest so `--using` recognizes it (root `composer.json`
    `"type": "project"` + a `database/`/`.env.example` ready to boot).
 3. Push to `github.com/anousss007/blatui-starter`, tag, and submit to Packagist
-   as `blatui/starter`.
-4. Document `laravel new my-app --using=blatui/starter` in the demo + README.
+   as `anousss007/blatui-starter`.
+4. Document `laravel new my-app --using=anousss007/blatui-starter` in the demo + README.
 
 Steps 3–4 are outward-facing (new public repo, Packagist) and are intentionally
 left for explicit approval — this file is the spec, not the publish.

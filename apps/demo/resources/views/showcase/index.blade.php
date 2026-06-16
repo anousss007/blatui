@@ -72,9 +72,9 @@
                 <div class="mt-7">
                     <p class="blat-mono blat-brand-text mb-2 text-[11px] font-medium tracking-[0.14em] uppercase">// install</p>
                     <div class="bg-card flex max-w-md items-center gap-2 rounded-lg border p-1.5 pl-3 shadow-sm"
-                         x-data="{ copied: false, copy() { navigator.clipboard.writeText('composer require blatui/blatui'); this.copied = true; setTimeout(() => this.copied = false, 1500); } }">
+                         x-data="{ copied: false, copy() { navigator.clipboard.writeText('composer require anousss007/blatui'); this.copied = true; setTimeout(() => this.copied = false, 1500); } }">
                         <span class="blat-mono shrink-0 text-sm" style="color: var(--blat-brand-ink);">$</span>
-                        <span class="blat-mono min-w-0 flex-1 truncate text-sm">composer require blatui/blatui</span>
+                        <span class="blat-mono min-w-0 flex-1 truncate text-sm">composer require anousss007/blatui</span>
                         <button type="button" @click="copy()" class="hover:bg-accent text-muted-foreground hover:text-foreground inline-flex size-7 shrink-0 items-center justify-center rounded transition-colors" aria-label="Copy install command">
                             <x-lucide-copy class="size-3.5" x-show="!copied" />
                             <x-lucide-check class="size-3.5" style="color: var(--blat-brand-ink);" x-show="copied" x-cloak />

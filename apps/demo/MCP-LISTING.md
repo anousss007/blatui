@@ -41,7 +41,7 @@ Claude Code / Cursor / VS Code MCP config:
 }
 ```
 
-Or the local stdio server (after `composer require blatui/blatui`):
+Or the local stdio server (after `composer require anousss007/blatui`):
 
 ```json
 { "mcpServers": { "blatui": { "command": "php", "args": ["artisan", "blatui:mcp"] } } }

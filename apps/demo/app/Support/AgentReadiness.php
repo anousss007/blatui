@@ -165,7 +165,7 @@ class AgentReadiness
         ## Install (in a Laravel project)
 
         ```bash
-        composer require blatui/blatui
+        composer require anousss007/blatui
         php artisan blatui:add <component> [<component> ...]
         ```
 

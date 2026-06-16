@@ -250,7 +250,7 @@ class RegistryDistribution
             .'Open-source (MIT), copy-paste, accessible (WCAG AA) UI components you own. '
             .'No JS runtime lock-in. Works with or without Livewire.';
         $out[] = '';
-        $out[] = 'Install the CLI: `composer require blatui/blatui`, then `php artisan blatui:add <component>`.';
+        $out[] = 'Install the CLI: `composer require anousss007/blatui`, then `php artisan blatui:add <component>`.';
         $out[] = 'Every component, block and chart is also installable from this registry: '
             .'`'.$base.'/r/<name>.json` (shadcn registry-item schema).';
         $out[] = '';

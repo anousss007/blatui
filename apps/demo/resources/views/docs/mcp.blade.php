@@ -51,7 +51,7 @@
                     Local — reads your project
                 </h3>
                 <p class="text-muted-foreground mb-3 text-sm">After installing the package, run the stdio server. It serves component source from your own copy (offline-friendly):</p>
-                <x-code-block label="Terminal" icon="terminal">composer require blatui/blatui
+                <x-code-block label="Terminal" icon="terminal">composer require anousss007/blatui
 # then register it with your editor:
 claude mcp add -s local -t stdio blatui php artisan blatui:mcp</x-code-block>
                 <p class="text-muted-foreground mt-3 text-sm">Manual config:</p>
@@ -106,7 +106,7 @@ claude mcp add -s local -t stdio blatui php artisan blatui:mcp</x-code-block>
         <x-code-block label="Terminal" icon="terminal">composer require laravel/boost --dev
 php artisan boost:install</x-code-block>
         <p class="text-muted-foreground mt-4 text-sm">
-            Because <code class="text-foreground">blatui/blatui</code> ships
+            Because <code class="text-foreground">anousss007/blatui</code> ships
             <code class="text-foreground">resources/boost/guidelines/core.blade.php</code> and a
             <code class="text-foreground">blatui-development</code> skill, Boost loads BlatUI's conventions
             (the <code class="text-foreground">x-ui.</code> namespace, <code class="text-foreground">blatui:add</code>,

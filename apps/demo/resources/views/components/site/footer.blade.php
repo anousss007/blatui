@@ -16,7 +16,7 @@
         'Project' => [
             ['GitHub', config('brand.github')],
             ['Package', config('brand.package')],
-            ['Packagist', 'https://packagist.org/packages/blatui/blatui'],
+            ['Packagist', 'https://packagist.org/packages/anousss007/blatui'],
             ['Changelog', config('brand.github').'/blob/main/CHANGELOG.md'],
         ],
     ];

@@ -10,7 +10,7 @@ Open-source, copy-paste UI components for Laravel. No JS runtime lock-in, no bla
 
 ### 🌐 [**Live demo & docs → blatui.remix-it.com**](https://blatui.remix-it.com)
 
-Install the CLI: [**`composer require blatui/blatui`**](https://github.com/anousss007/blatui) · [Package repo](https://github.com/anousss007/blatui)
+Install the CLI: [**`composer require anousss007/blatui`**](https://github.com/anousss007/blatui) · [Package repo](https://github.com/anousss007/blatui)
 
 </div>
 
@@ -33,7 +33,7 @@ Install the CLI: [**`composer require blatui/blatui`**](https://github.com/anous
 
 ```bash
 # 1. Install the package
-composer require blatui/blatui
+composer require anousss007/blatui
 
 # 2. Peer dependencies
 composer require gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons

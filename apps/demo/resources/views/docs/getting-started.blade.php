@@ -30,7 +30,7 @@
             <div class="border-primary/20 from-primary/5 mb-12 rounded-2xl border bg-gradient-to-br to-transparent p-6">
                 <h2 class="flex items-center gap-2 text-sm font-semibold"><x-lucide-zap class="text-primary size-4" /> TL;DR — already on Laravel + Tailwind v4?</h2>
                 <p class="text-muted-foreground mt-1 mb-4 text-sm">Install, publish the foundations, wire two entrypoints, then start building.</p>
-                <x-code-block label="Terminal" icon="terminal">composer require blatui/blatui gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons
+                <x-code-block label="Terminal" icon="terminal">composer require anousss007/blatui gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons
 npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus
 php artisan vendor:publish --tag=blatui-foundations</x-code-block>
                 <p class="text-muted-foreground mt-3 mb-2 text-sm">Point your two Vite entrypoints at the published foundations (replace each file's contents):</p>
@@ -77,7 +77,7 @@ Alpine.start();</x-code-block>
 
             <x-step :n="1" title="Install the package">
                 <p class="text-muted-foreground text-sm">Pull {{ config('brand.name') }} in via Composer. It ships the Artisan commands and the component registry.</p>
-                <x-code-block label="Terminal" icon="terminal">composer require blatui/blatui</x-code-block>
+                <x-code-block label="Terminal" icon="terminal">composer require anousss007/blatui</x-code-block>
             </x-step>
 
             <x-step :n="2" title="Install the peer dependencies">

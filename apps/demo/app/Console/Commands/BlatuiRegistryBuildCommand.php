@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 /**
  * Regenerates registry.json from the authored Blade components. This file is
- * the single contract consumed by the CLI package (blatui/blatui): the demo
+ * the single contract consumed by the CLI package (anousss007/blatui): the demo
  * is the source of truth, scripts/sync-package.sh ships registry.json + the
  * component stubs into the package, and the package reads the manifest
  * verbatim instead of re-deriving it.
