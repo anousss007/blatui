@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.2] - 2026-06-16
+
+### Changed
+- **Rebrand to the `anousss007/*` Composer vendor**: every install command, doc, badge and the
+  footer link now reference `anousss007/blatui`. The product is still BlatUI, and all
+  `github.com/anousss007` URLs and the `io.github.anousss007/blatui` MCP namespace are unchanged.
+
 ## [1.13.1] - 2026-06-16
 
 ### Fixed
