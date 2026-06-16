@@ -11,7 +11,7 @@
 Spin up a BlatUI-powered app in one command:
 
 ```bash
-laravel new my-app --using=blatui/starter
+laravel new my-app --using=anousss007/blatui-starter
 ```
 
 ## What's inside

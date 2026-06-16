@@ -1,13 +1,13 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "blatui/starter",
+    "name": "anousss007/blatui-starter",
     "type": "project",
     "description": "A Laravel starter kit pre-wired with BlatUI — shadcn/ui for the BLAT stack.",
     "keywords": ["laravel", "blatui", "starter-kit", "blade", "alpinejs", "tailwindcss", "shadcn"],
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "blatui/blatui": "^1.4",
+        "anousss007/blatui": "^1.4",
         "gehrisandro/tailwind-merge-laravel": "^1.4",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
