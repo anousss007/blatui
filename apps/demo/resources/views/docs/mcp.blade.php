@@ -31,17 +31,87 @@
                     <span class="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-full text-xs">A</span>
                     Hosted — no install
                 </h3>
-                <p class="text-muted-foreground mb-3 text-sm">A public, stateless MCP endpoint. Point any editor at it:</p>
-                <x-code-block label=".mcp.json / editor MCP config" icon="braces">{
-    "mcpServers": {
-        "blatui": {
-            "type": "streamable-http",
-            "url": "https://blatui.remix-it.com/mcp"
-        }
+                <p class="text-muted-foreground mb-3 text-sm">One public, stateless endpoint. Point any MCP-capable editor at it — the URL never changes:</p>
+                <x-code-block label="MCP endpoint" icon="link">https://blatui.remix-it.com/mcp</x-code-block>
+
+                <p class="text-muted-foreground mt-6 mb-3 text-sm font-medium">Pick your editor — same server, slightly different config file:</p>
+
+                <div class="space-y-6">
+                    {{-- Claude Code --}}
+                    <div>
+                        <h4 class="mb-2 flex items-center gap-2 text-sm font-semibold">
+                            <x-lucide-sparkles class="text-primary size-4" /> Claude Code
+                            <span class="text-muted-foreground font-normal">· one command</span>
+                        </h4>
+                        <x-code-block label="Terminal" icon="terminal">claude mcp add -t http blatui https://blatui.remix-it.com/mcp</x-code-block>
+                    </div>
+
+                    {{-- GitHub Copilot / VS Code --}}
+                    <div>
+                        <h4 class="mb-2 flex items-center gap-2 text-sm font-semibold">
+                            <x-lucide-github class="text-primary size-4" /> GitHub Copilot — VS Code
+                            <span class="text-muted-foreground font-normal">· .vscode/mcp.json</span>
+                        </h4>
+                        <x-code-block label=".vscode/mcp.json" icon="braces">{
+    "servers": {
+        "blatui": { "type": "http", "url": "https://blatui.remix-it.com/mcp" }
     }
 }</x-code-block>
-                <p class="text-muted-foreground mt-3 text-sm">Or, in Claude Code:</p>
-                <x-code-block label="Terminal" icon="terminal">claude mcp add -t http blatui https://blatui.remix-it.com/mcp</x-code-block>
+                        <p class="text-muted-foreground mt-2 text-xs">VS Code 1.101+. Note the key is <code class="text-foreground">servers</code> (not <code class="text-foreground">mcpServers</code>). You can also run the <code class="text-foreground">MCP: Add Server</code> command and pick <em>HTTP</em>.</p>
+                    </div>
+
+                    {{-- Cursor --}}
+                    <div>
+                        <h4 class="mb-2 flex items-center gap-2 text-sm font-semibold">
+                            <x-lucide-mouse-pointer-2 class="text-primary size-4" /> Cursor
+                            <span class="text-muted-foreground font-normal">· .cursor/mcp.json</span>
+                        </h4>
+                        <x-code-block label=".cursor/mcp.json" icon="braces">{
+    "mcpServers": {
+        "blatui": { "url": "https://blatui.remix-it.com/mcp" }
+    }
+}</x-code-block>
+                    </div>
+
+                    {{-- OpenAI Codex --}}
+                    <div>
+                        <h4 class="mb-2 flex items-center gap-2 text-sm font-semibold">
+                            <x-lucide-bot class="text-primary size-4" /> OpenAI Codex
+                            <span class="text-muted-foreground font-normal">· ~/.codex/config.toml</span>
+                        </h4>
+                        <x-code-block label="~/.codex/config.toml" icon="braces">[mcp_servers.blatui]
+url = "https://blatui.remix-it.com/mcp"</x-code-block>
+                        <p class="text-muted-foreground mt-2 text-xs">Or run <code class="text-foreground">codex mcp add</code>. TOML, not JSON.</p>
+                    </div>
+
+                    {{-- Windsurf --}}
+                    <div>
+                        <h4 class="mb-2 flex items-center gap-2 text-sm font-semibold">
+                            <x-lucide-wind class="text-primary size-4" /> Windsurf
+                            <span class="text-muted-foreground font-normal">· ~/.codeium/windsurf/mcp_config.json</span>
+                        </h4>
+                        <x-code-block label="~/.codeium/windsurf/mcp_config.json" icon="braces">{
+    "mcpServers": {
+        "blatui": { "serverUrl": "https://blatui.remix-it.com/mcp" }
+    }
+}</x-code-block>
+                        <p class="text-muted-foreground mt-2 text-xs">Windsurf uses <code class="text-foreground">serverUrl</code> for remote servers.</p>
+                    </div>
+
+                    {{-- Any other client --}}
+                    <div>
+                        <h4 class="mb-2 flex items-center gap-2 text-sm font-semibold">
+                            <x-lucide-plug class="text-primary size-4" /> Any other MCP client
+                            <span class="text-muted-foreground font-normal">· Zed, Gemini CLI, JetBrains, n8n…</span>
+                        </h4>
+                        <x-code-block label="MCP standard config" icon="braces">{
+    "mcpServers": {
+        "blatui": { "type": "streamable-http", "url": "https://blatui.remix-it.com/mcp" }
+    }
+}</x-code-block>
+                        <p class="text-muted-foreground mt-2 text-xs">Streamable HTTP transport. Some clients label the type <code class="text-foreground">http</code> — both point at the same endpoint.</p>
+                    </div>
+                </div>
             </div>
 
             {{-- Local --}}
@@ -50,16 +120,17 @@
                     <span class="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-full text-xs">B</span>
                     Local — reads your project
                 </h3>
-                <p class="text-muted-foreground mb-3 text-sm">After installing the package, run the stdio server. It serves component source from your own copy (offline-friendly):</p>
-                <x-code-block label="Terminal" icon="terminal">composer require anousss007/blatui
-# then register it with your editor:
-claude mcp add -s local -t stdio blatui php artisan blatui:mcp</x-code-block>
-                <p class="text-muted-foreground mt-3 text-sm">Manual config:</p>
-                <x-code-block label=".mcp.json" icon="braces">{
+                <p class="text-muted-foreground mb-3 text-sm">Prefer to serve component source straight from your own copy (offline-friendly)? Install the package, then point any editor at the stdio server. Install once:</p>
+                <x-code-block label="Terminal" icon="terminal">composer require anousss007/blatui</x-code-block>
+                <p class="text-muted-foreground mt-3 mb-3 text-sm">Register <code class="text-foreground">php artisan blatui:mcp</code> with your editor. In Claude Code:</p>
+                <x-code-block label="Terminal" icon="terminal">claude mcp add -s local -t stdio blatui php artisan blatui:mcp</x-code-block>
+                <p class="text-muted-foreground mt-3 mb-3 text-sm">Every other editor — same config file as above, but a <code class="text-foreground">command</code>/<code class="text-foreground">args</code> pair instead of a URL:</p>
+                <x-code-block label=".mcp.json / .cursor/mcp.json" icon="braces">{
     "mcpServers": {
         "blatui": { "command": "php", "args": ["artisan", "blatui:mcp"] }
     }
 }</x-code-block>
+                <p class="text-muted-foreground mt-2 text-xs">VS Code nests it under <code class="text-foreground">servers</code>; Codex uses <code class="text-foreground">[mcp_servers.blatui]</code> with <code class="text-foreground">command</code> + <code class="text-foreground">args</code> — same idea, local stdio.</p>
             </div>
         </div>
 
