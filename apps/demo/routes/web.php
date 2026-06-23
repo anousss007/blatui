@@ -111,6 +111,13 @@ Route::get('/templates/{template}', function (string $template) use ($cachePage)
 
 Route::view('/components', 'docs.index')->name('docs.index');
 
+// Merged/renamed components: the old slug permanently redirects to the canonical
+// component it folded into (e.g. /components/autocomplete → /components/combobox).
+// Registered before the dynamic route below so these exact matches win.
+foreach (config('docs.deprecated', []) as $oldSlug => $canonical) {
+    Route::redirect('/components/'.$oldSlug, '/components/'.$canonical, 301);
+}
+
 Route::get('/components/{component}', function (string $component) {
     abort_unless(preg_match('/^[a-z0-9-]+$/', $component) && is_dir(resource_path('views/examples/'.$component)), 404);
 

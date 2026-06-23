@@ -95,16 +95,26 @@ class RegistryDistribution
 
         $packages = $this->components->packagesFor($family);
 
+        // Merged-component handling: a deprecated family points at its replacement;
+        // a canonical family carries the old names as search keywords so a query for
+        // "autocomplete" surfaces "combobox".
+        $deprecated = config('docs.deprecated', []);
+        $replacedBy = $deprecated[$family] ?? null;
+        $keywords = array_keys($deprecated, $family, true);
+
         return array_filter([
             'name' => $family,
             'type' => 'registry:ui',
             'title' => $this->title($family),
             'description' => $this->description($family),
+            'keywords' => $keywords,
+            'deprecated' => $replacedBy !== null,
+            'replacedBy' => $replacedBy,
             'files' => $files,
             'registryDependencies' => $this->depUrls($this->components->dependenciesFor($family)),
             'dependencies' => $packages['npm'] ?? [],
             'categories' => array_values(array_filter([$this->categoryOf($family)])),
-        ], fn ($v) => $v !== null && $v !== []);
+        ], fn ($v) => $v !== null && $v !== [] && $v !== false);
     }
 
     /** Full installable item for a component family (file contents inlined). */

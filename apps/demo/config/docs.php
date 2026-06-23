@@ -44,6 +44,16 @@ return [
         ],
     ],
 
+    // Merged/renamed components: old slug => the canonical component it folded into.
+    // Drives: redirects (/components/<old> → /components/<canonical>), search keywords
+    // (the canonical item carries the old names so a search for "autocomplete" returns
+    // combobox), and the deprecated flag that hides the old entry from search.
+    'deprecated' => [
+        'autocomplete' => 'combobox',
+        'autosize-textarea' => 'textarea',
+        'quantity-selector' => 'number-input',
+    ],
+
     // Display-name overrides for slugs whose humanized form is wrong (acronyms, etc.).
     'labels' => [
         'input-otp' => 'Input OTP',
@@ -226,12 +236,6 @@ return [
 
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).
     'notes' => [
-        'autosize-textarea' => [
-            'Deprecated — merged into <code>textarea</code>. Use <code>&lt;x-ui.textarea :max-rows="…"&gt;</code>; this tag still works as a thin alias.',
-        ],
-        'autocomplete' => [
-            'Deprecated — merged into <code>combobox</code>. Use <code>&lt;x-ui.combobox trigger="input"&gt;</code>; this tag still works as a thin alias.',
-        ],
         'number-input' => [
             'Building a cart or product <strong>quantity stepper</strong>? Use <code>number-input</code> with <code>:min="1"</code> and a compact <code>size="sm"</code> — see the <em>Quantity selector</em> example below. (A separate <code>quantity-selector</code> component was removed in favour of this; it was the same control with different defaults.)',
         ],
