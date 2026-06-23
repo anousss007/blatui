@@ -24,6 +24,7 @@
         <div class="mx-auto flex max-w-screen-2xl">
             {{-- Sidebar --}}
             <aside
+                id="docs-sidebar"
                 class="bg-background fixed inset-y-0 left-0 top-14 z-30 w-64 shrink-0 overflow-y-auto border-r p-4 transition-transform lg:sticky lg:top-14 lg:h-[calc(100svh-3.5rem)] lg:translate-x-0"
                 :class="sidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
                 <nav class="space-y-6 text-sm">
@@ -53,6 +54,29 @@
                     @endforeach
                 </nav>
             </aside>
+
+            {{-- Keep the sidebar's scroll position across full-page navigations (each docs link is a
+                 server-rendered page load). Restored synchronously here — right after the element is
+                 parsed — so there's no scroll-to-top flash before paint. --}}
+            <script>
+                (function () {
+                    var el = document.getElementById('docs-sidebar');
+                    if (!el) return;
+                    var KEY = 'blatui:docs-sidebar-scroll';
+                    try {
+                        var saved = sessionStorage.getItem(KEY);
+                        if (saved !== null) el.scrollTop = parseInt(saved, 10) || 0;
+                    } catch (e) {}
+                    var raf = 0;
+                    el.addEventListener('scroll', function () {
+                        if (raf) return;
+                        raf = requestAnimationFrame(function () {
+                            raf = 0;
+                            try { sessionStorage.setItem(KEY, el.scrollTop); } catch (e) {}
+                        });
+                    }, { passive: true });
+                })();
+            </script>
 
             {{-- Backdrop (mobile) --}}
             <div x-show="sidebar" x-cloak @click="sidebar = false" class="fixed inset-0 top-14 z-20 bg-black/50 lg:hidden"></div>
