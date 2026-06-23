@@ -50,4 +50,6 @@
     @empty
         <p class="text-muted-foreground mt-10">No examples yet.</p>
     @endforelse
+
+    <x-docs.api :slug="$slug" />
 </x-layouts.docs>
