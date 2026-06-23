@@ -34,7 +34,7 @@ return [
             'accordion', 'collapsible',
         ],
         'E-commerce' => [
-            'product-card', 'price', 'quantity-selector', 'variant-selector', 'add-to-cart', 'mini-cart',
+            'product-card', 'price', 'variant-selector', 'add-to-cart', 'mini-cart',
         ],
         'Effects' => [
             'gradient-text', 'number-ticker', 'border-beam', 'spotlight-card', 'tilt-card', 'flip-card', 'confetti', 'meteors', 'animated-beam', 'parallax', 'dot-pattern', 'grid-pattern', 'aurora',
@@ -193,7 +193,6 @@ return [
 
         'product-card' => 'An e-commerce product card with image, badge, rating, price and an add-to-cart action.',
         'price' => 'A formatted product price with optional struck-through compare-at and a discount badge.',
-        'quantity-selector' => 'A compact − [n] + quantity stepper for product and cart UIs.',
         'variant-selector' => 'Choose a product variant — size pills or colour swatches — from an accessible radio group.',
         'add-to-cart' => 'A stateful add-to-cart button that animates idle → adding → added.',
         'mini-cart' => 'A cart dropdown with line items, quantity steppers, a live subtotal and checkout.',
@@ -227,6 +226,9 @@ return [
 
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).
     'notes' => [
+        'number-input' => [
+            'Building a cart or product <strong>quantity stepper</strong>? Use <code>number-input</code> with <code>:min="1"</code> and a compact <code>size="sm"</code> — see the <em>Quantity selector</em> example below. (A separate <code>quantity-selector</code> component was removed in favour of this; it was the same control with different defaults.)',
+        ],
         'button' => [
             'Buttons default to <strong><code>type="button"</code></strong> — a deliberate default. Inside a <code>&lt;form&gt;</code>, set <code>type="submit"</code> on the submit button, or a native button migrated with no <code>type</code> will silently <strong>stop submitting</strong>. Run <code>php artisan blatui:doctor</code> to catch typeless buttons in forms.',
         ],

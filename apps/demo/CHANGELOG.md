@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **`quantity-selector` component removed** — it duplicated `number-input` (same control, just
+  integer-only with a `min`/`value` of 1 and a tighter footprint), bloating the API surface and
+  the docs ([#3](https://github.com/anousss007/blatui/issues/3)). Build a cart/product stepper
+  with `number-input` instead (`<x-ui.number-input :min="1" size="sm" />`); a "Quantity selector"
+  usage example now lives on the number-input docs page, linked from the e-commerce section.
+
 ## [1.13.2] - 2026-06-16
 
 ### Changed

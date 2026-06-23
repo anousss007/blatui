@@ -1617,19 +1617,6 @@
             ]
         }
     },
-    "quantity-selector": {
-        "name": "quantity-selector",
-        "files": [
-            "quantity-selector.blade.php"
-        ],
-        "dependencies": [],
-        "packages": {
-            "composer": [
-                "mallardduck/blade-lucide-icons",
-                "gehrisandro/tailwind-merge-laravel"
-            ]
-        }
-    },
     "quote": {
         "name": "quote",
         "files": [
