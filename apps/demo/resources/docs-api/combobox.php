@@ -39,10 +39,29 @@ return [
             'description' => 'Message shown when the search matches no options. Defaults to a translatable "No results found." string.',
         ],
         [
+            'name' => 'trigger',
+            'type' => 'string',
+            'default' => "'button'",
+            'options' => ['button', 'input'],
+            'description' => 'How the listbox is opened. "button" is the classic popover with a search input inside. "input" makes the field itself the search box — the inline autocomplete shape (replaces the deprecated <x-ui.autocomplete>).',
+        ],
+        [
             'name' => 'searchable',
             'type' => 'bool',
             'default' => 'true',
-            'description' => 'Show the search input. Set false for a plain picker that lists every option with no filtering.',
+            'description' => 'Show the search input (button trigger only). Set false for a plain picker that lists every option with no filtering.',
+        ],
+        [
+            'name' => 'size',
+            'type' => 'string',
+            'default' => "'default'",
+            'options' => ['sm', 'default', 'lg'],
+            'description' => 'Height and text size of the field (input trigger, single-select).',
+        ],
+        [
+            'name' => 'icon',
+            'type' => 'string',
+            'description' => 'Optional leading Lucide icon name, e.g. "search" (input trigger only).',
         ],
         [
             'name' => 'multiple',

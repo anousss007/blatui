@@ -1,1 +1,1 @@
-<span data-slot="menubar-shortcut" {{ $attributes->twMerge('text-muted-foreground ml-auto text-xs tracking-widest') }}>{{ $slot }}</span>
+<x-ui.menu-shortcut :data-slot="'menubar-shortcut'" {{ $attributes }}>{{ $slot }}</x-ui.menu-shortcut>
