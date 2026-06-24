@@ -4,6 +4,7 @@
     'trigger' => '@',
     'placeholder' => 'Type @ to mention…',
     'rows' => 3,
+    'disabled' => false,
     'id' => null,
 ])
 
@@ -94,19 +95,25 @@
     x-id="['blat-mention-list', 'blat-mention-opt']"
     {{ $attributes->twMerge('relative w-full') }}
 >
-    <textarea
+    {{-- Composes the base textarea so styling/size/aria-invalid stay in sync. The combobox
+         behaviour (x-ref, key handling, aria-*) is forwarded verbatim as extra attributes.
+         The composed textarea already emits `data-slot="textarea"`, so the public
+         `data-slot="mention-input-field"` rides a `display:contents` wrapper to keep that
+         selector working without disturbing layout or the `$refs.field` element. --}}
+    <span class="contents" data-slot="mention-input-field">
+    <x-ui.textarea
         x-ref="field"
-        data-slot="mention-input-field"
-        id="{{ $fieldId }}"
-        @if ($name) name="{{ $name }}" @endif
-        rows="{{ (int) $rows }}"
-        placeholder="{{ $placeholder }}"
+        :id="$fieldId"
+        :name="$name"
+        :rows="(int) $rows"
+        :placeholder="$placeholder"
+        :disabled="$disabled"
         role="combobox"
         aria-label="{{ $name ? $name : __('Mention input') }}"
         aria-autocomplete="list"
-        :aria-expanded="open"
-        :aria-controls="open ? $id('blat-mention-list') : null"
-        :aria-activedescendant="open ? activeId : null"
+        x-bind:aria-expanded="open"
+        x-bind:aria-controls="open ? $id('blat-mention-list') : null"
+        x-bind:aria-activedescendant="open ? activeId : null"
         @input="scan()"
         @click="scan()"
         @keyup.arrow-left="scan()"
@@ -117,8 +124,8 @@
         @keydown.tab="if (open && insertActive()) $event.preventDefault();"
         @keydown.escape="if (open) { $event.preventDefault(); $event.stopPropagation(); close(); }"
         @blur="close()"
-        class="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-    >{{ $initial }}</textarea>
+    >{{ $initial }}</x-ui.textarea>
+    </span>
 
     {{-- Suggestion popup. Sits below the field; the textarea keeps focus (combobox pattern). --}}
     <div

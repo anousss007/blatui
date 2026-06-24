@@ -1,3 +1,1 @@
-<div role="group" data-slot="menubar-group" x-blat-labelledby="{ label: ':scope > [data-slot=menubar-label]' }" {{ $attributes }}>
-    {{ $slot }}
-</div>
+<x-ui.menu-group :data-slot="'menubar-group'" :label-slot="'menubar-label'" {{ $attributes }}>{{ $slot }}</x-ui.menu-group>
