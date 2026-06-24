@@ -5,6 +5,12 @@
         x-ref="menu"
         x-init="_menu = $el"
         @click.outside="closeMenu(false)"
+        {{-- The menu is pinned to fixed viewport coords captured at open, so close it on
+             page scroll/resize instead of leaving it stranded (matches Radix). The menu's
+             own overflow scroll does not bubble to window, so it stays open while scrolling
+             inside it. --}}
+        @scroll.window="closeMenu(false)"
+        @resize.window="closeMenu(false)"
         @keydown.escape.prevent.stop="closeMenu()"
         @keydown.tab.prevent.stop="closeMenu()"
         @keydown="$blatNav($event); $blatType($event)"

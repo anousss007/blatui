@@ -1,6 +1,7 @@
 @props([
     'columns' => [],   // [['key' => 'name', 'label' => 'Name', 'align' => ?'left|center|right'], ...]
     'rows' => [],       // [['name' => '...', 'size' => '...', 'children' => [...]], ...] each child has the same shape
+    'copyable' => false, // show a button that copies the tree as a markdown ├──/└──/│ structure
 ])
 
 @php
@@ -24,6 +25,38 @@
         return $ids;
     };
     $openIds = $collectOpen($rows, '', $collectOpen);
+
+    // Render the hierarchy as a markdown tree (├──/└──/│), built from the row data — the
+    // first column's key supplies each label. Branches get a trailing slash, folder-style.
+    $treeKey = $columns[0]['key'] ?? 'name';
+    $buildMarkdown = function (array $rows, string $prefix, callable $self, bool $isRoot = false) use ($treeKey) {
+        $rows = array_values($rows);
+        $last = count($rows) - 1;
+        $out = '';
+        foreach ($rows as $i => $row) {
+            $isLast = $i === $last;
+            $children = $row['children'] ?? [];
+            $hasChildren = is_array($children) && count($children) > 0;
+            $name = (string) ($row[$treeKey] ?? '');
+            if ($hasChildren) {
+                $name = rtrim($name, '/').'/';
+            }
+            if ($isRoot) {
+                // Top-level rows are the roots: render flush, no connector.
+                $out .= $name."\n";
+                if ($hasChildren) {
+                    $out .= $self($children, '', $self);
+                }
+            } else {
+                $out .= $prefix.($isLast ? '└── ' : '├── ').$name."\n";
+                if ($hasChildren) {
+                    $out .= $self($children, $prefix.($isLast ? '    ' : '│   '), $self);
+                }
+            }
+        }
+        return $out;
+    };
+    $markdown = $copyable ? $buildMarkdown($rows, '', $buildMarkdown, true) : '';
 
     $alignClass = fn ($align) => match ($align) {
         'right' => 'text-right',
@@ -52,9 +85,26 @@
             }
             return true;
         },
+        markdown: @js($markdown),
+        copied: false,
+        copyTree() {
+            navigator.clipboard.writeText(this.markdown);
+            this.copied = true;
+            setTimeout(() => this.copied = false, 1500);
+        },
     }"
     {{ $attributes->twMerge('w-full overflow-x-auto rounded-lg border') }}
 >
+    @if ($copyable)
+        <div class="flex justify-end border-b px-2 py-1.5">
+            <x-ui.button type="button" variant="ghost" size="sm" class="gap-1.5" @click="copyTree()" aria-label="Copy tree as markdown">
+                <x-lucide-copy class="size-3.5" x-show="!copied" />
+                <x-lucide-check class="size-3.5 text-emerald-500" x-show="copied" x-cloak />
+                <span x-text="copied ? 'Copied' : 'Copy tree'"></span>
+            </x-ui.button>
+        </div>
+    @endif
+
     <table class="w-full caption-bottom text-sm">
         <thead>
             <tr class="bg-muted/40 border-b">
