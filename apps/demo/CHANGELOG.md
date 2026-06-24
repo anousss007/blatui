@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-06-24
+
 ### Changed
 - **Component consolidation toward composition ([#3](https://github.com/anousss007/blatui/issues/3)).**
   Near-duplicate components now share one implementation and their breadth is shown as variants of
