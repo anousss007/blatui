@@ -1029,6 +1029,114 @@ const blatCommand = () => ({
     },
 });
 
+// blatListbox — shared filtered-listbox engine behind <x-ui.combobox> (and its
+// inline-input variant, formerly <x-ui.autocomplete>). Both render the SAME
+// option list + selection model; they only differ in how the list is opened:
+//
+//   trigger: 'button' — a button opens a popover with the search input INSIDE it
+//            (the classic shadcn Combobox). `query` resets on open; filtering is
+//            always on; focus returns to the trigger on close.
+//   trigger: 'input'  — the field itself IS the text input (the "autocomplete"
+//            shape). `query` mirrors the selected label (single select); typing
+//            filters; picking a single value fills the input and closes.
+//
+// Shared primitives (single-sourced here): isSelected, selected, matches,
+// visible, visibleCount, ensureActive, move, edge, selectActive, select, remove.
+const blatListbox = (config = {}) => ({
+    trigger: config.trigger || 'button', // 'button' | 'input'
+    open: false,
+    // `filtering` only matters for the input trigger: the list shows ALL options
+    // until the user actually types, so opening a field with a value shows siblings.
+    filtering: false,
+    multiple: !!config.multiple,
+    value: config.value ?? (config.multiple ? [] : ''),
+    activeValue: null,
+    options: config.options || [],
+    // Seed the query: input/single starts showing the selected label.
+    query: config.query ?? '',
+
+    isSelected(v) { return this.multiple ? this.value.includes(v) : this.value === v; },
+    get selected() { return this.options.filter((o) => this.isSelected(o.value)); },
+    // Single-select trigger label (button variant renders this).
+    get label() { const o = this.options.find((o) => o.value === this.value); return o ? o.label : ''; },
+    matches(label) { return label.toLowerCase().includes(this.query.toLowerCase()); },
+    get visible() {
+        // Input trigger only filters once the user types; button always filters by query.
+        if (this.trigger === 'input' && !this.filtering) return this.options;
+        return this.options.filter((o) => this.matches(o.label));
+    },
+    get visibleCount() { return this.visible.length; },
+    ensureActive() {
+        const v = this.visible;
+        if (!v.length) { this.activeValue = null; return; }
+        if (!v.some((o) => o.value === this.activeValue)) {
+            this.activeValue = (v.find((o) => this.isSelected(o.value)) || v[0]).value;
+        }
+    },
+    move(dir) {
+        if (this.trigger === 'input' && !this.open) { this.openList(); return; }
+        const v = this.visible;
+        if (!v.length) return;
+        let i = v.findIndex((o) => o.value === this.activeValue);
+        i = i < 0 ? 0 : (i + dir + v.length) % v.length;
+        this.activeValue = v[i].value;
+    },
+    edge(pos) {
+        const v = this.visible;
+        if (!v.length) return;
+        this.activeValue = (pos === 'last' ? v[v.length - 1] : v[0]).value;
+    },
+    openList() {
+        this.open = true;
+        if (this.trigger === 'button') {
+            this.query = '';
+            this.$nextTick(() => { this.ensureActive(); (this.$refs.search || this.$refs.list)?.focus(); });
+        } else {
+            this.filtering = false;
+            this.$nextTick(() => this.ensureActive());
+        }
+    },
+    // Input trigger: typing opens + filters; single select clears the committed value.
+    onInput() {
+        if (!this.multiple) this.value = '';
+        this.open = true;
+        this.filtering = true;
+        this.$nextTick(() => this.ensureActive());
+    },
+    toggle() { this.open ? this.close(false) : this.openList(); },
+    close(returnFocus = true) {
+        if (!this.open) return;
+        this.open = false;
+        this.filtering = false;
+        if (this.trigger === 'button' && returnFocus) this.$nextTick(() => this.$refs.trigger?.focus());
+    },
+    selectActive() { if (this.activeValue != null) this.select(this.activeValue); },
+    select(v) {
+        if (this.multiple) {
+            const i = this.value.indexOf(v);
+            if (i === -1) this.value.push(v); else this.value.splice(i, 1);
+            if (this.trigger === 'input') {
+                this.query = '';
+                this.filtering = false;
+                this.$nextTick(() => this.$refs.input?.focus());
+            }
+            return; // keep the list open for further picks
+        }
+        if (this.trigger === 'input') {
+            const o = this.options.find((x) => x.value === v);
+            if (o) { this.value = o.value; this.query = o.label; }
+            this.close();
+            return;
+        }
+        this.value = this.value === v ? '' : v; // toggle off in single button mode (matches shadcn)
+        this.close();
+        this.query = '';
+    },
+    remove(v) { const i = this.value.indexOf(v); if (i !== -1) this.value.splice(i, 1); },
+    // Input trigger: Backspace on an empty query pops the last chip.
+    backspace() { if (this.multiple && this.query === '' && this.value.length) this.value.splice(this.value.length - 1, 1); },
+});
+
 // ---------------------------------------------------------------------------
 // Register every BlatUI Alpine piece — plugins, the theme store, the calendar
 // component and the a11y primitives — into an Alpine instance. (Charts are
@@ -1052,6 +1160,7 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.data('blatMenu', blatMenu);
     Alpine.data('blatMenubar', blatMenubar);
     Alpine.data('blatSelect', blatSelect);
+    Alpine.data('blatListbox', blatListbox);
     Alpine.data('blatCommand', blatCommand);
     Alpine.directive('blat-trigger', blatTriggerDirective);
     Alpine.directive('blat-labelledby', blatLabelledByDirective);

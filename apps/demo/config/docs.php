@@ -5,8 +5,8 @@
 return [
     'categories' => [
         'Forms & Input' => [
-            'button', 'button-group', 'copy-button', 'input', 'input-group', 'input-mask', 'input-otp', 'number-input', 'knob', 'phone-input', 'textarea', 'autosize-textarea', 'rich-text-editor', 'markdown-editor',
-            'label', 'field', 'repeater', 'checkbox', 'radio-group', 'switch', 'segmented-control', 'select', 'combobox', 'autocomplete', 'tags-input', 'mention-input', 'signature-pad',
+            'button', 'button-group', 'copy-button', 'input', 'input-group', 'input-mask', 'input-otp', 'number-input', 'knob', 'phone-input', 'textarea', 'rich-text-editor', 'markdown-editor',
+            'label', 'field', 'repeater', 'checkbox', 'radio-group', 'switch', 'segmented-control', 'select', 'combobox', 'tags-input', 'mention-input', 'signature-pad',
             'slider', 'toggle', 'toggle-group', 'rating', 'color-picker', 'password-strength', 'file-upload', 'editable', 'calendar', 'date-picker',
             'datetime-picker', 'time-field',
         ],
@@ -44,6 +44,16 @@ return [
         ],
     ],
 
+    // Merged/renamed components: old slug => the canonical component it folded into.
+    // Drives: redirects (/components/<old> → /components/<canonical>), search keywords
+    // (the canonical item carries the old names so a search for "autocomplete" returns
+    // combobox), and the deprecated flag that hides the old entry from search.
+    'deprecated' => [
+        'autocomplete' => 'combobox',
+        'autosize-textarea' => 'textarea',
+        'quantity-selector' => 'number-input',
+    ],
+
     // Display-name overrides for slugs whose humanized form is wrong (acronyms, etc.).
     'labels' => [
         'input-otp' => 'Input OTP',
@@ -62,14 +72,14 @@ return [
         'input-mask' => 'A text input that formats its value against a mask as you type.',
         'phone-input' => 'A phone number field with a searchable country-code selector.',
         'input-otp' => 'Accessible one-time password component with copy-paste functionality.',
-        'textarea' => 'Displays a form textarea or a component that looks like a textarea.',
+        'textarea' => 'A form textarea that auto-grows to fit its content, with optional rows and a max-rows cap.',
         'label' => 'Renders an accessible label associated with controls.',
         'field' => 'Combine labels, controls, and help text to compose accessible form fields.',
         'checkbox' => 'A control that allows the user to toggle between checked and not checked.',
         'radio-group' => 'A set of checkable buttons where no more than one can be checked at a time.',
         'switch' => 'A control that allows the user to toggle between an on and off state.',
         'select' => 'Displays a list of options for the user to pick from, triggered by a button.',
-        'combobox' => 'Autocomplete input and command palette with a list of suggestions.',
+        'combobox' => 'A filterable picker over a list of options — button or inline-input trigger, single or multi-select.',
         'autocomplete' => 'A text input that filters and suggests options as you type.',
         'slider' => 'An input where the user selects a value — single, or a two-handle min–max range.',
         'toggle' => 'A two-state button that can be either on or off.',

@@ -35,7 +35,9 @@
         "files": [
             "add-to-cart.blade.php"
         ],
-        "dependencies": [],
+        "dependencies": [
+            "button"
+        ],
         "packages": {
             "composer": [
                 "mallardduck/blade-lucide-icons",
@@ -135,28 +137,20 @@
         "files": [
             "autocomplete.blade.php"
         ],
-        "dependencies": [],
-        "packages": {
-            "composer": [
-                "mallardduck/blade-lucide-icons",
-                "gehrisandro/tailwind-merge-laravel"
-            ],
-            "npm": [
-                "@alpinejs/anchor"
-            ]
-        }
+        "dependencies": [
+            "combobox"
+        ],
+        "packages": []
     },
     "autosize-textarea": {
         "name": "autosize-textarea",
         "files": [
             "autosize-textarea.blade.php"
         ],
-        "dependencies": [],
-        "packages": {
-            "composer": [
-                "gehrisandro/tailwind-merge-laravel"
-            ]
-        }
+        "dependencies": [
+            "textarea"
+        ],
+        "packages": []
     },
     "avatar": {
         "name": "avatar",
@@ -598,7 +592,15 @@
             "context-menu-sub-trigger.blade.php",
             "context-menu-trigger.blade.php"
         ],
-        "dependencies": [],
+        "dependencies": [
+            "menu-checkbox-item",
+            "menu-group",
+            "menu-item",
+            "menu-label",
+            "menu-radio-item",
+            "menu-separator",
+            "menu-shortcut"
+        ],
         "packages": {
             "composer": [
                 "mallardduck/blade-lucide-icons",
@@ -846,7 +848,15 @@
             "dropdown-menu-sub-trigger.blade.php",
             "dropdown-menu-trigger.blade.php"
         ],
-        "dependencies": [],
+        "dependencies": [
+            "menu-checkbox-item",
+            "menu-group",
+            "menu-item",
+            "menu-label",
+            "menu-radio-item",
+            "menu-separator",
+            "menu-shortcut"
+        ],
         "packages": {
             "composer": [
                 "mallardduck/blade-lucide-icons",
@@ -1271,6 +1281,90 @@
         "files": [
             "mention-input.blade.php"
         ],
+        "dependencies": [
+            "textarea"
+        ],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-checkbox-item": {
+        "name": "menu-checkbox-item",
+        "files": [
+            "menu-checkbox-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-group": {
+        "name": "menu-group",
+        "files": [
+            "menu-group.blade.php"
+        ],
+        "dependencies": [],
+        "packages": []
+    },
+    "menu-item": {
+        "name": "menu-item",
+        "files": [
+            "menu-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-label": {
+        "name": "menu-label",
+        "files": [
+            "menu-label.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-radio-item": {
+        "name": "menu-radio-item",
+        "files": [
+            "menu-radio-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-separator": {
+        "name": "menu-separator",
+        "files": [
+            "menu-separator.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-shortcut": {
+        "name": "menu-shortcut",
+        "files": [
+            "menu-shortcut.blade.php"
+        ],
         "dependencies": [],
         "packages": {
             "composer": [
@@ -1297,7 +1391,15 @@
             "menubar-sub-trigger.blade.php",
             "menubar-trigger.blade.php"
         ],
-        "dependencies": [],
+        "dependencies": [
+            "menu-checkbox-item",
+            "menu-group",
+            "menu-item",
+            "menu-label",
+            "menu-radio-item",
+            "menu-separator",
+            "menu-shortcut"
+        ],
         "packages": {
             "composer": [
                 "mallardduck/blade-lucide-icons",

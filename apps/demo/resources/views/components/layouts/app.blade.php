@@ -139,8 +139,10 @@
                     const res = await fetch(origin + '/registry.json');
                     const data = await res.json();
                     const q = String(query || '').toLowerCase();
-                    const hits = (data.items || []).filter(i =>
-                        (i.name + ' ' + (i.title || '') + ' ' + (i.description || '')).toLowerCase().includes(q)
+                    // Skip deprecated (merged) items: their search keywords live on the
+                    // canonical component, so a query for "autocomplete" resolves to combobox.
+                    const hits = (data.items || []).filter(i => !i.deprecated).filter(i =>
+                        (i.name + ' ' + (i.title || '') + ' ' + (i.description || '') + ' ' + (i.keywords || []).join(' ')).toLowerCase().includes(q)
                     ).slice(0, 25).map(i => `- [${i.type}] ${i.name}${i.description ? ' — ' + i.description : ''}`);
                     return { content: [{ type: 'text', text: hits.join('\n') || 'No matches.' }] };
                 },

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Component consolidation toward composition ([#3](https://github.com/anousss007/blatui/issues/3)).**
+  Near-duplicate components now share one implementation and their breadth is shown as variants of
+  a single component rather than separate components. Total breadth is preserved (component + variant
+  count did not drop). Public tags keep working — merged components remain as thin deprecated aliases.
+  - `add-to-cart` now composes `<x-ui.button>` instead of re-declaring its base/size classes.
+  - `mention-input`'s field now composes `<x-ui.textarea>` (inherits sizing/`aria-invalid`).
+  - The three menu families (`dropdown-menu`, `context-menu`, `menubar`) now share `menu-*` leaf
+    primitives (item/checkbox-item/radio-item/separator/label/shortcut/group); rendered HTML is
+    unchanged. ~21 duplicated leaf files collapsed onto 7 shared primitives.
+  - `autocomplete` and `combobox` now share one Alpine listbox engine; `combobox` gained a
+    `trigger="input"` variant covering the inline-autocomplete use-case.
+
+### Deprecated
+- **`autosize-textarea`** → merged into `textarea`. Use `<x-ui.textarea :max-rows="…">`; the tag
+  remains as a thin alias. (Textarea gained `rows`/`maxRows` and `autosize`/`sizes`/`with-color` variants.)
+- **`autocomplete`** → merged into `combobox`. Use `<x-ui.combobox trigger="input">`; the tag remains
+  as a thin alias. (Combobox gained inline-input / multi-select / async variants.)
+
 ### Removed
 - **`quantity-selector` component removed** — it duplicated `number-input` (same control, just
   integer-only with a `min`/`value` of 1 and a tighter footprint), bloating the API surface and
