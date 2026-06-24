@@ -2444,10 +2444,12 @@
             "tree-table.blade.php"
         ],
         "dependencies": [
+            "button",
             "tree-table-row"
         ],
         "packages": {
             "composer": [
+                "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
             ]
         }

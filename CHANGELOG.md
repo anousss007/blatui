@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.1] - 2026-06-24
+
+### Fixed
+- **`context-menu`** closes on window scroll/resize instead of staying pinned to stale fixed
+  coordinates. Scrolling inside the menu keeps it open.
+- **`accordion`** trigger shows `cursor-pointer` again (Tailwind v4 dropped the default cursor).
+
+### Added
+- **`tree-table`** `copyable` prop — copies the hierarchy as a markdown tree (`├──/└──/│`).
+- **`confetti`** `direction`/`spreadArc` (aimed bursts) and `fullscreen` (top-edge rain).
+
 ## [1.14.0] - 2026-06-24
 
 ### Changed
