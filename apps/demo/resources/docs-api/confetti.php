@@ -21,6 +21,23 @@ return [
             'type' => 'array',
             'description' => 'Optional list of CSS colours cycled across the particles. Falls back to a built-in festive palette.',
         ],
+        [
+            'name' => 'direction',
+            'type' => 'number',
+            'description' => 'Aim the burst, in degrees (0 = right, 90 = up, 180 = left, 270 = down). Omit for a full 360° fan.',
+        ],
+        [
+            'name' => 'spreadArc',
+            'type' => 'number',
+            'default' => '90',
+            'description' => 'When direction is set, the arc width (in degrees) the particles fan across.',
+        ],
+        [
+            'name' => 'fullscreen',
+            'type' => 'bool',
+            'default' => 'false',
+            'description' => 'Rain confetti down from across the top edge of the viewport instead of bursting from the trigger.',
+        ],
     ],
 
     'slots' => [

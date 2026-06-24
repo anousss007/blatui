@@ -20,6 +20,12 @@ return [
             'description' => 'The hierarchical row data. Each row is keyed by the column keys and may carry a "children" array of rows with the same shape, nested to any depth.',
             'shape' => 'row',
         ],
+        [
+            'name' => 'copyable',
+            'type' => 'bool',
+            'default' => 'false',
+            'description' => 'Show a button that copies the hierarchy to the clipboard as a markdown tree (├──/└──/│), using the first column as the label.',
+        ],
     ],
 
     'shapes' => [
