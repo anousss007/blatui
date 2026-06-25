@@ -26,6 +26,11 @@
         ['code' => 'MA', 'name' => 'Morocco', 'dial' => '+212', 'flag' => '🇲🇦'],
         ['code' => 'AE', 'name' => 'United Arab Emirates', 'dial' => '+971', 'flag' => '🇦🇪'],
     ];
+
+    // Livewire bridge — forward a consumer's wire:model onto the native tel <input>.
+    // Inert without Livewire (an empty attribute bag renders nothing).
+    $wireAttrs = $attributes->whereStartsWith('wire:model');
+    $attributes = $attributes->whereDoesntStartWith('wire:model');
 @endphp
 
 <div
@@ -70,6 +75,7 @@
         inputmode="numeric"
         autocomplete="tel-national"
         placeholder="{{ $placeholder }}"
+        {{ $wireAttrs }}
         class="border-input dark:bg-input/30 placeholder:text-muted-foreground flex h-9 w-full min-w-0 rounded-r-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:z-10 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
     >
 

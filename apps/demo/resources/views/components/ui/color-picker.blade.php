@@ -8,6 +8,14 @@
 ])
 
 @php
+    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    // No-op (and stripped) without Livewire, so the component still works in plain Blade/Alpine.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+@endphp
+
+@php
     // A tasteful default palette of common, readable hex values.
     $palette = $swatches ?: [
         '#ef4444', // red
@@ -32,7 +40,7 @@
         open: false,
         disabled: @js((bool) $disabled),
         inline: @js((bool) $inline),
-        hex: @js($value),
+        hex: @if ($hasWire)@entangle($wireModel)@else @js($value)@endif,
         hue: 0,
         input: @js($value),
         swatches: @js(array_values((array) $palette)),

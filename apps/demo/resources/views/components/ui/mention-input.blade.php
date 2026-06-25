@@ -26,6 +26,13 @@
     // Initial value drives the textarea contents; supports a prefilled value via the `value` attribute.
     $initial = (string) ($attributes->get('value') ?? $slot ?? '');
     $attributes = $attributes->except('value');
+
+    // Livewire bridge — forward a consumer's wire:model onto the composed <x-ui.textarea>.
+    // (A bare {{ }} echo isn't valid inside a component tag, so we emit literal attributes.)
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    $wireLive = $hasWire && $wireModel->hasModifier('live');
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
@@ -108,6 +115,9 @@
         :rows="(int) $rows"
         :placeholder="$placeholder"
         :disabled="$disabled"
+        {{-- Bound attrs null-omit when absent (a bare @if isn't valid inside a component tag). --}}
+        :wire:model="$hasWire && ! $wireLive ? $wireModel->value() : null"
+        :wire:model.live="$wireLive ? $wireModel->value() : null"
         role="combobox"
         aria-label="{{ $name ? $name : __('Mention input') }}"
         aria-autocomplete="list"

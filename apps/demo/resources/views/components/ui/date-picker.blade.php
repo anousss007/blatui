@@ -40,6 +40,12 @@
 
     $placeholder ??= $isRange ? 'Pick a date range' : 'Pick a date';
     $width ??= $isRange ? 'w-[300px]' : 'w-[240px]';
+
+    // Livewire bridge — entangle the single-date value with a consumer's wire:model when present.
+    // No-op (and stripped) without Livewire. Range mode keeps its from/to hidden inputs.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
@@ -47,7 +53,7 @@
     x-data="{
         open: false,
         mode: @js($mode),
-        value: @js($isRange ? null : $value),
+        value: @if ($hasWire && ! $isRange)@entangle($wireModel)@else @js($isRange ? null : $value)@endif,
         from: @js($fromDate), to: @js($toDate),
         minNights: @js($minNights !== null ? (int) $minNights : null),
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),
