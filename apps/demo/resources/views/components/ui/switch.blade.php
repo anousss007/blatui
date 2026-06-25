@@ -8,6 +8,14 @@
 ])
 
 @php
+    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    // No-op (and stripped) without Livewire, so the component still works in plain Blade/Alpine.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+@endphp
+
+@php
     $track = match ($size) {
         'sm' => 'h-4 w-7',
         'lg' => 'h-6 w-10',
@@ -24,7 +32,7 @@
     type="button"
     role="switch"
     @if ($id) id="{{ $id }}" @endif
-    x-data="{ checked: @js((bool) $checked) }"
+    x-data="{ checked: @if ($hasWire)@entangle($wireModel)@else @js((bool) $checked)@endif }"
     :data-state="checked ? 'checked' : 'unchecked'"
     :aria-checked="checked"
     @click="checked = !checked"

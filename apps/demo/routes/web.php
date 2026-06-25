@@ -12,6 +12,8 @@ Route::view('/docs', 'docs.getting-started')->name('docs.getting-started');
 
 Route::view('/docs/mcp', 'docs.mcp')->name('docs.mcp');
 
+Route::view('/docs/livewire', 'docs.livewire')->name('docs.livewire');
+
 Route::view('/themes', 'themes.index')->name('themes');
 
 Route::get('/sitemap.xml', function () {
@@ -27,6 +29,7 @@ Route::get('/sitemap.xml', function () {
     }
     $add('/themes', '0.8', 'weekly');
     $add('/docs/mcp', '0.6', 'monthly');
+    $add('/docs/livewire', '0.7', 'monthly');
 
     // Component pages (one per example directory).
     foreach (glob(resource_path('views/examples/*'), GLOB_ONLYDIR) as $d) {

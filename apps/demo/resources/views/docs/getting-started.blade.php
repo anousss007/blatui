@@ -209,7 +209,7 @@ Alpine.start()</x-code-block>
             <div class="mt-8 border-t pt-10">
                 <h2 class="mb-5 text-2xl font-bold tracking-tight">What's next</h2>
                 <div class="grid gap-4 sm:grid-cols-3">
-                    @foreach ([['Components', '55 building blocks', '/components', 'component'], ['Blocks', '62 full pages', '/blocks', 'layout-template'], ['Charts', '70 visualizations', '/charts', 'chart-column']] as [$t, $d, $href, $icon])
+                    @foreach ([['Components', '55 building blocks', '/components', 'component'], ['Livewire', 'wire:model ready', '/docs/livewire', 'zap'], ['Blocks', '62 full pages', '/blocks', 'layout-template'], ['Charts', '70 visualizations', '/charts', 'chart-column']] as [$t, $d, $href, $icon])
                         <a href="{{ $href }}" class="group bg-card hover:border-ring rounded-xl border p-5 transition-colors">
                             <x-dynamic-component :component="'lucide-'.$icon" class="text-muted-foreground mb-3 size-5" />
                             <div class="flex items-center gap-1 font-semibold">{{ $t }} <x-lucide-arrow-right class="size-4 transition-transform group-hover:translate-x-0.5" /></div>

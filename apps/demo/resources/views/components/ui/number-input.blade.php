@@ -35,12 +35,17 @@
     $ariaLabelledby = $attributes->get('aria-labelledby');
     $attributes = $attributes->except(['aria-label', 'aria-labelledby']);
     $inputLabel = $ariaLabel ?? $name;
+
+    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
     data-slot="number-input"
     x-data="{
-        value: @js($value === null || $value === '' ? null : (float) $value),
+        value: @if ($hasWire)@entangle($wireModel)@else @js($value === null || $value === '' ? null : (float) $value)@endif,
         min: @js($min === null ? null : (float) $min),
         max: @js($max === null ? null : (float) $max),
         step: @js((float) $step),

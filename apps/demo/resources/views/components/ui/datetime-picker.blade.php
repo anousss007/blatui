@@ -68,6 +68,12 @@
     $width ??= $isRange ? 'w-[320px]' : 'w-[280px]';
 
     $triggerCls = 'border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-left text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20';
+
+    // Livewire bridge — entangle the single combined date+time value with wire:model (single mode).
+    // No-op (and stripped) without Livewire. Range mode keeps its from/to hidden inputs.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
@@ -84,6 +90,15 @@
         maxDate: @js($maxDate), maxTime: @js($maxTime),
         minNights: @js($minNights !== null ? (int) $minNights : null),
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),
+@if ($hasWire && ! $isRange)
+        model: @entangle($wireModel),
+        init() {
+            if (this.model) { const p = String(this.model).replace(' ', 'T').split('T'); this.date = p[0] || null; this.time = p[1] || null; }
+            const push = () => { this.model = this.combined(this.date, this.time); };
+            this.$watch('date', push);
+            this.$watch('time', push);
+        },
+@endif
         onTime(d) {
             if (this.mode === 'range') {
                 if (d.part === 'to') this.timeTo = d.value; else this.timeFrom = d.value;

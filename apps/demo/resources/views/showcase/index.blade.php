@@ -99,7 +99,7 @@
             </div>
 
             {{-- Right: terminal mockup --}}
-            <div class="relative">
+            <div class="relative min-w-0">
                 <div class="pointer-events-none absolute -inset-6 -z-10 opacity-40" style="background: radial-gradient(ellipse at 60% 40%, color-mix(in srgb, var(--blat-brand) 22%, transparent) 0%, transparent 70%); filter: blur(36px); border-radius: 2rem;"></div>
                 <div class="blat-term">
                     <div class="blat-term-bar flex items-center gap-2 px-3.5 py-2.5">
@@ -258,7 +258,7 @@
     <section class="bg-muted/30 border-b">
         <div class="mx-auto max-w-screen-xl px-6 py-16 lg:px-8 lg:py-24">
             <div class="grid items-center gap-10 lg:grid-cols-2">
-                <div>
+                <div class="min-w-0">
                     <p class="blat-mono blat-brand-text mb-3 text-[11px] font-medium tracking-[0.14em] uppercase">// the workflow</p>
                     <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Add it. Read it. Own it.</h2>
                     <p class="text-muted-foreground mt-4 text-base">
@@ -282,7 +282,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div class="min-w-0">
                     <x-ui.code-block filename="resources/views/welcome.blade.php">@verbatim
 {{-- Just paste the markup. You own this file. --}}
 <x-ui.button>Get started</x-ui.button>

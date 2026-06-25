@@ -269,6 +269,18 @@
             ]
         }
     },
+    "brand": {
+        "name": "brand",
+        "files": [
+            "brand.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "breadcrumb": {
         "name": "breadcrumb",
         "files": [
@@ -1682,6 +1694,21 @@
             ]
         }
     },
+    "profile": {
+        "name": "profile",
+        "files": [
+            "profile.blade.php"
+        ],
+        "dependencies": [
+            "avatar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "progress": {
         "name": "progress",
         "files": [
@@ -2444,10 +2471,12 @@
             "tree-table.blade.php"
         ],
         "dependencies": [
+            "button",
             "tree-table-row"
         ],
         "packages": {
             "composer": [
+                "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
             ]
         }

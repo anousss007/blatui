@@ -249,4 +249,48 @@ return [
             'Building a custom DX layer that re-wraps a slot with an <code>@aware</code> anonymous component? <code>&lt;x-ui.*&gt;</code> passed as that slot\'s content stays <strong>literal</strong> (it never compiles) — the field is silently absent though the page still returns 200. In such layers, render raw elements styled by the foundation utilities (<code>.blat-input .blat-select .blat-checkbox .blat-radio</code>) instead.',
         ],
     ],
+
+    // Per-component Livewire usage, rendered as a "Using with Livewire" section on each
+    // component page. The examples above already show the frontend (Blade/Alpine) usage; this
+    // adds the wire:model binding + the matching Livewire property. Keyed by component slug.
+    //   decl => the public property on the Livewire component
+    //   tag  => the Blade markup that binds it (shown as literal code)
+    //   note => optional caption rendered under the code
+    'livewire' => [
+        'input'             => ['decl' => 'public string $email = \'\';', 'tag' => '<x-ui.input type="email" wire:model="email" placeholder="m@example.com" />'],
+        'textarea'          => ['decl' => 'public string $bio = \'\';', 'tag' => '<x-ui.textarea wire:model="bio" placeholder="About you" />'],
+        'select'            => ['decl' => 'public string $plan = \'pro\';', 'tag' => '<x-ui.select wire:model="plan" :options="[\'free\' => \'Free\', \'pro\' => \'Pro\']" />'],
+        'combobox'          => ['decl' => 'public string $framework = \'\';', 'tag' => '<x-ui.combobox wire:model="framework" :options="[\'laravel\' => \'Laravel\', \'rails\' => \'Rails\']" />'],
+        'autocomplete'      => ['decl' => 'public string $country = \'\';', 'tag' => '<x-ui.autocomplete wire:model="country" :options="[\'ma\' => \'Morocco\', \'be\' => \'Belgium\']" />'],
+        'checkbox'          => ['decl' => 'public bool $accept = false;', 'tag' => '<x-ui.checkbox wire:model="accept" />'],
+        'radio-group'       => ['decl' => 'public string $plan = \'pro\';', 'tag' => '<x-ui.radio-group wire:model="plan">
+    <x-ui.radio-group-item value="free" /> Free
+    <x-ui.radio-group-item value="pro" /> Pro
+</x-ui.radio-group>'],
+        'switch'            => ['decl' => 'public bool $notify = true;', 'tag' => '<x-ui.switch wire:model="notify" />'],
+        'toggle'            => ['decl' => 'public bool $bold = false;', 'tag' => '<x-ui.toggle wire:model="bold">B</x-ui.toggle>'],
+        'toggle-group'      => ['decl' => 'public array $tools = [];', 'tag' => '<x-ui.toggle-group type="multiple" wire:model="tools">
+    <x-ui.toggle-group-item value="bold">B</x-ui.toggle-group-item>
+    <x-ui.toggle-group-item value="italic">I</x-ui.toggle-group-item>
+</x-ui.toggle-group>'],
+        'segmented-control' => ['decl' => 'public string $view = \'list\';', 'tag' => '<x-ui.segmented-control wire:model="view" :options="[\'list\' => \'List\', \'grid\' => \'Grid\']" />'],
+        'slider'            => ['decl' => 'public int $volume = 30;', 'tag' => '<x-ui.slider wire:model="volume" />', 'note' => 'Single value in default mode; range mode submits via name[min]/name[max].'],
+        'rating'            => ['decl' => 'public int $score = 0;', 'tag' => '<x-ui.rating wire:model="score" />'],
+        'knob'              => ['decl' => 'public int $level = 50;', 'tag' => '<x-ui.knob wire:model="level" />'],
+        'number-input'      => ['decl' => 'public int $qty = 1;', 'tag' => '<x-ui.number-input wire:model="qty" :min="1" />'],
+        'color-picker'      => ['decl' => 'public string $color = \'#6366f1\';', 'tag' => '<x-ui.color-picker wire:model="color" />'],
+        'date-picker'       => ['decl' => 'public ?string $date = null;', 'tag' => '<x-ui.date-picker wire:model="date" />', 'note' => 'Single date in default mode; range mode submits via name[from]/name[to].'],
+        'datetime-picker'   => ['decl' => 'public ?string $startsAt = null;', 'tag' => '<x-ui.datetime-picker wire:model="startsAt" />'],
+        'time-field'        => ['decl' => 'public ?string $time = null;', 'tag' => '<x-ui.time-field wire:model="time" />'],
+        'input-otp'         => ['decl' => 'public string $code = \'\';', 'tag' => '<x-ui.input-otp wire:model="code" />'],
+        'tags-input'        => ['decl' => 'public array $tags = [];', 'tag' => '<x-ui.tags-input wire:model="tags" />'],
+        'phone-input'       => ['decl' => 'public string $phone = \'\';', 'tag' => '<x-ui.phone-input wire:model="phone" />'],
+        'input-mask'        => ['decl' => 'public string $card = \'\';', 'tag' => '<x-ui.input-mask mask="9999 9999 9999 9999" wire:model="card" />'],
+        'editable'          => ['decl' => 'public string $title = \'Untitled\';', 'tag' => '<x-ui.editable wire:model="title" />'],
+        'mention-input'     => ['decl' => 'public string $message = \'\';', 'tag' => '<x-ui.mention-input wire:model="message" :mentions="[\'sam\', \'alex\']" />'],
+        'markdown-editor'   => ['decl' => 'public string $content = \'\';', 'tag' => '<x-ui.markdown-editor wire:model="content" />'],
+        'rich-text-editor'  => ['decl' => 'public string $body = \'\';', 'tag' => '<x-ui.rich-text-editor wire:model="body" />'],
+        'signature-pad'     => ['decl' => 'public ?string $signature = null;', 'tag' => '<x-ui.signature-pad wire:model="signature" />'],
+        'file-upload'       => ['decl' => 'public $avatar;', 'tag' => '<x-ui.file-upload wire:model="avatar" accept="image/*" />', 'note' => 'Add the Livewire\\WithFileUploads trait to the component for temporary uploads.'],
+    ],
 ];

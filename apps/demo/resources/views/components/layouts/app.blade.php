@@ -189,11 +189,13 @@
         /* Terminal chrome — intentionally dark in BOTH themes (a terminal is a terminal). */
         .blat-term { background: #0b0f17; border: 1px solid #20262e; border-radius: .7rem; overflow: hidden; box-shadow: 0 1px 0 #ffffff0a inset, 0 24px 60px -20px #00000080; }
         .blat-term-bar { background: #11161f; border-bottom: 1px solid #20262e; }
-        .blat-term-body { font-family: 'JetBrains Mono', ui-monospace, monospace; color: #e6edf3; }
+        .blat-term-body { font-family: 'JetBrains Mono', ui-monospace, monospace; color: #e6edf3; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
         @keyframes blat-caret { 0%,49%{opacity:1} 50%,100%{opacity:0} }
         .blat-caret { display:inline-block; width:.55ch; height:1.05em; background: var(--blat-brand); vertical-align:text-bottom; animation: blat-caret 1.1s step-end infinite; }
         @keyframes blat-line-in { from{opacity:0; transform:translateY(3px)} to{opacity:1; transform:translateY(0)} }
-        .blat-term-line { animation: blat-line-in .25s ease both; }
+        /* Keep each command on one line; the body scrolls horizontally on narrow screens
+           (authentic terminal behaviour) instead of wrapping a command mid-line. */
+        .blat-term-line { animation: blat-line-in .25s ease both; white-space: nowrap; }
         @media (prefers-reduced-motion: reduce) { .blat-caret{animation:none;opacity:1} .blat-term-line{animation:none} .blat-glow-btn:hover{transform:none} }
     </style>
 

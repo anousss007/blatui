@@ -16,6 +16,11 @@
         $maxSizeLabel,
     ]);
     $hint = $hintBits ? implode(' · ', $hintBits) : null;
+
+    // Livewire bridge — forward a consumer's wire:model onto the real <input type=file>
+    // (Livewire's upload target). Inert without Livewire (an empty bag renders nothing).
+    $wireAttrs = $attributes->whereStartsWith('wire:model');
+    $attributes = $attributes->whereDoesntStartWith('wire:model');
 @endphp
 
 <div
@@ -87,6 +92,7 @@
         @if ($multiple) multiple @endif
         @if ($disabled) disabled @endif
         @change="onChange($event)"
+        {{ $wireAttrs }}
         class="sr-only"
         tabindex="-1"
         aria-hidden="true"
