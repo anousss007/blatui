@@ -99,7 +99,7 @@
             </div>
 
             {{-- Right: terminal mockup --}}
-            <div class="relative">
+            <div class="relative min-w-0">
                 <div class="pointer-events-none absolute -inset-6 -z-10 opacity-40" style="background: radial-gradient(ellipse at 60% 40%, color-mix(in srgb, var(--blat-brand) 22%, transparent) 0%, transparent 70%); filter: blur(36px); border-radius: 2rem;"></div>
                 <div class="blat-term">
                     <div class="blat-term-bar flex items-center gap-2 px-3.5 py-2.5">
