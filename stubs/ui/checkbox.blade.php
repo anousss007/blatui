@@ -8,6 +8,14 @@
     'native' => false,
 ])
 
+@php
+    // Livewire bridge — native checkbox binds wire:model on the real <input>; the custom
+    // (Alpine) checkbox entangles its `checked` state instead. No-op without Livewire.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if (! $native && $hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+@endphp
+
 @if ($native)
     {{-- Real native checkbox for no-JS / native-submit form layers. Styled via the
          .blat-checkbox foundations utility (accent-color). `indeterminate` needs JS and is
@@ -27,7 +35,7 @@
         type="button"
         role="checkbox"
         @if ($id) id="{{ $id }}" @endif
-        x-data="{ checked: @js((bool) $checked), indeterminate: @js((bool) $indeterminate) }"
+        x-data="{ checked: @if ($hasWire)@entangle($wireModel)@else @js((bool) $checked)@endif, indeterminate: @js((bool) $indeterminate) }"
         :data-state="indeterminate ? 'indeterminate' : (checked ? 'checked' : 'unchecked')"
         :aria-checked="indeterminate ? 'mixed' : checked.toString()"
         @click="indeterminate ? (indeterminate = false, checked = true) : (checked = !checked)"

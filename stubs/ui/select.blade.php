@@ -47,6 +47,12 @@
     $userStyle = (string) $attributes->get('style', '');
     $style = trim($colorStyle.($colorStyle && $userStyle ? ' ' : '').$userStyle);
     $attributes = $attributes->except('style');
+
+    // Livewire bridge — the native <select> binds wire:model directly; the custom listbox
+    // entangles its Alpine value instead. No-op without Livewire.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if (! $native && $hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 @if ($native)
@@ -76,7 +82,7 @@
 @else
     <div
         data-slot="select"
-        x-data="blatSelect({ value: @js($initialValue), multiple: @js((bool) $multiple) })"
+        x-data="blatSelect({ value: @if ($hasWire)@entangle($wireModel)@else @js($initialValue)@endif, multiple: @js((bool) $multiple)@if ($hasWire), entangled: true @endif })"
         x-id="['blat-listbox']"
         @if ($style) style="{{ $style }}" @endif
         {{ $attributes->twMerge('relative') }}

@@ -35,6 +35,11 @@
 @php
     $uid = $id ?: 'blat-md-'.\Illuminate\Support\Str::random(6);
     $textareaId = $uid.'-textarea';
+
+    // Livewire bridge — entangle the markdown `source` with a consumer's wire:model when present.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 @once
@@ -197,7 +202,7 @@
 
 <div
     data-slot="markdown-editor"
-    x-data="blatMarkdownEditor(@js((string) $value))"
+    x-data="blatMarkdownEditor(@if ($hasWire)@entangle($wireModel)@else @js((string) $value)@endif)"
     {{ $attributes->twMerge('border-input bg-background flex w-full flex-col overflow-hidden rounded-md border shadow-xs') }}
 >
     {{-- Toolbar + tab switch --}}

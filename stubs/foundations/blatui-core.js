@@ -901,15 +901,19 @@ const blatMenubar = () => ({
 const blatSelect = (config = {}) => ({
     multiple: !!config.multiple,
     open: false,
-    value: config.multiple
-        ? (Array.isArray(config.value)
-              ? config.value.map(String)
-              : config.value != null && config.value !== ''
-                ? [String(config.value)]
-                : [])
-        : config.value != null
-          ? String(config.value)
-          : '',
+    // `entangled` (Livewire wire:model) passes the value through verbatim — coercing it would
+    // sever the two-way binding. Otherwise normalise to string(s) as before.
+    value: config.entangled
+        ? config.value
+        : (config.multiple
+            ? (Array.isArray(config.value)
+                  ? config.value.map(String)
+                  : config.value != null && config.value !== ''
+                    ? [String(config.value)]
+                    : [])
+            : config.value != null
+              ? String(config.value)
+              : ''),
     label: '',
     selected: [], // [{ value, label }] — multiple only; seeded by each item + selectOption
     _list: null,

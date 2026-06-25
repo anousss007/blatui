@@ -35,6 +35,12 @@
         : 'bg-muted relative grow overflow-hidden rounded-full h-1.5 w-full';
     $thumbCls = 'border-primary bg-background ring-ring/50 absolute block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden'
         .($vertical ? ' left-1/2 -translate-x-1/2 translate-y-1/2' : ' top-1/2 -translate-x-1/2 -translate-y-1/2');
+
+    // Livewire bridge — entangle the single-value slider with a consumer's wire:model when present.
+    // No-op (and stripped) without Livewire. Range mode keeps its min/max hidden inputs.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
@@ -49,7 +55,7 @@
         disabled: {{ $disabled ? 'true' : 'false' }},
         range: {{ $range ? 'true' : 'false' }},
         vertical: {{ $vertical ? 'true' : 'false' }},
-        value: {{ $range ? 0 : $value }},
+        value: @if ($hasWire && ! $range)@entangle($wireModel)@else {{ $range ? 0 : $value }}@endif,
         low: {{ $range ? $low : 0 }},
         high: {{ $range ? $high : 0 }},
         dragging: false,

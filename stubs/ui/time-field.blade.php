@@ -24,12 +24,17 @@
     // wrapper div and the native <input type=time> stays unnamed.
     $ariaLabel = $attributes->get('aria-label');
     $attributes = $attributes->except('aria-label');
+
+    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
     data-slot="time-field"
     x-data="{
-        value: @js($value),
+        value: @if ($hasWire)@entangle($wireModel)@else @js($value)@endif,
         cycle: @js($hourCycle),
         seconds: @js((bool) $seconds),
         part: @js($part),
