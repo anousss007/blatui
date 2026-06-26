@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-06-26
+
+### Added
+- **Livewire support — `wire:model` on every form control, with full two-way binding.** Components are
+  Blade + Alpine, so they already render inside Livewire; this wires `wire:model` through to their value:
+  - Native fields (`input`, `textarea`, native `select`/`checkbox`) bind directly.
+  - Alpine-driven widgets entangle their state via `@entangle($attributes->wire('model'))` — `select`,
+    `combobox`, `autocomplete`, `switch`, `toggle`, `toggle-group`, `radio-group`, `checkbox`, `slider`,
+    `rating`, `knob`, `number-input`, `color-picker`, `date-picker`, `datetime-picker`, `time-field`,
+    `input-otp`, `tags-input`, `editable`, `markdown-editor`.
+  - Composites forward `wire:model` to their real input — `file-upload` (upload target), `phone-input`,
+    `segmented-control`, `mention-input`, `rich-text-editor`, `signature-pad`.
+  - Respects `.live` / `.blur` / `.debounce` modifiers. The bridge is **fully inert (and stripped)
+    when Livewire isn't installed**, so plain Blade/Alpine projects are unaffected.
+- **`brand`** — your app's logo/wordmark, optionally linked (parity with Flux's `<flux:brand>`).
+- **`profile`** — an avatar paired with a name/description, for account buttons and dropdown triggers
+  (parity with Flux's `<flux:profile>`).
+
+### Notes
+- `slider`, `date-picker` and `datetime-picker` bind a single value with `wire:model` in their default
+  mode; their range modes submit via standard `name[...]` form fields.
+
 ## [1.14.1] - 2026-06-24
 
 ### Fixed
