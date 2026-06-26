@@ -9,6 +9,12 @@
     // The ink defaults to the theme foreground. We resolve `currentColor` at runtime in JS by
     // reading the computed color of the root, so the stroke tracks the token in light/dark.
     $resolvedPen = $penColor ? "'".addslashes($penColor)."'" : 'null';
+
+    // Livewire bridge — forward a consumer's wire:model onto the hidden data-URL <input>.
+    // The pad already dispatches an input event on sync(), so Livewire stays in step.
+    $wireAttrs = $attributes->whereStartsWith('wire:model');
+    $hasWire = filled($wireAttrs->getAttributes());
+    $attributes = $attributes->whereDoesntStartWith('wire:model');
 @endphp
 
 <div
@@ -168,7 +174,7 @@
         </x-ui.button>
     </div>
 
-    @if ($name)
-        <input type="hidden" x-ref="field" name="{{ $name }}" @if ($id) id="{{ $id }}" @endif>
+    @if ($name || $hasWire)
+        <input type="hidden" x-ref="field" @if ($name) name="{{ $name }}" @endif {{ $wireAttrs }} @if ($id) id="{{ $id }}" @endif>
     @endif
 </div>

@@ -7,10 +7,18 @@
     'id' => null,
 ])
 
+@php
+    // Livewire bridge — entangle the tags array with a consumer's wire:model when present.
+    // No-op (and stripped) without Livewire, so the component still works in plain Blade/Alpine.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+@endphp
+
 <div
     data-slot="tags-input"
     x-data="{
-        tags: @js(array_values((array) $value)),
+        tags: @if ($hasWire)@entangle($wireModel)@else @js(array_values((array) $value))@endif,
         draft: '',
         max: @js($max !== null ? (int) $max : null),
         disabled: @js((bool) $disabled),

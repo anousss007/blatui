@@ -40,6 +40,11 @@
 
     $track = $tracks[$size] ?? $tracks['default'];
     $segment = $segments[$size] ?? $segments['default'];
+
+    // Livewire bridge — forward a consumer's wire:model onto each native radio <input>.
+    // Inert without Livewire (an empty attribute bag renders nothing).
+    $wireAttrs = $attributes->whereStartsWith('wire:model');
+    $attributes = $attributes->whereDoesntStartWith('wire:model');
 @endphp
 
 <div
@@ -65,6 +70,7 @@
                 class="peer sr-only"
                 @checked($checked)
                 @disabled($disabled)
+                {{ $wireAttrs }}
             >
             {{-- The styled segment. peer-checked gives the raised/filled active look (more than colour). --}}
             <label

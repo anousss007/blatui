@@ -11,7 +11,7 @@ A CLI that copies open-source, copy-paste UI components **you own** straight int
 [![License](https://img.shields.io/packagist/l/anousss007/blatui.svg)](LICENSE)
 [![Accessibility: WCAG AA](https://img.shields.io/badge/accessibility-WCAG%20AA-22c55e.svg)](https://blatui.remix-it.com)
 
-**153 components · 614 variants · 64 blocks · 70 charts · accessible (WCAG AA) · fully themeable · light + dark · MIT**
+**155 components · 614 variants · 64 blocks · 70 charts · accessible (WCAG AA) · Livewire-ready · fully themeable · light + dark · MIT**
 
 [Live demo & docs → blatui.remix-it.com](https://blatui.remix-it.com)
 
@@ -24,6 +24,7 @@ A CLI that copies open-source, copy-paste UI components **you own** straight int
 - **Accessible by default.** WAI-ARIA roles, complete keyboard navigation & focus management, and WCAG AA color contrast — modeled on shadcn/ui's Base UI behavior, verified in a real browser and audited with axe-core. Accessibility isn't an add-on; it ships in every component.
 - **You own the code.** Components are *copied* into your project — not hidden in `vendor/`. Edit them however you like; updating the package never overwrites your edits.
 - **The BLAT stack.** Pure Blade components, a sprinkle of Alpine.js for interactivity, Tailwind CSS v4 for styling. No React, no build-step lock-in.
+- **Livewire-ready.** `wire:model` works on every form control — inputs, selects, checkboxes, switches, sliders, date/time pickers, file uploads and more — with full two-way binding. A free, you-own-the-code alternative to Flux Pro. [See the Livewire guide →](https://blatui.remix-it.com/docs/livewire)
 - **Faithful to shadcn/ui.** Same design language, component APIs and blocks — ported to the Laravel way.
 - **Themeable to the core.** Every token is a CSS variable.
 

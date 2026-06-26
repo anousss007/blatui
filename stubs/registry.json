@@ -269,6 +269,18 @@
             ]
         }
     },
+    "brand": {
+        "name": "brand",
+        "files": [
+            "brand.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "breadcrumb": {
         "name": "breadcrumb",
         "files": [
@@ -1674,6 +1686,21 @@
             "button",
             "price",
             "rating"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "profile": {
+        "name": "profile",
+        "files": [
+            "profile.blade.php"
+        ],
+        "dependencies": [
+            "avatar"
         ],
         "packages": {
             "composer": [

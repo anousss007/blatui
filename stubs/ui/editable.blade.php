@@ -28,13 +28,18 @@
     $displaySize = $displaySizes[$size] ?? $displaySizes['default'];
 
     $fieldBase = 'placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex w-full min-w-0 rounded-md border bg-transparent shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]';
+
+    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
     data-slot="editable"
     x-data="{
         editing: false,
-        value: @js((string) $value),
+        value: @if ($hasWire)@entangle($wireModel)@else @js((string) $value)@endif,
         draft: '',
         edit() {
             this.draft = this.value;

@@ -30,6 +30,12 @@
         ['key' => 'link',          'icon' => 'link',           'label' => 'Insert link',   'link' => true,           'state' => null],
         ['key' => 'clear',         'icon' => 'remove-formatting', 'label' => 'Clear formatting', 'clear' => true,    'state' => null],
     ];
+
+    // Livewire bridge — forward a consumer's wire:model onto the hidden mirror <textarea>.
+    // Inert without Livewire (an empty attribute bag renders nothing).
+    $wireAttrs = $attributes->whereStartsWith('wire:model');
+    $hasWire = filled($wireAttrs->getAttributes());
+    $attributes = $attributes->whereDoesntStartWith('wire:model');
 @endphp
 
 <div
@@ -37,7 +43,11 @@
     x-data="{
         active: {},
         sync() {
-            if (this.$refs.input) this.$refs.input.value = this.$refs.editor.innerHTML;
+            if (this.$refs.input) {
+                this.$refs.input.value = this.$refs.editor.innerHTML;
+                // Notify Livewire (wire:model on the mirror) that the value changed.
+                this.$refs.input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         },
         run(cmd) {
             this.$refs.editor.focus();
@@ -141,7 +151,7 @@
     {{-- Accessible name for the textbox; visually hidden (it duplicates the placeholder intent). --}}
     <span id="{{ $labelId }}" class="sr-only">{{ $placeholder }}</span>
 
-    @if ($name)
-        <textarea x-ref="input" name="{{ $name }}" class="hidden" aria-hidden="true" tabindex="-1">{!! $value !!}</textarea>
+    @if ($name || $hasWire)
+        <textarea x-ref="input" @if ($name) name="{{ $name }}" @endif {{ $wireAttrs }} class="hidden" aria-hidden="true" tabindex="-1">{!! $value !!}</textarea>
     @endif
 </div>
