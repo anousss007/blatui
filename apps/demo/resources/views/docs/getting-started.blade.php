@@ -175,6 +175,17 @@ registerBlatUI(Alpine)   // plugins + theme store + chart/calendar engines
 window.Alpine = Alpine
 Alpine.start()</x-code-block>
                     </div>
+
+                    <div>
+                        <p class="mb-1 text-sm font-medium">JS — using Livewire or Flux?</p>
+                        <p class="text-muted-foreground mb-2 text-sm">Livewire bundles and starts Alpine for you, so don't <code class="bg-muted rounded px-1 text-xs">npm install alpinejs</code> (that's the duplicate-Alpine trap) and don't import <code class="bg-muted rounded px-1 text-xs">blatui.js</code>. Install only the plugins — <code class="bg-muted rounded px-1 text-xs">npm install -D @alpinejs/anchor @alpinejs/collapse @alpinejs/focus</code> (add <code class="bg-muted rounded px-1 text-xs">apexcharts</code> only if you use charts) — and register BlatUI onto Livewire's Alpine via the <code class="bg-muted rounded px-1 text-xs">alpine:init</code> hook:</p>
+                        <x-code-block label="resources/js/app.js" icon="file-code">import { registerBlatUI } from './blatui-core.js'
+
+document.addEventListener('alpine:init', () => {
+    registerBlatUI(window.Alpine)
+})</x-code-block>
+                        <p class="text-muted-foreground mt-2 text-sm">BlatUI registers a <code class="bg-muted rounded px-1 text-xs">theme</code> store for dark mode. If Flux already drives dark mode, pass <code class="bg-muted rounded px-1 text-xs">registerBlatUI(window.Alpine, &lbrace; darkMode: false &rbrace;)</code> so the two don't both toggle <code class="bg-muted rounded px-1 text-xs">.dark</code>.</p>
+                    </div>
                 </div>
             </div>
 
