@@ -1,5 +1,6 @@
-<template x-teleport="body">
+<template x-teleport="body" wire:ignore>
     <div
+        x-blat-dialog-layer
         x-show="open"
         x-cloak
         x-ref="submenu"

@@ -10,8 +10,9 @@
     $anchorAttr = 'x-anchor.'.$placement.'.offset.'.$sideOffset.'="$refs.trigger"';
 @endphp
 
-<template x-teleport="body">
+<template x-teleport="body" wire:ignore>
     <div
+        x-blat-dialog-layer
         x-show="open"
         x-cloak
         {!! $anchorAttr !!}

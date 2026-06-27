@@ -688,6 +688,23 @@ function blatLabelledByDirective(el, { expression }, { evaluate }) {
     });
 }
 
+// x-blat-dialog-layer — put a teleported popover in the right stacking layer. When its
+// home (the <template x-teleport> Alpine left behind, `el._x_teleportBack`) sits inside a
+// native <dialog> — e.g. a Flux <flux:modal>, opened with showModal() — move the popover
+// into that dialog. A modal <dialog> lives in the browser's *top layer*, which paints above
+// everything in <body> regardless of z-index; a popover teleported to <body> would otherwise
+// render behind the modal (and be inert). Inside the dialog it shares the top layer and stays
+// interactive. With no native <dialog> ancestor it stays in <body> (the teleport default),
+// still escaping any overflow-clipping ancestor. Pure DOM — works in any component's scope.
+function blatDialogLayerDirective(el) {
+    queueMicrotask(() => {
+        const home = el._x_teleportBack;
+        if (!home) return;
+        const target = home.closest('dialog') || document.body;
+        if (el.parentElement !== target) target.appendChild(el);
+    });
+}
+
 // x-blat-field — wires a form field's control to its label/description/error:
 //   aria-describedby ← description + error ids, aria-invalid + data-invalid when
 //   an error is present, and label[for] ← control id when not already set. Radix/
@@ -1168,6 +1185,7 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.data('blatCommand', blatCommand);
     Alpine.directive('blat-trigger', blatTriggerDirective);
     Alpine.directive('blat-labelledby', blatLabelledByDirective);
+    Alpine.directive('blat-dialog-layer', blatDialogLayerDirective);
     Alpine.directive('blat-field', blatFieldDirective);
     Alpine.magic('blatNav', blatNavMagic);
     Alpine.magic('blatType', blatTypeMagic);

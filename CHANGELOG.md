@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.15.0] - 2026-06-26
+## [1.15.1] - 2026-06-27
+
+### Fixed
+- **Teleported popovers inside modals** ([#5](https://github.com/anousss007/blatui/issues/5)). Two
+  bugs hit any teleported overlay (`datetime-picker`, `date-picker`, `combobox`, `select`,
+  `dropdown-menu`, `context-menu`, `menubar`, `popover`, `hover-card`, `tooltip`) when used inside a
+  modal:
+  - **Rendered *behind* a Flux modal.** Flux `<flux:modal>` is a native `<dialog>` opened with
+    `showModal()`, which lives in the browser's **top layer** — it paints above everything in
+    `<body>` regardless of `z-index`, so a popover teleported to `<body>` was hidden behind it (and
+    inert). New shared `x-blat-dialog-layer` directive relocates the popover into the nearest
+    ancestor native `<dialog>` when there is one (top layer + interactive); otherwise it stays in
+    `<body>` as before, still escaping overflow-clipping ancestors.
+  - **Picker died after a Livewire validation re-render.** Livewire's morph detached the teleported
+    popover from its Alpine scope, after which its expressions (`open`/`errors`/`invalid`) resolved
+    against `window` — throwing `'open' called on … Window` and `… is not defined`, killing the
+    widget until a full page refresh. `wire:ignore` on the teleport template keeps morph from
+    touching the popover; Alpine reactivity and `wire:model`/`@entangle` keep working.
 
 ### Added
 - **Livewire support — `wire:model` on every form control, with full two-way binding.** Components are
