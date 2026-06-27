@@ -115,8 +115,9 @@
 
     {{-- Teleported to <body> so the popover is never clipped by an overflow-hidden ancestor
          (a card, table cell, the docs preview…). x-anchor still positions it at the trigger. --}}
-    <template x-teleport="body">
+    <template x-teleport="body" wire:ignore>
     <div
+        x-blat-dialog-layer
         x-show="open"
         x-cloak
         x-anchor.bottom-start.offset.4="$refs.trigger"

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Teleported popovers inside modals** ([#5](https://github.com/anousss007/blatui/issues/5)) —
+  `datetime-picker`, `date-picker`, `combobox`, `select`, `dropdown-menu`, `context-menu`, `menubar`,
+  `popover`, `hover-card`, `tooltip`:
+  - No longer render *behind* a Flux `<flux:modal>` (a native `<dialog>` in the browser's top layer).
+    New `x-blat-dialog-layer` directive relocates the popover into the ancestor `<dialog>` when there
+    is one; otherwise it stays teleported to `<body>` as before.
+  - No longer break after a Livewire validation re-render. `wire:ignore` on the teleport template
+    stops the morph from detaching the popover from its Alpine scope (which previously threw
+    `'open' called on … Window` / `… is not defined` and froze the widget until a refresh).
+
 ## [1.14.1] - 2026-06-24
 
 ### Fixed

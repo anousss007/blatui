@@ -198,8 +198,9 @@
     @endif
 
     {{-- Teleported to <body> so the listbox is never clipped by an overflow-hidden ancestor. --}}
-    <template x-teleport="body">
+    <template x-teleport="body" wire:ignore>
     <div
+        x-blat-dialog-layer
         x-show="open"
         x-cloak
         @if ($isInput)
