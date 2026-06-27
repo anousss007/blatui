@@ -91,6 +91,23 @@ window.Alpine = Alpine
 Alpine.start()
 ```
 
+- **JS — using Livewire or Flux?** Livewire bundles and starts Alpine for you, so don't
+  `npm install alpinejs` (that's the duplicate-Alpine trap) and don't import `blatui.js`.
+  Install only the plugins — `npm install -D @alpinejs/anchor @alpinejs/collapse @alpinejs/focus`
+  (add `apexcharts` only if you use charts) — and register BlatUI onto Livewire's Alpine via
+  the `alpine:init` hook:
+
+```js
+import { registerBlatUI } from './blatui-core.js'
+
+document.addEventListener('alpine:init', () => {
+    registerBlatUI(window.Alpine)
+})
+```
+
+  BlatUI registers a `theme` store for dark mode. If Flux already drives dark mode, pass
+  `registerBlatUI(window.Alpine, { darkMode: false })` so the two don't both toggle `.dark`.
+
 ## Adding components
 
 ```bash
