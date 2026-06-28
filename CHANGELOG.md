@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.15.3] - 2026-06-28
+
+### Fixed
+- **`darkMode: false` no longer strips the `dark` class** ([#4](https://github.com/anousss007/blatui/issues/4)).
+  The theme store's `apply()` ran `classList.toggle('dark', false)` on every page load even when dark
+  mode was disabled, removing a `dark` class set by the host app (e.g. Flux) and causing a dark→light
+  flash on full refresh. `darkMode: false` now means *hands off* — BlatUI never touches the `dark`
+  class, so it coexists with apps that drive their own dark mode. (`'class'`/`'system'` unchanged.)
+- **Theme CSS export no longer emits `@import 'tw-animate-css'`** ([#4](https://github.com/anousss007/blatui/issues/4)).
+  `tw-animate-css` was dropped as a dependency (components animate via Alpine, not CSS keyframes), but
+  the "Copy theme CSS" scaffold still imported it — so a pasted theme failed to build with a missing
+  package. The scaffold now matches the shipped `app.css` (Tailwind import only).
+
 ## [1.15.2] - 2026-06-28
 
 ### Fixed
