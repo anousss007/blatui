@@ -95,7 +95,7 @@ Alpine.start();</x-code-block>
                 <x-code-block label="resources/js/app.js" icon="file-code">import "./blatui.js";</x-code-block>
                 <div class="bg-muted/40 flex items-start gap-2 rounded-lg border p-3 text-sm">
                     <x-lucide-sparkles class="text-primary mt-0.5 size-4 shrink-0" />
-                    <span class="text-muted-foreground"><code class="bg-muted rounded px-1 text-xs">blatui.css</code> bundles Tailwind, <code class="bg-muted rounded px-1 text-xs">tw-animate-css</code>, the design tokens and the <code class="bg-muted rounded px-1 text-xs">@theme</code> mapping; <code class="bg-muted rounded px-1 text-xs">blatui.js</code> boots Alpine + its plugins and lazy-loads ApexCharts. Want a custom palette? Open <span class="text-foreground font-medium">Customize</span> (top-right), tune it, and hit <span class="text-foreground font-medium">Copy theme CSS</span> for a complete, ready-to-paste <code class="bg-muted rounded px-1 text-xs">app.css</code>.</span>
+                    <span class="text-muted-foreground"><code class="bg-muted rounded px-1 text-xs">blatui.css</code> bundles Tailwind, the design tokens and the <code class="bg-muted rounded px-1 text-xs">@theme</code> mapping; <code class="bg-muted rounded px-1 text-xs">blatui.js</code> boots Alpine + its plugins and lazy-loads ApexCharts. Want a custom palette? Open <span class="text-foreground font-medium">Customize</span> (top-right), tune it, and hit <span class="text-foreground font-medium">Copy theme CSS</span> for a complete, ready-to-paste <code class="bg-muted rounded px-1 text-xs">app.css</code>.</span>
                 </div>
             </x-step>
 

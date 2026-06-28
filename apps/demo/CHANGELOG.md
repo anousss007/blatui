@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **`darkMode: false` no longer strips the `dark` class** ([#4](https://github.com/anousss007/blatui/issues/4)) —
+  it now means "hands off", so BlatUI never touches `dark` and coexists with apps (e.g. Flux) that
+  drive their own dark mode (previously it removed `dark` on every load → dark→light flash).
+- **Theme CSS export no longer imports the dropped `tw-animate-css`** ([#4](https://github.com/anousss007/blatui/issues/4)) —
+  the "Copy theme CSS" scaffold matched the shipped `app.css` again, so a pasted theme builds cleanly.
 - **Popovers mis-positioned inside a Flux modal** (follow-up to
   [#5](https://github.com/anousss007/blatui/issues/5)). After relocating into the modal's native
   `<dialog>`, popovers rendered at the dialog's corner instead of at their trigger, and tall ones

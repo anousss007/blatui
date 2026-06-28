@@ -95,7 +95,12 @@ const themeStore = {
 
     apply() {
         const root = document.documentElement;
-        root.classList.toggle('dark', this.isDark);
+        // darkMode:false means "hands off dark mode" — never touch the `dark` class, so apps that
+        // drive their own dark mode (e.g. Flux) aren't stripped back to light on every page load.
+        // (Previously this force-removed `dark`, causing a dark→light flash on full refresh.)
+        if (this.darkMode !== false) {
+            root.classList.toggle('dark', this.isDark);
+        }
         // Attributes only emitted when non-default, so :root keeps the defaults.
         this.attr(root, 'data-base', this.base, 'neutral');
         this.attr(root, 'data-theme', this.preset, 'default');
@@ -454,8 +459,8 @@ const calendar = (cfg = {}) => ({
 // font, shadow, spacing, tracking) into a COMPLETE, self-contained
 // resources/css/app.css the user can paste as-is.
 //
-// We emit the full foundations scaffold (the Tailwind + tw-animate-css imports,
-// the @source globs and the @theme inline mapping) followed by the live
+// We emit the full foundations scaffold (the Tailwind import, the @source globs
+// and the @theme inline mapping) followed by the live
 // :root/.dark tokens. The @theme inline mapping is what turns the tokens into
 // utilities (bg-background, shadow-md, tracking-wide, …) — without it Tailwind
 // generates nothing and a pasted theme renders unstyled. The :root block also
@@ -466,7 +471,6 @@ const calendar = (cfg = {}) => ({
 // the @theme inline mapping or @source globs there, mirror them here too.
 // ---------------------------------------------------------------------------
 const THEME_SCAFFOLD = `@import 'tailwindcss';
-@import 'tw-animate-css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../vendor/mallardduck/blade-lucide-icons/resources/svg/*.svg';
