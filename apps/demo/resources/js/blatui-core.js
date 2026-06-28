@@ -76,6 +76,32 @@ const themeStore = {
         this.setMode(this.isDark ? 'light' : 'dark');
     },
 
+    // Roll a random, tasteful combination across every visual dimension — a quick
+    // way to stumble on a starting point. Mode (light/dark) is left untouched so the
+    // page doesn't flip out from under you; everything else is fair game.
+    randomize() {
+        const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const fonts = ['sans', 'inter', 'geist', 'manrope', 'jakarta', 'space-grotesk', 'dm-sans', 'outfit', 'sora', 'lora', 'source-serif', 'system', 'serif', 'mono'];
+        const body = pick(fonts);
+        const next = {
+            base: pick(['neutral', 'stone', 'zinc', 'slate', 'gray', 'mauve', 'olive', 'mist', 'taupe']),
+            preset: pick(['default', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky']),
+            radius: pick(['0', '0.3', '0.5', '0.625', '0.75', '1']),
+            inputStyle: pick(['outline', 'fill', 'inset']),
+            font: body,
+            // Heading mostly follows the body font; sometimes gets its own pairing.
+            fontHeading: Math.random() < 0.6 ? 'sans' : pick(fonts),
+            shadow: pick(['none', 'sm', 'default', 'lg', 'xl']),
+            spacing: pick(['compact', 'default', 'comfortable']),
+            tracking: pick(['tight', 'normal', 'wide']),
+        };
+        Object.entries(next).forEach(([k, v]) => {
+            this[k] = v;
+            localStorage.setItem('theme:' + k, v);
+        });
+        this.apply();
+    },
+
     reset() {
         ['mode', 'base', 'preset', 'radius', 'font', 'shadow', 'spacing', 'tracking', 'inputStyle', 'fontHeading'].forEach((k) =>
             localStorage.removeItem('theme:' + k),

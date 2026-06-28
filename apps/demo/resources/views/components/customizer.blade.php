@@ -14,7 +14,12 @@
                     <h4 class="text-sm font-semibold">Customize</h4>
                     <p class="text-muted-foreground text-xs">Tune it live. Every preset is pure CSS variables.</p>
                 </div>
-                <x-ui.button variant="ghost" size="sm" @click="$store.theme.reset()">Reset</x-ui.button>
+                <div class="flex items-center gap-1">
+                    <x-ui.button variant="ghost" size="sm" @click="$store.theme.randomize()" title="Surprise me — random combination">
+                        <x-lucide-dices class="size-3.5" /> Random
+                    </x-ui.button>
+                    <x-ui.button variant="ghost" size="sm" @click="$store.theme.reset()">Reset</x-ui.button>
+                </div>
             </div>
 
             <x-theme-controls />

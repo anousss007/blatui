@@ -58,6 +58,9 @@
                     <p class="text-muted-foreground mt-1 text-xs">Pure CSS variables. Share a link, export JSON, or copy it as your <code class="bg-muted rounded px-1 text-[11px]">app.css</code>.</p>
                 </div>
                 <input type="file" accept="application/json,.json" x-ref="file" class="hidden" @change="importJson($event)">
+                <x-ui.button variant="ghost" size="sm" @click="$store.theme.randomize()" title="Surprise me — random combination">
+                    <x-lucide-dices class="size-3.5" /> Random
+                </x-ui.button>
                 <x-ui.button variant="ghost" size="sm" @click="$store.theme.reset()">
                     <x-lucide-rotate-ccw class="size-3.5" /> Reset
                 </x-ui.button>
