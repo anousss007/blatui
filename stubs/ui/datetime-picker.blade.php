@@ -185,7 +185,7 @@
         x-blat-dialog-layer
         x-show="open"
         x-cloak
-        x-anchor.bottom-start.offset.4="$refs.trigger"
+        x-blat-anchor.bottom-start.offset.4="$refs.trigger"
         @click.outside="open = false"
         @keydown.escape.window="open = false"
         {{-- Listeners live here (inside the teleported popover) so they catch the calendar's /
@@ -199,7 +199,7 @@
         role="dialog"
         aria-label="{{ $isRange ? 'Choose a date and time range' : 'Choose date and time' }}"
         tabindex="-1"
-        class="bg-popover text-popover-foreground z-50 w-auto origin-top overflow-hidden rounded-md border shadow-md"
+        class="bg-popover text-popover-foreground z-50 flex w-auto origin-top flex-col overflow-y-auto overscroll-contain rounded-md border shadow-md"
         x-transition:enter="transition ease-out duration-150"
         x-transition:enter-start="opacity-0 scale-95"
         x-transition:enter-end="opacity-100 scale-100"

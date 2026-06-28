@@ -1,6 +1,7 @@
 import anchor from '@alpinejs/anchor';
 import focus from '@alpinejs/focus';
 import collapse from '@alpinejs/collapse';
+import { computePosition, autoUpdate, flip, shift, offset as flOffset, size } from '@floating-ui/dom';
 
 // ---------------------------------------------------------------------------
 // Theme store — dark mode + color preset + radius, persisted to localStorage.
@@ -696,12 +697,74 @@ function blatLabelledByDirective(el, { expression }, { evaluate }) {
 // render behind the modal (and be inert). Inside the dialog it shares the top layer and stays
 // interactive. With no native <dialog> ancestor it stays in <body> (the teleport default),
 // still escaping any overflow-clipping ancestor. Pure DOM — works in any component's scope.
+// x-blat-anchor — positions a teleported popover at its trigger, like Alpine's x-anchor,
+// but built for popovers that live in a modal's top layer and can be tall:
+//   • strategy: 'fixed' — viewport-relative coords. x-anchor's default 'absolute' strategy
+//     mis-positions a popover once it's relocated into a native <dialog> (Flux modal), because
+//     the offsetParent math is wrong for the top layer; 'fixed' is correct there and in <body>.
+//   • size() — caps the popover's height to the space actually available and lets it scroll,
+//     so a calendar / long menu can't overflow off-screen when the trigger sits low (the exact
+//     failure inside a centered modal). flip()+shift() keep it pointed at and within the viewport.
+// Modifiers mirror x-anchor: a placement (e.g. bottom-start), `.offset N`, and `.no-flip`.
+const BLAT_ANCHOR_PLACEMENTS = ['top', 'top-start', 'top-end', 'right', 'right-start', 'right-end', 'bottom', 'bottom-start', 'bottom-end', 'left', 'left-start', 'left-end'];
+function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cleanup }) {
+    const placement = BLAT_ANCHOR_PLACEMENTS.find((p) => modifiers.includes(p)) || 'bottom';
+    let offsetValue = 0;
+    if (modifiers.includes('offset')) {
+        const i = modifiers.indexOf('offset');
+        offsetValue = modifiers[i + 1] !== undefined ? Number(modifiers[i + 1]) : 0;
+    }
+    const allowFlip = !modifiers.includes('no-flip');
+    const PAD = 8;
+    // The popover's own design cap (e.g. `max-h-96`), read once before we set anything inline.
+    // size() only shrinks *below* this when the viewport is tight — it never makes the popover
+    // taller than the component intended. Infinity when the component sets no cap (e.g. calendars).
+    const designMax = parseFloat(getComputedStyle(el).maxHeight) || Infinity;
+    const getReference = evaluateLater(expression);
+
+    let stop = null;
+    getReference((reference) => {
+        if (!reference || stop) return;
+        const update = () =>
+            computePosition(reference, el, {
+                strategy: 'fixed',
+                placement,
+                middleware: [
+                    flOffset(offsetValue),
+                    allowFlip && flip({ padding: PAD }),
+                    shift({ padding: PAD }),
+                    size({
+                        padding: PAD,
+                        apply({ availableHeight }) {
+                            // Fit the available space but never exceed the design cap (min 140px so it
+                            // never collapses). The popover carries overflow-y-auto, so it scrolls.
+                            const h = Math.min(designMax, Math.max(140, Math.floor(availableHeight)));
+                            el.style.maxHeight = Number.isFinite(h) ? `${h}px` : '';
+                        },
+                    }),
+                ].filter(Boolean),
+            }).then(({ x, y }) => {
+                Object.assign(el.style, { position: 'fixed', left: `${x}px`, top: `${y}px` });
+            });
+        stop = autoUpdate(reference, el, update);
+    });
+
+    cleanup(() => stop && stop());
+}
+
 function blatDialogLayerDirective(el) {
     queueMicrotask(() => {
         const home = el._x_teleportBack;
         if (!home) return;
         const target = home.closest('dialog') || document.body;
-        if (el.parentElement !== target) target.appendChild(el);
+        if (el.parentElement !== target) {
+            target.appendChild(el);
+            // Reparenting changes the popover's offsetParent. x-anchor (floating-ui) positions
+            // it as `position:absolute; top/left` computed against the *old* parent — stale after
+            // the move. Nudge floating-ui's autoUpdate (it listens for resize/scroll) to recompute
+            // against the new containing block so the popover re-anchors to its trigger.
+            requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+        }
     });
 }
 
@@ -1185,6 +1248,7 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.data('blatCommand', blatCommand);
     Alpine.directive('blat-trigger', blatTriggerDirective);
     Alpine.directive('blat-labelledby', blatLabelledByDirective);
+    Alpine.directive('blat-anchor', blatAnchorDirective);
     Alpine.directive('blat-dialog-layer', blatDialogLayerDirective);
     Alpine.directive('blat-field', blatFieldDirective);
     Alpine.magic('blatNav', blatNavMagic);

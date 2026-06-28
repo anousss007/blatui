@@ -11,7 +11,7 @@
     // The trigger span is display:contents (no box), so anchor to its real inner
     // element: the sidebar menu-action button when present, else the first child.
     $anchorRef = '($refs.trigger?.querySelector(\'[data-slot=sidebar-menu-action]\') || $refs.trigger?.firstElementChild || $refs.trigger)';
-    $anchorAttr = 'x-anchor.'.$placement.'.offset.'.$sideOffset.'="'.$anchorRef.'"';
+    $anchorAttr = 'x-blat-anchor.'.$placement.'.offset.'.$sideOffset.'="'.$anchorRef.'"';
 @endphp
 
 <template x-teleport="body" wire:ignore>

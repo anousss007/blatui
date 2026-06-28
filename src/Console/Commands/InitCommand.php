@@ -39,6 +39,7 @@ class InitCommand extends Command
         foreach ([
             'alpinejs' => 'the Alpine.js runtime',
             '@alpinejs/anchor' => 'positioning for popovers/menus',
+            '@floating-ui/dom' => 'viewport-fit positioning for popovers in modals',
             '@alpinejs/collapse' => 'accordion/collapsible animation',
             '@alpinejs/focus' => 'focus traps for dialogs',
         ] as $package => $why) {

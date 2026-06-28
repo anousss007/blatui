@@ -41,7 +41,7 @@ composer require anousss007/blatui
 
 # 2. Peer packages used by the components
 composer require gehrisandro/tailwind-merge-laravel mallardduck/blade-lucide-icons
-npm install -D alpinejs @alpinejs/anchor @alpinejs/collapse @alpinejs/focus
+npm install -D alpinejs @alpinejs/anchor @floating-ui/dom @alpinejs/collapse @alpinejs/focus
 
 # 3. Publish the foundations (theme tokens + Alpine/chart/calendar engine)
 php artisan vendor:publish --tag=blatui-foundations
@@ -93,7 +93,7 @@ Alpine.start()
 
 - **JS — using Livewire or Flux?** Livewire bundles and starts Alpine for you, so don't
   `npm install alpinejs` (that's the duplicate-Alpine trap) and don't import `blatui.js`.
-  Install only the plugins — `npm install -D @alpinejs/anchor @alpinejs/collapse @alpinejs/focus`
+  Install only the plugins — `npm install -D @alpinejs/anchor @floating-ui/dom @alpinejs/collapse @alpinejs/focus`
   (add `apexcharts` only if you use charts) — and register BlatUI onto Livewire's Alpine via
   the `alpine:init` hook:
 

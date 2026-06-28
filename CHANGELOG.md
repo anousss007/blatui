@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.15.2] - 2026-06-28
+
+### Fixed
+- **Popovers were mis-positioned inside a Flux modal** (follow-up to
+  [#5](https://github.com/anousss007/blatui/issues/5)). v1.15.1 relocated the popover into the
+  modal's native `<dialog>` so it stopped rendering *behind* it — but it then rendered at the
+  dialog's top-left, detached from its trigger, and a tall popover (a calendar, a long
+  `select`/`dropdown`) overflowed off-screen. Two causes, both fixed:
+  - **Wrong positioning strategy.** Alpine's `x-anchor` defaults to `position: absolute`, whose
+    `offsetParent` math is wrong for an element in the browser's top layer. Popovers now position
+    with `position: fixed` (viewport-relative — correct in a top-layer `<dialog>` and in `<body>`).
+  - **No height fitting.** New `x-blat-anchor` directive (floating-ui `flip` + `shift` + `size`)
+    used by the tall popovers (`datetime-picker`, `date-picker`, `select`, `dropdown-menu`) caps the
+    popover to the height actually available and lets it scroll, so it can never overflow the
+    viewport — while never growing past the component's own `max-h`. The remaining popovers gained
+    the `fixed` strategy.
+  - Requires the **`@floating-ui/dom`** package (already a transitive dependency of
+    `@alpinejs/anchor`; now listed explicitly in the install instructions and `blatui:init`).
+
 ## [1.15.1] - 2026-06-27
 
 ### Fixed
