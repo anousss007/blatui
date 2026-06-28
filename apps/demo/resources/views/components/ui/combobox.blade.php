@@ -204,10 +204,10 @@
         x-show="open"
         x-cloak
         @if ($isInput)
-            x-anchor.bottom-start.offset.4="$refs.control"
+            x-anchor.fixed.bottom-start.offset.4="$refs.control"
             @click.outside="open && !$refs.control.contains($event.target) && close()"
         @else
-            x-anchor.bottom-start.offset.4="$refs.trigger"
+            x-anchor.fixed.bottom-start.offset.4="$refs.trigger"
             @click.outside="close(false)"
             @keydown.escape.prevent.stop="close()"
         @endif

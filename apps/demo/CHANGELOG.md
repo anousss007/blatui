@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Popovers mis-positioned inside a Flux modal** (follow-up to
+  [#5](https://github.com/anousss007/blatui/issues/5)). After relocating into the modal's native
+  `<dialog>`, popovers rendered at the dialog's corner instead of at their trigger, and tall ones
+  overflowed off-screen. Popovers now position with `position: fixed` (correct in the top layer),
+  and the new `x-blat-anchor` directive (floating-ui `flip`+`shift`+`size`) makes `datetime-picker`,
+  `date-picker`, `select` and `dropdown-menu` fit the available height and scroll. Adds a
+  `@floating-ui/dom` dependency.
 - **Teleported popovers inside modals** ([#5](https://github.com/anousss007/blatui/issues/5)) —
   `datetime-picker`, `date-picker`, `combobox`, `select`, `dropdown-menu`, `context-menu`, `menubar`,
   `popover`, `hover-card`, `tooltip`:

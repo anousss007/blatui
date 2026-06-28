@@ -1907,9 +1907,6 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
-            ],
-            "npm": [
-                "@alpinejs/anchor"
             ]
         }
     },
