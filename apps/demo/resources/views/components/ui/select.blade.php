@@ -21,6 +21,7 @@
     'options' => null,
     'placeholder' => '',
     'color' => null,
+    'indicator' => 'check',   // check | checkbox | radio — how a selected option is marked (custom listbox only)
 ])
 
 @php
@@ -100,7 +101,7 @@
             <x-ui.select-trigger :class="'w-full'.($multiple ? ' data-[size=default]:h-auto min-h-9 py-1' : '')" :ariaLabel="$placeholder !== '' ? $placeholder : 'Select option'">
                 <x-ui.select-value :placeholder="$placeholder" />
             </x-ui.select-trigger>
-            <x-ui.select-content>
+            <x-ui.select-content :indicator="$indicator">
                 @foreach ($normalized as $val => $lab)
                     <x-ui.select-item :value="$val">{{ $lab }}</x-ui.select-item>
                 @endforeach

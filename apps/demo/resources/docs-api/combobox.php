@@ -70,6 +70,13 @@ return [
             'description' => 'Allow picking many values. Selected items render as removable chips and the list stays open after each pick.',
         ],
         [
+            'name' => 'indicator',
+            'type' => 'string',
+            'default' => "'check'",
+            'options' => ['check', 'checkbox', 'radio'],
+            'description' => 'How a selected option is marked in the list: a trailing check, a checkbox box (pairs well with multiple), or a radio dot (pairs well with single-select).',
+        ],
+        [
             'name' => 'disabled',
             'type' => 'bool',
             'default' => 'false',

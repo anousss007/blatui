@@ -50,6 +50,13 @@ return [
             'type' => 'string',
             'description' => 'A CSS color that brands the trigger\'s focus ring and selected accent for this instance only.',
         ],
+        [
+            'name' => 'indicator',
+            'type' => 'string',
+            'default' => "'check'",
+            'options' => ['check', 'checkbox', 'radio'],
+            'description' => 'How a selected option is marked in the custom listbox (ignored when native): a trailing check, a checkbox box, or a radio dot. In the compositional API, set it on <x-ui.select-content> instead — it cascades to the items.',
+        ],
     ],
 
     'slots' => [

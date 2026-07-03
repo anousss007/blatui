@@ -88,6 +88,11 @@ return [
             'type' => 'string',
             'description' => 'Tailwind width class for the trigger and popover. Defaults to w-[240px] (single) or w-[300px] (range).',
         ],
+        [
+            'name' => 'presets',
+            'type' => 'bool|array',
+            'description' => 'Quick-pick shortcuts shown beside the calendar. Pass true for sensible defaults per mode, or an array of named keys and/or custom entries. Named keys: today, yesterday, tomorrow, thisWeek, lastWeek, last7Days, last14Days, last30Days, thisMonth, lastMonth, thisYear, yearToDate, allTime. Custom entries: \'My label\' => [\'from\' => "Y-m-d", \'to\' => "Y-m-d"] or [\'date\' => "Y-m-d"]. Dates resolve client-side relative to today, so they never go stale.',
+        ],
     ],
 
     'shapes' => [
