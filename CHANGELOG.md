@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.0] - 2026-07-03
+
+### Added
+- **`date-picker` presets.** New `presets` prop renders a quick-pick panel beside the calendar.
+  Pass `true` for sensible defaults per mode, or an array mixing named keys (`today`, `yesterday`,
+  `tomorrow`, `thisWeek`, `lastWeek`, `last7Days`, `last14Days`, `last30Days`, `thisMonth`,
+  `lastMonth`, `thisYear`, `yearToDate`, `allTime`) with fully custom entries
+  (`'My label' => ['from' => 'Y-m-d', 'to' => 'Y-m-d']` or `['date' => 'Y-m-d']`). Dates resolve
+  client-side relative to *today*, so a cached view never serves a stale range. Applying a preset
+  keeps the popover open so the selection stays visible and adjustable.
+- **`select` / `combobox` indicator variants.** New `indicator` prop (`check` | `checkbox` |
+  `radio`) controls how a selected option is marked in the list — a trailing check (default,
+  unchanged), a checkbox box (pairs with `multiple`), or a radio dot (pairs with single-select).
+  On the compositional select API, set `indicator` on `<x-ui.select-content>` and it cascades to
+  every `<x-ui.select-item>` via `@aware`.
+
+### Changed
+- **Calendar external hooks are now element-scoped as well as global.** `calendar:set` /
+  `calendar:set-range` / `calendar:today` bind to both `window` (unchanged, backward-compatible)
+  and each calendar's own root element. A non-bubbling dispatch on one calendar targets only that
+  instance — so the new date-picker presets work correctly with several pickers on one page.
+
 ## [1.15.3] - 2026-06-28
 
 ### Fixed
