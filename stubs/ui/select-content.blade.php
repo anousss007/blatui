@@ -2,6 +2,7 @@
     'align' => 'start',
     'side' => 'bottom',
     'sideOffset' => 4,
+    'indicator' => 'check',   // check | checkbox | radio — cascades to child select-item options
 ])
 
 @php

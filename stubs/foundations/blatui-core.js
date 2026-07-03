@@ -76,6 +76,32 @@ const themeStore = {
         this.setMode(this.isDark ? 'light' : 'dark');
     },
 
+    // Roll a random, tasteful combination across every visual dimension — a quick
+    // way to stumble on a starting point. Mode (light/dark) is left untouched so the
+    // page doesn't flip out from under you; everything else is fair game.
+    randomize() {
+        const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const fonts = ['sans', 'inter', 'geist', 'manrope', 'jakarta', 'space-grotesk', 'dm-sans', 'outfit', 'sora', 'lora', 'source-serif', 'system', 'serif', 'mono'];
+        const body = pick(fonts);
+        const next = {
+            base: pick(['neutral', 'stone', 'zinc', 'slate', 'gray', 'mauve', 'olive', 'mist', 'taupe']),
+            preset: pick(['default', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky']),
+            radius: pick(['0', '0.3', '0.5', '0.625', '0.75', '1']),
+            inputStyle: pick(['outline', 'fill', 'inset']),
+            font: body,
+            // Heading mostly follows the body font; sometimes gets its own pairing.
+            fontHeading: Math.random() < 0.6 ? 'sans' : pick(fonts),
+            shadow: pick(['none', 'sm', 'default', 'lg', 'xl']),
+            spacing: pick(['compact', 'default', 'comfortable']),
+            tracking: pick(['tight', 'normal', 'wide']),
+        };
+        Object.entries(next).forEach(([k, v]) => {
+            this[k] = v;
+            localStorage.setItem('theme:' + k, v);
+        });
+        this.apply();
+    },
+
     reset() {
         ['mode', 'base', 'preset', 'radius', 'font', 'shadow', 'spacing', 'tracking', 'inputStyle', 'fontHeading'].forEach((k) =>
             localStorage.removeItem('theme:' + k),
@@ -223,24 +249,24 @@ const calendar = (cfg = {}) => ({
             d.setDate(ref.getDate() + ((this.weekStart + i + 7 - ref.getDay()) % 7));
             this.weekdays.push(d.toLocaleString(this.locale, { weekday: 'narrow' }));
         }
-        // External "Today" hook (used by calendar-10 etc.)
-        window.addEventListener('calendar:today', () => {
+        // External control hooks. Each is bound to BOTH `window` (global broadcast — used by
+        // standalone preset blocks like calendar-19) and this calendar's root element, so a
+        // caller can target one instance with a non-bubbling dispatch on the element (used by
+        // the date-picker presets panel when several pickers share a page).
+        const onToday = () => {
             const t = new Date();
             this.view = new Date(t.getFullYear(), t.getMonth(), 1);
             if (this.mode === 'single') { this.single = t; this.emit(_ymd(t)); }
-        });
-        // External "set date" hook (used by preset blocks, e.g. calendar-19).
+        };
         // Detail may be a 'YYYY-MM-DD' string or a Date; single mode only.
-        window.addEventListener('calendar:set', (e) => {
+        const onSet = (e) => {
             const t = _parse(e.detail);
             if (!t) return;
             this.view = new Date(t.getFullYear(), t.getMonth(), 1);
             if (this.mode === 'single') { this.single = t; this.emit(_ymd(t)); }
-        });
-        // External "set range" hook — symmetric to calendar:set, for pushing a range from app
-        // state (pre-fill, re-open on a selection). Range mode only.
-        // Detail: { from: 'YYYY-MM-DD'|Date|null, to: 'YYYY-MM-DD'|Date|null }
-        window.addEventListener('calendar:set-range', (e) => {
+        };
+        // Detail: { from: 'YYYY-MM-DD'|Date|null, to: 'YYYY-MM-DD'|Date|null }; range mode only.
+        const onSetRange = (e) => {
             if (this.mode !== 'range') return;
             const d = e.detail || {};
             const from = d.from ? _parse(d.from) : null;
@@ -249,7 +275,12 @@ const calendar = (cfg = {}) => ({
             this.rangeTo = to;
             if (from) this.view = new Date(from.getFullYear(), from.getMonth(), 1);
             this.emit({ from: from ? _ymd(from) : null, to: to ? _ymd(to) : null });
-        });
+        };
+        for (const target of [window, this.$root]) {
+            target.addEventListener('calendar:today', onToday);
+            target.addEventListener('calendar:set', onSet);
+            target.addEventListener('calendar:set-range', onSetRange);
+        }
     },
 
     // ---- grid building ----

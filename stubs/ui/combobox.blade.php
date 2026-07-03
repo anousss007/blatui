@@ -12,11 +12,13 @@
     'trigger' => 'button',        // button → popover w/ search inside | input → the field IS the search box (autocomplete)
     'size' => 'default',          // sm | default | lg — input trigger only
     'icon' => null,               // optional leading lucide icon name (input trigger only, e.g. "search")
+    'indicator' => 'check',       // check | checkbox | radio — how a selected option is marked in the list
 ])
 
 @php
     $trigger = in_array($trigger, ['button', 'input'], true) ? $trigger : 'button';
     $isInput = $trigger === 'input';
+    $indicator = in_array($indicator, ['check', 'checkbox', 'radio'], true) ? $indicator : 'check';
 
     // i18n-safe defaults: these are translation keys, localise them in your lang files.
     // The input trigger has a single visible placeholder (the search field itself); default it to "Search...".
@@ -271,7 +273,22 @@
                         :data-active="activeValue === option.value"
                         class="data-[active=true]:bg-accent data-[active=true]:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none"
                     >
-                        <x-lucide-check class="size-4" x-bind:class="isSelected(option.value) ? 'opacity-100' : 'opacity-0'" aria-hidden="true" />
+                        @switch($indicator)
+                            @case('checkbox')
+                                <span class="border-input flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors" :class="isSelected(option.value) && 'bg-primary border-primary text-primary-foreground'">
+                                    <x-lucide-check class="size-3" x-bind:class="isSelected(option.value) ? 'opacity-100' : 'opacity-0'" aria-hidden="true" />
+                                </span>
+                                @break
+
+                            @case('radio')
+                                <span class="border-input flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors" :class="isSelected(option.value) && 'border-primary'">
+                                    <span class="bg-primary size-2 rounded-full transition-opacity" :class="isSelected(option.value) ? 'opacity-100' : 'opacity-0'"></span>
+                                </span>
+                                @break
+
+                            @default
+                                <x-lucide-check class="size-4" x-bind:class="isSelected(option.value) ? 'opacity-100' : 'opacity-0'" aria-hidden="true" />
+                        @endswitch
                         <span x-text="option.label"></span>
                     </div>
                 </template>
