@@ -9,6 +9,7 @@
     'searchable' => true,         // false → a plain picker with no search box
     'disabled' => false,
     'multiple' => false,          // true → pick many; selected render as removable chips, list stays open
+    'indicator' => 'check',       // check | checkbox | radio — how a selected option is marked in the list
 ])
 
 @php
@@ -16,6 +17,7 @@
     $placeholder ??= __('Select option...');
     $searchPlaceholder ??= __('Search...');
     $empty ??= __('No results found.');
+    $indicator = in_array($indicator, ['check', 'checkbox', 'radio'], true) ? $indicator : 'check';
 
     $opts = collect($options)->map(fn ($o) => is_array($o)
         ? ['value' => (string) ($o['value'] ?? ''), 'label' => (string) ($o['label'] ?? $o['value'] ?? '')]
@@ -181,7 +183,22 @@
                         :data-active="activeValue === option.value"
                         class="data-[active=true]:bg-accent data-[active=true]:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none"
                     >
-                        <x-lucide-check class="size-4" x-bind:class="isSelected(option.value) ? 'opacity-100' : 'opacity-0'" aria-hidden="true" />
+                        @switch($indicator)
+                            @case('checkbox')
+                                <span class="border-input flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors" :class="isSelected(option.value) && 'bg-primary border-primary text-primary-foreground'">
+                                    <x-lucide-check class="size-3" x-bind:class="isSelected(option.value) ? 'opacity-100' : 'opacity-0'" aria-hidden="true" />
+                                </span>
+                                @break
+
+                            @case('radio')
+                                <span class="border-input flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors" :class="isSelected(option.value) && 'border-primary'">
+                                    <span class="bg-primary size-2 rounded-full transition-opacity" :class="isSelected(option.value) ? 'opacity-100' : 'opacity-0'"></span>
+                                </span>
+                                @break
+
+                            @default
+                                <x-lucide-check class="size-4" x-bind:class="isSelected(option.value) ? 'opacity-100' : 'opacity-0'" aria-hidden="true" />
+                        @endswitch
                         <span x-text="option.label"></span>
                     </div>
                 </template>

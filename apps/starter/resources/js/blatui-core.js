@@ -411,20 +411,38 @@ const calendar = (cfg = {}) => ({
             d.setDate(ref.getDate() + ((this.weekStart + i + 7 - ref.getDay()) % 7));
             this.weekdays.push(d.toLocaleString(this.locale, { weekday: 'narrow' }));
         }
-        // External "Today" hook (used by calendar-10 etc.)
-        window.addEventListener('calendar:today', () => {
+        // External control hooks. Each is bound to BOTH `window` (global broadcast — used by
+        // standalone preset blocks like calendar-19) and this calendar's root element, so a
+        // caller can target one instance with a non-bubbling dispatch on the element (used by
+        // the date-picker presets panel when several pickers share a page).
+        const onToday = () => {
             const t = new Date();
             this.view = new Date(t.getFullYear(), t.getMonth(), 1);
             if (this.mode === 'single') { this.single = t; this.emit(_ymd(t)); }
-        });
-        // External "set date" hook (used by preset blocks, e.g. calendar-19).
+        };
         // Detail may be a 'YYYY-MM-DD' string or a Date; single mode only.
-        window.addEventListener('calendar:set', (e) => {
+        const onSet = (e) => {
             const t = _parse(e.detail);
             if (!t) return;
             this.view = new Date(t.getFullYear(), t.getMonth(), 1);
             if (this.mode === 'single') { this.single = t; this.emit(_ymd(t)); }
-        });
+        };
+        // Detail: { from: 'YYYY-MM-DD'|Date|null, to: 'YYYY-MM-DD'|Date|null }; range mode only.
+        const onSetRange = (e) => {
+            if (this.mode !== 'range') return;
+            const d = e.detail || {};
+            const from = d.from ? _parse(d.from) : null;
+            const to = d.to ? _parse(d.to) : null;
+            this.rangeFrom = from;
+            this.rangeTo = to;
+            if (from) this.view = new Date(from.getFullYear(), from.getMonth(), 1);
+            this.emit({ from: from ? _ymd(from) : null, to: to ? _ymd(to) : null });
+        };
+        for (const target of [window, this.$root]) {
+            target.addEventListener('calendar:today', onToday);
+            target.addEventListener('calendar:set', onSet);
+            target.addEventListener('calendar:set-range', onSetRange);
+        }
     },
 
     // ---- grid building ----
