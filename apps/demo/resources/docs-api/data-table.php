@@ -48,6 +48,31 @@ return [
             'default' => '5',
             'description' => 'Number of rows shown per page.',
         ],
+        [
+            'name' => 'rowKey',
+            'type' => 'string',
+            'default' => "'id'",
+            'description' => 'The row-data key used as a stable :key for each rendered row, and the identifier you read in the actions slot (item.r[rowKey]). Point it at your primary key so re-sorts and Livewire updates keep row identity.',
+        ],
+        [
+            'name' => 'actionsLabel',
+            'type' => 'string',
+            'default' => "'Actions'",
+            'description' => 'Accessible header label for the row-actions column. Rendered sr-only so the column reads correctly to screen readers without a visible header.',
+        ],
+        [
+            'name' => 'stickyActions',
+            'type' => 'bool',
+            'default' => 'false',
+            'description' => 'Freeze the actions column to the right edge so it stays visible while the table scrolls horizontally on small screens.',
+        ],
+    ],
+
+    'slots' => [
+        [
+            'name' => 'actions',
+            'description' => 'Optional per-row action buttons. Rendered inside the Alpine x-for, so the current row is available as item.r (the row data) and item.i (its index). Bind to Livewire with $wire, e.g. x-on:click="$wire.edit(item.r.id)". Because rendering is client-side, use Alpine bindings here — not server-side {{ $row->id }} interpolation. For a fully server-rendered table where wire:click="edit($row->id)" works natively, use server-table.',
+        ],
     ],
 
     'shapes' => [

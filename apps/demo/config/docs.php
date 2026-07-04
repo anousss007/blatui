@@ -14,7 +14,7 @@ return [
             'container', 'stack', 'card', 'bento-grid', 'page-header', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar', 'accent', 'visually-hidden',
         ],
         'Data Display' => [
-            'avatar', 'avatar-group', 'presence', 'badge', 'table', 'comparison-table', 'data-table', 'tree-table', 'description-list', 'carousel', 'masonry', 'comparison-slider', 'chart', 'sparkline', 'stat', 'meter', 'heatmap', 'gantt', 'scheduler', 'org-chart', 'icon', 'item',
+            'avatar', 'avatar-group', 'presence', 'badge', 'table', 'comparison-table', 'data-table', 'server-table', 'tree-table', 'description-list', 'carousel', 'masonry', 'comparison-slider', 'chart', 'sparkline', 'stat', 'meter', 'heatmap', 'gantt', 'scheduler', 'org-chart', 'icon', 'item',
             'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'kanban', 'tree', 'json-viewer', 'diff-viewer', 'skeleton', 'code-block', 'typography',
         ],
         'AI' => [
@@ -109,6 +109,7 @@ return [
         'badge' => 'Displays a badge, with semantic status tones (success, warning, danger, info, neutral).',
         'code-block' => 'A dark code panel with an optional filename header and a copy button.',
         'data-table' => 'An interactive table with search, sortable columns, row selection and pagination.',
+        'server-table' => 'A server-rendered, Livewire-first data table with declarative row actions, server sorting, search, selection and pagination.',
         'table' => 'A responsive table component.',
         'comparison-table' => 'A data-driven feature comparison table — tiers × features with checks, dashes and values.',
         'carousel' => 'A carousel with motion and swipe.',
@@ -292,5 +293,62 @@ return [
         'rich-text-editor'  => ['decl' => 'public string $body = \'\';', 'tag' => '<x-ui.rich-text-editor wire:model="body" />'],
         'signature-pad'     => ['decl' => 'public ?string $signature = null;', 'tag' => '<x-ui.signature-pad wire:model="signature" />'],
         'file-upload'       => ['decl' => 'public $avatar;', 'tag' => '<x-ui.file-upload wire:model="avatar" accept="image/*" />', 'note' => 'Add the Livewire\\WithFileUploads trait to the component for temporary uploads.'],
+        'server-table'      => [
+            'decl' => <<<'DECL'
+use \Livewire\WithPagination;
+
+    public ?string $search = null;
+
+    public string $sort = 'name';
+
+    public string $direction = 'asc';
+
+    public array $selected = [];
+
+    #[\Livewire\Attributes\Computed]
+    public function users()
+    {
+        return \App\Models\User::query()
+            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
+            ->orderBy($this->sort, $this->direction)
+            ->paginate(10);
+    }
+
+    public function sortBy(string $key): void
+    {
+        $this->direction = $this->sort === $key && $this->direction === 'asc' ? 'desc' : 'asc';
+        $this->sort = $key;
+        $this->resetPage();
+    }
+
+    public function delete(int $id): void
+    {
+        \App\Models\User::findOrFail($id)->delete();
+    }
+DECL,
+            'tag' => <<<'TAG'
+<x-ui.server-table
+    :rows="$this->users"
+    row-key="id"
+    searchable
+    search-model="search"
+    :sort="$sort"
+    :direction="$direction"
+    sort-method="sortBy"
+    selectable
+    select-model="selected"
+    :columns="[
+        ['key' => 'name', 'label' => 'Name', 'sortable' => true],
+        ['key' => 'email', 'label' => 'Email', 'sortable' => true],
+        ['key' => 'role', 'label' => 'Role'],
+    ]"
+    :actions="[
+        ['label' => 'Edit', 'icon' => 'pencil', 'method' => 'edit'],
+        ['label' => 'Delete', 'icon' => 'trash-2', 'method' => 'delete', 'color' => 'var(--destructive)', 'confirm' => 'Delete this user?'],
+    ]"
+/>
+TAG,
+            'note' => 'Rows render server-side, so wire:click actions carry the real primary key and sorting/search/pagination run in your query — not client-side.',
+        ],
     ],
 ];

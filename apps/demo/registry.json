@@ -1922,6 +1922,23 @@
             ]
         }
     },
+    "server-table": {
+        "name": "server-table",
+        "files": [
+            "server-table.blade.php"
+        ],
+        "dependencies": [
+            "button",
+            "dropdown-menu",
+            "input"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
     "sheet": {
         "name": "sheet",
         "files": [
