@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-07-14
+
+### Added
+- **`server-table` component.** New server-driven table for Livewire-backed data — sorting,
+  search, and pagination are handled on the server rather than client-side, so it scales past
+  the in-memory limits of `data-table`. Pulls in `button`, `dropdown-menu`, and `input`.
+- **`data-table` row actions.** New `actions` slot renders a trailing actions column. It sits
+  inside the Alpine `x-for`, so the current row is available as `item.r` (row data) and `item.i`
+  (index) — wire buttons straight to Livewire, e.g.
+  `x-on:click="$wire.edit(item.r.id)"`. Accompanied by three new props: `rowKey` (row-data key
+  used for stable `:key`s and passed through to the actions slot, default `id`), `actionsLabel`
+  (sr-only header for the actions column, default `Actions`), and `stickyActions` (freeze the
+  actions column to the right edge on horizontal scroll).
+
+### Improved
+- **`data-table` accessibility.** Header cells now carry `scope="col"`, sortable headers expose
+  `aria-sort`, decorative sort/check icons are marked `aria-hidden`, and the select/sort controls
+  gain visible `focus-visible` rings. Row keys are now stable via `rowKey` instead of the paged
+  index.
+
 ## [1.16.0] - 2026-07-03
 
 ### Added
