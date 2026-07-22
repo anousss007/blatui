@@ -17,11 +17,10 @@ A CLI that copies open-source, copy-paste UI components **you own** straight int
 
 </div>
 
-> 📦 **This is the distribution repo** for the `anousss007/blatui` Composer package (what
-> Packagist reads — installation is unchanged: `composer require anousss007/blatui`). Its
-> `stubs/`, `src/` and tests are **published here from the development monorepo** at
-> **[anousss007/blatui-workspace](https://github.com/anousss007/blatui-workspace)**. Open issues
-> and PRs on the workspace, not here.
+> 🧩 **This is the BlatUI monorepo.** The Composer package is the repo **root** (`src/` + `stubs/`)
+> — Packagist reads it directly, so `composer require anousss007/blatui` is unchanged and the
+> `apps/` are stripped from the dist tarball. Components are **authored in `apps/demo/`** and
+> generated into `stubs/`. See [Contributing](#contributing) before editing a component.
 
 ---
 
@@ -164,6 +163,24 @@ grab the exact source you want rather than installing it:
 | `blatui:list [component]` | List all component families, or detail one |
 | `blatui:add <components...>` | Copy components (+ deps) into your project |
 | `vendor:publish --tag=blatui-foundations` | Publish theme CSS + JS engine |
+
+## Contributing
+
+BlatUI is a **monorepo** — one repo, one PR, one CI. The Composer package is the repo root;
+the demo/docs site and starter kit are apps that live alongside it (excluded from the published
+package via `.gitattributes`).
+
+```
+composer.json  src/  stubs/   → the published package (this is what `composer require` gets)
+apps/demo/                     → authors AND renders every component; the live docs site
+apps/starter/                  → the Laravel starter kit
+scripts/build-package.sh       → regenerates stubs/ from apps/demo (CI enforces it)
+```
+
+Components are **authored in `apps/demo/resources/views/components/ui/`** (the only place they
+render, so it's the source of truth); `stubs/` is generated — don't hand-edit it. After changing
+a component, run `bash scripts/build-package.sh` and commit both. CI fails if they drift.
+Full guide: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Credits
 

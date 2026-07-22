@@ -1,4 +1,10 @@
 # Keep the Composer dist lean — exclude dev-only paths from `composer require`.
+# The package is the repo ROOT (src/ + stubs/ + composer.json); the monorepo's demo &
+# starter apps and dev tooling live in subdirs that are stripped from the dist tarball,
+# so consumers get exactly the package and nothing else.
+/apps             export-ignore
+/scripts          export-ignore
+/docs             export-ignore
 /.github          export-ignore
 /tests            export-ignore
 /.gitattributes   export-ignore

@@ -1,16 +1,15 @@
-<!--
-  ⚠️ This is the read-only DISTRIBUTION repo for the `anousss007/blatui` Composer package.
-  Its contents are generated and published from the development monorepo. PRs opened here
-  cannot be merged and will be closed.
+<!-- Thanks for contributing to BlatUI! -->
 
-  Please open your pull request on the monorepo instead:
-      https://github.com/anousss007/blatui-workspace
+## What does this PR do?
 
-  (Installation is unchanged — `composer require anousss007/blatui`.)
--->
+<!-- Brief description. Reference any issue: "Closes #123". -->
 
-## ⚠️ Wrong repository
+## Checklist
 
-This repo is the published distribution of the `anousss007/blatui` package. BlatUI is developed
-in the monorepo — **please open your PR at https://github.com/anousss007/blatui-workspace** and
-close this one. Thanks! 🙏
+- [ ] Component/foundation changes were made in **`apps/demo/`** (the source), not in `stubs/` (generated)
+- [ ] Ran `bash scripts/build-package.sh` and committed the regenerated `stubs/**`
+- [ ] `vendor/bin/pint` passes (code style)
+- [ ] `vendor/bin/phpunit` passes (tests)
+- [ ] Added/updated a test when behaviour changed
+
+<!-- CI runs pint, phpunit (PHP 8.2–8.4), and a drift check that fails if stubs/ is out of sync with apps/demo. -->
