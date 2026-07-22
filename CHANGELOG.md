@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.17.1] - 2026-07-22
+
+### Fixed
+- **`qr-code` scaling.** The SVG bound its `viewBox` via a plain `:viewBox`, which the HTML
+  parser lowercases to `viewbox` — silently ignored since SVG's `viewBox` is case-sensitive.
+  With no valid viewBox the code rendered at ~1px per module instead of filling `size`. Now
+  bound with Alpine's `.camel` modifier (`:view-box.camel="viewBox"`) so it scales to any
+  `size`, crisp and scannable.
+
 ## [1.17.0] - 2026-07-14
 
 ### Added
