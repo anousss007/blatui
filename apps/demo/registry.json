@@ -1,0 +1,2575 @@
+{
+    "accent": {
+        "name": "accent",
+        "files": [
+            "accent.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "accordion": {
+        "name": "accordion",
+        "files": [
+            "accordion.blade.php",
+            "accordion-content.blade.php",
+            "accordion-item.blade.php",
+            "accordion-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/collapse"
+            ]
+        }
+    },
+    "add-to-cart": {
+        "name": "add-to-cart",
+        "files": [
+            "add-to-cart.blade.php"
+        ],
+        "dependencies": [
+            "button"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "alert": {
+        "name": "alert",
+        "files": [
+            "alert.blade.php",
+            "alert-action.blade.php",
+            "alert-description.blade.php",
+            "alert-title.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "alert-dialog": {
+        "name": "alert-dialog",
+        "files": [
+            "alert-dialog.blade.php",
+            "alert-dialog-action.blade.php",
+            "alert-dialog-cancel.blade.php",
+            "alert-dialog-content.blade.php",
+            "alert-dialog-description.blade.php",
+            "alert-dialog-footer.blade.php",
+            "alert-dialog-header.blade.php",
+            "alert-dialog-title.blade.php",
+            "alert-dialog-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "animated-beam": {
+        "name": "animated-beam",
+        "files": [
+            "animated-beam.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "aspect-ratio": {
+        "name": "aspect-ratio",
+        "files": [
+            "aspect-ratio.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "audio-player": {
+        "name": "audio-player",
+        "files": [
+            "audio-player.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "aurora": {
+        "name": "aurora",
+        "files": [
+            "aurora.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "autocomplete": {
+        "name": "autocomplete",
+        "files": [
+            "autocomplete.blade.php"
+        ],
+        "dependencies": [
+            "combobox"
+        ],
+        "packages": []
+    },
+    "autosize-textarea": {
+        "name": "autosize-textarea",
+        "files": [
+            "autosize-textarea.blade.php"
+        ],
+        "dependencies": [
+            "textarea"
+        ],
+        "packages": []
+    },
+    "avatar": {
+        "name": "avatar",
+        "files": [
+            "avatar.blade.php",
+            "avatar-fallback.blade.php",
+            "avatar-group.blade.php",
+            "avatar-image.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "back-to-top": {
+        "name": "back-to-top",
+        "files": [
+            "back-to-top.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "badge": {
+        "name": "badge",
+        "files": [
+            "badge.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "banner": {
+        "name": "banner",
+        "files": [
+            "banner.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "bento-grid": {
+        "name": "bento-grid",
+        "files": [
+            "bento-grid.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "bento-item": {
+        "name": "bento-item",
+        "files": [
+            "bento-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "border-beam": {
+        "name": "border-beam",
+        "files": [
+            "border-beam.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "bottom-navigation": {
+        "name": "bottom-navigation",
+        "files": [
+            "bottom-navigation.blade.php"
+        ],
+        "dependencies": [
+            "bottom-navigation-item"
+        ],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "bottom-navigation-item": {
+        "name": "bottom-navigation-item",
+        "files": [
+            "bottom-navigation-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "brand": {
+        "name": "brand",
+        "files": [
+            "brand.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "breadcrumb": {
+        "name": "breadcrumb",
+        "files": [
+            "breadcrumb.blade.php",
+            "breadcrumb-ellipsis.blade.php",
+            "breadcrumb-item.blade.php",
+            "breadcrumb-link.blade.php",
+            "breadcrumb-list.blade.php",
+            "breadcrumb-page.blade.php",
+            "breadcrumb-separator.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "button": {
+        "name": "button",
+        "files": [
+            "button.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "button-group": {
+        "name": "button-group",
+        "files": [
+            "button-group.blade.php",
+            "button-group-separator.blade.php",
+            "button-group-text.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "calendar": {
+        "name": "calendar",
+        "files": [
+            "calendar.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "card": {
+        "name": "card",
+        "files": [
+            "card.blade.php",
+            "card-action.blade.php",
+            "card-content.blade.php",
+            "card-description.blade.php",
+            "card-footer.blade.php",
+            "card-header.blade.php",
+            "card-title.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "carousel": {
+        "name": "carousel",
+        "files": [
+            "carousel.blade.php",
+            "carousel-content.blade.php",
+            "carousel-item.blade.php",
+            "carousel-next.blade.php",
+            "carousel-previous.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "chart": {
+        "name": "chart",
+        "files": [
+            "chart.blade.php",
+            "chart-container.blade.php",
+            "chart-tooltip-content.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "apexcharts"
+            ]
+        }
+    },
+    "chat": {
+        "name": "chat",
+        "files": [
+            "chat.blade.php"
+        ],
+        "dependencies": [
+            "chat-message"
+        ],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "chat-message": {
+        "name": "chat-message",
+        "files": [
+            "chat-message.blade.php"
+        ],
+        "dependencies": [
+            "avatar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        }
+    },
+    "checkbox": {
+        "name": "checkbox",
+        "files": [
+            "checkbox.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "citation": {
+        "name": "citation",
+        "files": [
+            "citation.blade.php"
+        ],
+        "dependencies": [
+            "link"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "code-block": {
+        "name": "code-block",
+        "files": [
+            "code-block.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "collapsible": {
+        "name": "collapsible",
+        "files": [
+            "collapsible.blade.php",
+            "collapsible-content.blade.php",
+            "collapsible-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "npm": [
+                "@alpinejs/collapse"
+            ]
+        }
+    },
+    "color-picker": {
+        "name": "color-picker",
+        "files": [
+            "color-picker.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "combobox": {
+        "name": "combobox",
+        "files": [
+            "combobox.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor"
+            ]
+        }
+    },
+    "command": {
+        "name": "command",
+        "files": [
+            "command.blade.php",
+            "command-empty.blade.php",
+            "command-group.blade.php",
+            "command-input.blade.php",
+            "command-item.blade.php",
+            "command-list.blade.php",
+            "command-separator.blade.php",
+            "command-shortcut.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "command-dialog": {
+        "name": "command-dialog",
+        "files": [
+            "command-dialog.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "npm": [
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "comparison-slider": {
+        "name": "comparison-slider",
+        "files": [
+            "comparison-slider.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "comparison-table": {
+        "name": "comparison-table",
+        "files": [
+            "comparison-table.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "confetti": {
+        "name": "confetti",
+        "files": [
+            "confetti.blade.php"
+        ],
+        "dependencies": [
+            "button"
+        ],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "container": {
+        "name": "container",
+        "files": [
+            "container.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "context-menu": {
+        "name": "context-menu",
+        "files": [
+            "context-menu.blade.php",
+            "context-menu-checkbox-item.blade.php",
+            "context-menu-content.blade.php",
+            "context-menu-group.blade.php",
+            "context-menu-item.blade.php",
+            "context-menu-label.blade.php",
+            "context-menu-radio-group.blade.php",
+            "context-menu-radio-item.blade.php",
+            "context-menu-separator.blade.php",
+            "context-menu-shortcut.blade.php",
+            "context-menu-sub.blade.php",
+            "context-menu-sub-content.blade.php",
+            "context-menu-sub-trigger.blade.php",
+            "context-menu-trigger.blade.php"
+        ],
+        "dependencies": [
+            "menu-checkbox-item",
+            "menu-group",
+            "menu-item",
+            "menu-label",
+            "menu-radio-item",
+            "menu-separator",
+            "menu-shortcut"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor"
+            ]
+        }
+    },
+    "cookie-consent": {
+        "name": "cookie-consent",
+        "files": [
+            "cookie-consent.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "copy-button": {
+        "name": "copy-button",
+        "files": [
+            "copy-button.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "countdown": {
+        "name": "countdown",
+        "files": [
+            "countdown.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "data-table": {
+        "name": "data-table",
+        "files": [
+            "data-table.blade.php"
+        ],
+        "dependencies": [
+            "button",
+            "input"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "date-picker": {
+        "name": "date-picker",
+        "files": [
+            "date-picker.blade.php"
+        ],
+        "dependencies": [
+            "calendar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor",
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "datetime-picker": {
+        "name": "datetime-picker",
+        "files": [
+            "datetime-picker.blade.php"
+        ],
+        "dependencies": [
+            "button",
+            "calendar",
+            "time-field"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor",
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "description-item": {
+        "name": "description-item",
+        "files": [
+            "description-item.blade.php"
+        ],
+        "dependencies": [
+            "description-list"
+        ],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "description-list": {
+        "name": "description-list",
+        "files": [
+            "description-list.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "dialog": {
+        "name": "dialog",
+        "files": [
+            "dialog.blade.php",
+            "dialog-close.blade.php",
+            "dialog-content.blade.php",
+            "dialog-description.blade.php",
+            "dialog-footer.blade.php",
+            "dialog-header.blade.php",
+            "dialog-title.blade.php",
+            "dialog-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "diff-viewer": {
+        "name": "diff-viewer",
+        "files": [
+            "diff-viewer.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "dock": {
+        "name": "dock",
+        "files": [
+            "dock.blade.php"
+        ],
+        "dependencies": [
+            "dock-item"
+        ],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "dock-item": {
+        "name": "dock-item",
+        "files": [
+            "dock-item.blade.php"
+        ],
+        "dependencies": [
+            "dock"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "dot-pattern": {
+        "name": "dot-pattern",
+        "files": [
+            "dot-pattern.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "drawer": {
+        "name": "drawer",
+        "files": [
+            "drawer.blade.php",
+            "drawer-close.blade.php",
+            "drawer-content.blade.php",
+            "drawer-description.blade.php",
+            "drawer-footer.blade.php",
+            "drawer-header.blade.php",
+            "drawer-title.blade.php",
+            "drawer-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "dropdown-menu": {
+        "name": "dropdown-menu",
+        "files": [
+            "dropdown-menu.blade.php",
+            "dropdown-menu-checkbox-item.blade.php",
+            "dropdown-menu-content.blade.php",
+            "dropdown-menu-group.blade.php",
+            "dropdown-menu-item.blade.php",
+            "dropdown-menu-label.blade.php",
+            "dropdown-menu-radio-group.blade.php",
+            "dropdown-menu-radio-item.blade.php",
+            "dropdown-menu-separator.blade.php",
+            "dropdown-menu-shortcut.blade.php",
+            "dropdown-menu-sub.blade.php",
+            "dropdown-menu-sub-content.blade.php",
+            "dropdown-menu-sub-trigger.blade.php",
+            "dropdown-menu-trigger.blade.php"
+        ],
+        "dependencies": [
+            "menu-checkbox-item",
+            "menu-group",
+            "menu-item",
+            "menu-label",
+            "menu-radio-item",
+            "menu-separator",
+            "menu-shortcut"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor"
+            ]
+        }
+    },
+    "editable": {
+        "name": "editable",
+        "files": [
+            "editable.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "empty": {
+        "name": "empty",
+        "files": [
+            "empty.blade.php",
+            "empty-content.blade.php",
+            "empty-description.blade.php",
+            "empty-header.blade.php",
+            "empty-media.blade.php",
+            "empty-title.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "field": {
+        "name": "field",
+        "files": [
+            "field.blade.php",
+            "field-content.blade.php",
+            "field-description.blade.php",
+            "field-error.blade.php",
+            "field-group.blade.php",
+            "field-label.blade.php",
+            "field-legend.blade.php",
+            "field-separator.blade.php",
+            "field-set.blade.php",
+            "field-title.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "file-upload": {
+        "name": "file-upload",
+        "files": [
+            "file-upload.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "flip-card": {
+        "name": "flip-card",
+        "files": [
+            "flip-card.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "gallery": {
+        "name": "gallery",
+        "files": [
+            "gallery.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "gantt": {
+        "name": "gantt",
+        "files": [
+            "gantt.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "gradient-text": {
+        "name": "gradient-text",
+        "files": [
+            "gradient-text.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "grid-pattern": {
+        "name": "grid-pattern",
+        "files": [
+            "grid-pattern.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "heatmap": {
+        "name": "heatmap",
+        "files": [
+            "heatmap.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "hover-card": {
+        "name": "hover-card",
+        "files": [
+            "hover-card.blade.php",
+            "hover-card-content.blade.php",
+            "hover-card-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor"
+            ]
+        }
+    },
+    "icon": {
+        "name": "icon",
+        "files": [
+            "icon.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        }
+    },
+    "image": {
+        "name": "image",
+        "files": [
+            "image.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "infinite-scroll": {
+        "name": "infinite-scroll",
+        "files": [
+            "infinite-scroll.blade.php"
+        ],
+        "dependencies": [
+            "button",
+            "spinner"
+        ],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "input": {
+        "name": "input",
+        "files": [
+            "input.blade.php",
+            "input-mask.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "input-group": {
+        "name": "input-group",
+        "files": [
+            "input-group.blade.php",
+            "input-group-addon.blade.php",
+            "input-group-button.blade.php",
+            "input-group-input.blade.php",
+            "input-group-text.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "input-otp": {
+        "name": "input-otp",
+        "files": [
+            "input-otp.blade.php",
+            "input-otp-group.blade.php",
+            "input-otp-separator.blade.php",
+            "input-otp-slot.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "item": {
+        "name": "item",
+        "files": [
+            "item.blade.php",
+            "item-actions.blade.php",
+            "item-content.blade.php",
+            "item-description.blade.php",
+            "item-group.blade.php",
+            "item-media.blade.php",
+            "item-separator.blade.php",
+            "item-title.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "json-viewer": {
+        "name": "json-viewer",
+        "files": [
+            "json-viewer.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "json-viewer-node": {
+        "name": "json-viewer-node",
+        "files": [
+            "json-viewer-node.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        }
+    },
+    "kanban": {
+        "name": "kanban",
+        "files": [
+            "kanban.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "kbd": {
+        "name": "kbd",
+        "files": [
+            "kbd.blade.php",
+            "kbd-group.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "knob": {
+        "name": "knob",
+        "files": [
+            "knob.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "label": {
+        "name": "label",
+        "files": [
+            "label.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "link": {
+        "name": "link",
+        "files": [
+            "link.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "loading-overlay": {
+        "name": "loading-overlay",
+        "files": [
+            "loading-overlay.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "map": {
+        "name": "map",
+        "files": [
+            "map.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "markdown-editor": {
+        "name": "markdown-editor",
+        "files": [
+            "markdown-editor.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "marquee": {
+        "name": "marquee",
+        "files": [
+            "marquee.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "masonry": {
+        "name": "masonry",
+        "files": [
+            "masonry.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "mention-input": {
+        "name": "mention-input",
+        "files": [
+            "mention-input.blade.php"
+        ],
+        "dependencies": [
+            "textarea"
+        ],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-checkbox-item": {
+        "name": "menu-checkbox-item",
+        "files": [
+            "menu-checkbox-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-group": {
+        "name": "menu-group",
+        "files": [
+            "menu-group.blade.php"
+        ],
+        "dependencies": [],
+        "packages": []
+    },
+    "menu-item": {
+        "name": "menu-item",
+        "files": [
+            "menu-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-label": {
+        "name": "menu-label",
+        "files": [
+            "menu-label.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-radio-item": {
+        "name": "menu-radio-item",
+        "files": [
+            "menu-radio-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-separator": {
+        "name": "menu-separator",
+        "files": [
+            "menu-separator.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menu-shortcut": {
+        "name": "menu-shortcut",
+        "files": [
+            "menu-shortcut.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "menubar": {
+        "name": "menubar",
+        "files": [
+            "menubar.blade.php",
+            "menubar-checkbox-item.blade.php",
+            "menubar-content.blade.php",
+            "menubar-group.blade.php",
+            "menubar-item.blade.php",
+            "menubar-label.blade.php",
+            "menubar-menu.blade.php",
+            "menubar-radio-group.blade.php",
+            "menubar-radio-item.blade.php",
+            "menubar-separator.blade.php",
+            "menubar-shortcut.blade.php",
+            "menubar-sub.blade.php",
+            "menubar-sub-content.blade.php",
+            "menubar-sub-trigger.blade.php",
+            "menubar-trigger.blade.php"
+        ],
+        "dependencies": [
+            "menu-checkbox-item",
+            "menu-group",
+            "menu-item",
+            "menu-label",
+            "menu-radio-item",
+            "menu-separator",
+            "menu-shortcut"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor"
+            ]
+        }
+    },
+    "meteors": {
+        "name": "meteors",
+        "files": [
+            "meteors.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "meter": {
+        "name": "meter",
+        "files": [
+            "meter.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "mini-cart": {
+        "name": "mini-cart",
+        "files": [
+            "mini-cart.blade.php"
+        ],
+        "dependencies": [
+            "button"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor",
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "navigation-menu": {
+        "name": "navigation-menu",
+        "files": [
+            "navigation-menu.blade.php",
+            "navigation-menu-content.blade.php",
+            "navigation-menu-item.blade.php",
+            "navigation-menu-link.blade.php",
+            "navigation-menu-list.blade.php",
+            "navigation-menu-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor"
+            ]
+        }
+    },
+    "notification-center": {
+        "name": "notification-center",
+        "files": [
+            "notification-center.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor",
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "number-input": {
+        "name": "number-input",
+        "files": [
+            "number-input.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "number-ticker": {
+        "name": "number-ticker",
+        "files": [
+            "number-ticker.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "onboarding-tour": {
+        "name": "onboarding-tour",
+        "files": [
+            "onboarding-tour.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "org-chart": {
+        "name": "org-chart",
+        "files": [
+            "org-chart.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "org-chart-node": {
+        "name": "org-chart-node",
+        "files": [
+            "org-chart-node.blade.php"
+        ],
+        "dependencies": [],
+        "packages": []
+    },
+    "page-header": {
+        "name": "page-header",
+        "files": [
+            "page-header.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "pagination": {
+        "name": "pagination",
+        "files": [
+            "pagination.blade.php",
+            "pagination-content.blade.php",
+            "pagination-ellipsis.blade.php",
+            "pagination-item.blade.php",
+            "pagination-link.blade.php",
+            "pagination-next.blade.php",
+            "pagination-previous.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "parallax": {
+        "name": "parallax",
+        "files": [
+            "parallax.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "password-strength": {
+        "name": "password-strength",
+        "files": [
+            "password-strength.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "phone-input": {
+        "name": "phone-input",
+        "files": [
+            "phone-input.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "popover": {
+        "name": "popover",
+        "files": [
+            "popover.blade.php",
+            "popover-content.blade.php",
+            "popover-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor",
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "presence": {
+        "name": "presence",
+        "files": [
+            "presence.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "price": {
+        "name": "price",
+        "files": [
+            "price.blade.php"
+        ],
+        "dependencies": [
+            "badge"
+        ],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "product-card": {
+        "name": "product-card",
+        "files": [
+            "product-card.blade.php"
+        ],
+        "dependencies": [
+            "badge",
+            "button",
+            "price",
+            "rating"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "profile": {
+        "name": "profile",
+        "files": [
+            "profile.blade.php"
+        ],
+        "dependencies": [
+            "avatar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "progress": {
+        "name": "progress",
+        "files": [
+            "progress.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "prompt-input": {
+        "name": "prompt-input",
+        "files": [
+            "prompt-input.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "qr-code": {
+        "name": "qr-code",
+        "files": [
+            "qr-code.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "quote": {
+        "name": "quote",
+        "files": [
+            "quote.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "radio-group": {
+        "name": "radio-group",
+        "files": [
+            "radio-group.blade.php",
+            "radio-group-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "rating": {
+        "name": "rating",
+        "files": [
+            "rating.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "reasoning": {
+        "name": "reasoning",
+        "files": [
+            "reasoning.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/collapse"
+            ]
+        }
+    },
+    "repeater": {
+        "name": "repeater",
+        "files": [
+            "repeater.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "resizable": {
+        "name": "resizable",
+        "files": [
+            "resizable-handle.blade.php",
+            "resizable-panel.blade.php",
+            "resizable-panel-group.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "rich-text-editor": {
+        "name": "rich-text-editor",
+        "files": [
+            "rich-text-editor.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "scheduler": {
+        "name": "scheduler",
+        "files": [
+            "scheduler.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "scroll-area": {
+        "name": "scroll-area",
+        "files": [
+            "scroll-area.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "scrollspy": {
+        "name": "scrollspy",
+        "files": [
+            "scrollspy.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "segmented-control": {
+        "name": "segmented-control",
+        "files": [
+            "segmented-control.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "select": {
+        "name": "select",
+        "files": [
+            "select.blade.php",
+            "select-content.blade.php",
+            "select-group.blade.php",
+            "select-item.blade.php",
+            "select-label.blade.php",
+            "select-separator.blade.php",
+            "select-trigger.blade.php",
+            "select-value.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "separator": {
+        "name": "separator",
+        "files": [
+            "separator.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "server-table": {
+        "name": "server-table",
+        "files": [
+            "server-table.blade.php"
+        ],
+        "dependencies": [
+            "button",
+            "dropdown-menu",
+            "input"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "sheet": {
+        "name": "sheet",
+        "files": [
+            "sheet.blade.php",
+            "sheet-content.blade.php",
+            "sheet-description.blade.php",
+            "sheet-footer.blade.php",
+            "sheet-header.blade.php",
+            "sheet-title.blade.php",
+            "sheet-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "sidebar": {
+        "name": "sidebar",
+        "files": [
+            "sidebar.blade.php",
+            "sidebar-content.blade.php",
+            "sidebar-footer.blade.php",
+            "sidebar-group.blade.php",
+            "sidebar-group-content.blade.php",
+            "sidebar-group-label.blade.php",
+            "sidebar-header.blade.php",
+            "sidebar-input.blade.php",
+            "sidebar-inset.blade.php",
+            "sidebar-menu.blade.php",
+            "sidebar-menu-action.blade.php",
+            "sidebar-menu-badge.blade.php",
+            "sidebar-menu-button.blade.php",
+            "sidebar-menu-item.blade.php",
+            "sidebar-menu-sub.blade.php",
+            "sidebar-menu-sub-button.blade.php",
+            "sidebar-menu-sub-item.blade.php",
+            "sidebar-provider.blade.php",
+            "sidebar-rail.blade.php",
+            "sidebar-separator.blade.php",
+            "sidebar-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
+            ]
+        }
+    },
+    "signature-pad": {
+        "name": "signature-pad",
+        "files": [
+            "signature-pad.blade.php"
+        ],
+        "dependencies": [
+            "button"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "skeleton": {
+        "name": "skeleton",
+        "files": [
+            "skeleton.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "slider": {
+        "name": "slider",
+        "files": [
+            "slider.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "sonner": {
+        "name": "sonner",
+        "files": [
+            "sonner.blade.php",
+            "sonner-flash.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        }
+    },
+    "sparkline": {
+        "name": "sparkline",
+        "files": [
+            "sparkline.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "speed-dial": {
+        "name": "speed-dial",
+        "files": [
+            "speed-dial.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "spinner": {
+        "name": "spinner",
+        "files": [
+            "spinner.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "spotlight-card": {
+        "name": "spotlight-card",
+        "files": [
+            "spotlight-card.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stack": {
+        "name": "stack",
+        "files": [
+            "stack.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stat": {
+        "name": "stat",
+        "files": [
+            "stat.blade.php"
+        ],
+        "dependencies": [
+            "sparkline"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper": {
+        "name": "stepper",
+        "files": [
+            "stepper.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-content": {
+        "name": "stepper-content",
+        "files": [
+            "stepper-content.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-description": {
+        "name": "stepper-description",
+        "files": [
+            "stepper-description.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-indicator": {
+        "name": "stepper-indicator",
+        "files": [
+            "stepper-indicator.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-item": {
+        "name": "stepper-item",
+        "files": [
+            "stepper-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-nav": {
+        "name": "stepper-nav",
+        "files": [
+            "stepper-nav.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-separator": {
+        "name": "stepper-separator",
+        "files": [
+            "stepper-separator.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-title": {
+        "name": "stepper-title",
+        "files": [
+            "stepper-title.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "stepper-trigger": {
+        "name": "stepper-trigger",
+        "files": [
+            "stepper-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "streaming-text": {
+        "name": "streaming-text",
+        "files": [
+            "streaming-text.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "switch": {
+        "name": "switch",
+        "files": [
+            "switch.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "table": {
+        "name": "table",
+        "files": [
+            "table.blade.php",
+            "table-body.blade.php",
+            "table-caption.blade.php",
+            "table-cell.blade.php",
+            "table-footer.blade.php",
+            "table-head.blade.php",
+            "table-header.blade.php",
+            "table-row.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "tabs": {
+        "name": "tabs",
+        "files": [
+            "tabs.blade.php",
+            "tabs-content.blade.php",
+            "tabs-list.blade.php",
+            "tabs-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "tags-input": {
+        "name": "tags-input",
+        "files": [
+            "tags-input.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "terminal": {
+        "name": "terminal",
+        "files": [
+            "terminal.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "text-reveal": {
+        "name": "text-reveal",
+        "files": [
+            "text-reveal.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "textarea": {
+        "name": "textarea",
+        "files": [
+            "textarea.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "tilt-card": {
+        "name": "tilt-card",
+        "files": [
+            "tilt-card.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "time-field": {
+        "name": "time-field",
+        "files": [
+            "time-field.blade.php"
+        ],
+        "dependencies": [
+            "input"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "timeline": {
+        "name": "timeline",
+        "files": [
+            "timeline.blade.php",
+            "timeline-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "toggle": {
+        "name": "toggle",
+        "files": [
+            "toggle.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "toggle-group": {
+        "name": "toggle-group",
+        "files": [
+            "toggle-group.blade.php",
+            "toggle-group-item.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "tool-call": {
+        "name": "tool-call",
+        "files": [
+            "tool-call.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/collapse"
+            ]
+        }
+    },
+    "tooltip": {
+        "name": "tooltip",
+        "files": [
+            "tooltip.blade.php",
+            "tooltip-content.blade.php",
+            "tooltip-trigger.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/anchor"
+            ]
+        }
+    },
+    "top-progress": {
+        "name": "top-progress",
+        "files": [
+            "top-progress.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "tree": {
+        "name": "tree",
+        "files": [
+            "tree.blade.php"
+        ],
+        "dependencies": [
+            "tree-node"
+        ],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "tree-node": {
+        "name": "tree-node",
+        "files": [
+            "tree-node.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        }
+    },
+    "tree-table": {
+        "name": "tree-table",
+        "files": [
+            "tree-table.blade.php"
+        ],
+        "dependencies": [
+            "button",
+            "tree-table-row"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "tree-table-row": {
+        "name": "tree-table-row",
+        "files": [
+            "tree-table-row.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        }
+    },
+    "typewriter": {
+        "name": "typewriter",
+        "files": [
+            "typewriter.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "typography": {
+        "name": "typography",
+        "files": [
+            "typography.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "variant-selector": {
+        "name": "variant-selector",
+        "files": [
+            "variant-selector.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "video": {
+        "name": "video",
+        "files": [
+            "video.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
+            ]
+        }
+    },
+    "visually-hidden": {
+        "name": "visually-hidden",
+        "files": [
+            "visually-hidden.blade.php"
+        ],
+        "dependencies": [],
+        "packages": {
+            "composer": [
+                "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
+            ]
+        }
+    }
+}

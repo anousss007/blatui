@@ -1,0 +1,354 @@
+<?php
+
+// Drives the docs sidebar + index grouping. Keys are category labels,
+// values are ordered component slugs (must match resources/views/components/ui).
+return [
+    'categories' => [
+        'Forms & Input' => [
+            'button', 'button-group', 'copy-button', 'input', 'input-group', 'input-mask', 'input-otp', 'number-input', 'knob', 'phone-input', 'textarea', 'rich-text-editor', 'markdown-editor',
+            'label', 'field', 'repeater', 'checkbox', 'radio-group', 'switch', 'segmented-control', 'select', 'combobox', 'tags-input', 'mention-input', 'signature-pad',
+            'slider', 'toggle', 'toggle-group', 'rating', 'color-picker', 'password-strength', 'file-upload', 'editable', 'calendar', 'date-picker',
+            'datetime-picker', 'time-field',
+        ],
+        'Layout' => [
+            'container', 'stack', 'card', 'bento-grid', 'page-header', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar', 'accent', 'visually-hidden',
+        ],
+        'Data Display' => [
+            'avatar', 'avatar-group', 'presence', 'badge', 'table', 'comparison-table', 'data-table', 'server-table', 'tree-table', 'description-list', 'carousel', 'masonry', 'comparison-slider', 'chart', 'sparkline', 'stat', 'meter', 'heatmap', 'gantt', 'scheduler', 'org-chart', 'icon', 'item',
+            'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'kanban', 'tree', 'json-viewer', 'diff-viewer', 'skeleton', 'code-block', 'typography',
+        ],
+        'AI' => [
+            'chat', 'prompt-input', 'streaming-text', 'reasoning', 'tool-call', 'citation', 'terminal',
+        ],
+        'Feedback' => [
+            'alert', 'banner', 'empty', 'spinner', 'loading-overlay', 'top-progress', 'sonner', 'tooltip', 'hover-card', 'cookie-consent',
+        ],
+        'Overlays' => [
+            'dialog', 'alert-dialog', 'sheet', 'drawer', 'popover', 'dropdown-menu',
+            'context-menu', 'menubar', 'command', 'command-dialog', 'notification-center', 'onboarding-tour',
+        ],
+        'Navigation' => [
+            'breadcrumb', 'link', 'tabs', 'navigation-menu', 'pagination', 'stepper', 'scrollspy', 'bottom-navigation', 'dock', 'speed-dial', 'back-to-top', 'infinite-scroll',
+        ],
+        'Disclosure' => [
+            'accordion', 'collapsible',
+        ],
+        'E-commerce' => [
+            'product-card', 'price', 'variant-selector', 'add-to-cart', 'mini-cart',
+        ],
+        'Effects' => [
+            'gradient-text', 'number-ticker', 'border-beam', 'spotlight-card', 'tilt-card', 'flip-card', 'confetti', 'meteors', 'animated-beam', 'parallax', 'dot-pattern', 'grid-pattern', 'aurora',
+        ],
+        'Media' => [
+            'audio-player', 'video', 'image', 'gallery', 'qr-code', 'map',
+        ],
+    ],
+
+    // Merged/renamed components: old slug => the canonical component it folded into.
+    // Drives: redirects (/components/<old> → /components/<canonical>), search keywords
+    // (the canonical item carries the old names so a search for "autocomplete" returns
+    // combobox), and the deprecated flag that hides the old entry from search.
+    'deprecated' => [
+        'autocomplete' => 'combobox',
+        'autosize-textarea' => 'textarea',
+        'quantity-selector' => 'number-input',
+    ],
+
+    // Display-name overrides for slugs whose humanized form is wrong (acronyms, etc.).
+    'labels' => [
+        'input-otp' => 'Input OTP',
+        'datetime-picker' => 'Date & Time Picker',
+        'json-viewer' => 'JSON Viewer',
+        'qr-code' => 'QR Code',
+    ],
+
+    // Optional one-line descriptions shown on each component page.
+    'descriptions' => [
+        'button' => 'Displays a button or a component that looks like a button.',
+        'button-group' => 'Groups related buttons together with consistent styling.',
+        'copy-button' => 'A button that copies text to the clipboard, with a copied state and a live announcement.',
+        'input' => 'Displays a form input field or a component that looks like an input field.',
+        'input-group' => 'Group inputs with text, buttons, icons, and more.',
+        'input-mask' => 'A text input that formats its value against a mask as you type.',
+        'phone-input' => 'A phone number field with a searchable country-code selector.',
+        'input-otp' => 'Accessible one-time password component with copy-paste functionality.',
+        'textarea' => 'A form textarea that auto-grows to fit its content, with optional rows and a max-rows cap.',
+        'label' => 'Renders an accessible label associated with controls.',
+        'field' => 'Combine labels, controls, and help text to compose accessible form fields.',
+        'checkbox' => 'A control that allows the user to toggle between checked and not checked.',
+        'radio-group' => 'A set of checkable buttons where no more than one can be checked at a time.',
+        'switch' => 'A control that allows the user to toggle between an on and off state.',
+        'select' => 'Displays a list of options for the user to pick from, triggered by a button.',
+        'combobox' => 'A filterable picker over a list of options — button or inline-input trigger, single or multi-select.',
+        'autocomplete' => 'A text input that filters and suggests options as you type.',
+        'slider' => 'An input where the user selects a value — single, or a two-handle min–max range.',
+        'toggle' => 'A two-state button that can be either on or off.',
+        'toggle-group' => 'A set of two-state buttons that can be toggled on or off.',
+        'rating' => 'A star rating input with hover preview, keyboard support and a hidden field for forms.',
+        'calendar' => 'A date field component that allows users to enter and edit dates.',
+        'date-picker' => 'A date picker component with a calendar popover.',
+        'datetime-picker' => 'Pick a date and a time together — single or range — in one popover.',
+        'time-field' => 'A time input with native and dropdown variants, 12/24-hour and seconds.',
+        'number-input' => 'A numeric stepper with minus/plus buttons that clamp a value to an optional min, max and step.',
+        'tags-input' => 'A tag entry field — type and press Enter or comma to add removable chips, with form-array submission.',
+        'autosize-textarea' => 'A textarea that grows and shrinks to fit its content, with an optional max-rows cap.',
+        'file-upload' => 'A drag-and-drop dropzone with image thumbnails, file sizes and per-file progress bars.',
+        'color-picker' => 'Accessible colour selection with a hue slider, a validating hex field and a preset swatch palette.',
+        'password-strength' => 'A password field with a live strength meter and an optional requirements checklist.',
+        'editable' => 'Click-to-edit inline text that swaps the value for an input, saving on Enter or blur.',
+
+        'card' => 'Displays a card with header, content, and footer.',
+        'aspect-ratio' => 'Displays content within a desired ratio.',
+        'separator' => 'Visually or semantically separates content.',
+        'scroll-area' => 'Augments native scroll functionality for custom, cross-browser styling.',
+        'resizable' => 'Accessible resizable panel groups and layouts.',
+        'sidebar' => 'A composable, themeable and customizable sidebar component.',
+        'accent' => 'Recolors any subtree of BlatUI components from a single accent colour — no per-component props.',
+
+        'avatar' => 'An image element with a fallback for representing the user.',
+        'badge' => 'Displays a badge, with semantic status tones (success, warning, danger, info, neutral).',
+        'code-block' => 'A dark code panel with an optional filename header and a copy button.',
+        'data-table' => 'An interactive table with search, sortable columns, row selection and pagination.',
+        'server-table' => 'A server-rendered, Livewire-first data table with declarative row actions, server sorting, search, selection and pagination.',
+        'table' => 'A responsive table component.',
+        'comparison-table' => 'A data-driven feature comparison table — tiers × features with checks, dashes and values.',
+        'carousel' => 'A carousel with motion and swipe.',
+        'gallery' => 'A thumbnail grid that opens a full-screen lightbox with keyboard navigation.',
+        'video' => 'A styled HTML5 video player with a custom poster and play overlay.',
+        'chart' => 'Beautiful charts, built using ApexCharts.',
+        'icon' => 'A thin wrapper over Lucide icons that auto-mirrors directional arrows under RTL.',
+        'item' => 'A flexible component for displaying content with media, title, and actions.',
+        'kbd' => 'Used to display textual user input from the keyboard.',
+        'progress' => 'Displays an indicator showing the completion progress of a task — a linear bar or a circular ring.',
+        'countdown' => 'A live countdown to a target date — days, hours, minutes and seconds, with an expired state.',
+        'timeline' => 'A vertical timeline of events, with dots, connecting lines, icons and timestamps.',
+        'terminal' => 'A terminal / console window with traffic-light controls — for command output and code demos.',
+        'sparkline' => 'A tiny inline trend line drawn from a data array — for KPI cards, tables and stats.',
+        'skeleton' => 'Use to show a placeholder while content is loading.',
+
+        'alert' => 'Displays a callout for user attention, with semantic status tones.',
+        'banner' => 'A full-width, dismissible announcement bar with semantic tones.',
+        'marquee' => 'A seamless, infinite scroll of its content — logos, testimonials, badges.',
+        'typewriter' => 'Types and deletes a cycling list of words — for hero headlines and taglines.',
+        'text-reveal' => 'Brightens its words one by one as the element scrolls up through the viewport.',
+        'quote' => 'A styled blockquote / testimonial with optional author, role and avatar.',
+        'empty' => 'An empty state for when there is no data to display.',
+        'spinner' => 'An animated loading indicator.',
+        'sonner' => 'An opinionated toast notification component. Includes a sonner-flash bridge that turns Laravel session flashes into toasts.',
+        'tooltip' => 'A popup that displays information related to an element when hovered or focused.',
+        'hover-card' => 'For sighted users to preview content available behind a link.',
+
+        'dialog' => 'A window overlaid on the primary window, rendering the content underneath inert.',
+        'alert-dialog' => 'A modal dialog that interrupts the user with important content and expects a response.',
+        'sheet' => 'Extends the dialog to display content that complements the main content of the screen.',
+        'drawer' => 'A drawer component that slides in from the edge of the screen.',
+        'popover' => 'Displays rich content in a portal, triggered by a button.',
+        'dropdown-menu' => 'Displays a menu of actions or functions, triggered by a button.',
+        'context-menu' => 'Displays a menu located at the pointer, triggered by a right click.',
+        'menubar' => 'A visually persistent menu common in desktop applications.',
+        'command' => 'Fast, composable, command menu for your app.',
+        'command-dialog' => 'A command menu rendered inside a dialog.',
+
+        'breadcrumb' => 'Displays the path to the current resource using a hierarchy of links.',
+        'link' => 'An inline, prose-friendly text link with default, muted and subtle variants.',
+        'tabs' => 'A set of layered sections of content displayed one panel at a time.',
+        'navigation-menu' => 'A collection of links for navigating websites.',
+        'pagination' => 'Pagination with page navigation, next and previous links.',
+        'stepper' => 'Guides users through a multi-step flow — horizontal or vertical, with completed-step checks.',
+        'typography' => 'Prose text styles — headings, lead, blockquote, lists, inline code and more, via a single variant prop.',
+
+        'accordion' => 'A vertically stacked set of interactive headings that each reveal a section of content.',
+        'collapsible' => 'An interactive component which expands and collapses a panel.',
+
+        'description-list' => 'A semantic key/value list (term/description) — horizontal or vertical, with an optional bordered style.',
+        'stat' => 'A KPI metric card with a label, big value, trend arrow with change, optional icon and inline sparkline.',
+        'tree' => 'A collapsible, keyboard-navigable hierarchical tree view with folder and file icons.',
+        'json-viewer' => 'A collapsible, syntax-highlighted JSON tree with per-node expand/collapse and copy.',
+        'chat' => 'A composable chat transcript — role-aware message bubbles with avatars, names, timestamps and a typing indicator.',
+        'prompt-input' => 'An AI chat composer with an auto-growing textarea, attach and send buttons, and ⌘↵ to send.',
+        'streaming-text' => 'Reveals a passage token-by-token, LLM-style, with a blinking caret that stops when complete.',
+        'reasoning' => 'A collapsible AI reasoning / "thinking" block that reveals the chain-of-thought behind an answer.',
+        'tool-call' => 'A card showing an AI tool invocation — name, status, and collapsible JSON arguments and result.',
+        'citation' => 'An inline, LLM-style source reference that reveals the source title, link and snippet in a popover.',
+
+        'gradient-text' => 'Text painted with a gradient fill, with optional animated shimmer and colour presets.',
+        'number-ticker' => 'A number that animates counting up to its target when it scrolls into view.',
+        'border-beam' => 'A container with a light beam continuously travelling around its border.',
+        'spotlight-card' => 'A card with a soft radial spotlight that follows the cursor on hover.',
+        'tilt-card' => 'A card that tilts in 3D toward the cursor, with an optional glare highlight.',
+        'flip-card' => 'A card that flips on hover or click to reveal a back face.',
+        'confetti' => 'A celebratory confetti burst fired from a button or any trigger.',
+        'dot-pattern' => 'A decorative dotted-grid background layer with adjustable size, gap and edge fade.',
+        'grid-pattern' => 'A decorative grid / graph-paper background layer with an optional edge fade.',
+        'aurora' => 'An animated northern-lights gradient backdrop with your content overlaid.',
+
+        'container' => 'A centered, max-width content wrapper with responsive padding and selectable widths.',
+        'stack' => 'A flexbox layout primitive for vertical or horizontal stacking with gap and alignment.',
+        'bento-grid' => 'A modern bento grid for arranging cards of varying column and row spans.',
+        'page-header' => 'A page title block with a description and optional breadcrumb and action slots.',
+        'visually-hidden' => 'Hide content visually while keeping it available to screen readers, with an optional skip-link mode.',
+        'scrollspy' => 'A table-of-contents nav that highlights the section currently in view.',
+        'bottom-navigation' => 'A mobile bottom tab bar with icons, labels, an active state and badges.',
+        'dock' => 'A macOS-style dock whose icons magnify as the cursor passes over them.',
+        'speed-dial' => 'A floating action button that expands to reveal labelled actions.',
+        'back-to-top' => 'A floating button that appears after scrolling and smoothly returns to the top.',
+
+        'avatar-group' => 'Overlapping stacked avatars with an overflow "+N" count.',
+        'meter' => 'A labelled measurement bar for a value within a range (usage, score, capacity), with status tones.',
+        'heatmap' => 'A GitHub-style contributions heatmap of colour-graded daily counts.',
+        'comparison-slider' => 'A draggable before/after image comparison with a keyboard-operable divider.',
+        'masonry' => 'A Pinterest-style masonry grid built on native CSS columns.',
+        'diff-viewer' => 'A line-based text diff with inline or side-by-side views and add/remove tinting.',
+        'kanban' => 'A drag-and-drop board of columns whose cards can be moved between them.',
+        'tree-table' => 'A table whose rows expand to reveal nested child rows.',
+
+        'product-card' => 'An e-commerce product card with image, badge, rating, price and an add-to-cart action.',
+        'price' => 'A formatted product price with optional struck-through compare-at and a discount badge.',
+        'variant-selector' => 'Choose a product variant — size pills or colour swatches — from an accessible radio group.',
+        'add-to-cart' => 'A stateful add-to-cart button that animates idle → adding → added.',
+        'mini-cart' => 'A cart dropdown with line items, quantity steppers, a live subtotal and checkout.',
+        'cookie-consent' => 'A GDPR cookie banner with accept / reject / customize, persisted to localStorage.',
+        'top-progress' => 'An NProgress-style top loading bar with start / set / done controls for navigation.',
+        'loading-overlay' => 'A veil with a spinner shown over its content while busy.',
+        'notification-center' => 'A bell with an unread-count badge that opens an inbox of notifications.',
+
+        'segmented-control' => 'An iOS-style segmented control for picking one option from a small set.',
+        'knob' => 'A rotary dial input — drag, scroll or use the keyboard to set a value.',
+        'signature-pad' => 'Draw a signature on a canvas and capture it as a data URL, with clear and undo.',
+        'rich-text-editor' => 'A lightweight, dependency-free WYSIWYG editor with a formatting toolbar.',
+        'markdown-editor' => 'A Markdown textarea with a live preview, formatting toolbar and Write/Preview tabs.',
+        'mention-input' => 'A textarea that surfaces a suggestion list when you type @ to insert a mention.',
+        'repeater' => 'Addable / removable field rows (a form field-array) that submit as an array.',
+        'presence' => 'An online / away / busy / offline status dot, optionally pinned to an avatar.',
+        'onboarding-tour' => 'A guided product tour that spotlights elements step by step.',
+        'infinite-scroll' => 'Loads more content when a sentinel scrolls into view, with a load-more fallback.',
+
+        'audio-player' => 'A custom audio player — play/pause, seek, time and volume — over a native HTML5 audio element.',
+        'image' => 'A smart image with a skeleton, blur-up fade-in and a graceful error fallback.',
+        'qr-code' => 'A client-side QR code generator rendered as a crisp, theme-aware SVG — no dependencies.',
+        'map' => 'A keyless OpenStreetMap embed that drops a pin at any latitude / longitude.',
+        'org-chart' => 'A top-down organisational chart with connector lines, rendered from a tree.',
+        'gantt' => 'A project timeline (Gantt) chart with task bars positioned by date and progress.',
+        'scheduler' => 'A week / day agenda that positions events in time slots.',
+        'meteors' => 'Animated falling meteor streaks behind your content.',
+        'animated-beam' => 'An SVG line with a travelling light gradient connecting two elements.',
+        'parallax' => 'Translates its content as it scrolls for a depth effect.',
+    ],
+
+    // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).
+    'notes' => [
+        'number-input' => [
+            'Building a cart or product <strong>quantity stepper</strong>? Use <code>number-input</code> with <code>:min="1"</code> and a compact <code>size="sm"</code> — see the <em>Quantity selector</em> example below. (A separate <code>quantity-selector</code> component was removed in favour of this; it was the same control with different defaults.)',
+        ],
+        'button' => [
+            'Buttons default to <strong><code>type="button"</code></strong> — a deliberate default. Inside a <code>&lt;form&gt;</code>, set <code>type="submit"</code> on the submit button, or a native button migrated with no <code>type</code> will silently <strong>stop submitting</strong>. Run <code>php artisan blatui:doctor</code> to catch typeless buttons in forms.',
+        ],
+        'dropdown-menu' => [
+            'A <code>dropdown-menu-item</code> renders <strong><code>type="button"</code></strong> by default. To submit the surrounding form from a menu item, pass <code>type="submit"</code> (or <code>href</code> to navigate).',
+        ],
+        'field' => [
+            'Building a custom DX layer that re-wraps a slot with an <code>@aware</code> anonymous component? <code>&lt;x-ui.*&gt;</code> passed as that slot\'s content stays <strong>literal</strong> (it never compiles) — the field is silently absent though the page still returns 200. In such layers, render raw elements styled by the foundation utilities (<code>.blat-input .blat-select .blat-checkbox .blat-radio</code>) instead.',
+        ],
+    ],
+
+    // Per-component Livewire usage, rendered as a "Using with Livewire" section on each
+    // component page. The examples above already show the frontend (Blade/Alpine) usage; this
+    // adds the wire:model binding + the matching Livewire property. Keyed by component slug.
+    //   decl => the public property on the Livewire component
+    //   tag  => the Blade markup that binds it (shown as literal code)
+    //   note => optional caption rendered under the code
+    'livewire' => [
+        'input'             => ['decl' => 'public string $email = \'\';', 'tag' => '<x-ui.input type="email" wire:model="email" placeholder="m@example.com" />'],
+        'textarea'          => ['decl' => 'public string $bio = \'\';', 'tag' => '<x-ui.textarea wire:model="bio" placeholder="About you" />'],
+        'select'            => ['decl' => 'public string $plan = \'pro\';', 'tag' => '<x-ui.select wire:model="plan" :options="[\'free\' => \'Free\', \'pro\' => \'Pro\']" />'],
+        'combobox'          => ['decl' => 'public string $framework = \'\';', 'tag' => '<x-ui.combobox wire:model="framework" :options="[\'laravel\' => \'Laravel\', \'rails\' => \'Rails\']" />'],
+        'autocomplete'      => ['decl' => 'public string $country = \'\';', 'tag' => '<x-ui.autocomplete wire:model="country" :options="[\'ma\' => \'Morocco\', \'be\' => \'Belgium\']" />'],
+        'checkbox'          => ['decl' => 'public bool $accept = false;', 'tag' => '<x-ui.checkbox wire:model="accept" />'],
+        'radio-group'       => ['decl' => 'public string $plan = \'pro\';', 'tag' => '<x-ui.radio-group wire:model="plan">
+    <x-ui.radio-group-item value="free" /> Free
+    <x-ui.radio-group-item value="pro" /> Pro
+</x-ui.radio-group>'],
+        'switch'            => ['decl' => 'public bool $notify = true;', 'tag' => '<x-ui.switch wire:model="notify" />'],
+        'toggle'            => ['decl' => 'public bool $bold = false;', 'tag' => '<x-ui.toggle wire:model="bold">B</x-ui.toggle>'],
+        'toggle-group'      => ['decl' => 'public array $tools = [];', 'tag' => '<x-ui.toggle-group type="multiple" wire:model="tools">
+    <x-ui.toggle-group-item value="bold">B</x-ui.toggle-group-item>
+    <x-ui.toggle-group-item value="italic">I</x-ui.toggle-group-item>
+</x-ui.toggle-group>'],
+        'segmented-control' => ['decl' => 'public string $view = \'list\';', 'tag' => '<x-ui.segmented-control wire:model="view" :options="[\'list\' => \'List\', \'grid\' => \'Grid\']" />'],
+        'slider'            => ['decl' => 'public int $volume = 30;', 'tag' => '<x-ui.slider wire:model="volume" />', 'note' => 'Single value in default mode; range mode submits via name[min]/name[max].'],
+        'rating'            => ['decl' => 'public int $score = 0;', 'tag' => '<x-ui.rating wire:model="score" />'],
+        'knob'              => ['decl' => 'public int $level = 50;', 'tag' => '<x-ui.knob wire:model="level" />'],
+        'number-input'      => ['decl' => 'public int $qty = 1;', 'tag' => '<x-ui.number-input wire:model="qty" :min="1" />'],
+        'color-picker'      => ['decl' => 'public string $color = \'#6366f1\';', 'tag' => '<x-ui.color-picker wire:model="color" />'],
+        'date-picker'       => ['decl' => 'public ?string $date = null;', 'tag' => '<x-ui.date-picker wire:model="date" />', 'note' => 'Single date in default mode; range mode submits via name[from]/name[to].'],
+        'datetime-picker'   => ['decl' => 'public ?string $startsAt = null;', 'tag' => '<x-ui.datetime-picker wire:model="startsAt" />'],
+        'time-field'        => ['decl' => 'public ?string $time = null;', 'tag' => '<x-ui.time-field wire:model="time" />'],
+        'input-otp'         => ['decl' => 'public string $code = \'\';', 'tag' => '<x-ui.input-otp wire:model="code" />'],
+        'tags-input'        => ['decl' => 'public array $tags = [];', 'tag' => '<x-ui.tags-input wire:model="tags" />'],
+        'phone-input'       => ['decl' => 'public string $phone = \'\';', 'tag' => '<x-ui.phone-input wire:model="phone" />'],
+        'input-mask'        => ['decl' => 'public string $card = \'\';', 'tag' => '<x-ui.input-mask mask="9999 9999 9999 9999" wire:model="card" />'],
+        'editable'          => ['decl' => 'public string $title = \'Untitled\';', 'tag' => '<x-ui.editable wire:model="title" />'],
+        'mention-input'     => ['decl' => 'public string $message = \'\';', 'tag' => '<x-ui.mention-input wire:model="message" :mentions="[\'sam\', \'alex\']" />'],
+        'markdown-editor'   => ['decl' => 'public string $content = \'\';', 'tag' => '<x-ui.markdown-editor wire:model="content" />'],
+        'rich-text-editor'  => ['decl' => 'public string $body = \'\';', 'tag' => '<x-ui.rich-text-editor wire:model="body" />'],
+        'signature-pad'     => ['decl' => 'public ?string $signature = null;', 'tag' => '<x-ui.signature-pad wire:model="signature" />'],
+        'file-upload'       => ['decl' => 'public $avatar;', 'tag' => '<x-ui.file-upload wire:model="avatar" accept="image/*" />', 'note' => 'Add the Livewire\\WithFileUploads trait to the component for temporary uploads.'],
+        'server-table'      => [
+            'decl' => <<<'DECL'
+use \Livewire\WithPagination;
+
+    public ?string $search = null;
+
+    public string $sort = 'name';
+
+    public string $direction = 'asc';
+
+    public array $selected = [];
+
+    #[\Livewire\Attributes\Computed]
+    public function users()
+    {
+        return \App\Models\User::query()
+            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
+            ->orderBy($this->sort, $this->direction)
+            ->paginate(10);
+    }
+
+    public function sortBy(string $key): void
+    {
+        $this->direction = $this->sort === $key && $this->direction === 'asc' ? 'desc' : 'asc';
+        $this->sort = $key;
+        $this->resetPage();
+    }
+
+    public function delete(int $id): void
+    {
+        \App\Models\User::findOrFail($id)->delete();
+    }
+DECL,
+            'tag' => <<<'TAG'
+<x-ui.server-table
+    :rows="$this->users"
+    row-key="id"
+    searchable
+    search-model="search"
+    :sort="$sort"
+    :direction="$direction"
+    sort-method="sortBy"
+    selectable
+    select-model="selected"
+    :columns="[
+        ['key' => 'name', 'label' => 'Name', 'sortable' => true],
+        ['key' => 'email', 'label' => 'Email', 'sortable' => true],
+        ['key' => 'role', 'label' => 'Role'],
+    ]"
+    :actions="[
+        ['label' => 'Edit', 'icon' => 'pencil', 'method' => 'edit'],
+        ['label' => 'Delete', 'icon' => 'trash-2', 'method' => 'delete', 'color' => 'var(--destructive)', 'confirm' => 'Delete this user?'],
+    ]"
+/>
+TAG,
+            'note' => 'Rows render server-side, so wire:click actions carry the real primary key and sorting/search/pagination run in your query — not client-side.',
+        ],
+    ],
+];
