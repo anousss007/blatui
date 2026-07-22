@@ -1,3 +1,8 @@
+> ## 📦 This repository has moved
+> BlatUI is now developed in the monorepo at **[anousss007/blatui-workspace](https://github.com/anousss007/blatui-workspace)**. This repo is **archived** (read-only); its full history now lives under `apps/demo/` there. The Composer package `anousss007/blatui` is unchanged — `composer require anousss007/blatui` works exactly as before.
+
+---
+
 <div align="center">
 
 # BlatUI
