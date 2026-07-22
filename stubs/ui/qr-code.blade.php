@@ -486,7 +486,10 @@
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-label="{{ $label }}"
-        :viewBox="viewBox"
+        {{-- SVG's viewBox is case-sensitive; Alpine's `:viewBox` bind is lowercased to
+             `viewbox` by the HTML parser and silently ignored. Set it from JS (setAttribute
+             preserves case) so the code scales to `size` instead of rendering at 1px/module. --}}
+        x-effect="$el.setAttribute('viewBox', viewBox)"
         width="{{ (int) $size }}"
         height="{{ (int) $size }}"
         class="block h-full w-full"

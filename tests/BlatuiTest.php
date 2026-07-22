@@ -74,6 +74,18 @@ class BlatuiTest extends TestCase
         );
     }
 
+    public function test_qr_code_sets_viewbox_with_correct_case(): void
+    {
+        // SVG's `viewBox` is case-sensitive. An Alpine `:viewBox` bind is lowercased to
+        // `viewbox` by the HTML parser and silently ignored, so the code never scales to
+        // `size` (it renders at 1px per module). Guard against that regression: the stub
+        // must set the attribute imperatively (setAttribute preserves case), not via bind.
+        $stub = file_get_contents(dirname(__DIR__).'/stubs/ui/qr-code.blade.php');
+
+        $this->assertStringContainsString("setAttribute('viewBox'", $stub);
+        $this->assertStringNotContainsString(':viewBox=', $stub);
+    }
+
     public function test_doctor_flags_typeless_button_in_form(): void
     {
         $dir = sys_get_temp_dir().'/blatui-doctor-'.uniqid();
