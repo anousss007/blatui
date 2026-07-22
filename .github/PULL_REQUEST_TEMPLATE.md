@@ -1,12 +1,16 @@
-<!-- Thanks for contributing to BlatUI! -->
+<!--
+  ⚠️ This is the read-only DISTRIBUTION repo for the `anousss007/blatui` Composer package.
+  Its contents are generated and published from the development monorepo. PRs opened here
+  cannot be merged and will be closed.
 
-## What does this PR do?
+  Please open your pull request on the monorepo instead:
+      https://github.com/anousss007/blatui-workspace
 
-<!-- Brief description. Reference any issue: "Closes #123". -->
+  (Installation is unchanged — `composer require anousss007/blatui`.)
+-->
 
-## Checklist
+## ⚠️ Wrong repository
 
-- [ ] `vendor/bin/pint` passes (code style)
-- [ ] `vendor/bin/phpunit` passes (tests)
-- [ ] Added/updated a test when behaviour changed
-- [ ] Component changes were made in the [demo repo](https://github.com/anousss007/blatui-demo), not in `stubs/`
+This repo is the published distribution of the `anousss007/blatui` package. BlatUI is developed
+in the monorepo — **please open your PR at https://github.com/anousss007/blatui-workspace** and
+close this one. Thanks! 🙏

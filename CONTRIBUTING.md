@@ -1,45 +1,22 @@
 # Contributing to BlatUI
 
-Thanks for your interest in improving BlatUI! 🎉
+> ⚠️ **This repository is the published distribution of the package** (Packagist reads it as
+> `anousss007/blatui`; installation is unchanged). Its contents are **published from the
+> development monorepo** at **https://github.com/anousss007/blatui-workspace**. **Do not open PRs
+> or issues here** — they will be closed. Contribute at the workspace instead.
 
-## Project layout
+## Where to work (in the monorepo)
 
-This repository is the **`anousss007/blatui` Composer package** — the CLI that copies
-components into a user's project. It contains:
-
-- `src/` — the service provider, registry and `blatui:*` Artisan commands
-- `stubs/ui/` — the component Blade files shipped to consumers (generated from the
-  [demo repo](https://github.com/anousss007/blatui-demo); **don't hand-edit here**)
-- `stubs/registry.json` — the component manifest (families, dependencies, packages)
-  that `src/Registry.php` reads; **generated, never hand-edited**
-- `stubs/foundations/` — the theme CSS + Alpine/chart/calendar JS
-- `tests/` — Testbench-based tests
-
-> The **components themselves** live in the demo repo and are synced here via a
-> build script. Fix component bugs there, not in `stubs/`. The demo generates
-> `registry.json` with `php artisan blatui:registry:build`, and
-> `scripts/sync-package.sh` (in the demo) copies the stubs + manifest into this
-> package in one step — so `stubs/ui/` and `stubs/registry.json` always match.
-
-## Local setup
-
-```bash
-composer install
-vendor/bin/phpunit      # run the tests
-vendor/bin/pint         # auto-format (vendor/bin/pint --test to check only)
-```
-
-## Pull requests
-
-1. Fork & branch from `main`.
-2. Keep changes focused; add a test when you change behaviour.
-3. Run `vendor/bin/pint` and `vendor/bin/phpunit` — CI runs both on PHP 8.2–8.4.
-4. Describe the change clearly. Reference any related issue.
+- **Components** are authored in `apps/demo/resources/views/components/ui/` (the demo is the
+  only place they render). `packages/blatui/stubs/` is generated from there.
+- **The CLI** (service provider, registry, `blatui:*` commands, MCP) lives in `packages/blatui/src/`.
+- See the workspace's [`CONTRIBUTING.md`](https://github.com/anousss007/blatui-workspace/blob/main/CONTRIBUTING.md)
+  for the full edit-map and the build/test loop.
 
 ## Reporting bugs
 
-Open an issue with: BlatUI version, Laravel/PHP version, the command you ran, and
-what happened vs. what you expected.
+Open an issue on the **workspace**: https://github.com/anousss007/blatui-workspace/issues — include the
+BlatUI version, Laravel/PHP version, the command you ran, and what happened vs. what you expected.
 
 ## Code of conduct
 

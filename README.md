@@ -17,6 +17,12 @@ A CLI that copies open-source, copy-paste UI components **you own** straight int
 
 </div>
 
+> 📦 **This is the distribution repo** for the `anousss007/blatui` Composer package (what
+> Packagist reads — installation is unchanged: `composer require anousss007/blatui`). Its
+> `stubs/`, `src/` and tests are **published here from the development monorepo** at
+> **[anousss007/blatui-workspace](https://github.com/anousss007/blatui-workspace)**. Open issues
+> and PRs on the workspace, not here.
+
 ---
 
 ## Why BlatUI
