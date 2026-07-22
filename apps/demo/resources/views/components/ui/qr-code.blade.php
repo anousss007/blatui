@@ -486,7 +486,11 @@
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-label="{{ $label }}"
-        :viewBox="viewBox"
+        {{-- SVG's `viewBox` is case-sensitive, but the HTML parser lowercases a plain
+             `:viewBox` bind to `viewbox`, which the browser silently ignores (the code
+             then renders at 1px/module instead of scaling to `size`). Alpine's `.camel`
+             modifier restores the correct casing. --}}
+        :view-box.camel="viewBox"
         width="{{ (int) $size }}"
         height="{{ (int) $size }}"
         class="block h-full w-full"
