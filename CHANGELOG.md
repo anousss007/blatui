@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.18.0] - 2026-07-28
+
+### Added
+- **Localisable registry labels.** Components that previously hardcoded English UI text now route
+  it through `__()` with an override prop (falling back to the translation key). `pagination-previous`
+  / `pagination-next` gained `label` + `aria-label`; `sidebar-trigger` gained `label`; `calendar`
+  gained `prev-month-label` / `next-month-label`. Existing usage is unchanged (English defaults).
+
+### Changed
+- **RTL: registry migrated to logical properties.** ~30 `ui/` components moved from physical
+  direction utilities to logical ones (`pl/pr→ps/pe`, `ml/mr→ms/me`, `left-/right-→start-/end-`,
+  `border-l/r→border-s/e`, `rounded-l/r→rounded-s/e`, `text-left/right→text-start/end`), with
+  `rtl:rotate-180` on directional chevrons. Indentation, check/radio indicators, sub-menu chevrons,
+  sidebar affordances and table sticky-action columns now flip correctly under `dir="rtl"`.
+  Genuinely physical mechanics (carousel scroll gutter, symmetric slider handle, LTR diff gutter)
+  and explicit side/position-prop APIs (sheet/drawer/sidebar `side`, dialog/sonner `position`) are
+  intentionally left physical.
+
+### Fixed
+- **`calendar` selection not always repainting.** A programmatic `calendar:set` updated state
+  reliably, but the day's `data-selected` highlight only appeared after some month navigations —
+  the grid's `x-for` used positional keys, so navigated cells were reused and their selection
+  bindings went stale. The month/week/day loops are now keyed by date (`fmt(m)` / `fmt(week[0])` /
+  `fmt(day)`), so a navigation mounts fresh cells that re-evaluate the selection deterministically.
+
 ## [1.17.1] - 2026-07-22
 
 ### Fixed

@@ -21,7 +21,7 @@
         @elseif ($items->count() === 1)
             {{ $items->first() }}
         @else
-            <ul class="ml-4 flex list-disc flex-col gap-1">
+            <ul class="ms-4 flex list-disc flex-col gap-1">
                 @foreach ($items as $message)
                     <li>{{ $message }}</li>
                 @endforeach

@@ -24,9 +24,14 @@
     'minDate' => null,   // out-of-range date bound (Y-m-d)
     'maxDate' => null,
     'outOfRange' => 'disable',  // 'disable' (prevent selection) | 'flag' (allow + show red)
+    'prevMonthLabel' => null,   // nav accessible name; defaults via __() below (no hardcoded English)
+    'nextMonthLabel' => null,
 ])
 
 @php
+    // i18n-safe defaults: these are translation keys, localise them in your lang files.
+    $prevMonthLabel ??= __('Go to the previous month');
+    $nextMonthLabel ??= __('Go to the next month');
     // weekStart accepts 0–6 (0 = Sunday) OR a day name ("sunday", "monday", …).
     $weekStartNum = is_numeric($weekStart)
         ? (((int) $weekStart % 7) + 7) % 7
@@ -71,8 +76,8 @@
         // outOfRange="flag": selectable but flagged red (overridden by the selected/range styles below).
         'data-[out-of-range]:text-destructive data-[out-of-range]:hover:bg-destructive/10 data-[out-of-range]:hover:text-destructive',
         'data-[selected]:bg-primary data-[selected]:text-primary-foreground data-[selected]:hover:bg-primary data-[selected]:hover:text-primary-foreground',
-        'data-[range-start]:bg-primary data-[range-start]:text-primary-foreground data-[range-start]:rounded-r-none',
-        'data-[range-end]:bg-primary data-[range-end]:text-primary-foreground data-[range-end]:rounded-l-none',
+        'data-[range-start]:bg-primary data-[range-start]:text-primary-foreground data-[range-start]:rounded-e-none',
+        'data-[range-end]:bg-primary data-[range-end]:text-primary-foreground data-[range-end]:rounded-s-none',
         'data-[range-middle]:bg-accent data-[range-middle]:text-accent-foreground data-[range-middle]:rounded-none',
     ]);
 @endphp
@@ -97,19 +102,19 @@
 
     <div class="relative flex flex-col gap-4 md:flex-row">
         {{-- Navigation --}}
-        <button type="button" @click="prev()" :aria-disabled="!canPrev" aria-label="Go to the previous month" class="{{ $navBtn }} absolute left-0 top-0 z-10">
-            <x-lucide-chevron-left class="size-4" aria-hidden="true" />
-            <span class="sr-only">Previous month</span>
+        <button type="button" @click="prev()" :aria-disabled="!canPrev" aria-label="{{ $prevMonthLabel }}" class="{{ $navBtn }} absolute start-0 top-0 z-10">
+            <x-lucide-chevron-left class="size-4 rtl:rotate-180" aria-hidden="true" />
+            <span class="sr-only">{{ $prevMonthLabel }}</span>
         </button>
-        <button type="button" @click="next()" :aria-disabled="!canNext" aria-label="Go to the next month" class="{{ $navBtn }} absolute right-0 top-0 z-10">
-            <x-lucide-chevron-right class="size-4" aria-hidden="true" />
-            <span class="sr-only">Next month</span>
+        <button type="button" @click="next()" :aria-disabled="!canNext" aria-label="{{ $nextMonthLabel }}" class="{{ $navBtn }} absolute end-0 top-0 z-10">
+            <x-lucide-chevron-right class="size-4 rtl:rotate-180" aria-hidden="true" />
+            <span class="sr-only">{{ $nextMonthLabel }}</span>
         </button>
 
         {{-- Announce the visible month(s) to assistive tech on navigation --}}
         <span role="status" aria-live="polite" class="sr-only" x-text="months.map(m => monthLabel(m)).join(', ')"></span>
 
-        <template x-for="(m, mi) in months" :key="mi">
+        <template x-for="(m, mi) in months" :key="fmt(m)">
             <div class="flex w-full flex-col gap-4">
                 {{-- Caption --}}
                 <div class="flex h-(--cell-size) items-center justify-center">
@@ -151,12 +156,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="(week, wi) in weeksFor(m)" :key="wi">
+                        <template x-for="(week, wi) in weeksFor(m)" :key="fmt(week[0])">
                             <tr class="mt-1 flex w-full">
                                 @if ($showWeekNumber)
                                     <td class="text-muted-foreground flex size-(--cell-size) items-center justify-center text-[0.8rem]" x-text="weekNumber(week)"></td>
                                 @endif
-                                <template x-for="(day, di) in week" :key="di">
+                                <template x-for="(day, di) in week" :key="fmt(day)">
                                     <td role="gridcell" :aria-selected="isSelected(day)" class="relative flex-1 p-0 text-center">
                                         <button
                                             type="button"

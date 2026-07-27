@@ -59,9 +59,9 @@
     $markdown = $copyable ? $buildMarkdown($rows, '', $buildMarkdown, true) : '';
 
     $alignClass = fn ($align) => match ($align) {
-        'right' => 'text-right',
+        'right' => 'text-end',
         'center' => 'text-center',
-        default => 'text-left',
+        default => 'text-start',
     };
 @endphp
 

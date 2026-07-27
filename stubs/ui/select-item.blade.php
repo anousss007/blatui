@@ -23,11 +23,11 @@
     x-init="seedSelected(@js((string) $value), $el.querySelector('[data-slot=select-item-label]').textContent.trim())"
     :aria-selected="isSelected(@js((string) $value))"
     :data-state="isSelected(@js((string) $value)) ? 'checked' : 'unchecked'"
-    {{ $attributes->twMerge("hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4") }}
+    {{ $attributes->twMerge("hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pe-8 ps-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4") }}
 >
     @switch($indicator)
         @case('checkbox')
-            <span class="absolute right-2 flex items-center justify-center">
+            <span class="absolute end-2 flex items-center justify-center">
                 <span class="border-input flex size-4 items-center justify-center rounded-[4px] border transition-colors" :class="isSelected({!! $jsVal !!}) && 'bg-primary border-primary text-primary-foreground'">
                     <x-lucide-check class="size-3" x-bind:class="isSelected({!! $jsVal !!}) ? 'opacity-100' : 'opacity-0'" aria-hidden="true" />
                 </span>
@@ -35,7 +35,7 @@
             @break
 
         @case('radio')
-            <span class="absolute right-2 flex items-center justify-center">
+            <span class="absolute end-2 flex items-center justify-center">
                 <span class="border-input flex size-4 items-center justify-center rounded-full border transition-colors" :class="isSelected({!! $jsVal !!}) && 'border-primary'">
                     <span class="bg-primary size-2 rounded-full transition-opacity" :class="isSelected({!! $jsVal !!}) ? 'opacity-100' : 'opacity-0'"></span>
                 </span>
@@ -43,7 +43,7 @@
             @break
 
         @default
-            <span class="absolute right-2 flex size-3.5 items-center justify-center">
+            <span class="absolute end-2 flex size-3.5 items-center justify-center">
                 <x-lucide-check class="size-4" x-show="isSelected({!! $jsVal !!})" x-cloak aria-hidden="true" />
             </span>
     @endswitch

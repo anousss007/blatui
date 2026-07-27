@@ -99,7 +99,7 @@
             <x-lucide-play x-show="!playing" x-cloak class="size-4 fill-current" aria-hidden="true" />
         </button>
 
-        <span data-slot="audio-player-time" class="text-muted-foreground w-10 text-right text-xs tabular-nums" x-text="fmt(currentTime)">0:00</span>
+        <span data-slot="audio-player-time" class="text-muted-foreground w-10 text-end text-xs tabular-nums" x-text="fmt(currentTime)">0:00</span>
 
         <input
             type="range"

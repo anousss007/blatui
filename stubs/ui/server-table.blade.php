@@ -57,8 +57,8 @@
 
     $alignClass = fn (string $a) => match ($a) {
         'center' => 'text-center',
-        'right', 'end' => 'text-right',
-        default => 'text-left',
+        'right', 'end' => 'text-end',
+        default => 'text-start',
     };
 
     // Build the wire:click argument list for an action on a given row. Numeric keys stay bare
@@ -120,13 +120,13 @@
         wire:loading.class.delay="opacity-60">
         <table data-slot="table" class="w-full caption-bottom text-sm {{ $stack ? 'max-md:block' : '' }}">
             @if ($caption)
-                <caption class="{{ $captionVisible ? 'text-muted-foreground p-2 text-left text-sm' : 'sr-only' }}">{{ $caption }}</caption>
+                <caption class="{{ $captionVisible ? 'text-muted-foreground p-2 text-start text-sm' : 'sr-only' }}">{{ $caption }}</caption>
             @endif
 
             <thead data-slot="table-header" class="[&_tr]:border-b {{ $stack ? 'max-md:sr-only' : '' }}">
                 <tr class="hover:bg-muted/50 border-b transition-colors">
                     @if ($selectable)
-                        <th scope="col" class="h-10 w-10 px-2 text-left align-middle">
+                        <th scope="col" class="h-10 w-10 px-2 text-start align-middle">
                             <span class="sr-only">Select</span>
                             <input type="checkbox" aria-label="Select all rows on this page"
                                 @change="toggleAll($event.target.checked)"
@@ -141,7 +141,7 @@
                             class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap {{ $alignClass($col['align']) }} {{ $col['class'] }}">
                             @if ($col['sortable'])
                                 <button type="button" wire:click="{{ $sortMethod }}('{{ $col['key'] }}')"
-                                    class="hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 -ml-2 inline-flex items-center gap-1 rounded-md px-2 py-1 transition-colors outline-none focus-visible:ring-[3px] {{ $col['align'] === 'right' ? 'flex-row-reverse' : '' }}">
+                                    class="hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 -ms-2 inline-flex items-center gap-1 rounded-md px-2 py-1 transition-colors outline-none focus-visible:ring-[3px] {{ $col['align'] === 'right' ? 'flex-row-reverse' : '' }}">
                                     {{ $col['label'] }}
                                     <span class="text-muted-foreground inline-flex" aria-hidden="true">
                                         @if ($sort === $col['key'])
@@ -159,8 +159,8 @@
 
                     @if ($hasActions)
                         <th scope="col" @class([
-                            'text-foreground bg-background h-10 px-2 text-right align-middle font-medium whitespace-nowrap',
-                            'sticky right-0 border-l' => $stickyActions,
+                            'text-foreground bg-background h-10 px-2 text-end align-middle font-medium whitespace-nowrap',
+                            'sticky end-0 border-s' => $stickyActions,
                         ])>
                             <span class="sr-only">{{ $actionsLabel }}</span>
                         </th>
@@ -188,7 +188,7 @@
                                 'p-2 align-middle whitespace-nowrap',
                                 $alignClass($col['align']),
                                 $col['class'],
-                                'max-md:flex max-md:items-center max-md:justify-between max-md:gap-4 max-md:whitespace-normal max-md:text-right' => $stack,
+                                'max-md:flex max-md:items-center max-md:justify-between max-md:gap-4 max-md:whitespace-normal max-md:text-end' => $stack,
                             ])>
                                 @if ($stack)
                                     <span class="text-muted-foreground font-medium md:hidden" aria-hidden="true">{{ $col['label'] }}</span>
@@ -204,7 +204,7 @@
                         @if ($hasActions)
                             <td @class([
                                 'bg-background p-2 align-middle whitespace-nowrap',
-                                'sticky right-0 border-l' => $stickyActions,
+                                'sticky end-0 border-s' => $stickyActions,
                                 'max-md:flex max-md:justify-end max-md:border-t max-md:pt-3' => $stack,
                             ])>
                                 @if ($actionsView)

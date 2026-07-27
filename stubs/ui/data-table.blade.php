@@ -83,7 +83,7 @@
             <thead data-slot="table-header" class="[&_tr]:border-b">
                 <tr class="hover:bg-muted/50 border-b transition-colors">
                     @if ($selectable)
-                        <th scope="col" class="h-10 w-10 px-2 text-left align-middle">
+                        <th scope="col" class="h-10 w-10 px-2 text-start align-middle">
                             <span class="sr-only">Select</span>
                             <button type="button" role="checkbox" aria-label="Select all rows" @click="toggleAll()" :aria-checked="allPageSelected" :data-state="allPageSelected ? 'checked' : 'unchecked'"
                                 class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]">
@@ -93,9 +93,9 @@
                     @endif
                     @foreach ($cols as $col)
                         <th scope="col" @if ($col['sortable']) :aria-sort="sortKey === '{{ $col['key'] }}' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" @endif
-                            class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap {{ $col['class'] }}">
+                            class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap {{ $col['class'] }}">
                             @if ($col['sortable'])
-                                <button type="button" @click="toggleSort('{{ $col['key'] }}')" class="hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 -ml-2 inline-flex items-center gap-1 rounded-md px-2 py-1 transition-colors outline-none focus-visible:ring-[3px]">
+                                <button type="button" @click="toggleSort('{{ $col['key'] }}')" class="hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 -ms-2 inline-flex items-center gap-1 rounded-md px-2 py-1 transition-colors outline-none focus-visible:ring-[3px]">
                                     {{ $col['label'] }}
                                     <span class="text-muted-foreground inline-flex" aria-hidden="true">
                                         <span x-show="sortKey === '{{ $col['key'] }}' && sortDir === 'asc'" x-cloak><x-lucide-chevron-up class="size-3.5" /></span>
@@ -110,8 +110,8 @@
                     @endforeach
                     @isset($actions)
                         <th scope="col" @class([
-                            'text-foreground bg-background h-10 px-2 text-right align-middle font-medium whitespace-nowrap',
-                            'sticky right-0 border-l' => $stickyActions,
+                            'text-foreground bg-background h-10 px-2 text-end align-middle font-medium whitespace-nowrap',
+                            'sticky end-0 border-s' => $stickyActions,
                         ])>
                             <span class="sr-only">{{ $actionsLabel }}</span>
                         </th>
@@ -135,7 +135,7 @@
                         @isset($actions)
                             <td @class([
                                 'bg-background p-2 align-middle whitespace-nowrap',
-                                'sticky right-0 border-l' => $stickyActions,
+                                'sticky end-0 border-s' => $stickyActions,
                             ])>
                                 <div class="flex items-center justify-end gap-1">{{ $actions }}</div>
                             </td>

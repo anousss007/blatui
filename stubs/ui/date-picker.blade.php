@@ -190,7 +190,7 @@
         :aria-controls="$id('blat-datepicker')"
         :class="{ 'text-muted-foreground': !label }"
         :aria-invalid="invalid ? 'true' : null"
-        class="{{ $width }} border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-left text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20"
+        class="{{ $width }} border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-start text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20"
     >
         <x-lucide-calendar class="size-4 opacity-50" aria-hidden="true" />
         <span class="truncate" x-text="label || @js($placeholder)"></span>
@@ -223,14 +223,14 @@
     >
         <div x-ref="cal" class="flex flex-col sm:flex-row">
             @if ($hasPresets)
-                <div class="flex shrink-0 flex-row gap-1 overflow-x-auto border-b p-2 sm:max-w-[9rem] sm:flex-col sm:gap-0.5 sm:overflow-visible sm:border-r sm:border-b-0"
+                <div class="flex shrink-0 flex-row gap-1 overflow-x-auto border-b p-2 sm:max-w-[9rem] sm:flex-col sm:gap-0.5 sm:overflow-visible sm:border-e sm:border-b-0"
                     role="group" aria-label="{{ __('Presets') }}">
                     @foreach ($presetList as $p)
                         <button
                             type="button"
                             @click="applyPreset(@js($p))"
                             :data-active="isActivePreset(@js($p))"
-                            class="hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground focus-visible:ring-ring/50 inline-flex shrink-0 cursor-pointer items-center rounded-md px-2.5 py-1.5 text-left text-sm whitespace-nowrap transition-colors outline-none focus-visible:ring-[2px] sm:w-full"
+                            class="hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground focus-visible:ring-ring/50 inline-flex shrink-0 cursor-pointer items-center rounded-md px-2.5 py-1.5 text-start text-sm whitespace-nowrap transition-colors outline-none focus-visible:ring-[2px] sm:w-full"
                         >{{ $p['label'] }}</button>
                     @endforeach
                 </div>

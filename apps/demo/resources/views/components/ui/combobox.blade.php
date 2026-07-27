@@ -89,7 +89,7 @@
                 class="border-input dark:bg-input/30 {{ $minH }} flex w-full flex-wrap items-center gap-1 rounded-md border bg-transparent px-2 py-1 shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] {{ $disabled ? 'pointer-events-none opacity-50' : '' }}"
             >
                 @if ($icon)
-                    <x-dynamic-component :component="'lucide-'.$icon" class="text-muted-foreground pointer-events-none ml-1 size-4 shrink-0" aria-hidden="true" />
+                    <x-dynamic-component :component="'lucide-'.$icon" class="text-muted-foreground pointer-events-none ms-1 size-4 shrink-0" aria-hidden="true" />
                 @endif
                 <template x-for="o in selected" :key="o.value">
                     <span class="bg-secondary text-secondary-foreground inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium">
@@ -123,7 +123,7 @@
                     class="placeholder:text-muted-foreground min-w-[6rem] flex-1 bg-transparent text-sm outline-none disabled:cursor-not-allowed"
                 >
                 <x-lucide-chevron-down
-                    class="text-muted-foreground pointer-events-none ml-auto size-4 shrink-0 self-center opacity-50 transition-transform"
+                    class="text-muted-foreground pointer-events-none ms-auto size-4 shrink-0 self-center opacity-50 transition-transform"
                     ::class="open && 'rotate-180'"
                     aria-hidden="true"
                 />
@@ -131,7 +131,7 @@
         @else
             <div class="relative">
                 @if ($icon)
-                    <x-dynamic-component :component="'lucide-'.$icon" class="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" aria-hidden="true" />
+                    <x-dynamic-component :component="'lucide-'.$icon" class="text-muted-foreground pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2" aria-hidden="true" />
                 @endif
                 <input
                     x-ref="control"
@@ -152,10 +152,10 @@
                     @keydown.escape.prevent.stop="close()"
                     placeholder="{{ $placeholder }}"
                     @disabled($disabled)
-                    class="border-input dark:bg-input/30 placeholder:text-muted-foreground flex w-full rounded-md border bg-transparent pr-9 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 {{ $icon ? 'pl-9' : 'pl-3' }} {{ $sizeCls }}"
+                    class="border-input dark:bg-input/30 placeholder:text-muted-foreground flex w-full rounded-md border bg-transparent pe-9 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 {{ $icon ? 'ps-9' : 'ps-3' }} {{ $sizeCls }}"
                 >
                 <x-lucide-chevron-down
-                    class="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 opacity-50 transition-transform"
+                    class="text-muted-foreground pointer-events-none absolute top-1/2 end-3 size-4 -translate-y-1/2 opacity-50 transition-transform"
                     ::class="open && 'rotate-180'"
                     aria-hidden="true"
                 />

@@ -15,7 +15,7 @@
         <caption class="sr-only">{{ $featureLabel }} comparison across {{ implode(', ', $tiers) }}</caption>
         <thead>
             <tr class="bg-muted/40 border-b">
-                <th scope="col" class="text-muted-foreground px-4 py-3 text-left font-medium">{{ $featureLabel }}</th>
+                <th scope="col" class="text-muted-foreground px-4 py-3 text-start font-medium">{{ $featureLabel }}</th>
                 @foreach ($tiers as $i => $tier)
                     <th scope="col" @class([
                         'px-4 py-3 text-center font-semibold',
@@ -27,7 +27,7 @@
         <tbody>
             @foreach ($rows as $row)
                 <tr class="border-b last:border-0">
-                    <th scope="row" class="px-4 py-3 text-left font-medium">{{ $row['feature'] ?? '' }}</th>
+                    <th scope="row" class="px-4 py-3 text-start font-medium">{{ $row['feature'] ?? '' }}</th>
                     @foreach (array_values($row['values'] ?? []) as $i => $val)
                         <td @class([
                             'px-4 py-3 text-center',

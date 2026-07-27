@@ -84,7 +84,7 @@
         x-cloak
         @click.outside="open = false"
         @keydown.escape.stop="open = false"
-        class="bg-popover text-popover-foreground absolute top-full left-0 z-50 mt-1 w-64 overflow-hidden rounded-md border shadow-md"
+        class="bg-popover text-popover-foreground absolute top-full start-0 z-50 mt-1 w-64 overflow-hidden rounded-md border shadow-md"
     >
         <div class="flex h-9 items-center gap-2 border-b px-3">
             <x-lucide-search class="size-4 shrink-0 opacity-50" aria-hidden="true" />
@@ -101,7 +101,7 @@
                 >
                     <span class="text-base leading-none" x-text="c.flag"></span>
                     <span class="truncate" x-text="c.name"></span>
-                    <span class="text-muted-foreground ml-auto" x-text="c.dial"></span>
+                    <span class="text-muted-foreground ms-auto" x-text="c.dial"></span>
                 </button>
             </template>
         </div>
