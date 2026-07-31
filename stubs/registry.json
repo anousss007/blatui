@@ -930,6 +930,22 @@
             ]
         }
     },
+    "file-tree": {
+        "name": "file-tree",
+        "files": [
+            "file-tree.blade.php"
+        ],
+        "dependencies": [
+            "collapsible",
+            "sidebar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        },
+        "target": "resources/views/components/block"
+    },
     "file-upload": {
         "name": "file-upload",
         "files": [
@@ -1465,6 +1481,70 @@
             ]
         }
     },
+    "nav-main": {
+        "name": "nav-main",
+        "files": [
+            "nav-main.blade.php"
+        ],
+        "dependencies": [
+            "collapsible",
+            "sidebar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        },
+        "target": "resources/views/components/block"
+    },
+    "nav-projects": {
+        "name": "nav-projects",
+        "files": [
+            "nav-projects.blade.php"
+        ],
+        "dependencies": [
+            "dropdown-menu",
+            "sidebar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        },
+        "target": "resources/views/components/block"
+    },
+    "nav-secondary": {
+        "name": "nav-secondary",
+        "files": [
+            "nav-secondary.blade.php"
+        ],
+        "dependencies": [
+            "sidebar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        },
+        "target": "resources/views/components/block"
+    },
+    "nav-user": {
+        "name": "nav-user",
+        "files": [
+            "nav-user.blade.php"
+        ],
+        "dependencies": [
+            "avatar",
+            "dropdown-menu",
+            "sidebar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        },
+        "target": "resources/views/components/block"
+    },
     "navigation-menu": {
         "name": "navigation-menu",
         "files": [
@@ -1876,6 +1956,22 @@
                 "gehrisandro/tailwind-merge-laravel"
             ]
         }
+    },
+    "search-form": {
+        "name": "search-form",
+        "files": [
+            "search-form.blade.php"
+        ],
+        "dependencies": [
+            "label",
+            "sidebar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        },
+        "target": "resources/views/components/block"
     },
     "segmented-control": {
         "name": "segmented-control",
@@ -2306,6 +2402,22 @@
             ]
         }
     },
+    "team-switcher": {
+        "name": "team-switcher",
+        "files": [
+            "team-switcher.blade.php"
+        ],
+        "dependencies": [
+            "dropdown-menu",
+            "sidebar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        },
+        "target": "resources/views/components/block"
+    },
     "terminal": {
         "name": "terminal",
         "files": [
@@ -2543,6 +2655,22 @@
                 "gehrisandro/tailwind-merge-laravel"
             ]
         }
+    },
+    "version-switcher": {
+        "name": "version-switcher",
+        "files": [
+            "version-switcher.blade.php"
+        ],
+        "dependencies": [
+            "dropdown-menu",
+            "sidebar"
+        ],
+        "packages": {
+            "composer": [
+                "mallardduck/blade-lucide-icons"
+            ]
+        },
+        "target": "resources/views/components/block"
     },
     "video": {
         "name": "video",

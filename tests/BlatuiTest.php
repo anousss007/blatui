@@ -183,4 +183,55 @@ class BlatuiTest extends TestCase
         @rmdir($compiled);
         @rmdir($src);
     }
+
+    /**
+     * Block components (nav-user, team-switcher, file-tree, …) — the <x-block.*> pieces the
+     * dashboard/sidebar blocks compose — must be first-class, installable families that ship
+     * with the package and target components/block. Regression guard for GitHub issue #10.
+     */
+    public function test_block_components_are_first_class_installable_families(): void
+    {
+        $registry = new Registry;
+
+        $blocks = ['nav-user', 'nav-main', 'nav-projects', 'nav-secondary', 'team-switcher', 'version-switcher', 'search-form', 'file-tree'];
+        foreach ($blocks as $c) {
+            $this->assertTrue($registry->familyExists($c), "{$c} should be a registered family");
+            $this->assertSame('resources/views/components/block', $registry->targetFor($c), "{$c} should install to components/block");
+            $this->assertFileExists(dirname(__DIR__)."/stubs/block/{$c}.blade.php", "{$c} stub should ship in stubs/block");
+        }
+
+        // ui components keep the default target.
+        $this->assertSame('resources/views/components/ui', $registry->targetFor('button'));
+
+        // A block component still resolves its own <x-ui.*> dependencies.
+        $seen = [];
+        $registry->resolve('nav-user', $seen);
+        foreach (['avatar', 'dropdown-menu', 'sidebar'] as $dep) {
+            $this->assertContains($dep, $seen, "nav-user should resolve its {$dep} dependency");
+        }
+    }
+
+    public function test_add_routes_each_family_to_its_namespace_dir(): void
+    {
+        $base = sys_get_temp_dir().'/blatui-ns-'.uniqid();
+        @mkdir($base, 0777, true);
+        $this->app->setBasePath($base);
+
+        $this->artisan('blatui:add', ['components' => ['nav-user']])->assertSuccessful();
+
+        // The block component lands in components/block; its ui dependency in components/ui.
+        $this->assertFileExists($base.'/resources/views/components/block/nav-user.blade.php');
+        $this->assertFileExists($base.'/resources/views/components/ui/avatar.blade.php');
+        $this->assertFileDoesNotExist($base.'/resources/views/components/block/avatar.blade.php');
+
+        $this->rrmdir($base);
+    }
+
+    private function rrmdir(string $dir): void
+    {
+        foreach (glob($dir.'/*') ?: [] as $f) {
+            is_dir($f) ? $this->rrmdir($f) : @unlink($f);
+        }
+        @rmdir($dir);
+    }
 }

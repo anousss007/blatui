@@ -263,6 +263,7 @@ class Server
 
         $composer = [];
         $npm = [];
+        $known = [];
         $unknown = [];
         foreach ($names as $name) {
             $item = $this->client->component($name);
@@ -271,13 +272,20 @@ class Server
 
                 continue;
             }
+            $known[] = $name;
             $composer = array_merge($composer, $item['composer'] ?? []);
             $npm = array_merge($npm, $item['npm'] ?? []);
         }
 
+        if (! $known) {
+            return '# No known components. Unknown: '.implode(', ', $unknown)
+                .'. Use search_registry to find valid names.';
+        }
+
         $lines = [];
         $lines[] = '# Add the components (you own the copied code):';
-        $lines[] = 'php artisan blatui:add '.implode(' ', $names);
+        // Emit only names the registry can resolve — never a command we know will fail.
+        $lines[] = 'php artisan blatui:add '.implode(' ', $known);
 
         $composer = array_values(array_unique($composer));
         $npm = array_values(array_unique($npm));

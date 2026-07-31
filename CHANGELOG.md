@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.19.0] - 2026-08-01
+
+### Added
+- **Block components are now first-class, installable items** (`nav-user`, `nav-main`,
+  `nav-projects`, `nav-secondary`, `team-switcher`, `version-switcher`, `search-form`,
+  `file-tree`). These are the `<x-block.*>` pieces the dashboard/sidebar blocks compose. They
+  ship with the package (`stubs/block/`), install to `resources/views/components/block/`, and are
+  reachable via `php artisan blatui:add nav-user`, the registry index, and `/r/nav-user.json`.
+  Fixes [#10](https://github.com/anousss007/blatui/issues/10) — 14 blocks referenced these
+  components, but none were shipped or installable, so a copied block threw
+  `Unable to locate ... component [block.nav-user]` on render.
+
+### Fixed
+- **Block `registryDependencies` were incomplete.** The dependency scanner matched `<x-ui.*>`
+  only, silently dropping every `<x-block.*>` reference — so `sidebar-07` advertised
+  `breadcrumb, separator, sidebar` but not the four block components it actually needs. It now
+  scans both namespaces, in the manifest, the HTTP registry, and the MCP client.
+- **MCP `install_command` no longer emits commands it knows will fail** — unknown names are
+  reported separately instead of being folded into the `blatui:add` line.
+
 ## [1.18.0] - 2026-07-28
 
 ### Added

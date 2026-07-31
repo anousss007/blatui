@@ -84,11 +84,14 @@ class RegistryDistribution
     /** Catalogue entry for a component family (no file contents). */
     protected function componentMeta(string $family): array
     {
+        $target = $this->components->targetFor($family);       // resources/views/components/{ui,block}
+        $namespace = basename($target);                        // ui | block
+
         $files = array_map(
             fn (string $path) => [
-                'path' => 'ui/'.basename($path),
+                'path' => $namespace.'/'.basename($path),
                 'type' => 'registry:file',
-                'target' => 'resources/views/components/ui/'.basename($path),
+                'target' => $target.'/'.basename($path),
             ],
             $this->components->filesFor($family),
         );
@@ -124,9 +127,10 @@ class RegistryDistribution
             return null;
         }
 
+        $targetDir = $this->components->targetFor($family);   // resources/views/components/{ui,block}
         $files = [];
         foreach ($this->components->filesFor($family) as $path) {
-            $target = 'resources/views/components/ui/'.basename($path);
+            $target = $targetDir.'/'.basename($path);
             $files[] = [
                 'path' => $target,
                 'content' => is_file($path) ? (string) file_get_contents($path) : '',
@@ -427,7 +431,7 @@ class RegistryDistribution
             return [];
         }
 
-        preg_match_all('/<x-ui\.([a-z0-9-]+)/i', (string) file_get_contents($path), $m);
+        preg_match_all('/<x-(?:ui|block)\.([a-z0-9-]+)/i', (string) file_get_contents($path), $m);
 
         return collect($m[1] ?? [])
             ->map(fn ($slug) => $this->components->familyOf($slug) ?? $slug)

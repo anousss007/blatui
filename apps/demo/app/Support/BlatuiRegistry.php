@@ -32,17 +32,34 @@ class BlatuiRegistry
 
     public function __construct(
         protected string $sourceDir = '',
+        protected string $blockDir = '',
     ) {
         if ($this->sourceDir === '') {
             $this->sourceDir = resource_path('views/components/ui');
         }
+        if ($this->blockDir === '') {
+            $this->blockDir = resource_path('views/components/block');
+        }
     }
+
+    /**
+     * Install targets (path relative to the project root) per component namespace.
+     * `ui/` components render as <x-ui.*>; `block/` components (nav-user,
+     * team-switcher, file-tree, …) render as <x-block.*> and are the pieces the
+     * dashboard/sidebar blocks compose. Both are first-class, installable families.
+     */
+    public const TARGET_UI = 'resources/views/components/ui';
+
+    public const TARGET_BLOCK = 'resources/views/components/block';
 
     /** @var list<string>|null */
     protected ?array $rootsCache = null;
 
     /** @var list<string>|null */
     protected ?array $slugsCache = null;
+
+    /** @var list<string>|null */
+    protected ?array $blockSlugsCache = null;
 
     /** @var array<string, list<string>>|null */
     protected ?array $familiesCache = null;
@@ -63,6 +80,12 @@ class BlatuiRegistry
     /** Map a component slug to its family root. */
     public function familyOf(string $slug): ?string
     {
+        // Each block/ component is its own family (nav-user, file-tree, …); it never
+        // shares a family root with the ui/ components.
+        if (in_array($slug, $this->blockSlugs(), true)) {
+            return $slug;
+        }
+
         foreach ($this->rootsByLength() as $root) {
             if ($slug === $root || str_starts_with($slug, $root.'-')) {
                 return $root;
@@ -72,7 +95,7 @@ class BlatuiRegistry
         return null;
     }
 
-    /** All slugs present in the source directory (memoized per instance). */
+    /** All ui/ component slugs present in the source directory (memoized per instance). */
     public function slugs(): array
     {
         if ($this->slugsCache !== null) {
@@ -86,6 +109,34 @@ class BlatuiRegistry
             ->sort()
             ->values()
             ->all();
+    }
+
+    /** All block/ component slugs (each is its own family). Memoized per instance. */
+    public function blockSlugs(): array
+    {
+        if ($this->blockSlugsCache !== null) {
+            return $this->blockSlugsCache;
+        }
+
+        $files = glob($this->blockDir.'/*.blade.php') ?: [];
+
+        return $this->blockSlugsCache = collect($files)
+            ->map(fn ($f) => Str::beforeLast(basename($f), '.blade.php'))
+            ->sort()
+            ->values()
+            ->all();
+    }
+
+    /** True when a family is a block/ component (installs to components/block, renders <x-block.*>). */
+    public function isBlockFamily(string $family): bool
+    {
+        return in_array($family, $this->blockSlugs(), true);
+    }
+
+    /** Install target (path relative to project root) for a family's namespace. */
+    public function targetFor(string $family): string
+    {
+        return $this->isBlockFamily($family) ? self::TARGET_BLOCK : self::TARGET_UI;
     }
 
     /**
@@ -109,6 +160,11 @@ class BlatuiRegistry
             $families[$family][] = $slug;
         }
 
+        // Each block/ component is a standalone single-file family.
+        foreach ($this->blockSlugs() as $slug) {
+            $families[$slug] = [$slug];
+        }
+
         ksort($families);
 
         return $this->familiesCache = $families;
@@ -123,8 +179,9 @@ class BlatuiRegistry
     public function filesFor(string $family): array
     {
         $slugs = $this->families()[$family] ?? [];
+        $dir = $this->isBlockFamily($family) ? $this->blockDir : $this->sourceDir;
 
-        return array_map(fn ($s) => $this->sourceDir.'/'.$s.'.blade.php', $slugs);
+        return array_map(fn ($s) => $dir.'/'.$s.'.blade.php', $slugs);
     }
 
     /** @var array<string, string> */
@@ -139,15 +196,17 @@ class BlatuiRegistry
     }
 
     /**
-     * Other component families this family references via <x-ui.X ...>,
-     * excluding self-references and its own sub-components.
+     * Other component families this family references via <x-ui.X ...> or
+     * <x-block.X ...>, excluding self-references and its own sub-components.
+     * Blocks compose block/ components (nav-user, team-switcher, …), so those
+     * must resolve as dependencies too — otherwise a copied block can't render.
      */
     public function dependenciesFor(string $family): array
     {
         $source = $this->sourceFor($family);
         $own = $this->families()[$family] ?? [];
 
-        preg_match_all('/<x-ui\.([a-z0-9-]+)/i', $source, $matches);
+        preg_match_all('/<x-(?:ui|block)\.([a-z0-9-]+)/i', $source, $matches);
 
         return collect($matches[1] ?? [])
             ->reject(fn ($slug) => in_array($slug, $own, true))
@@ -226,12 +285,21 @@ class BlatuiRegistry
         $manifest = [];
 
         foreach (array_keys($this->families()) as $family) {
-            $manifest[$family] = [
+            $entry = [
                 'name' => $family,
                 'files' => array_map('basename', $this->filesFor($family)),
                 'dependencies' => $this->dependenciesFor($family),
                 'packages' => $this->packagesFor($family),
             ];
+
+            // Only non-default targets are recorded; ui/ families stay implicit so
+            // the manifest for the 180 ui components is unchanged. Consumers default
+            // to components/ui when `target` is absent.
+            if ($this->isBlockFamily($family)) {
+                $entry['target'] = self::TARGET_BLOCK;
+            }
+
+            $manifest[$family] = $entry;
         }
 
         return $manifest;

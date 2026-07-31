@@ -25,6 +25,13 @@ echo "→ Syncing components → stubs/ui"
 rm -f "$ROOT"/stubs/ui/*.blade.php
 cp "$DEMO"/resources/views/components/ui/*.blade.php "$ROOT"/stubs/ui/
 
+# Block components (nav-user, team-switcher, file-tree, …) — the <x-block.*> pieces the
+# dashboard/sidebar blocks compose. Shipped so `blatui:add nav-user` works offline.
+echo "→ Syncing block components → stubs/block"
+mkdir -p "$ROOT"/stubs/block
+rm -f "$ROOT"/stubs/block/*.blade.php
+cp "$DEMO"/resources/views/components/block/*.blade.php "$ROOT"/stubs/block/
+
 # The published bootstrap is the charts-free blatui.js (NOT the demo's app.js, which also
 # registers charts). Charts ship as the opt-in blatui-charts.js.
 echo "→ Syncing foundations (CSS + bootstrap + engine + opt-in charts)"
@@ -37,4 +44,5 @@ echo "→ Syncing registry manifest → stubs/registry.json"
 cp "$DEMO"/registry.json "$ROOT"/stubs/registry.json
 
 UI_COUNT=$(ls "$ROOT"/stubs/ui/*.blade.php | wc -l | tr -d ' ')
-echo "✓ Regenerated ${UI_COUNT} component files + foundations + registry.json."
+BLOCK_COUNT=$(ls "$ROOT"/stubs/block/*.blade.php 2>/dev/null | wc -l | tr -d ' ')
+echo "✓ Regenerated ${UI_COUNT} ui + ${BLOCK_COUNT} block component files + foundations + registry.json."

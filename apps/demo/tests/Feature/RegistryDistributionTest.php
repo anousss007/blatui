@@ -67,6 +67,30 @@ class RegistryDistributionTest extends TestCase
         $this->assertNotEmpty($res->json('files.0.content'));
     }
 
+    public function test_block_components_are_installable_and_wired_as_block_dependencies(): void
+    {
+        // The <x-block.*> components a block composes must be installable items…
+        $res = $this->get('/r/nav-user.json');
+        $res->assertOk();
+        $res->assertJsonPath('name', 'nav-user');
+        $this->assertSame(
+            'resources/views/components/block/nav-user.blade.php',
+            $res->json('files.0.target'),
+            'block components install to components/block, so <x-block.nav-user> resolves'
+        );
+        $this->assertNotEmpty($res->json('files.0.content'));
+
+        // …and a block that uses them must LIST them in registryDependencies (regression
+        // guard for #10: the dep scanner previously matched <x-ui.*> only, dropping <x-block.*>).
+        $res = $this->get('/r/blocks/sidebar-07.json');
+        $res->assertOk();
+        $deps = collect($res->json('registryDependencies') ?? [])
+            ->map(fn ($u) => basename($u, '.json'))->all();
+        foreach (['nav-main', 'nav-projects', 'nav-user', 'team-switcher'] as $blockComponent) {
+            $this->assertContains($blockComponent, $deps, "sidebar-07 must declare its {$blockComponent} dependency");
+        }
+    }
+
     public function test_unknown_item_is_404(): void
     {
         $this->get('/r/does-not-exist.json')->assertNotFound();

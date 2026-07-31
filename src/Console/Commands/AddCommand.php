@@ -67,10 +67,10 @@ class AddCommand extends Command
         }
         $resolved = collect($resolved)->unique()->sort()->values()->all();
 
-        $dest = $this->option('path') ?: resource_path('views/components/ui');
-        if (! is_dir($dest)) {
-            mkdir($dest, 0755, true);
-        }
+        // --path forces a single destination; otherwise each family installs to its
+        // own namespace dir (ui → components/ui, block → components/block) so
+        // <x-block.*> components resolve in the consuming app.
+        $forcedDest = $this->option('path') ?: null;
 
         $extras = array_values(array_diff($resolved, $requested));
         if ($extras) {
@@ -80,6 +80,11 @@ class AddCommand extends Command
         $copied = 0;
         $skipped = 0;
         foreach ($resolved as $family) {
+            $dest = $forcedDest ?? base_path($registry->targetFor($family));
+            if (! is_dir($dest)) {
+                mkdir($dest, 0755, true);
+            }
+
             foreach ($registry->filesFor($family) as $src) {
                 $target = $dest.'/'.basename($src);
                 if (is_file($target) && ! $this->option('force')) {

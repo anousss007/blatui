@@ -110,10 +110,11 @@ class RegistryClient
     public function component(string $name): ?array
     {
         if ($this->registry->familyExists($name)) {
+            $targetDir = $this->registry->targetFor($name);   // resources/views/components/{ui,block}
             $files = [];
             foreach ($this->registry->filesFor($name) as $path) {
                 $files[] = [
-                    'target' => 'resources/views/components/ui/'.basename($path),
+                    'target' => $targetDir.'/'.basename($path),
                     'content' => is_file($path) ? (string) file_get_contents($path) : '',
                 ];
             }

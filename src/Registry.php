@@ -91,12 +91,26 @@ class Registry
         return array_key_exists($family, $this->manifest);
     }
 
-    /** Absolute file paths that make up a family. */
+    /**
+     * Install target (path relative to the project root) for a family. Block/
+     * components (nav-user, team-switcher, file-tree, …) install to
+     * components/block and render as <x-block.*>; everything else defaults to
+     * components/ui. Absent `target` ⇒ ui, so older manifests still work.
+     */
+    public function targetFor(string $family): string
+    {
+        return $this->manifest[$family]['target'] ?? 'resources/views/components/ui';
+    }
+
+    /** Absolute file paths that make up a family (read from the matching stubs/ subdir). */
     public function filesFor(string $family): array
     {
         $files = $this->manifest[$family]['files'] ?? [];
+        // stubsDir is stubs/ui; sibling stubs/<namespace> holds other targets (e.g. stubs/block).
+        $namespace = basename($this->targetFor($family));           // ui | block
+        $dir = $namespace === 'ui' ? $this->stubsDir : dirname($this->stubsDir).'/'.$namespace;
 
-        return array_map(fn (string $file) => $this->stubsDir.'/'.$file, $files);
+        return array_map(fn (string $file) => $dir.'/'.$file, $files);
     }
 
     /** Other component families this family references. */
