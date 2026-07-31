@@ -33,6 +33,11 @@
     $circ = 2 * M_PI * $radius;
     $sweep = 0.75;                              // 270° of the full circle
     $arcLen = $circ * $sweep;
+
+    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
@@ -43,7 +48,7 @@
         max: @js((float) $max),
         step: @js((float) $step),
         disabled: @js((bool) $disabled),
-        value: @js((float) $value),
+        value: @if ($hasWire)@entangle($wireModel)@else @js((float) $value)@endif,
         dragging: false,
         circ: @js($circ),
         arcLen: @js($arcLen),

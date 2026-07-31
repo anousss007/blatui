@@ -18,7 +18,7 @@
     // shared border between adjacent items (border-l-0 / border-t-0 is a no-op for the non-outline
     // variant, so it can be gated on orientation alone).
     $shape = "min-w-0 flex-1 shrink-0 rounded-none shadow-none focus:z-10 focus-visible:z-10 "
-        ."group-data-[orientation=horizontal]/toggle-group:first:rounded-l-md group-data-[orientation=horizontal]/toggle-group:last:rounded-r-md group-data-[orientation=horizontal]/toggle-group:not-first:border-l-0 "
+        ."group-data-[orientation=horizontal]/toggle-group:first:rounded-s-md group-data-[orientation=horizontal]/toggle-group:last:rounded-e-md group-data-[orientation=horizontal]/toggle-group:not-first:border-s-0 "
         ."group-data-[orientation=vertical]/toggle-group:w-full group-data-[orientation=vertical]/toggle-group:first:rounded-t-md group-data-[orientation=vertical]/toggle-group:last:rounded-b-md group-data-[orientation=vertical]/toggle-group:not-first:border-t-0";
 
     $classes = "$base $variant $size $shape";

@@ -6,36 +6,18 @@
 ])
 
 @php
-    $classes = "focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:hover:bg-destructive/10 data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[inset]:pl-8";
-
-    // Merge any caller-provided @click with close-on-select so they don't collide.
-    // closeMenu() (not a bare open=false) so keyboard focus returns to the trigger.
-    $userClick = $attributes->get('@click') ?? $attributes->get('x-on:click');
-    $attributes = $attributes->except(['@click', 'x-on:click']);
-    $clickExpr = collect([$userClick, 'closeMenu()'])->filter()->implode('; ');
+    // context-menu-item never exposed `type`/`closeOnSelect`; it always submits as a
+    // button and always closes on select. Drop any caller-supplied values for those so
+    // the shared primitive's props can't change behaviour.
+    $attributes = $attributes->except(['type', 'closeOnSelect', 'close-on-select']);
 @endphp
 
-@if ($href)
-    <a
-        href="{{ $href }}"
-        role="menuitem"
-        tabindex="-1"
-        data-slot="context-menu-item"
-        data-variant="{{ $variant }}"
-        @if ($inset) data-inset @endif
-        @click="{{ $clickExpr }}"
-        {{ $attributes->twMerge($classes) }}
-    >{{ $slot }}</a>
-@else
-    <button
-        type="button"
-        role="menuitem"
-        tabindex="-1"
-        data-slot="context-menu-item"
-        data-variant="{{ $variant }}"
-        @if ($inset) data-inset @endif
-        @if ($disabled) disabled data-disabled aria-disabled="true" @endif
-        @click="{{ $clickExpr }}"
-        {{ $attributes->twMerge($classes) }}
-    >{{ $slot }}</button>
-@endif
+<x-ui.menu-item
+    :data-slot="'context-menu-item'"
+    :click-conditional="false"
+    :href="$href"
+    :variant="$variant"
+    :inset="$inset"
+    :disabled="$disabled"
+    {{ $attributes }}
+>{{ $slot }}</x-ui.menu-item>

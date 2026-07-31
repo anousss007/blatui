@@ -6,7 +6,19 @@
     'searchPlaceholder' => 'Search...',
     'selectable' => true,
     'pageSize' => 5,
+    'rowKey' => 'id',     // row-data key used for stable :keys and passed to the actions slot (item.r[rowKey])
+    'actionsLabel' => 'Actions',   // header label for the row-actions column (kept sr-only)
+    'stickyActions' => false,      // freeze the actions column to the right edge on horizontal scroll
 ])
+
+{{--
+    Row actions: pass an `actions` slot. It renders inside the Alpine x-for, so the current row is
+    available as `item.r` (the row data) and `item.i` (its index). Wire it to Livewire with $wire:
+
+        <x-slot:actions>
+            <x-ui.button size="sm" variant="ghost" x-on:click="$wire.edit(item.r.{{ rowKey }})">Edit</x-ui.button>
+        </x-slot:actions>
+--}}
 
 @php
     $cols = collect($columns)->map(fn ($c) => [
@@ -71,20 +83,21 @@
             <thead data-slot="table-header" class="[&_tr]:border-b">
                 <tr class="hover:bg-muted/50 border-b transition-colors">
                     @if ($selectable)
-                        <th class="h-10 w-10 px-2 text-left align-middle">
+                        <th scope="col" class="h-10 w-10 px-2 text-start align-middle">
                             <span class="sr-only">Select</span>
                             <button type="button" role="checkbox" aria-label="Select all rows" @click="toggleAll()" :aria-checked="allPageSelected" :data-state="allPageSelected ? 'checked' : 'unchecked'"
-                                class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none">
-                                <x-lucide-check class="size-3.5" x-show="allPageSelected" x-cloak />
+                                class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]">
+                                <x-lucide-check class="size-3.5" x-show="allPageSelected" x-cloak aria-hidden="true" />
                             </button>
                         </th>
                     @endif
                     @foreach ($cols as $col)
-                        <th class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap {{ $col['class'] }}">
+                        <th scope="col" @if ($col['sortable']) :aria-sort="sortKey === '{{ $col['key'] }}' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" @endif
+                            class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap {{ $col['class'] }}">
                             @if ($col['sortable'])
-                                <button type="button" @click="toggleSort('{{ $col['key'] }}')" class="hover:text-foreground -ml-2 inline-flex items-center gap-1 rounded-md px-2 py-1 transition-colors">
+                                <button type="button" @click="toggleSort('{{ $col['key'] }}')" class="hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 -ms-2 inline-flex items-center gap-1 rounded-md px-2 py-1 transition-colors outline-none focus-visible:ring-[3px]">
                                     {{ $col['label'] }}
-                                    <span class="text-muted-foreground inline-flex">
+                                    <span class="text-muted-foreground inline-flex" aria-hidden="true">
                                         <span x-show="sortKey === '{{ $col['key'] }}' && sortDir === 'asc'" x-cloak><x-lucide-chevron-up class="size-3.5" /></span>
                                         <span x-show="sortKey === '{{ $col['key'] }}' && sortDir === 'desc'" x-cloak><x-lucide-chevron-down class="size-3.5" /></span>
                                         <span x-show="sortKey !== '{{ $col['key'] }}'"><x-lucide-chevrons-up-down class="size-3.5 opacity-50" /></span>
@@ -95,26 +108,42 @@
                             @endif
                         </th>
                     @endforeach
+                    @isset($actions)
+                        <th scope="col" @class([
+                            'text-foreground bg-background h-10 px-2 text-end align-middle font-medium whitespace-nowrap',
+                            'sticky end-0 border-s' => $stickyActions,
+                        ])>
+                            <span class="sr-only">{{ $actionsLabel }}</span>
+                        </th>
+                    @endisset
                 </tr>
             </thead>
             <tbody data-slot="table-body" class="[&_tr:last-child]:border-0">
-                <template x-for="item in paged" :key="item.i">
+                <template x-for="item in paged" :key="item.r['{{ $rowKey }}'] ?? item.i">
                     <tr class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors" :data-state="selected.includes(item.i) ? 'selected' : null">
                         @if ($selectable)
                             <td class="w-10 px-2 align-middle">
                                 <button type="button" role="checkbox" aria-label="Select row" @click="toggleRow(item.i)" :aria-checked="selected.includes(item.i)" :data-state="selected.includes(item.i) ? 'checked' : 'unchecked'"
-                                    class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none">
-                                    <x-lucide-check class="size-3.5" x-show="selected.includes(item.i)" x-cloak />
+                                    class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]">
+                                    <x-lucide-check class="size-3.5" x-show="selected.includes(item.i)" x-cloak aria-hidden="true" />
                                 </button>
                             </td>
                         @endif
                         @foreach ($cols as $col)
                             <td class="p-2 align-middle whitespace-nowrap {{ $col['class'] }}" x-text="item.r['{{ $col['key'] }}']"></td>
                         @endforeach
+                        @isset($actions)
+                            <td @class([
+                                'bg-background p-2 align-middle whitespace-nowrap',
+                                'sticky end-0 border-s' => $stickyActions,
+                            ])>
+                                <div class="flex items-center justify-end gap-1">{{ $actions }}</div>
+                            </td>
+                        @endisset
                     </tr>
                 </template>
                 <tr x-show="paged.length === 0">
-                    <td colspan="{{ $cols->count() + ($selectable ? 1 : 0) }}" class="text-muted-foreground h-24 text-center align-middle">No results.</td>
+                    <td colspan="{{ $cols->count() + ($selectable ? 1 : 0) + (isset($actions) ? 1 : 0) }}" class="text-muted-foreground h-24 text-center align-middle">No results.</td>
                 </tr>
             </tbody>
         </table>

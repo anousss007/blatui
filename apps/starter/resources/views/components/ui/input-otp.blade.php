@@ -10,12 +10,17 @@
 @php
     $inputmode = $alphanumeric ? 'text' : 'numeric';
     $pattern = $alphanumeric ? '[a-zA-Z0-9]*' : '[0-9]*';
+
+    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
     data-slot="input-otp"
     x-data="{
-        value: @js((string) $value),
+        value: @if ($hasWire)@entangle($wireModel)@else @js((string) $value)@endif,
         max: {{ $maxlength }},
         focused: false,
         get active() { return this.focused ? Math.min(this.value.length, this.max - 1) : -1 }

@@ -67,7 +67,13 @@
     $placeholder ??= $isRange ? 'Pick a date range' : 'Pick a date & time';
     $width ??= $isRange ? 'w-[320px]' : 'w-[280px]';
 
-    $triggerCls = 'border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-left text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20';
+    $triggerCls = 'border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-start text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20';
+
+    // Livewire bridge — entangle the single combined date+time value with wire:model (single mode).
+    // No-op (and stripped) without Livewire. Range mode keeps its from/to hidden inputs.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
@@ -84,6 +90,15 @@
         maxDate: @js($maxDate), maxTime: @js($maxTime),
         minNights: @js($minNights !== null ? (int) $minNights : null),
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),
+@if ($hasWire && ! $isRange)
+        model: @entangle($wireModel),
+        init() {
+            if (this.model) { const p = String(this.model).replace(' ', 'T').split('T'); this.date = p[0] || null; this.time = p[1] || null; }
+            const push = () => { this.model = this.combined(this.date, this.time); };
+            this.$watch('date', push);
+            this.$watch('time', push);
+        },
+@endif
         onTime(d) {
             if (this.mode === 'range') {
                 if (d.part === 'to') this.timeTo = d.value; else this.timeFrom = d.value;
@@ -165,11 +180,12 @@
 
     {{-- Teleported to <body> so the popover is never clipped by an overflow-hidden ancestor
          (a card, table cell, the docs preview…). x-anchor still positions it at the trigger. --}}
-    <template x-teleport="body">
+    <template x-teleport="body" wire:ignore>
     <div
+        x-blat-dialog-layer
         x-show="open"
         x-cloak
-        x-anchor.bottom-start.offset.4="$refs.trigger"
+        x-blat-anchor.bottom-start.offset.4="$refs.trigger"
         @click.outside="open = false"
         @keydown.escape.window="open = false"
         {{-- Listeners live here (inside the teleported popover) so they catch the calendar's /
@@ -183,7 +199,7 @@
         role="dialog"
         aria-label="{{ $isRange ? 'Choose a date and time range' : 'Choose date and time' }}"
         tabindex="-1"
-        class="bg-popover text-popover-foreground z-50 w-auto origin-top overflow-hidden rounded-md border shadow-md"
+        class="bg-popover text-popover-foreground z-50 flex w-auto origin-top flex-col overflow-y-auto overscroll-contain rounded-md border shadow-md"
         x-transition:enter="transition ease-out duration-150"
         x-transition:enter-start="opacity-0 scale-95"
         x-transition:enter-end="opacity-100 scale-100"

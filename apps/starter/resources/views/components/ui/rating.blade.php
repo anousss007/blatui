@@ -10,6 +10,14 @@
 ])
 
 @php
+    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    // No-op (and stripped) without Livewire, so the component still works in plain Blade/Alpine.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+@endphp
+
+@php
     $sizes = ['sm' => 'size-4', 'default' => 'size-5', 'lg' => 'size-6'];
     $star = $sizes[$size] ?? $sizes['default'];
 @endphp
@@ -17,7 +25,7 @@
 <div
     data-slot="rating"
     x-data="{
-        value: @js((float) $value),
+        value: @if ($hasWire)@entangle($wireModel)@else @js((float) $value)@endif,
         hover: 0,
         max: @js((int) $max),
         readonly: @js((bool) $readonly),

@@ -140,7 +140,7 @@
 
     @if ($mode === 'split')
         <div data-slot="diff-viewer-scroll" tabindex="0" class="overflow-x-auto outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:ring-inset">
-            <table dir="ltr" class="w-full border-collapse text-left tabular-nums">
+            <table dir="ltr" class="w-full border-collapse text-start tabular-nums">
                 <caption class="sr-only">Side-by-side diff{{ $filename ? ' of '.$filename : '' }}: original on the left, changed on the right.</caption>
                 <thead class="sr-only">
                     <tr>
@@ -155,12 +155,12 @@
                         @php($left = $pair['left'])
                         @php($right = $pair['right'])
                         <tr>
-                            <td class="text-muted-foreground/50 border-r select-none px-2 py-0.5 text-right align-top">{{ $left['oldNo'] ?? '' }}</td>
+                            <td class="text-muted-foreground/50 border-r select-none px-2 py-0.5 text-end align-top">{{ $left['oldNo'] ?? '' }}</td>
                             <td @class([
                                 'border-r py-0.5 pr-3 align-top whitespace-pre-wrap',
                                 $lineBg[$left['type']] => $left,
                             ])><span @class(['inline-block w-4 shrink-0 select-none text-center', $gutterColor[$left['type'] ?? 'eq']]) aria-hidden="true">{{ $left ? $gutter[$left['type']] : '' }}</span>@if ($left && $left['type'] === 'del')<span class="sr-only">{{ $srPrefix['del'] }}</span>@endif<span>{{ $left['text'] ?? '' }}</span></td>
-                            <td class="text-muted-foreground/50 border-r select-none px-2 py-0.5 text-right align-top">{{ $right['newNo'] ?? '' }}</td>
+                            <td class="text-muted-foreground/50 border-r select-none px-2 py-0.5 text-end align-top">{{ $right['newNo'] ?? '' }}</td>
                             <td @class([
                                 'py-0.5 pr-3 align-top whitespace-pre-wrap',
                                 $lineBg[$right['type']] => $right,
@@ -172,7 +172,7 @@
         </div>
     @else
         <div data-slot="diff-viewer-scroll" tabindex="0" class="overflow-x-auto outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:ring-inset">
-            <table dir="ltr" class="w-full border-collapse text-left tabular-nums">
+            <table dir="ltr" class="w-full border-collapse text-start tabular-nums">
                 <caption class="sr-only">Inline diff{{ $filename ? ' of '.$filename : '' }}: removed lines are marked with a minus, added lines with a plus.</caption>
                 <thead class="sr-only">
                     <tr>
@@ -184,8 +184,8 @@
                 <tbody>
                     @foreach ($rows as $row)
                         <tr @class([$lineBg[$row['type']]])>
-                            <td class="text-muted-foreground/50 select-none px-2 py-0.5 text-right align-top">{{ $row['oldNo'] ?? '' }}</td>
-                            <td class="text-muted-foreground/50 border-r select-none px-2 py-0.5 text-right align-top">{{ $row['newNo'] ?? '' }}</td>
+                            <td class="text-muted-foreground/50 select-none px-2 py-0.5 text-end align-top">{{ $row['oldNo'] ?? '' }}</td>
+                            <td class="text-muted-foreground/50 border-r select-none px-2 py-0.5 text-end align-top">{{ $row['newNo'] ?? '' }}</td>
                             <td class="py-0.5 pr-3 align-top whitespace-pre-wrap"><span @class(['inline-block w-4 shrink-0 select-none text-center', $gutterColor[$row['type']]]) aria-hidden="true">{{ $gutter[$row['type']] }}</span>@if ($row['type'] !== 'eq')<span class="sr-only">{{ $srPrefix[$row['type']] }}</span>@endif<span>{{ $row['text'] }}</span></td>
                         </tr>
                     @endforeach

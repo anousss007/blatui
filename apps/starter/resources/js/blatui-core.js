@@ -1,28 +1,21 @@
 import anchor from '@alpinejs/anchor';
 import focus from '@alpinejs/focus';
 import collapse from '@alpinejs/collapse';
-
-// ApexCharts is ~140kb gzipped — load it on demand (only on pages with charts)
-// instead of shipping it in the main bundle. Returns the constructor.
-let _apexPromise = null;
-function loadApex() {
-    if (window.ApexCharts) return Promise.resolve(window.ApexCharts);
-    if (!_apexPromise) {
-        _apexPromise = import('apexcharts').then((m) => {
-            window.ApexCharts = m.default || m;
-            return window.ApexCharts;
-        });
-    }
-    return _apexPromise;
-}
+import { computePosition, autoUpdate, flip, shift, offset as flOffset, size } from '@floating-ui/dom';
 
 // ---------------------------------------------------------------------------
 // Theme store — dark mode + color preset + radius, persisted to localStorage.
 // Mirrors the data-attributes that resources/css/app.css keys off of.
 // ---------------------------------------------------------------------------
 const themeStore = {
+    // Dark-mode policy — set via registerBlatUI(Alpine, { darkMode }).
+    //   'class'  (default) light until an explicit toggle; NEVER auto-applies the OS
+    //            prefers-color-scheme (that silently broke light-only apps).
+    //   'system' follow the OS preference by default.
+    //   false    hard light-only (dark disabled, toggle is a no-op).
+    darkMode: 'class',
     // Every dimension shadcn exposes, each persisted independently.
-    mode: localStorage.getItem('theme:mode') || 'system',
+    mode: localStorage.getItem('theme:mode') || 'light',
     base: localStorage.getItem('theme:base') || 'neutral',
     preset: localStorage.getItem('theme:preset') || 'default',
     radius: localStorage.getItem('theme:radius') || '0.625',
@@ -34,13 +27,18 @@ const themeStore = {
     fontHeading: localStorage.getItem('theme:fontHeading') || 'sans',
 
     init() {
+        // No stored choice → fall back per the darkMode policy: 'system' follows the OS,
+        // anything else stays light (dark only after an explicit toggle).
+        if (!localStorage.getItem('theme:mode')) {
+            this.mode = this.darkMode === 'system' ? 'system' : 'light';
+        }
         this.apply();
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             if (this.mode === 'system') this.apply();
         });
         // Keep every same-origin document in sync (e.g. block-preview iframes):
         // localStorage writes in one document fire a `storage` event in the others.
-        const defaults = { mode: 'system', base: 'neutral', preset: 'default', radius: '0.625', font: 'sans', shadow: 'default', spacing: 'default', tracking: 'normal', inputStyle: 'outline', fontHeading: 'sans' };
+        const defaults = { mode: this.darkMode === 'system' ? 'system' : 'light', base: 'neutral', preset: 'default', radius: '0.625', font: 'sans', shadow: 'default', spacing: 'default', tracking: 'normal', inputStyle: 'outline', fontHeading: 'sans' };
         window.addEventListener('storage', (e) => {
             if (!e.key || !e.key.startsWith('theme:')) return;
             const key = e.key.slice('theme:'.length);
@@ -52,6 +50,7 @@ const themeStore = {
     },
 
     get isDark() {
+        if (this.darkMode === false) return false;
         return this.mode === 'dark' || (this.mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     },
 
@@ -73,14 +72,41 @@ const themeStore = {
     setFontHeading(fontHeading) { this.set('fontHeading', fontHeading); },
 
     toggle() {
+        if (this.darkMode === false) return;
         this.setMode(this.isDark ? 'light' : 'dark');
+    },
+
+    // Roll a random, tasteful combination across every visual dimension — a quick
+    // way to stumble on a starting point. Mode (light/dark) is left untouched so the
+    // page doesn't flip out from under you; everything else is fair game.
+    randomize() {
+        const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const fonts = ['sans', 'inter', 'geist', 'manrope', 'jakarta', 'space-grotesk', 'dm-sans', 'outfit', 'sora', 'lora', 'source-serif', 'system', 'serif', 'mono'];
+        const body = pick(fonts);
+        const next = {
+            base: pick(['neutral', 'stone', 'zinc', 'slate', 'gray', 'mauve', 'olive', 'mist', 'taupe']),
+            preset: pick(['default', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky']),
+            radius: pick(['0', '0.3', '0.5', '0.625', '0.75', '1']),
+            inputStyle: pick(['outline', 'fill', 'inset']),
+            font: body,
+            // Heading mostly follows the body font; sometimes gets its own pairing.
+            fontHeading: Math.random() < 0.6 ? 'sans' : pick(fonts),
+            shadow: pick(['none', 'sm', 'default', 'lg', 'xl']),
+            spacing: pick(['compact', 'default', 'comfortable']),
+            tracking: pick(['tight', 'normal', 'wide']),
+        };
+        Object.entries(next).forEach(([k, v]) => {
+            this[k] = v;
+            localStorage.setItem('theme:' + k, v);
+        });
+        this.apply();
     },
 
     reset() {
         ['mode', 'base', 'preset', 'radius', 'font', 'shadow', 'spacing', 'tracking', 'inputStyle', 'fontHeading'].forEach((k) =>
             localStorage.removeItem('theme:' + k),
         );
-        this.mode = 'system';
+        this.mode = this.darkMode === 'system' ? 'system' : 'light';
         this.base = 'neutral';
         this.preset = 'default';
         this.radius = '0.625';
@@ -95,7 +121,12 @@ const themeStore = {
 
     apply() {
         const root = document.documentElement;
-        root.classList.toggle('dark', this.isDark);
+        // darkMode:false means "hands off dark mode" — never touch the `dark` class, so apps that
+        // drive their own dark mode (e.g. Flux) aren't stripped back to light on every page load.
+        // (Previously this force-removed `dark`, causing a dark→light flash on full refresh.)
+        if (this.darkMode !== false) {
+            root.classList.toggle('dark', this.isDark);
+        }
         // Attributes only emitted when non-default, so :root keeps the defaults.
         this.attr(root, 'data-base', this.base, 'neutral');
         this.attr(root, 'data-theme', this.preset, 'default');
@@ -129,219 +160,23 @@ window.toast = (opts) => {
         window.dispatchEvent(new CustomEvent('toast', { detail: { ...detail, type } }));
     };
 });
-
-// ---------------------------------------------------------------------------
-// Charts — ApexCharts wrapper that mirrors shadcn's <ChartContainer>.
-//   * Resolves CSS-variable / oklch colors to concrete rgb() so ApexCharts'
-//     gradient + shade utilities work.
-//   * Re-renders on dark-mode / theme-preset / base-color changes.
-//   * Exposed as the Alpine component `shadcnChart` and composable helpers on
-//     window.Chart for bespoke blocks (e.g. the interactive dashboard chart).
-// ---------------------------------------------------------------------------
-const _colorProbe = document.createElement('span');
-_colorProbe.style.cssText = 'position:absolute;width:0;height:0;opacity:0;pointer-events:none;';
-const _colorCanvas = document.createElement('canvas').getContext('2d');
-
-// OKLCH → sRGB. shadcn v4 declares every token in oklch, and neither
-// getComputedStyle nor canvas reliably down-converts it, so we do it by hand.
-function oklchToRgb(str) {
-    const m = str.match(/oklch\(\s*([\d.]+%?)\s+([\d.]+%?)\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+%?))?\s*\)/i);
-    if (!m) return null;
-    const L = m[1].endsWith('%') ? parseFloat(m[1]) / 100 : parseFloat(m[1]);
-    const C = m[2].endsWith('%') ? (parseFloat(m[2]) / 100) * 0.4 : parseFloat(m[2]);
-    const H = parseFloat(m[3]);
-    const hr = (H * Math.PI) / 180;
-    const a = C * Math.cos(hr);
-    const b = C * Math.sin(hr);
-    const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
-    const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
-    const s_ = L - 0.0894841775 * a - 1.291485548 * b;
-    const l3 = l_ ** 3, m3 = m_ ** 3, s3 = s_ ** 3;
-    const lr = 4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3;
-    const lg = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3;
-    const lb = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3;
-    const g = (x) => (x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055);
-    const u = (x) => Math.round(Math.min(1, Math.max(0, g(x))) * 255);
-    const A = m[4] != null ? (m[4].endsWith('%') ? parseFloat(m[4]) / 100 : parseFloat(m[4])) : 1;
-    const [R, G, B] = [u(lr), u(lg), u(lb)];
-    return A < 1 ? `rgba(${R}, ${G}, ${B}, ${A})` : `rgb(${R}, ${G}, ${B})`;
-}
-
-// Canvas normalises hsl / named / lab / #hex to rgb.
-function toRenderColor(value) {
-    if (/^oklch/i.test(value)) return oklchToRgb(value) || value;
-    try {
-        _colorCanvas.fillStyle = '#000000';
-        _colorCanvas.fillStyle = value;
-        return _colorCanvas.fillStyle;
-    } catch (e) {
-        return value;
-    }
-}
-
-function resolveColor(value) {
-    if (Array.isArray(value)) return value.map(resolveColor);
-    if (typeof value !== 'string') return value;
-    if (!/var\(|oklch|oklab|hsl|color-mix|lab\(|lch\(|^#|^rgb/.test(value)) return value;
-    let v = value;
-    // Step 1: resolve CSS custom properties (var(--x)) to their computed value.
-    if (v.includes('var(')) {
-        if (!_colorProbe.isConnected) document.body.appendChild(_colorProbe);
-        _colorProbe.style.color = '';
-        _colorProbe.style.color = v;
-        v = getComputedStyle(_colorProbe).color || v;
-    }
-    // Step 2: normalise whatever color space we got to rgb for ApexCharts.
-    return toRenderColor(v);
-}
-
-function themeColor(name, fallback = '') {
-    const v = resolveColor(`var(${name})`);
-    return v || fallback;
-}
-
-function isDark() {
-    return document.documentElement.classList.contains('dark');
-}
-
-function isPlainObject(v) {
-    return v && typeof v === 'object' && !Array.isArray(v);
-}
-
-function deepMerge(target, source) {
-    const out = { ...target };
-    for (const key in source) {
-        if (isPlainObject(source[key]) && isPlainObject(out[key])) {
-            out[key] = deepMerge(out[key], source[key]);
-        } else {
-            out[key] = source[key];
-        }
-    }
-    return out;
-}
-
-// Recursively resolve any color-looking string leaves inside an options object.
-function resolveColorsDeep(obj) {
-    if (Array.isArray(obj)) return obj.map(resolveColorsDeep);
-    if (isPlainObject(obj)) {
-        const out = {};
-        for (const k in obj) out[k] = resolveColorsDeep(obj[k]);
-        return out;
-    }
-    if (typeof obj === 'string' && /var\(|oklch/.test(obj)) return resolveColor(obj);
-    return obj;
-}
-
-function chartBaseOptions() {
-    const muted = themeColor('--muted-foreground');
-    const border = themeColor('--border');
-    const card = themeColor('--popover');
-    return {
-        chart: {
-            fontFamily: 'inherit',
-            background: 'transparent',
-            toolbar: { show: false },
-            zoom: { enabled: false },
-            parentHeightOffset: 0,
-            animations: { enabled: true, speed: 350 },
-            redrawOnParentResize: true,
-        },
-        grid: {
-            borderColor: border,
-            strokeDashArray: 4,
-            xaxis: { lines: { show: false } },
-            padding: { left: 8, right: 8, top: 0, bottom: 0 },
-        },
-        dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: 2, lineCap: 'round' },
-        legend: {
-            fontSize: '12px',
-            labels: { colors: muted },
-            markers: { width: 8, height: 8, radius: 2 },
-            itemMargin: { horizontal: 8, vertical: 4 },
-        },
-        tooltip: {
-            theme: isDark() ? 'dark' : 'light',
-            style: { fontSize: '12px', fontFamily: 'inherit' },
-        },
-        xaxis: {
-            labels: { style: { colors: muted, fontSize: '12px', fontFamily: 'inherit' } },
-            axisBorder: { show: false },
-            axisTicks: { show: false },
-            crosshairs: { stroke: { color: border, dashArray: 0 } },
-        },
-        yaxis: {
-            labels: { style: { colors: muted, fontSize: '12px', fontFamily: 'inherit' } },
-        },
-        states: { hover: { filter: { type: 'lighten', value: 0.05 } } },
-        plotOptions: { bar: { borderRadius: 6, borderRadiusApplication: 'end' } },
-    };
-}
-
-function buildChartOptions(raw) {
-    const base = chartBaseOptions();
-    const top = {
-        chart: { type: raw.type || 'line', height: raw.height || 250 },
-        series: raw.series || [],
-        colors: resolveColor(raw.colors || []),
-    };
-    if (Array.isArray(raw.labels)) top.labels = raw.labels;
-    const merged = deepMerge(base, top);
-    return deepMerge(merged, resolveColorsDeep(raw.options || {}));
-}
-
-window.Chart = { resolveColor, themeColor, isDark, deepMerge, buildChartOptions, load: loadApex };
-
-function observeTheme(callback) {
-    let timer = null;
-    const obs = new MutationObserver(() => {
-        clearTimeout(timer);
-        timer = setTimeout(callback, 60);
-    });
-    obs.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['class', 'data-theme', 'data-base'],
-    });
-    return obs;
-}
-window.Chart.observeTheme = observeTheme;
-
-const shadcnChart = (raw = {}) => ({
-    _chart: null,
-    _raw: raw,
-    _obs: null,
-    _ready: false,
-    init() {
-        this.$nextTick(async () => {
-            if (!this.$refs.canvas) return;
-            const ApexCharts = await loadApex();
-            this._chart = new ApexCharts(this.$refs.canvas, buildChartOptions(this._raw));
-            await this._chart.render();
-            this._ready = true;
-            // Re-theme only AFTER the first render is committed.
-            this._obs = observeTheme(() => this._rerender());
-        });
-    },
-    _rerender() {
-        if (this._chart && this._ready) {
-            try {
-                this._chart.updateOptions(buildChartOptions(this._raw), false, false);
-            } catch (e) { /* ignore transient theme races */ }
-        }
-    },
-    setSeries(series) {
-        this._raw.series = series;
-        if (this._chart && this._ready) this._chart.updateSeries(series, true);
-    },
-    setRaw(patch) {
-        this._raw = deepMerge(this._raw, patch);
-        this._rerender();
-    },
-    destroy() {
-        if (this._chart) this._chart.destroy();
-        if (this._obs) this._obs.disconnect();
-    },
-});
+// A persistent loading toast (no auto-dismiss).
+window.toast.loading = (opts) => {
+    const detail = typeof opts === 'string' ? { title: opts } : (opts || {});
+    window.dispatchEvent(new CustomEvent('toast', { detail: { duration: Infinity, ...detail, type: 'loading' } }));
+};
+// Promise toast: shows `loading`, then swaps to `success`/`error` on settle.
+//   toast.promise(p, { loading, success, error }) — success/error may be functions of the value.
+let _toastPromiseId = 0;
+window.toast.promise = (promise, msgs = {}) => {
+    const id = 'tp-' + (++_toastPromiseId);
+    const text = (m, v) => (typeof m === 'function' ? m(v) : m);
+    window.dispatchEvent(new CustomEvent('toast', { detail: { id, type: 'loading', title: text(msgs.loading) || 'Loading…', duration: Infinity } }));
+    Promise.resolve(typeof promise === 'function' ? promise() : promise)
+        .then((data) => window.dispatchEvent(new CustomEvent('toast-update', { detail: { id, type: 'success', title: text(msgs.success, data) || 'Success', duration: 4000 } })))
+        .catch((err) => window.dispatchEvent(new CustomEvent('toast-update', { detail: { id, type: 'error', title: text(msgs.error, err) || 'Error', duration: 4000 } })));
+    return promise;
+};
 
 // ---------------------------------------------------------------------------
 // Calendar — Alpine day-picker mirroring shadcn/react-day-picker's <Calendar>.
@@ -370,9 +205,12 @@ const calendar = (cfg = {}) => ({
     captionLayout: cfg.captionLayout || 'label',
     showWeekNumber: !!cfg.showWeekNumber,
     disableNavigation: !!cfg.disableNavigation,
-    minDays: cfg.min || null,
-    maxDays: cfg.max || null,
+    minDays: cfg.minDays ?? cfg.min ?? null,   // explicit minDays/maxDays preferred; min/max kept for back-compat
+    maxDays: cfg.maxDays ?? cfg.max ?? null,
     disabledCfg: cfg.disabled || null,
+    minDate: cfg.minDate ? _parse(cfg.minDate) : null,
+    maxDate: cfg.maxDate ? _parse(cfg.maxDate) : null,
+    outOfRange: cfg.outOfRange || 'disable',  // 'disable' (prevent) | 'flag' (allow + red)
     modifiers: cfg.modifiers || {},
     modifiersClass: cfg.modifiersClass || {},
     startMonth: null,
@@ -461,6 +299,11 @@ const calendar = (cfg = {}) => ({
             for (let d = 0; d < 7; d++) {
                 const day = new Date(start);
                 day.setDate(start.getDate() + w * 7 + d);
+                // Stamp prev/next-month status here, where the panel month is correct. The
+                // template reads day.__outside instead of isOutside(day, m): the outer-loop `m`
+                // goes stale in the nested per-cell bindings after a month navigation, which
+                // mislabels outside days (only visible once outside days are hidden/collapsed).
+                day.__outside = day.getMonth() !== month;
                 days.push(day);
             }
             weeks.push(days);
@@ -477,7 +320,13 @@ const calendar = (cfg = {}) => ({
     // ---- predicates ----
     isOutside(d, m) { return d.getMonth() !== m.getMonth(); },
     isToday(d) { return _sameDay(d, new Date()); },
+    isOutOfRange(d) {
+        return !!((this.minDate && d < this.minDate) || (this.maxDate && d > this.maxDate));
+    },
     isDisabled(d) {
+        // Out-of-range dates are disabled UNLESS outOfRange === 'flag' (then they stay selectable
+        // but are flagged red via data-out-of-range + the picker's invalid state).
+        if (this.outOfRange !== 'flag' && this.isOutOfRange(d)) return true;
         if (this.startMonth && d < new Date(this.startMonth.getFullYear(), this.startMonth.getMonth(), 1)) return true;
         if (this.endMonth && d > new Date(this.endMonth.getFullYear(), this.endMonth.getMonth() + 1, 0)) return true;
         const c = this.disabledCfg;
@@ -641,8 +490,8 @@ const calendar = (cfg = {}) => ({
 // font, shadow, spacing, tracking) into a COMPLETE, self-contained
 // resources/css/app.css the user can paste as-is.
 //
-// We emit the full foundations scaffold (the Tailwind + tw-animate-css imports,
-// the @source globs and the @theme inline mapping) followed by the live
+// We emit the full foundations scaffold (the Tailwind import, the @source globs
+// and the @theme inline mapping) followed by the live
 // :root/.dark tokens. The @theme inline mapping is what turns the tokens into
 // utilities (bg-background, shadow-md, tracking-wide, …) — without it Tailwind
 // generates nothing and a pasted theme renders unstyled. The :root block also
@@ -653,7 +502,6 @@ const calendar = (cfg = {}) => ({
 // the @theme inline mapping or @source globs there, mirror them here too.
 // ---------------------------------------------------------------------------
 const THEME_SCAFFOLD = `@import 'tailwindcss';
-@import 'tw-animate-css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../vendor/mallardduck/blade-lucide-icons/resources/svg/*.svg';
@@ -876,6 +724,85 @@ function blatLabelledByDirective(el, { expression }, { evaluate }) {
     });
 }
 
+// x-blat-dialog-layer — put a teleported popover in the right stacking layer. When its
+// home (the <template x-teleport> Alpine left behind, `el._x_teleportBack`) sits inside a
+// native <dialog> — e.g. a Flux <flux:modal>, opened with showModal() — move the popover
+// into that dialog. A modal <dialog> lives in the browser's *top layer*, which paints above
+// everything in <body> regardless of z-index; a popover teleported to <body> would otherwise
+// render behind the modal (and be inert). Inside the dialog it shares the top layer and stays
+// interactive. With no native <dialog> ancestor it stays in <body> (the teleport default),
+// still escaping any overflow-clipping ancestor. Pure DOM — works in any component's scope.
+// x-blat-anchor — positions a teleported popover at its trigger, like Alpine's x-anchor,
+// but built for popovers that live in a modal's top layer and can be tall:
+//   • strategy: 'fixed' — viewport-relative coords. x-anchor's default 'absolute' strategy
+//     mis-positions a popover once it's relocated into a native <dialog> (Flux modal), because
+//     the offsetParent math is wrong for the top layer; 'fixed' is correct there and in <body>.
+//   • size() — caps the popover's height to the space actually available and lets it scroll,
+//     so a calendar / long menu can't overflow off-screen when the trigger sits low (the exact
+//     failure inside a centered modal). flip()+shift() keep it pointed at and within the viewport.
+// Modifiers mirror x-anchor: a placement (e.g. bottom-start), `.offset N`, and `.no-flip`.
+const BLAT_ANCHOR_PLACEMENTS = ['top', 'top-start', 'top-end', 'right', 'right-start', 'right-end', 'bottom', 'bottom-start', 'bottom-end', 'left', 'left-start', 'left-end'];
+function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cleanup }) {
+    const placement = BLAT_ANCHOR_PLACEMENTS.find((p) => modifiers.includes(p)) || 'bottom';
+    let offsetValue = 0;
+    if (modifiers.includes('offset')) {
+        const i = modifiers.indexOf('offset');
+        offsetValue = modifiers[i + 1] !== undefined ? Number(modifiers[i + 1]) : 0;
+    }
+    const allowFlip = !modifiers.includes('no-flip');
+    const PAD = 8;
+    // The popover's own design cap (e.g. `max-h-96`), read once before we set anything inline.
+    // size() only shrinks *below* this when the viewport is tight — it never makes the popover
+    // taller than the component intended. Infinity when the component sets no cap (e.g. calendars).
+    const designMax = parseFloat(getComputedStyle(el).maxHeight) || Infinity;
+    const getReference = evaluateLater(expression);
+
+    let stop = null;
+    getReference((reference) => {
+        if (!reference || stop) return;
+        const update = () =>
+            computePosition(reference, el, {
+                strategy: 'fixed',
+                placement,
+                middleware: [
+                    flOffset(offsetValue),
+                    allowFlip && flip({ padding: PAD }),
+                    shift({ padding: PAD }),
+                    size({
+                        padding: PAD,
+                        apply({ availableHeight }) {
+                            // Fit the available space but never exceed the design cap (min 140px so it
+                            // never collapses). The popover carries overflow-y-auto, so it scrolls.
+                            const h = Math.min(designMax, Math.max(140, Math.floor(availableHeight)));
+                            el.style.maxHeight = Number.isFinite(h) ? `${h}px` : '';
+                        },
+                    }),
+                ].filter(Boolean),
+            }).then(({ x, y }) => {
+                Object.assign(el.style, { position: 'fixed', left: `${x}px`, top: `${y}px` });
+            });
+        stop = autoUpdate(reference, el, update);
+    });
+
+    cleanup(() => stop && stop());
+}
+
+function blatDialogLayerDirective(el) {
+    queueMicrotask(() => {
+        const home = el._x_teleportBack;
+        if (!home) return;
+        const target = home.closest('dialog') || document.body;
+        if (el.parentElement !== target) {
+            target.appendChild(el);
+            // Reparenting changes the popover's offsetParent. x-anchor (floating-ui) positions
+            // it as `position:absolute; top/left` computed against the *old* parent — stale after
+            // the move. Nudge floating-ui's autoUpdate (it listens for resize/scroll) to recompute
+            // against the new containing block so the popover re-anchors to its trigger.
+            requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+        }
+    });
+}
+
 // x-blat-field — wires a form field's control to its label/description/error:
 //   aria-describedby ← description + error ids, aria-invalid + data-invalid when
 //   an error is present, and label[for] ← control id when not already set. Radix/
@@ -1087,9 +1014,23 @@ const blatMenubar = () => ({
 // $blatNav/$blatType on the listbox; Enter/Space on a focused option selects and
 // closes, restoring focus to the trigger.
 const blatSelect = (config = {}) => ({
+    multiple: !!config.multiple,
     open: false,
-    value: config.value != null ? String(config.value) : '',
+    // `entangled` (Livewire wire:model) passes the value through verbatim — coercing it would
+    // sever the two-way binding. Otherwise normalise to string(s) as before.
+    value: config.entangled
+        ? config.value
+        : (config.multiple
+            ? (Array.isArray(config.value)
+                  ? config.value.map(String)
+                  : config.value != null && config.value !== ''
+                    ? [String(config.value)]
+                    : [])
+            : config.value != null
+              ? String(config.value)
+              : ''),
     label: '',
+    selected: [], // [{ value, label }] — multiple only; seeded by each item + selectOption
     _list: null,
     _trigger: null,
     get _options() {
@@ -1099,12 +1040,16 @@ const blatSelect = (config = {}) => ({
               )
             : [];
     },
+    isSelected(val) {
+        val = String(val);
+        return this.multiple ? this.value.includes(val) : this.value === val;
+    },
     openList() {
         this.open = true;
         this.$nextTick(() => {
             if (!this._list) return;
             const opts = this._options;
-            (opts.find((o) => o.dataset.value === this.value) || opts[0] || this._list).focus();
+            (opts.find((o) => this.isSelected(o.dataset.value)) || opts[0] || this._list).focus();
         });
     },
     toggleList() {
@@ -1116,9 +1061,38 @@ const blatSelect = (config = {}) => ({
         if (returnFocus && this._trigger) this.$nextTick(() => this._trigger.focus());
     },
     selectOption(val, lbl) {
-        this.value = String(val);
+        val = String(val);
+        if (this.multiple) {
+            const i = this.value.indexOf(val);
+            if (i === -1) {
+                this.value.push(val);
+                if (!this.selected.some((s) => s.value === val)) this.selected.push({ value: val, label: lbl });
+            } else {
+                this.value.splice(i, 1);
+                const j = this.selected.findIndex((s) => s.value === val);
+                if (j !== -1) this.selected.splice(j, 1);
+            }
+            return; // keep the list open for further picks
+        }
+        this.value = val;
         this.label = lbl;
         this.close();
+    },
+    // Each <select-item> calls this on init so pre-selected chips/labels resolve their text.
+    seedSelected(val, lbl) {
+        val = String(val);
+        if (this.multiple) {
+            if (this.isSelected(val) && !this.selected.some((s) => s.value === val)) this.selected.push({ value: val, label: lbl });
+        } else if (this.value === val) {
+            this.label = lbl;
+        }
+    },
+    remove(val) {
+        val = String(val);
+        const i = this.value.indexOf(val);
+        if (i !== -1) this.value.splice(i, 1);
+        const j = this.selected.findIndex((s) => s.value === val);
+        if (j !== -1) this.selected.splice(j, 1);
     },
 });
 
@@ -1174,28 +1148,143 @@ const blatCommand = () => ({
     },
 });
 
+// blatListbox — shared filtered-listbox engine behind <x-ui.combobox> (and its
+// inline-input variant, formerly <x-ui.autocomplete>). Both render the SAME
+// option list + selection model; they only differ in how the list is opened:
+//
+//   trigger: 'button' — a button opens a popover with the search input INSIDE it
+//            (the classic shadcn Combobox). `query` resets on open; filtering is
+//            always on; focus returns to the trigger on close.
+//   trigger: 'input'  — the field itself IS the text input (the "autocomplete"
+//            shape). `query` mirrors the selected label (single select); typing
+//            filters; picking a single value fills the input and closes.
+//
+// Shared primitives (single-sourced here): isSelected, selected, matches,
+// visible, visibleCount, ensureActive, move, edge, selectActive, select, remove.
+const blatListbox = (config = {}) => ({
+    trigger: config.trigger || 'button', // 'button' | 'input'
+    open: false,
+    // `filtering` only matters for the input trigger: the list shows ALL options
+    // until the user actually types, so opening a field with a value shows siblings.
+    filtering: false,
+    multiple: !!config.multiple,
+    value: config.value ?? (config.multiple ? [] : ''),
+    activeValue: null,
+    options: config.options || [],
+    // Seed the query: input/single starts showing the selected label.
+    query: config.query ?? '',
+
+    isSelected(v) { return this.multiple ? this.value.includes(v) : this.value === v; },
+    get selected() { return this.options.filter((o) => this.isSelected(o.value)); },
+    // Single-select trigger label (button variant renders this).
+    get label() { const o = this.options.find((o) => o.value === this.value); return o ? o.label : ''; },
+    matches(label) { return label.toLowerCase().includes(this.query.toLowerCase()); },
+    get visible() {
+        // Input trigger only filters once the user types; button always filters by query.
+        if (this.trigger === 'input' && !this.filtering) return this.options;
+        return this.options.filter((o) => this.matches(o.label));
+    },
+    get visibleCount() { return this.visible.length; },
+    ensureActive() {
+        const v = this.visible;
+        if (!v.length) { this.activeValue = null; return; }
+        if (!v.some((o) => o.value === this.activeValue)) {
+            this.activeValue = (v.find((o) => this.isSelected(o.value)) || v[0]).value;
+        }
+    },
+    move(dir) {
+        if (this.trigger === 'input' && !this.open) { this.openList(); return; }
+        const v = this.visible;
+        if (!v.length) return;
+        let i = v.findIndex((o) => o.value === this.activeValue);
+        i = i < 0 ? 0 : (i + dir + v.length) % v.length;
+        this.activeValue = v[i].value;
+    },
+    edge(pos) {
+        const v = this.visible;
+        if (!v.length) return;
+        this.activeValue = (pos === 'last' ? v[v.length - 1] : v[0]).value;
+    },
+    openList() {
+        this.open = true;
+        if (this.trigger === 'button') {
+            this.query = '';
+            this.$nextTick(() => { this.ensureActive(); (this.$refs.search || this.$refs.list)?.focus(); });
+        } else {
+            this.filtering = false;
+            this.$nextTick(() => this.ensureActive());
+        }
+    },
+    // Input trigger: typing opens + filters; single select clears the committed value.
+    onInput() {
+        if (!this.multiple) this.value = '';
+        this.open = true;
+        this.filtering = true;
+        this.$nextTick(() => this.ensureActive());
+    },
+    toggle() { this.open ? this.close(false) : this.openList(); },
+    close(returnFocus = true) {
+        if (!this.open) return;
+        this.open = false;
+        this.filtering = false;
+        if (this.trigger === 'button' && returnFocus) this.$nextTick(() => this.$refs.trigger?.focus());
+    },
+    selectActive() { if (this.activeValue != null) this.select(this.activeValue); },
+    select(v) {
+        if (this.multiple) {
+            const i = this.value.indexOf(v);
+            if (i === -1) this.value.push(v); else this.value.splice(i, 1);
+            if (this.trigger === 'input') {
+                this.query = '';
+                this.filtering = false;
+                this.$nextTick(() => this.$refs.input?.focus());
+            }
+            return; // keep the list open for further picks
+        }
+        if (this.trigger === 'input') {
+            const o = this.options.find((x) => x.value === v);
+            if (o) { this.value = o.value; this.query = o.label; }
+            this.close();
+            return;
+        }
+        this.value = this.value === v ? '' : v; // toggle off in single button mode (matches shadcn)
+        this.close();
+        this.query = '';
+    },
+    remove(v) { const i = this.value.indexOf(v); if (i !== -1) this.value.splice(i, 1); },
+    // Input trigger: Backspace on an empty query pops the last chip.
+    backspace() { if (this.multiple && this.query === '' && this.value.length) this.value.splice(this.value.length - 1, 1); },
+});
+
 // ---------------------------------------------------------------------------
-// Register every BlatUI Alpine piece — plugins, the theme store, the chart +
-// calendar components and the a11y primitives — into an Alpine instance.
+// Register every BlatUI Alpine piece — plugins, the theme store, the calendar
+// component and the a11y primitives — into an Alpine instance. (Charts are
+// opt-in: see blatui-charts.js / registerCharts.)
 // Call this BEFORE Alpine.start().
 //
 //   Greenfield (no Alpine yet): the published blatui.js does this for you.
 //   Existing Alpine app:        import { registerBlatUI } from './blatui-core.js'
 //                               and call registerBlatUI(Alpine) before your start.
 // ---------------------------------------------------------------------------
-export function registerBlatUI(Alpine) {
+export function registerBlatUI(Alpine, options = {}) {
+    // darkMode: 'class' (default — light until an explicit toggle), 'system' (follow the OS
+    // prefers-color-scheme), or false (hard light-only). The default does NOT auto-apply the
+    // OS dark preference, so a light-only app never flips to an unreadable dark on a dark OS.
+    if (options.darkMode !== undefined) themeStore.darkMode = options.darkMode;
     Alpine.plugin(anchor);
     Alpine.plugin(focus);
     Alpine.plugin(collapse);
     Alpine.store('theme', themeStore);
-    Alpine.data('shadcnChart', shadcnChart);
     Alpine.data('calendar', calendar);
     Alpine.data('blatMenu', blatMenu);
     Alpine.data('blatMenubar', blatMenubar);
     Alpine.data('blatSelect', blatSelect);
+    Alpine.data('blatListbox', blatListbox);
     Alpine.data('blatCommand', blatCommand);
     Alpine.directive('blat-trigger', blatTriggerDirective);
     Alpine.directive('blat-labelledby', blatLabelledByDirective);
+    Alpine.directive('blat-anchor', blatAnchorDirective);
+    Alpine.directive('blat-dialog-layer', blatDialogLayerDirective);
     Alpine.directive('blat-field', blatFieldDirective);
     Alpine.magic('blatNav', blatNavMagic);
     Alpine.magic('blatType', blatTypeMagic);

@@ -70,3 +70,56 @@ jobs:
             exit 1
           fi
           echo "✓ stubs/ match the authored demo source."
+
+  starter-drift:
+    name: apps/starter is in sync with apps/demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regenerate the starter from the authored source
+        run: bash scripts/build-starter.sh
+      - name: Fail if the starter's generated files are stale
+        run: |
+          paths="apps/starter/resources/views/components/ui \
+                 apps/starter/resources/views/components/block \
+                 apps/starter/resources/css/blatui.css \
+                 apps/starter/resources/js/blatui-core.js \
+                 apps/starter/resources/js/blatui.js \
+                 apps/starter/resources/js/blatui-charts.js"
+          if ! git diff --quiet -- $paths; then
+            echo "::error::apps/starter is out of sync with apps/demo."
+            echo "The starter's components + foundations are GENERATED from apps/demo. Edit the demo"
+            echo "source, run 'bash scripts/build-starter.sh', and commit."
+            git diff --stat -- $paths
+            exit 1
+          fi
+          echo "✓ starter matches the authored demo source."
+
+  starter-tests:
+    name: Starter kit boots and renders
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/starter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, dom, fileinfo
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+      - name: Render tests (pages compile every ui/block/layout component)
+        run: php artisan test
+      - name: Install JS dependencies
+        run: npm ci
+      - name: Build front-end assets
+        run: npm run build

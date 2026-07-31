@@ -26,6 +26,11 @@
         ['code' => 'MA', 'name' => 'Morocco', 'dial' => '+212', 'flag' => '🇲🇦'],
         ['code' => 'AE', 'name' => 'United Arab Emirates', 'dial' => '+971', 'flag' => '🇦🇪'],
     ];
+
+    // Livewire bridge — forward a consumer's wire:model onto the native tel <input>.
+    // Inert without Livewire (an empty attribute bag renders nothing).
+    $wireAttrs = $attributes->whereStartsWith('wire:model');
+    $attributes = $attributes->whereDoesntStartWith('wire:model');
 @endphp
 
 <div
@@ -70,6 +75,7 @@
         inputmode="numeric"
         autocomplete="tel-national"
         placeholder="{{ $placeholder }}"
+        {{ $wireAttrs }}
         class="border-input dark:bg-input/30 placeholder:text-muted-foreground flex h-9 w-full min-w-0 rounded-r-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:z-10 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
     >
 
@@ -78,7 +84,7 @@
         x-cloak
         @click.outside="open = false"
         @keydown.escape.stop="open = false"
-        class="bg-popover text-popover-foreground absolute top-full left-0 z-50 mt-1 w-64 overflow-hidden rounded-md border shadow-md"
+        class="bg-popover text-popover-foreground absolute top-full start-0 z-50 mt-1 w-64 overflow-hidden rounded-md border shadow-md"
     >
         <div class="flex h-9 items-center gap-2 border-b px-3">
             <x-lucide-search class="size-4 shrink-0 opacity-50" aria-hidden="true" />
@@ -95,7 +101,7 @@
                 >
                     <span class="text-base leading-none" x-text="c.flag"></span>
                     <span class="truncate" x-text="c.name"></span>
-                    <span class="text-muted-foreground ml-auto" x-text="c.dial"></span>
+                    <span class="text-muted-foreground ms-auto" x-text="c.dial"></span>
                 </button>
             </template>
         </div>

@@ -6,6 +6,14 @@
     'orientation' => 'horizontal',   // horizontal | vertical
 ])
 
+@php
+    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    // No-op (and stripped) without Livewire, so the component still works in plain Blade/Alpine.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+@endphp
+
 <div
     data-slot="toggle-group"
     data-variant="{{ $variant }}"
@@ -14,7 +22,7 @@
     data-orientation="{{ $orientation }}"
     x-data="{
         type: @js($type),
-        value: @js($type === 'multiple' ? (array) ($value ?? []) : $value),
+        value: @if ($hasWire)@entangle($wireModel)@else @js($type === 'multiple' ? (array) ($value ?? []) : $value)@endif,
         rovingValue: null,
         toggle(v) {
             if (this.type === 'multiple') {

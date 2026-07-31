@@ -72,6 +72,12 @@
         }
     }
     $hasPresets = count($presetList) > 0;
+
+    // Livewire bridge — entangle the single-date value with a consumer's wire:model when present.
+    // No-op (and stripped) without Livewire. Range mode keeps its from/to hidden inputs.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
 @endphp
 
 <div
@@ -79,7 +85,7 @@
     x-data="{
         open: false,
         mode: @js($mode),
-        value: @js($isRange ? null : $value),
+        value: @if ($hasWire && ! $isRange)@entangle($wireModel)@else @js($isRange ? null : $value)@endif,
         from: @js($fromDate), to: @js($toDate),
         minNights: @js($minNights !== null ? (int) $minNights : null),
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),
@@ -184,7 +190,7 @@
         :aria-controls="$id('blat-datepicker')"
         :class="{ 'text-muted-foreground': !label }"
         :aria-invalid="invalid ? 'true' : null"
-        class="{{ $width }} border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-left text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20"
+        class="{{ $width }} border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-start text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20"
     >
         <x-lucide-calendar class="size-4 opacity-50" aria-hidden="true" />
         <span class="truncate" x-text="label || @js($placeholder)"></span>
@@ -192,11 +198,12 @@
 
     {{-- Teleported to <body> so the popover is never clipped by an overflow-hidden ancestor
          (a card, table cell, the docs preview…). x-anchor still positions it at the trigger. --}}
-    <template x-teleport="body">
+    <template x-teleport="body" wire:ignore>
     <div
+        x-blat-dialog-layer
         x-show="open"
         x-cloak
-        x-anchor.bottom-start.offset.4="$refs.trigger"
+        x-blat-anchor.bottom-start.offset.4="$refs.trigger"
         @click.outside="open = false"
         @keydown.escape.window="open = false"
         {{-- Listener lives here (inside the teleported popover) so it catches the calendar's
@@ -209,21 +216,21 @@
         role="dialog"
         aria-label="{{ $isRange ? 'Choose a date range' : 'Choose date' }}"
         tabindex="-1"
-        class="bg-popover text-popover-foreground z-50 w-auto origin-top overflow-hidden rounded-md border p-0 shadow-md"
+        class="bg-popover text-popover-foreground z-50 flex w-auto origin-top flex-col overflow-y-auto overscroll-contain rounded-md border p-0 shadow-md"
         x-transition:enter="transition ease-out duration-150"
         x-transition:enter-start="opacity-0 scale-95"
         x-transition:enter-end="opacity-100 scale-100"
     >
         <div x-ref="cal" class="flex flex-col sm:flex-row">
             @if ($hasPresets)
-                <div class="flex shrink-0 flex-row gap-1 overflow-x-auto border-b p-2 sm:max-w-[9rem] sm:flex-col sm:gap-0.5 sm:overflow-visible sm:border-r sm:border-b-0"
+                <div class="flex shrink-0 flex-row gap-1 overflow-x-auto border-b p-2 sm:max-w-[9rem] sm:flex-col sm:gap-0.5 sm:overflow-visible sm:border-e sm:border-b-0"
                     role="group" aria-label="{{ __('Presets') }}">
                     @foreach ($presetList as $p)
                         <button
                             type="button"
                             @click="applyPreset(@js($p))"
                             :data-active="isActivePreset(@js($p))"
-                            class="hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground focus-visible:ring-ring/50 inline-flex shrink-0 cursor-pointer items-center rounded-md px-2.5 py-1.5 text-left text-sm whitespace-nowrap transition-colors outline-none focus-visible:ring-[2px] sm:w-full"
+                            class="hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground focus-visible:ring-ring/50 inline-flex shrink-0 cursor-pointer items-center rounded-md px-2.5 py-1.5 text-start text-sm whitespace-nowrap transition-colors outline-none focus-visible:ring-[2px] sm:w-full"
                         >{{ $p['label'] }}</button>
                     @endforeach
                 </div>
