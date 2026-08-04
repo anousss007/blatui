@@ -31,3 +31,4 @@ Thumbs.db
 CLAUDE.md
 .cursor/
 .aider*
+/tests/browser/shots

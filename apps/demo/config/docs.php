@@ -237,6 +237,10 @@ return [
 
     // Bold footgun callouts rendered above a component's examples. HTML allowed (trusted config).
     'notes' => [
+        'calendar' => [
+            'Since <strong>1.20</strong>, an incoming <code>calendar:set</code> / <code>calendar:set-range</code> / <code>calendar:today</code> <strong>no longer emits <code>calendar-change</code></strong>. That event now means "the user picked a day" and nothing else, so <em>close the popover when the selection is complete</em> can be written literally — a calendar that seeds itself on open no longer closes on the click that opened it. To observe programmatic changes too, listen for <code>calendar:updated</code> (<code>{ id, mode, value, source }</code>) and branch on <code>source</code>. Any re-entrancy flag you were carrying can go.',
+            'Driving a calendar from outside? Prefer <code>x-model</code> (the root exposes <code>x-modelable="value"</code>) over re-seeding it on every open, and give each instance a <code>calendar-id</code> so a <code>window</code>-level <code>calendar:*</code> event can target one calendar instead of every calendar on the page.',
+        ],
         'number-input' => [
             'Building a cart or product <strong>quantity stepper</strong>? Use <code>number-input</code> with <code>:min="1"</code> and a compact <code>size="sm"</code> — see the <em>Quantity selector</em> example below. (A separate <code>quantity-selector</code> component was removed in favour of this; it was the same control with different defaults.)',
         ],

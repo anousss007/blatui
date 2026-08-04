@@ -29,6 +29,8 @@ apps/demo/                     → authors + renders components; the live docs s
 apps/starter/                  → the Laravel starter kit
 scripts/build-package.sh       → regenerates stubs/ from apps/demo
 tests/                         → Testbench-based package tests
+apps/demo/tests/js/            → engine unit tests (node --test, no deps)
+apps/demo/tests/browser/       → Playwright acceptance runs (manual, see below)
 ```
 
 ## The loop
@@ -44,9 +46,25 @@ bash scripts/build-package.sh
 composer install && vendor/bin/pint && vendor/bin/phpunit
 ```
 
-CI runs the package tests (PHP 8.2–8.4), Pint, and a **drift check** that regenerates the package
-and fails if `stubs/` differs from the authored source — so a hand-edited or stale stub is
-rejected with a pointer back to the demo file.
+CI runs the package tests (PHP 8.2–8.4), Pint, the JS engine tests, and a **drift check** that
+regenerates the package and fails if `stubs/` differs from the authored source — so a hand-edited
+or stale stub is rejected with a pointer back to the demo file.
+
+### JS tests
+
+Components whose behaviour lives in `resources/js/blatui-core.js` have two extra layers:
+
+```bash
+cd apps/demo
+npm test                      # engine unit tests — zero-dependency `node --test`, run in CI
+
+# browser acceptance — NOT in CI: needs a served demo + a ~115 MB browser download.
+# Run it by hand before releasing a change to the calendar or the pickers.
+npm i -D playwright && npx playwright install chromium
+npm run build && php artisan serve --port=8123
+npm run test:browser
+npm run test:browser -- https://blatui.remix-it.com   # or against the live site
+```
 
 ## Pull requests
 
