@@ -19,9 +19,11 @@
         {{ $slot }}
     </div>
 @else
-{{-- Desktop --}}
+{{-- Desktop. The consumer's attributes land here (the in-flow root); the mobile
+     overlay below is a teleported sibling, so it only mirrors the classes —
+     duplicating id/x-data/aria across both would collide in the DOM. --}}
 <div
-    class="text-sidebar-foreground group peer hidden md:block"
+    {{ $attributes->twMerge('text-sidebar-foreground group peer hidden md:block') }}
     :data-state="open ? 'expanded' : 'collapsed'"
     :data-collapsible="open ? '' : @js($collapsible)"
     data-variant="{{ $variant }}"
@@ -83,7 +85,7 @@
             x-transition:leave="transition ease-in-out duration-200"
             x-transition:leave-start="translate-x-0"
             x-transition:leave-end="{{ $isLeft ? '-translate-x-full' : 'translate-x-full' }}"
-            class="bg-sidebar text-sidebar-foreground fixed inset-y-0 {{ $isLeft ? 'left-0' : 'right-0' }} z-50 flex h-svh w-(--sidebar-width) flex-col"
+            {{ $attributes->only('class')->twMerge('bg-sidebar text-sidebar-foreground fixed inset-y-0 '.($isLeft ? 'left-0' : 'right-0').' z-50 flex h-svh w-(--sidebar-width) flex-col') }}
         >
             {{ $slot }}
         </div>

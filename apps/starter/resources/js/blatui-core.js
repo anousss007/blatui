@@ -656,6 +656,7 @@ const THEME_SCAFFOLD = `@import 'tailwindcss';
     --font-sans: var(--font-sans);
     --font-serif: var(--font-serif);
     --font-mono: var(--font-mono);
+    --font-heading: var(--font-heading);
 
     /* Radius scale (derived from --radius) */
     --radius-sm: calc(var(--radius) - 4px);
@@ -701,6 +702,12 @@ const THEME_SCAFFOLD = `@import 'tailwindcss';
     --color-accent-foreground: var(--accent-foreground);
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-info: var(--info);
+    --color-info-foreground: var(--info-foreground);
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
@@ -731,6 +738,17 @@ const THEME_SCAFFOLD = `@import 'tailwindcss';
             opacity: 0;
         }
     }
+
+    --animate-progress-indeterminate: progress-indeterminate 1.4s ease-in-out infinite;
+
+    @keyframes progress-indeterminate {
+        0% {
+            left: -40%;
+        }
+        100% {
+            left: 100%;
+        }
+    }
 }`;
 
 // Every token the @theme inline mapping references — all must land in :root so
@@ -739,7 +757,7 @@ const THEME_TOKENS = [
     // Geometry / rhythm
     '--radius', '--spacing', '--tracking-normal',
     // Fonts
-    '--font-sans', '--font-serif', '--font-mono',
+    '--font-sans', '--font-serif', '--font-mono', '--font-heading',
     // Shadows
     '--shadow-2xs', '--shadow-xs', '--shadow-sm', '--shadow',
     '--shadow-md', '--shadow-lg', '--shadow-xl', '--shadow-2xl',
@@ -752,6 +770,9 @@ const THEME_TOKENS = [
     '--muted', '--muted-foreground',
     '--accent', '--accent-foreground',
     '--destructive', '--destructive-foreground',
+    '--success', '--success-foreground',
+    '--warning', '--warning-foreground',
+    '--info', '--info-foreground',
     '--border', '--input', '--ring',
     '--chart-1', '--chart-2', '--chart-3', '--chart-4', '--chart-5',
     '--sidebar', '--sidebar-foreground', '--sidebar-primary', '--sidebar-primary-foreground',
@@ -765,6 +786,12 @@ function _readTokens() {
         const v = cs.getPropertyValue(t).trim();
         if (v) out[t] = v;
     });
+    // getComputedStyle resolves var() references, so an untouched heading font
+    // exports as a frozen copy of the body stack. Re-tie it, otherwise editing
+    // --font-sans in the exported file silently stops moving the headings.
+    if (out['--font-heading'] && out['--font-heading'] === out['--font-sans']) {
+        out['--font-heading'] = 'var(--font-sans)';
+    }
     return out;
 }
 

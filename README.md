@@ -147,6 +147,31 @@ Components land in `resources/views/components/ui/` as Blade tags:
 `blatui:add` prints any extra `composer`/`npm` packages a component needs
 (e.g. charts pull in `apexcharts`).
 
+## Keeping components up to date
+
+You own the copied files, so an upgrade is never automatic — `blatui:update`
+shows you what changed and lets you decide, file by file:
+
+```bash
+# What would change across everything you have installed?
+php artisan blatui:update --dry-run --diff
+
+# Update, confirming each file that differs from the version we ship
+php artisan blatui:update
+
+# Just these families, no questions asked (your version is kept as .bak)
+php artisan blatui:update button card --force
+```
+
+A file that differs is either your customisation or an outdated copy — nothing on
+disk tells the two apart, so BlatUI never overwrites one without showing the diff
+and asking. `--force` still writes a `.bak` next to each file it replaces (opt out
+with `--no-backup`). Files a family gained in a newer release are simply added.
+
+The CSS/JS foundations are published, not copied — re-sync those with
+`vendor:publish --tag=blatui-foundations --force`; `blatui:init` tells you when
+the engine has fallen behind.
+
 ## Blocks & charts
 
 Blocks (dashboards, sidebars, login pages…) and the 70 charts are **copy-paste
@@ -162,6 +187,9 @@ grab the exact source you want rather than installing it:
 | `blatui:init` | Doctor — checks packages, Tailwind v4, theme tokens, Alpine/engine wiring |
 | `blatui:list [component]` | List all component families, or detail one |
 | `blatui:add <components...>` | Copy components (+ deps) into your project |
+| `blatui:update [components...]` | Diff installed components against this version and update them (`--dry-run`, `--diff`, `--force`) |
+| `blatui:doctor [path]` | Scan your Blade for known footguns (typeless buttons in forms, leaked tags) |
+| `blatui:mcp` | Run the MCP server (stdio) so an AI editor can search and install components |
 | `vendor:publish --tag=blatui-foundations` | Publish theme CSS + JS engine |
 
 ## Contributing

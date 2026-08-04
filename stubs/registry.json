@@ -2141,7 +2141,8 @@
         "dependencies": [],
         "packages": {
             "composer": [
-                "mallardduck/blade-lucide-icons"
+                "mallardduck/blade-lucide-icons",
+                "gehrisandro/tailwind-merge-laravel"
             ]
         }
     },

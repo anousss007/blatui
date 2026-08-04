@@ -189,6 +189,39 @@ document.addEventListener('alpine:init', () => {
                 </div>
             </div>
 
+            {{-- Updating installed components --}}
+            <div class="mt-10 border-t pt-10">
+                <h2 id="updating" class="mb-2 scroll-mt-20 text-2xl font-bold tracking-tight">Keeping components up to date</h2>
+                <p class="text-muted-foreground mb-6 text-sm">You own the copied files, so nothing updates behind your back. <code class="bg-muted rounded px-1 text-xs">blatui:update</code> compares what you have against the version this release ships, shows the diff, and lets you decide — file by file.</p>
+
+                <div class="space-y-5">
+                    <div>
+                        <p class="mb-1 text-sm font-medium">See what changed first</p>
+                        <p class="text-muted-foreground mb-2 text-sm">A dry run writes nothing. Add <code class="bg-muted rounded px-1 text-xs">--diff</code> for the full unified diff of every file that differs.</p>
+                        <x-code-block label="Terminal" icon="terminal">php artisan blatui:update --dry-run --diff</x-code-block>
+                    </div>
+
+                    <div>
+                        <p class="mb-1 text-sm font-medium">Then update</p>
+                        <p class="text-muted-foreground mb-2 text-sm">Without arguments it walks every installed family; pass names to scope it. Each differing file is confirmed individually.</p>
+                        <x-code-block label="Terminal" icon="terminal">php artisan blatui:update
+
+# or just these, without prompting
+php artisan blatui:update button card --force</x-code-block>
+                    </div>
+
+                    <div class="bg-muted/40 flex items-start gap-2 rounded-lg border p-3 text-sm">
+                        <x-lucide-shield-check class="text-primary mt-0.5 size-4 shrink-0" />
+                        <span class="text-muted-foreground">A file that differs is either <span class="text-foreground font-medium">your customisation</span> or an <span class="text-foreground font-medium">outdated copy</span> — nothing on disk tells them apart, so BlatUI never overwrites one silently. Even <code class="bg-muted rounded px-1 text-xs">--force</code> keeps your version next to it as <code class="bg-muted rounded px-1 text-xs">.bak</code> (opt out with <code class="bg-muted rounded px-1 text-xs">--no-backup</code>). Files a family gained in a newer release are simply added.</span>
+                    </div>
+
+                    <div class="bg-muted/40 flex items-start gap-2 rounded-lg border p-3 text-sm">
+                        <x-lucide-info class="text-primary mt-0.5 size-4 shrink-0" />
+                        <span class="text-muted-foreground">This covers the <span class="text-foreground font-medium">component stubs</span>. The CSS/JS foundations are published rather than copied — re-sync them with <code class="bg-muted rounded px-1 text-xs">php artisan vendor:publish --tag=blatui-foundations --force</code>. <code class="bg-muted rounded px-1 text-xs">blatui:init</code> tells you when the engine has fallen behind what your components expect.</span>
+                    </div>
+                </div>
+            </div>
+
             {{-- Server-rendered forms & foundations utilities --}}
             <div class="mt-10 border-t pt-10">
                 <h2 id="server-forms" class="mb-2 scroll-mt-20 text-2xl font-bold tracking-tight">Server-rendered forms &amp; the foundations utilities</h2>

@@ -90,6 +90,25 @@ class RemoteInstallerTest extends TestCase
         $this->assertStringContainsString('data-slot="button"', file_get_contents($button));
     }
 
+    public function test_a_bundled_block_dependency_lands_in_the_block_namespace(): void
+    {
+        // installLocalFamily used to hardcode components/ui, so a <x-block.*> piece
+        // pulled in as a dependency landed where Blade would never resolve it.
+        $item = [
+            'name' => 'shell', 'type' => 'registry:block',
+            'files' => [['target' => 'resources/views/components/block/shell.blade.php', 'content' => 'SHELL']],
+            'registryDependencies' => ['nav-user'], // ships locally, targets components/block
+        ];
+
+        $installer = new RemoteInstaller(new Registry, [], fn () => $item);
+        $installer->install('https://acme.test/r/shell.json', $this->base);
+
+        $this->assertFileExists($this->base.'/resources/views/components/block/nav-user.blade.php');
+        $this->assertFileDoesNotExist($this->base.'/resources/views/components/ui/nav-user.blade.php');
+        // …while its own ui dependencies still go to components/ui.
+        $this->assertFileExists($this->base.'/resources/views/components/ui/avatar.blade.php');
+    }
+
     public function test_skips_existing_files_without_force(): void
     {
         $item = [

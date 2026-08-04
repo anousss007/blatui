@@ -7,7 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`php artisan blatui:update`** ([#11](https://github.com/anousss007/blatui/issues/11)) — the
+  update path for components you already own. It diffs every installed file against the version
+  BlatUI ships and asks before touching anything that differs (`--dry-run`, `--diff`, `--force`,
+  `--no-backup`); your copy is kept as `.bak`. Documented under
+  [Getting started → Keeping components up to date](https://blatui.remix-it.com/docs#updating).
+
 ### Fixed
+- **Theme export dropped the status palette and the heading font.** *Copy CSS* left out
+  `--success`/`--warning`/`--info` (+ their `-foreground`) and `--font-heading`, so a pasted theme
+  lost the heading font you had just picked in the editor and any `bg-success`-style utility. The
+  export scaffold is now generated from `app.css` and locked by a test — it had also fallen behind
+  on the `progress-indeterminate` animation, so an indeterminate `<x-ui.progress>` stood still in a
+  pasted theme.
+- **`<x-ui.sonner>` rendered two `class` attributes**, so a class passed to the toaster was dropped
+  by the browser. It merges through `twMerge` now, and a test sweeps every component for the same
+  mistake.
+- **`<x-ui.sidebar>` dropped every attribute you passed it** (`class`, `id`, Alpine bindings) in the
+  collapsible branch. The desktop root forwards the full attribute bag; the mobile panel mirrors the
+  classes only.
 - **`darkMode: false` no longer strips the `dark` class** ([#4](https://github.com/anousss007/blatui/issues/4)) —
   it now means "hands off", so BlatUI never touches `dark` and coexists with apps (e.g. Flux) that
   drive their own dark mode (previously it removed `dark` on every load → dark→light flash).

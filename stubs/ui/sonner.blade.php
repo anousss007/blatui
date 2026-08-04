@@ -97,8 +97,7 @@
     role="region"
     aria-label="Notifications"
     tabindex="-1"
-    class="pointer-events-none fixed z-[100] flex w-full p-4 sm:max-w-[420px] {{ $posClass }}"
-    {{ $attributes }}
+    {{ $attributes->twMerge('pointer-events-none fixed z-[100] flex w-full p-4 sm:max-w-[420px] '.$posClass) }}
 >
     <div
         class="pointer-events-auto relative w-full"

@@ -75,7 +75,10 @@ class Server
             'instructions' => 'BlatUI is shadcn/ui for Laravel Blade (Blade, Alpine.js, Tailwind v4). '
                 .'Use search_registry to find components/blocks/charts, get_component to read a '
                 .'component\'s Blade source, and install_command to get the exact `php artisan '
-                .'blatui:add` invocation. Components are copied into the project — the user owns the code.',
+                .'blatui:add` invocation. Components are copied into the project — the user owns the code. '
+                .'To bring already-installed components up to date, use `php artisan blatui:update '
+                .'[component…]` (`--dry-run --diff` to preview): it never overwrites a file that differs '
+                .'without showing the diff, and keeps a .bak of the previous version.',
         ];
     }
 

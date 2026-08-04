@@ -139,7 +139,10 @@ class RemoteInstaller
 
     protected function installLocalFamily(string $family, string $basePath, bool $force, array &$state): void
     {
-        $dest = $basePath.'/resources/views/components/ui';
+        // Each family carries its own namespace dir (ui → components/ui, block →
+        // components/block); hardcoding ui here would drop <x-block.*> pieces
+        // pulled in as a remote dependency into the wrong namespace.
+        $dest = $basePath.'/'.trim($this->local->targetFor($family), '/');
         foreach ($this->local->filesFor($family) as $src) {
             $this->writeFile($dest.'/'.basename($src), is_file($src) ? (string) file_get_contents($src) : '', $force, $state);
         }

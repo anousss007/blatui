@@ -86,6 +86,81 @@ class BlatuiTest extends TestCase
         $this->assertStringNotContainsString(':viewBox="viewBox"', $stub);
     }
 
+    /**
+     * A root element carrying both a literal class="…" and a bare {{ $attributes }}
+     * emits two class attributes: invalid HTML, and the browser drops the consumer's
+     * classes. Sonner shipped that way — sweep the whole registry so the next one
+     * fails here instead of in someone's app.
+     */
+    public function test_no_component_emits_a_duplicate_class_attribute(): void
+    {
+        $offenders = [];
+
+        foreach (array_merge(
+            glob(dirname(__DIR__).'/stubs/ui/*.blade.php') ?: [],
+            glob(dirname(__DIR__).'/stubs/block/*.blade.php') ?: [],
+        ) as $file) {
+            $source = (string) file_get_contents($file);
+
+            foreach ($this->bareAttributeTags($source) as $tag) {
+                // Blade echoes can legitimately contain the word class inside an
+                // expression — only a real attribute on the element counts.
+                $withoutEchoes = (string) preg_replace('/\{\{.*?\}\}/s', '', $tag);
+                if (preg_match('/\sclass\s*=\s*"/', $withoutEchoes)) {
+                    $offenders[] = basename($file);
+                }
+            }
+        }
+
+        $this->assertSame([], array_values(array_unique($offenders)));
+    }
+
+    /**
+     * Every opening tag that renders a bare {{ $attributes }} (not ->twMerge()).
+     *
+     * @return list<string>
+     */
+    private function bareAttributeTags(string $source): array
+    {
+        $tags = [];
+
+        foreach (['{{ $attributes }}', '{{$attributes}}'] as $needle) {
+            $offset = 0;
+            while (($at = strpos($source, $needle, $offset)) !== false) {
+                $offset = $at + 1;
+                // Walk back to the opening '<' of the element it sits in — the tag
+                // body may contain '<' inside Alpine expressions, so skip those.
+                $start = $at;
+                do {
+                    $start = strrpos(substr($source, 0, $start), '<');
+                } while ($start !== false && ! preg_match('/^<[a-zA-Z\/]/', substr($source, $start, 2)));
+
+                if ($start === false || str_starts_with(substr($source, $start, 3), '<x-')) {
+                    continue;
+                }
+
+                $tags[] = substr($source, $start, $at - $start);
+            }
+        }
+
+        return $tags;
+    }
+
+    /**
+     * <x-ui.sidebar> renders three branches; the collapsible one dropped the
+     * attribute bag entirely, so class/id/x-data passed by a consumer vanished.
+     */
+    public function test_sidebar_forwards_its_attributes_in_every_branch(): void
+    {
+        $stub = (string) file_get_contents(dirname(__DIR__).'/stubs/ui/sidebar.blade.php');
+
+        // Non-collapsible root, desktop root, and the teleported mobile panel.
+        $this->assertSame(3, substr_count($stub, '$attributes'), 'every sidebar branch must forward the attribute bag');
+        $this->assertStringContainsString("\$attributes->twMerge('text-sidebar-foreground group peer hidden md:block')", $stub);
+        // The mobile panel is a sibling in the DOM: classes only, or ids collide.
+        $this->assertStringContainsString("\$attributes->only('class')->twMerge(", $stub);
+    }
+
     public function test_doctor_flags_typeless_button_in_form(): void
     {
         $dir = sys_get_temp_dir().'/blatui-doctor-'.uniqid();

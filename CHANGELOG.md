@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`blatui:update` — an update path for components you already own** (#11). `blatui:add --force`
+  was the only way to re-sync an installed component, and it overwrote the file with no diff, no
+  prompt and no backup — the one destructive corner of the copy-not-dependency model. The new
+  command compares every installed file against the stub this version ships and, for anything that
+  differs, prints the diff and asks before writing:
+  ```bash
+  php artisan blatui:update --dry-run --diff   # what would change, writes nothing
+  php artisan blatui:update                    # confirm file by file
+  php artisan blatui:update button --force     # no questions; your copy is kept as .bak
+  ```
+  It needs no lockfile and writes no state into your app: the package ships the exact stubs, so a
+  byte comparison answers the question. What it deliberately does *not* do is guess *why* a file
+  differs — a customisation and an outdated copy look identical on disk — so a differing file is
+  never overwritten silently, and `--force` still leaves a `.bak` next to it (`--no-backup` opts
+  out). Files a family gained in a newer release are added without prompting.
+- **`--success` / `--warning` / `--info` (+ their `-foreground`) and `--font-heading` are now part
+  of the theme export.** The theme editor's *Copy CSS* is meant to hand you a complete `app.css`;
+  it dropped the status palette and the heading font — so a theme whose heading font you had just
+  picked in the editor silently reverted to the body font on paste, and `bg-success`/`text-warning`
+  utilities stopped existing altogether. The exported scaffold is now generated from `app.css` and
+  guarded by a test — it had also fallen behind on the `progress-indeterminate` animation, so an
+  indeterminate `<x-ui.progress>` stood still in a pasted theme.
+
+### Fixed
+- **`sonner` emitted two `class` attributes.** The toaster root carried a literal `class="…"` next
+  to a bare `{{ $attributes }}`, which is invalid HTML — a class passed to `<x-ui.sonner>` was
+  dropped by the browser. It now merges through `twMerge`. A test sweeps every shipped component
+  for the same shape so the next one fails in CI instead of in your app.
+- **`<x-ui.sidebar>` discarded its attribute bag.** In the collapsible (default) branch the bag was
+  never rendered, so `class`, `id` and Alpine bindings passed by a consumer vanished. The desktop
+  root now forwards the full bag; the teleported mobile panel mirrors the classes only (a second
+  `id` would collide).
+- **A bundled `block` dependency of a remote item landed in `components/ui`.** `RemoteInstaller`
+  hardcoded the `ui` directory instead of resolving each family's own target, so a `<x-block.*>`
+  piece pulled in as a dependency was written where Blade would never resolve it.
+- **The MCP server reported its version as `dev`.** It read a `version` field out of the package's
+  `composer.json`, which Composer's own conventions say should not be there; it now asks Composer's
+  installed-packages metadata for the real tag.
+
 ## [1.20.0] - 2026-08-04
 
 ### Added

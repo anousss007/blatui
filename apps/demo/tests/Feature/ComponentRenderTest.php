@@ -240,6 +240,39 @@ class ComponentRenderTest extends TestCase
         $this->assertStringContainsString('calendar:set-range', $html);
     }
 
+    /**
+     * The toaster used to render a literal class="…" next to a bare {{ $attributes }},
+     * so a consumer class produced a second class attribute the browser ignores.
+     */
+    public function test_sonner_merges_consumer_classes_into_one_attribute(): void
+    {
+        $html = $this->render('<x-ui.sonner class="print:hidden" />');
+
+        // One class attribute carrying both the base classes and the consumer's.
+        $this->assertMatchesRegularExpression('/class="[^"]*print:hidden[^"]*"/', $html);
+        preg_match('/class="([^"]*print:hidden[^"]*)"/', $html, $m);
+        $this->assertStringContainsString('pointer-events-none', $m[1]);
+        $this->assertStringContainsString('sm:max-w-[420px]', $m[1]);
+        $this->assertSame(1, substr_count($html, 'print:hidden'));
+    }
+
+    /**
+     * <x-ui.sidebar>'s collapsible branch dropped the attribute bag entirely — class,
+     * id and Alpine bindings passed by a consumer never reached the DOM.
+     */
+    public function test_sidebar_forwards_attributes_on_every_branch(): void
+    {
+        $collapsible = $this->render('<x-ui.sidebar-provider><x-ui.sidebar class="print:hidden" id="app-nav">x</x-ui.sidebar></x-ui.sidebar-provider>');
+        $this->assertStringContainsString('print:hidden', $collapsible);
+        $this->assertStringContainsString('id="app-nav"', $collapsible);
+        // The mobile panel mirrors the classes only — a second id would collide.
+        $this->assertSame(2, substr_count($collapsible, 'print:hidden'));
+        $this->assertSame(1, substr_count($collapsible, 'id="app-nav"'));
+
+        $plain = $this->render('<x-ui.sidebar-provider><x-ui.sidebar collapsible="none" class="print:hidden">x</x-ui.sidebar></x-ui.sidebar-provider>');
+        $this->assertStringContainsString('print:hidden', $plain);
+    }
+
     /** Anchored popovers teleport to <body> so an overflow-hidden ancestor never clips them. */
     public function test_anchored_popovers_teleport_to_body(): void
     {

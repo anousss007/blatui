@@ -7,6 +7,7 @@ use BlatUI\Console\Commands\DoctorCommand;
 use BlatUI\Console\Commands\InitCommand;
 use BlatUI\Console\Commands\ListCommand;
 use BlatUI\Console\Commands\McpCommand;
+use BlatUI\Console\Commands\UpdateCommand;
 use Illuminate\Support\ServiceProvider;
 
 class BlatuiServiceProvider extends ServiceProvider
@@ -25,6 +26,7 @@ class BlatuiServiceProvider extends ServiceProvider
                 InitCommand::class,
                 ListCommand::class,
                 AddCommand::class,
+                UpdateCommand::class,
                 DoctorCommand::class,
                 McpCommand::class,
             ]);

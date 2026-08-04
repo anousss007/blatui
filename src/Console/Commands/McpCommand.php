@@ -5,6 +5,7 @@ namespace BlatUI\Console\Commands;
 use BlatUI\Mcp\RegistryClient;
 use BlatUI\Mcp\Server;
 use BlatUI\Registry;
+use Composer\InstalledVersions;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -79,8 +80,24 @@ class McpCommand extends Command
         fflush($stream);
     }
 
+    /**
+     * The installed package version, as reported to the MCP client.
+     *
+     * Composer derives a library's version from its git tag — a `version` field
+     * in composer.json is discouraged and this package has none, so reading it
+     * from there always fell through to 'dev'. Ask Composer's installed-packages
+     * metadata instead, and keep the composer.json read as a fallback for the
+     * odd install that does pin one.
+     */
     protected function blatuiVersion(): string
     {
+        if (class_exists(InstalledVersions::class) && InstalledVersions::isInstalled('anousss007/blatui')) {
+            $version = InstalledVersions::getPrettyVersion('anousss007/blatui');
+            if (is_string($version) && $version !== '') {
+                return ltrim($version, 'v');
+            }
+        }
+
         $composer = dirname(__DIR__, 3).'/composer.json';
         if (is_file($composer)) {
             $data = json_decode((string) file_get_contents($composer), true);
