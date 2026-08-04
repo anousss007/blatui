@@ -144,6 +144,80 @@ return [
             'type' => '[modifier => class]',
             'description' => 'Map of modifier name to the Tailwind classes applied to days that match that modifier.',
         ],
+        [
+            'name' => 'calendarId',
+            'type' => 'string',
+            'description' => 'Instance handle. Aims the calendar:* hooks at this calendar when they are broadcast on window, and stamps outgoing calendar:updated events. Defaults to the element id.',
+        ],
+        [
+            'name' => 'prevMonthLabel',
+            'type' => 'string',
+            'default' => "__('Go to the previous month')",
+            'description' => 'Accessible name of the previous-month button.',
+        ],
+        [
+            'name' => 'nextMonthLabel',
+            'type' => 'string',
+            'default' => "__('Go to the next month')",
+            'description' => 'Accessible name of the next-month button.',
+        ],
+        [
+            'name' => 'todayLabel',
+            'type' => 'string',
+            'default' => "__('Today, :date')",
+            'description' => 'aria-label used for today. The :date placeholder is replaced by the date formatted in the calendar locale.',
+        ],
+        [
+            'name' => 'selectedLabel',
+            'type' => 'string',
+            'default' => "__('selected')",
+            'description' => 'Appended to a day aria-label when that day is part of the selection.',
+        ],
+    ],
+
+    'events' => [
+        [
+            'name' => 'calendar-change',
+            'direction' => 'out',
+            'detail' => "'Y-m-d' | ['Y-m-d', …] | { from, to }",
+            'description' => 'The user picked a day. Programmatic changes never fire it, so "close the popover when the selection is complete" needs no re-entrancy flag.',
+        ],
+        [
+            'name' => 'calendar:updated',
+            'direction' => 'out',
+            'detail' => '{ id, mode, value, source }',
+            'description' => 'Any change. source is select (a user pick), set, set-range, today, clear or value (a controlled write). value has the same shape as the value prop. When the calendar sits in a teleported popover the event bubbles to window, not to the trigger\'s ancestors — listen inside the popover, or on .window and match detail.id.',
+        ],
+        [
+            'name' => 'calendar:set',
+            'direction' => 'in',
+            'detail' => "'Y-m-d' | Date | { date, id? }",
+            'description' => 'Selects a date. Single mode only — ignored, view included, in the other modes.',
+        ],
+        [
+            'name' => 'calendar:set-range',
+            'direction' => 'in',
+            'detail' => '{ from, to, id? }',
+            'description' => 'Selects a range (either end may be null). Range mode only.',
+        ],
+        [
+            'name' => 'calendar:today',
+            'direction' => 'in',
+            'detail' => '{ id? }',
+            'description' => 'Selects today. Single mode only.',
+        ],
+        [
+            'name' => 'calendar:goto',
+            'direction' => 'in',
+            'detail' => "'Y-m' | 'Y-m-d' | Date | { month, id? }",
+            'description' => 'Scrolls the visible month(s) without selecting anything. Works in every mode.',
+        ],
+        [
+            'name' => 'calendar:clear',
+            'direction' => 'in',
+            'detail' => '{ id? }',
+            'description' => 'Empties the selection. Works in every mode.',
+        ],
     ],
 
     'shapes' => [

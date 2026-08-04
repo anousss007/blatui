@@ -26,12 +26,20 @@
     'outOfRange' => 'disable',  // 'disable' (prevent selection) | 'flag' (allow + show red)
     'prevMonthLabel' => null,   // nav accessible name; defaults via __() below (no hardcoded English)
     'nextMonthLabel' => null,
+    'todayLabel' => null,       // day aria-label prefix for today; ":date" is the localised date
+    'selectedLabel' => null,    // day aria-label suffix when the day is selected
+    'calendarId' => null,       // instance handle for targeted calendar:* events (see below)
 ])
 
 @php
     // i18n-safe defaults: these are translation keys, localise them in your lang files.
     $prevMonthLabel ??= __('Go to the previous month');
     $nextMonthLabel ??= __('Go to the next month');
+    $todayLabel ??= __('Today, :date');
+    $selectedLabel ??= __('selected');
+    // Address a single calendar among several on the page: `calendar-id="search"` (or a plain
+    // `id`) makes `calendar:set` & co. targetable and stamps outgoing calendar:updated events.
+    $calendarId ??= $attributes->get('id');
     // weekStart accepts 0–6 (0 = Sunday) OR a day name ("sunday", "monday", …).
     $weekStartNum = is_numeric($weekStart)
         ? (((int) $weekStart % 7) + 7) % 7
@@ -40,6 +48,9 @@
     $cfg = array_filter([
         'mode' => $mode,
         'value' => $value,
+        'calendarId' => $calendarId,
+        'todayLabel' => $todayLabel,
+        'selectedLabel' => $selectedLabel,
         'locale' => $locale,
         'numberOfMonths' => (int) $numberOfMonths,
         'weekStart' => $weekStartNum,
@@ -85,7 +96,12 @@
 <div
     data-slot="calendar"
     x-data="calendar({{ \Illuminate\Support\Js::from($cfg) }})"
+    {{-- Controlled mode: a parent can drive/observe the whole selection with x-model.
+         <x-ui.calendar mode="range" x-model="stay" /> — the parent's value wins on mount,
+         then the binding stays live both ways (no re-seeding on every popover open). --}}
+    x-modelable="value"
     style="--cell-size: 2rem;"
+    @if ($calendarId) data-calendar-id="{{ $calendarId }}" @endif
     @unless ($showOutsideDays) data-hide-outside-days @endunless
     {{ $attributes->twMerge('group/calendar bg-background w-fit rounded-md border p-3') }}
 >
@@ -121,7 +137,7 @@
                     <template x-if="captionLayout === 'dropdown'">
                         <div class="flex items-center gap-1.5 text-sm font-medium">
                             <div class="relative rounded-md border border-input bg-background px-2 py-1 shadow-xs hover:bg-accent">
-                                <select aria-label="Month" class="absolute inset-0 cursor-pointer opacity-0" @change="setMonth($event.target.value)">
+                                <select aria-label="{{ __('Month') }}" class="absolute inset-0 cursor-pointer opacity-0" @change="setMonth($event.target.value)">
                                     <template x-for="(mn, idx) in monthNames" :key="idx">
                                         <option :value="idx" :selected="idx === m.getMonth()" x-text="mn"></option>
                                     </template>
@@ -129,7 +145,7 @@
                                 <span x-text="m.toLocaleString(locale, { month: 'long' })"></span>
                             </div>
                             <div class="relative rounded-md border border-input bg-background px-2 py-1 shadow-xs hover:bg-accent">
-                                <select aria-label="Year" class="absolute inset-0 cursor-pointer opacity-0" @change="setYear($event.target.value)">
+                                <select aria-label="{{ __('Year') }}" class="absolute inset-0 cursor-pointer opacity-0" @change="setYear($event.target.value)">
                                     <template x-for="y in years" :key="y">
                                         <option :value="y" :selected="y === m.getFullYear()" x-text="y"></option>
                                     </template>

@@ -30,6 +30,11 @@
           'methods' => [
               ['name' => 'start()', 'description' => 'Opens the tour at the first step.'],
           ],
+          // DOM events. `direction` is 'in' (the component listens) or 'out' (it dispatches).
+          'events' => [
+              ['name' => 'tour:start', 'direction' => 'in', 'detail' => '{ id? }',
+               'description' => 'Starts the tour. Dispatch on the element, or on window with an id.'],
+          ],
       ];
 
     Conventions: `default` is the literal default as written in code (string). Omit it
@@ -46,6 +51,7 @@
     $shapes = $api['shapes'] ?? [];
     $slots = $api['slots'] ?? [];
     $methods = $api['methods'] ?? [];
+    $events = $api['events'] ?? [];
 
     // Only show shapes that are actually referenced by a documented prop.
     $usedShapes = collect($props)->pluck('shape')->filter()->unique()->all();
@@ -53,7 +59,7 @@
     $hasRequired = collect($props)->contains(fn ($p) => $p['required'] ?? false);
 @endphp
 
-@if ($props || $slots || $methods)
+@if ($props || $slots || $methods || $events)
     <section id="api" class="mt-16 scroll-mt-20">
         <h2 class="text-2xl font-bold tracking-tight">API Reference</h2>
         <p class="text-muted-foreground mt-1 text-sm">
@@ -92,6 +98,42 @@
                             <tr>
                                 <td><code class="text-foreground font-mono text-xs font-medium">{{ $slot['name'] ?? 'default' }}</code></td>
                                 <td class="text-muted-foreground">{{ $slot['description'] ?? '' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+
+        @if ($events)
+            <h3 class="mt-8 mb-3 text-lg font-semibold tracking-tight">Events</h3>
+            <p class="text-muted-foreground mb-3 text-sm">
+                Events the component listens for (in) and dispatches (out). Both directions bubble,
+                so <code class="bg-muted rounded px-1 py-0.5 font-mono text-[0.85em]">.window</code> works
+                even when the component is teleported.
+            </p>
+            <div class="overflow-x-auto rounded-lg border">
+                <table class="w-full min-w-[34rem] text-left text-sm">
+                    <thead class="bg-muted/50 text-muted-foreground">
+                        <tr class="[&>th]:px-4 [&>th]:py-2.5 [&>th]:font-medium">
+                            <th class="w-56">Event</th>
+                            <th class="w-20">Direction</th>
+                            <th>Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody class="[&>tr]:border-t [&>tr>td]:px-4 [&>tr>td]:py-3 [&>tr>td]:align-top">
+                        @foreach ($events as $event)
+                            <tr>
+                                <td><code class="text-foreground font-mono text-xs font-medium">{{ $event['name'] ?? '' }}</code></td>
+                                <td class="text-muted-foreground">{{ ($event['direction'] ?? 'out') === 'in' ? 'In' : 'Out' }}</td>
+                                <td class="text-muted-foreground">
+                                    @if (! empty($event['detail']))
+                                        <code class="text-foreground font-mono text-xs">{{ $event['detail'] }}</code>
+                                        <span class="block">{{ $event['description'] ?? '' }}</span>
+                                    @else
+                                        {{ $event['description'] ?? '' }}
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

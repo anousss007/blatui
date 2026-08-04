@@ -91,7 +91,6 @@
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),
         minDate: @js($min), maxDate: @js($max),
         weekStart: @js($weekStartNum),
-        _keepOpen: false,   // presets apply without closing the popover, so the pick stays visible
         _pad(n) { return String(n).padStart(2, '0'); },
         _ymd(d) { return d.getFullYear() + '-' + this._pad(d.getMonth() + 1) + '-' + this._pad(d.getDate()); },
         // Resolve a preset to concrete {from, to} 'Y-m-d' strings. Literal specs win over named keys.
@@ -128,14 +127,15 @@
             const cal = this.$refs.cal && this.$refs.cal.querySelector('[data-slot=calendar]');
             if (!cal) return;
             // Non-bubbling dispatch on THIS calendar only — never leaks to other pickers on the page.
-            this._keepOpen = true;
+            // The seed reports back as calendar:updated with source 'set'/'set-range', which the
+            // listener below ignores for closing — so the popover stays open on a preset click
+            // with no re-entrancy flag on our side.
             if (this.mode === 'range') {
                 cal.dispatchEvent(new CustomEvent('calendar:set-range', { detail: { from, to }, bubbles: false }));
             } else {
                 const d = to || from;
                 if (d) cal.dispatchEvent(new CustomEvent('calendar:set', { detail: d, bubbles: false }));
             }
-            this._keepOpen = false;
         },
         isActivePreset(p) {
             const { from, to } = this.presetDates(p);
@@ -207,10 +207,12 @@
         @click.outside="open = false"
         @keydown.escape.window="open = false"
         {{-- Listener lives here (inside the teleported popover) so it catches the calendar's
-             bubbling event; the popover shares the picker's x-data scope, so `value` updates. --}}
-        @calendar-change="mode === 'range'
-            ? (from = $event.detail.from, to = $event.detail.to, (!_keepOpen && from && to && !invalid) && (open = false))
-            : (value = $event.detail, _keepOpen || (open = false))"
+             bubbling event; the popover shares the picker's x-data scope, so `value` updates.
+             `calendar:updated` reports every change with its source, so we can mirror the state
+             on a seed but only auto-close on a real user pick. --}}
+        @calendar:updated="mode === 'range'
+            ? (from = $event.detail.value.from, to = $event.detail.value.to, ($event.detail.source === 'select' && from && to && !invalid) && (open = false))
+            : (value = $event.detail.value, $event.detail.source === 'select' && (open = false))"
         x-trap="open"
         :id="$id('blat-datepicker')"
         role="dialog"

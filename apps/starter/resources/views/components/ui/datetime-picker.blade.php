@@ -189,10 +189,12 @@
         @click.outside="open = false"
         @keydown.escape.window="open = false"
         {{-- Listeners live here (inside the teleported popover) so they catch the calendar's /
-             time-field's bubbling events; the popover shares the picker's x-data scope. --}}
-        @calendar-change="mode === 'range'
-            ? (from = $event.detail.from, to = $event.detail.to)
-            : (date = $event.detail)"
+             time-field's bubbling events; the popover shares the picker's x-data scope.
+             `calendar:updated` covers programmatic seeds too, so the label/hidden inputs stay
+             in step when the calendar is driven from outside. --}}
+        @calendar:updated="mode === 'range'
+            ? (from = $event.detail.value.from, to = $event.detail.value.to)
+            : (date = $event.detail.value)"
         @time-change="onTime($event.detail)"
         x-trap="open"
         :id="$id('blat-datetimepicker')"

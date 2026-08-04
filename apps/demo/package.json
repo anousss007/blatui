@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "test": "node --test \"tests/js/*.test.mjs\""
     },
     "devDependencies": {
         "@floating-ui/dom": "^1.7.6",

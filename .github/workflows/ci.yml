@@ -31,6 +31,20 @@ jobs:
       - name: Run tests
         run: vendor/bin/phpunit
 
+  engine-tests:
+    name: JS engine tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # Zero-dependency: the tests strip the engine's Alpine/floating-ui imports and drive the
+      # component factories directly, so there is nothing to install.
+      - name: Run the engine tests
+        working-directory: apps/demo
+        run: npm test
+
   lint:
     name: Pint (code style)
     runs-on: ubuntu-latest

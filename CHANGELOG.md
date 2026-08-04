@@ -7,6 +7,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.20.0] - 2026-08-04
+
+### Added
+- **`calendar` controlled mode.** The root now carries `x-modelable="value"`, so a parent can
+  drive *and* observe the whole selection with plain Alpine two-way binding:
+  `<x-ui.calendar mode="range" x-model="stay" />`. The parent's value wins on mount and the
+  binding stays live in both directions — a popover no longer has to stay mounted just so it can
+  be re-seeded on every open. `value` is `'Y-m-d'|null` (single), `['Y-m-d', …]` (multiple) or
+  `{ from, to }` (range). See the new **Controlled** calendar example.
+- **`calendar` instance handle.** New `calendar-id` prop (defaults to the element `id`). It
+  renders as `data-calendar-id`, aims the incoming `calendar:*` hooks at one instance when they
+  are broadcast on `window` (`detail.id`), and is echoed on every outgoing `calendar:updated`.
+  Pages that run several calendars at once — a range picker in a sticky sidebar plus one in a
+  mobile sheet — can finally address them individually instead of hitting all of them.
+- **`calendar:updated` event.** Bubbling, `composed`, fired on *every* change with
+  `{ id, mode, value, source }` where `source` is `select` (a user pick), `set`, `set-range`,
+  `today`, `clear` or `value` (a controlled write). This is the event to listen to when you need
+  to mirror programmatic changes; `calendar-change` remains the "the user picked a day" event.
+  It is named `updated`, not `change`, on purpose: `calendar:change` would have differed from the
+  existing `calendar-change` by one character — indistinguishable in review and inseparable in a
+  grep. `calendar:*` is now the structured API (in: `set` / `set-range` / `today` / `goto` /
+  `clear`, out: `updated`); `calendar-change` is the historical user-pick event.
+- **`calendar:goto` and `calendar:clear` hooks.** `calendar:goto` moves the visible month(s)
+  without selecting (`'Y-m'`, `'Y-m-d'`, a `Date` or `{ month, id? }`) and is the one hook that
+  works in every mode — it replaces the incidental view-scrolling the selection hooks used to do
+  in the wrong mode. `calendar:clear` empties the selection in any mode.
+- **Engine tests.** `apps/demo/tests/js/calendar.test.mjs` locks the calendar's event and
+  targeting contract. Zero-dependency: `node --test "apps/demo/tests/js/*.test.mjs"`, also run
+  in CI.
+- Documented **`prevMonthLabel` / `nextMonthLabel`** and added an **Events** table to the API
+  reference generator (`docs-api` files may now declare an `events` key).
+
+### Changed
+- **BREAKING (behaviour): an incoming `calendar:*` hook no longer emits `calendar-change`.**
+  `calendar:set`, `calendar:set-range` and `calendar:today` used to re-emit the very same event a
+  day click emits, so any popover that seeded itself on open closed again on the click that
+  opened it as soon as the seeded value was complete — and every consumer had to carry a
+  `syncing` flag to work around it. Seeding is not a pick: those hooks now emit `calendar:updated`
+  (with the source that caused it) and nothing else. If you were relying on the old behaviour,
+  listen for `calendar:updated` and check `$event.detail.source`. `date-picker`'s internal
+  `_keepOpen` flag is gone as a result.
+- **BREAKING (behaviour): incoming hooks test the mode before touching the view.**
+  `calendar:set` / `calendar:today` previously moved the visible month in *every* mode and only
+  then checked that the calendar was in `single` mode — so a birthday picker seeding `1991`
+  dragged an unrelated range calendar 35 years back. They are now a complete no-op outside their
+  mode. Use `calendar:goto` when you want to move the view regardless of mode.
+- **Seeding no longer re-homes a view the user navigated.** A programmatic selection scrolls the
+  grid only when the seeded date isn't already on screen.
+- `date-picker` and `datetime-picker` now listen for `calendar:updated`, so their label and hidden
+  inputs stay in step when the calendar is driven from outside.
+
+### Fixed
+- **`calendar` leaked its `window` listeners.** The three incoming hooks were bound to `window`
+  and never unbound, so every Livewire re-render or SPA navigation left another live listener
+  behind, and destroyed calendars kept reacting to broadcasts. The component now unbinds on
+  `destroy()`.
+- **`calendar` arrow keys did not mirror under `dir="rtl"`.** The grid is built from logical
+  properties, so RTL renders it mirrored — the next day sits to the *left* of the current one —
+  but `ArrowLeft` still moved to the previous day, i.e. visually to the right. Arrow keys are
+  visual in the APG grid pattern, so they now follow the rendered direction. `Home` / `End` are
+  unchanged: "first/last day of the week" is a logical position and must not flip.
+- **`calendar` day `aria-label`s were hardcoded English.** "Today, …" and ", selected" ignored
+  the app locale; they are now the localisable `today-label` / `selected-label` props (defaults
+  `__('Today, :date')` / `__('selected')`). The month and year dropdown `aria-label`s in
+  `caption-layout="dropdown"` go through `__()` as well.
+
 ## [1.19.0] - 2026-08-01
 
 ### Added

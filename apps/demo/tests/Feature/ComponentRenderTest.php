@@ -190,6 +190,56 @@ class ComponentRenderTest extends TestCase
         $this->assertStringContainsString('data-hide-outside-days', $this->render('<x-ui.date-picker :show-outside-days="false" />'));
     }
 
+    public function test_calendar_exposes_a_controlled_value_binding(): void
+    {
+        // x-modelable="value" is what lets a parent drive the selection with x-model, instead of
+        // keeping the popover mounted just so it can be re-seeded on every open.
+        $this->assertStringContainsString('x-modelable="value"', $this->render('<x-ui.calendar />'));
+    }
+
+    public function test_calendar_id_becomes_an_addressable_instance_handle(): void
+    {
+        // The handle lands both on the element (for CSS/queries) and in the Alpine config (so the
+        // component can ignore a window-level calendar:* hook aimed at a different instance).
+        $html = $this->render('<x-ui.calendar calendar-id="stay" />');
+        $this->assertStringContainsString('data-calendar-id="stay"', $html);
+        $this->assertStringContainsString('calendarId', $html);
+
+        // A plain id is enough — no need to repeat yourself.
+        $this->assertStringContainsString('data-calendar-id="birthday"', $this->render('<x-ui.calendar id="birthday" />'));
+
+        // …and nothing is emitted when neither is given.
+        $this->assertStringNotContainsString('data-calendar-id', $this->render('<x-ui.calendar />'));
+    }
+
+    public function test_calendar_aria_labels_are_localisable(): void
+    {
+        // The day aria-label used to hardcode "Today, " / ", selected" regardless of locale.
+        $html = $this->render('<x-ui.calendar caption-layout="dropdown" today-label="Aujourd\'hui, :date" selected-label="sélectionné" />');
+        $this->assertStringContainsString('Aujourd', $html);
+        $this->assertStringContainsString('todayLabel', $html);
+        $this->assertStringContainsString('selectedLabel', $html);
+    }
+
+    public function test_date_picker_closes_on_a_pick_not_on_a_seed(): void
+    {
+        // Presets seed the calendar; the seed reports as calendar:updated with a non-'select'
+        // source, so the popover stays open without the old `_keepOpen` re-entrancy flag.
+        $html = $this->render('<x-ui.date-picker mode="range" :presets="true" />');
+        $this->assertStringContainsString('calendar:updated', $html);
+        $this->assertStringContainsString("source === 'select'", $html);
+        $this->assertStringNotContainsString('_keepOpen', $html);
+    }
+
+    public function test_controlled_calendar_example_renders(): void
+    {
+        // The docs example IS the documentation for the seed/targeting contract — keep it compiling.
+        $html = view('examples.calendar.controlled')->render();
+        $this->assertStringContainsString('x-model="stay"', $html);
+        $this->assertStringContainsString('data-calendar-id="stay"', $html);
+        $this->assertStringContainsString('calendar:set-range', $html);
+    }
+
     /** Anchored popovers teleport to <body> so an overflow-hidden ancestor never clips them. */
     public function test_anchored_popovers_teleport_to_body(): void
     {

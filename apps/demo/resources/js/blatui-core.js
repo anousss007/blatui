@@ -198,8 +198,17 @@ function _sameDay(a, b) { return a && b && _ymd(a) === _ymd(b); }
 function _addMonths(d, n) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 
 const calendar = (cfg = {}) => ({
+    // Instance handle. Set it with the `calendar-id` prop (or a plain `id`) and every
+    // incoming hook can be aimed at THIS calendar even when broadcast on `window`, and
+    // every outgoing `calendar:updated` says which calendar it came from. Pages that run
+    // several calendars at once (a range picker in a sticky sidebar + one in a mobile
+    // sheet, say) need this: an un-targeted window dispatch reaches all of them.
+    calendarId: cfg.calendarId || null,
     mode: cfg.mode || 'single',
     locale: cfg.locale || 'en-US',
+    // aria-label fragments, localised by the Blade layer (never hardcode English here).
+    todayLabel: cfg.todayLabel || 'Today, :date',
+    selectedLabel: cfg.selectedLabel || 'selected',
     numberOfMonths: cfg.numberOfMonths || 1,
     weekStart: cfg.weekStart || 0,
     captionLayout: cfg.captionLayout || 'label',
@@ -249,38 +258,136 @@ const calendar = (cfg = {}) => ({
             d.setDate(ref.getDate() + ((this.weekStart + i + 7 - ref.getDay()) % 7));
             this.weekdays.push(d.toLocaleString(this.locale, { weekday: 'narrow' }));
         }
-        // External control hooks. Each is bound to BOTH `window` (global broadcast — used by
-        // standalone preset blocks like calendar-19) and this calendar's root element, so a
-        // caller can target one instance with a non-bubbling dispatch on the element (used by
-        // the date-picker presets panel when several pickers share a page).
-        const onToday = () => {
-            const t = new Date();
-            this.view = new Date(t.getFullYear(), t.getMonth(), 1);
-            if (this.mode === 'single') { this.single = t; this.emit(_ymd(t)); }
+        // ---- External control hooks --------------------------------------------------
+        // CONTRACT — an incoming hook NEVER emits `calendar-change`. That event means "the
+        // user picked a day"; seeding is not a pick. Emitting it on a seed is what made a
+        // popover that seeds itself on open close again on the very click that opened it,
+        // and forced every consumer to carry a `syncing` flag. Programmatic changes are
+        // observable through `calendar:updated` (source: 'set' | 'set-range' | 'today' |
+        // 'clear' | 'value'), which never trips a "close when complete" handler.
+        //
+        // MODE — every hook tests the mode FIRST, before touching the view. A `calendar:set`
+        // meant for a birthday picker must not drag an unrelated range calendar 30 years back.
+        //
+        // TARGETING — each hook is bound to BOTH this calendar's root element and `window`:
+        //   • dispatch on the element (`bubbles: false`)  → this instance only;
+        //   • dispatch on `window` with `detail.id`       → the instance whose calendarId matches;
+        //   • dispatch on `window` without an id          → every calendar on the page (legacy).
+        const mine = (e) => {
+            const d = e.detail;
+            const id = d && typeof d === 'object' && !(d instanceof Date) ? d.id : null;
+            return !id || id === this.calendarId;
         };
-        // Detail may be a 'YYYY-MM-DD' string or a Date; single mode only.
+        // Detail may be a bare 'YYYY-MM-DD' / Date, or { date, id } to target an instance.
+        const payload = (e) => {
+            const d = e.detail;
+            return d && typeof d === 'object' && !(d instanceof Date) ? (d.date ?? d.month ?? null) : d;
+        };
+        const onToday = (e) => {
+            if (this.mode !== 'single' || !mine(e)) return;
+            if (this.setValue(_ymd(new Date()))) this.notify('today');
+        };
         const onSet = (e) => {
-            const t = _parse(e.detail);
-            if (!t) return;
-            this.view = new Date(t.getFullYear(), t.getMonth(), 1);
-            if (this.mode === 'single') { this.single = t; this.emit(_ymd(t)); }
+            if (this.mode !== 'single' || !mine(e)) return;
+            const t = _parse(payload(e));
+            if (t && this.setValue(_ymd(t))) this.notify('set');
         };
-        // Detail: { from: 'YYYY-MM-DD'|Date|null, to: 'YYYY-MM-DD'|Date|null }; range mode only.
+        // Detail: { from: 'YYYY-MM-DD'|Date|null, to: 'YYYY-MM-DD'|Date|null, id? }.
         const onSetRange = (e) => {
-            if (this.mode !== 'range') return;
+            if (this.mode !== 'range' || !mine(e)) return;
             const d = e.detail || {};
-            const from = d.from ? _parse(d.from) : null;
-            const to = d.to ? _parse(d.to) : null;
-            this.rangeFrom = from;
-            this.rangeTo = to;
-            if (from) this.view = new Date(from.getFullYear(), from.getMonth(), 1);
-            this.emit({ from: from ? _ymd(from) : null, to: to ? _ymd(to) : null });
+            if (this.setValue({ from: d.from ?? null, to: d.to ?? null })) this.notify('set-range');
         };
-        for (const target of [window, this.$root]) {
-            target.addEventListener('calendar:today', onToday);
-            target.addEventListener('calendar:set', onSet);
-            target.addEventListener('calendar:set-range', onSetRange);
+        // View-only navigation — no selection, so it is the one hook that works in every mode.
+        // Detail: 'YYYY-MM' | 'YYYY-MM-DD' | Date | { month, id? }.
+        const onGoto = (e) => {
+            if (!mine(e)) return;
+            const raw = payload(e);
+            const m = _parse(typeof raw === 'string' && raw.length === 7 ? raw + '-01' : raw);
+            if (m) this.view = new Date(m.getFullYear(), m.getMonth(), 1);
+        };
+        const onClear = (e) => {
+            if (!mine(e)) return;
+            if (this.setValue(this.mode === 'single' ? null : this.mode === 'multiple' ? [] : { from: null, to: null })) {
+                this.notify('clear');
+            }
+        };
+        this._hooks = {
+            'calendar:today': onToday,
+            'calendar:set': onSet,
+            'calendar:set-range': onSetRange,
+            'calendar:goto': onGoto,
+            'calendar:clear': onClear,
+        };
+        this._rootEl = this.$root;
+        for (const target of [window, this._rootEl]) {
+            for (const name in this._hooks) target.addEventListener(name, this._hooks[name]);
         }
+    },
+
+    // Alpine calls this when the component leaves the DOM. The window-level hooks would
+    // otherwise outlive it (and keep firing) across Livewire re-renders / SPA navigations.
+    destroy() {
+        if (!this._hooks) return;
+        for (const target of [window, this._rootEl]) {
+            for (const name in this._hooks) target.removeEventListener(name, this._hooks[name]);
+        }
+    },
+
+    // ---- controlled value -------------------------------------------------------------
+    // `value` is the whole selection in one reactive property, so the calendar can be driven
+    // from outside with Alpine's own two-way binding (the root carries x-modelable="value"):
+    //
+    //     <div x-data="{ stay: { from: null, to: null } }">
+    //         <x-ui.calendar mode="range" x-model="stay" />
+    //
+    // The parent's value wins on mount; from then on the binding is live in both directions,
+    // so a popover no longer has to stay mounted just to be re-seeded on every open.
+    // Shape per mode: single 'Y-m-d'|null · multiple ['Y-m-d', …] · range { from, to }.
+    get value() {
+        if (this.mode === 'single') return this.single ? _ymd(this.single) : null;
+        if (this.mode === 'multiple') return this.multiple.map(_ymd);
+        return { from: this.rangeFrom ? _ymd(this.rangeFrom) : null, to: this.rangeTo ? _ymd(this.rangeTo) : null };
+    },
+    set value(v) {
+        if (this.setValue(v)) this.notify('value');
+    },
+    // Seed the selection and scroll it into view. Returns whether anything actually changed —
+    // the caller uses that both to skip a pointless event and to keep the two-way binding
+    // from ping-ponging (a write of the value we already hold is a no-op, not a new change).
+    setValue(v) {
+        if (this.mode === 'single') {
+            const next = v ? _ymd(_parse(v)) : null;
+            const changed = next !== (this.single ? _ymd(this.single) : null);
+            this.single = next ? _parse(next) : null;
+            if (this.single) this.reveal(this.single);
+            return changed;
+        }
+        if (this.mode === 'multiple') {
+            const list = (Array.isArray(v) ? v : v ? [v] : []).filter(Boolean).map(_parse);
+            const changed = list.map(_ymd).join(',') !== this.multiple.map(_ymd).join(',');
+            this.multiple = list;
+            if (list[0]) this.reveal(list[0]);
+            return changed;
+        }
+        const d = v || {};
+        const from = d.from ? _parse(d.from) : null;
+        const to = d.to ? _parse(d.to) : null;
+        const key = (a, b) => this.fmt(a) + '/' + this.fmt(b);
+        const changed = key(from, to) !== key(this.rangeFrom, this.rangeTo);
+        this.rangeFrom = from;
+        this.rangeTo = to;
+        this.hover = null;
+        if (from) this.reveal(from);
+        return changed;
+    },
+    // Bring a date into the visible month(s) — but only when it isn't already there, so
+    // re-seeding the current selection never yanks a calendar the user just navigated.
+    // Also re-anchors roving focus (APG: Tab lands on the selected day, not on day 1).
+    reveal(d) {
+        if (!d) return;
+        if (!this._viewContains(d)) this.view = new Date(d.getFullYear(), d.getMonth(), 1);
+        this.focusedDate = d;
     },
 
     // ---- grid building ----
@@ -368,12 +475,10 @@ const calendar = (cfg = {}) => ({
         if (this.isDisabled(d)) return;
         if (this.mode === 'single') {
             this.single = _sameDay(this.single, d) && !cfg.required ? null : d;
-            this.emit(this.single ? _ymd(this.single) : null);
         } else if (this.mode === 'multiple') {
             const i = this.multiple.findIndex((x) => _sameDay(x, d));
             if (i >= 0) this.multiple.splice(i, 1);
             else if (!this.maxDays || this.multiple.length < this.maxDays) this.multiple.push(d);
-            this.emit(this.multiple.map(_ymd));
         } else {
             if (!this.rangeFrom || (this.rangeFrom && this.rangeTo)) {
                 this.rangeFrom = d; this.rangeTo = null;
@@ -385,9 +490,32 @@ const calendar = (cfg = {}) => ({
                 else if (this.maxDays && span > this.maxDays) { this.rangeFrom = d; this.rangeTo = null; }
                 else { this.rangeFrom = from; this.rangeTo = to; }
             }
-            this.emit({ from: this.rangeFrom ? _ymd(this.rangeFrom) : null, to: this.rangeTo ? _ymd(this.rangeTo) : null });
         }
+        this.notify('select');
     },
+
+    // ---- events -----------------------------------------------------------------------
+    // Two events, on purpose:
+    //   `calendar-change`   — the user picked a day. Detail is the bare value (unchanged
+    //                         since 1.0). Programmatic seeds do NOT fire it, which is what
+    //                         lets "close the popover when the range is complete" be written
+    //                         without a re-entrancy flag.
+    //   `calendar:updated`  — ANY change, including seeds. Detail is { id, mode, value,
+    //                         source }, so a listener can tell a pick from a seed and can
+    //                         tell which calendar spoke.
+    // The names are deliberately NOT near-twins: `calendar:change` would have differed from
+    // `calendar-change` by a single character, which reads as a typo and greps as one string.
+    // `calendar:*` is the structured API (in: set / set-range / today / goto / clear —
+    // out: updated); `calendar-change` is the historical user-pick event.
+    // Both bubble and are `composed` (Alpine's $dispatch), so they reach `window` even from
+    // a popover teleported into <body> — listen inside the popover, or on `.window` and
+    // filter on `$event.detail.id`.
+    notify(source) {
+        const value = this.value;
+        this.$dispatch('calendar:updated', { id: this.calendarId, mode: this.mode, value, source });
+        if (source === 'select') this.$dispatch('calendar-change', value);
+    },
+    /** @deprecated since 1.20 — use notify(source). Kept so overrides keep working. */
     emit(value) { this.$dispatch('calendar-change', value); },
 
     // ---- navigation ----
@@ -416,8 +544,8 @@ const calendar = (cfg = {}) => ({
     isFocused(d) { return _sameDay(d, this.focusedDate); },
     dayLabel(d) {
         const base = d.toLocaleDateString(this.locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        let label = this.isToday(d) ? 'Today, ' + base : base;
-        if (this.isSelected(d)) label += ', selected';
+        let label = this.isToday(d) ? this.todayLabel.replace(':date', base) : base;
+        if (this.isSelected(d)) label += ', ' + this.selectedLabel;
         return label;
     },
     _viewContains(d) {
@@ -453,10 +581,19 @@ const calendar = (cfg = {}) => ({
         d.setDate(d.getDate() + (end ? 6 - offset : -offset));
         this._focus(d);
     },
+    // The grid is laid out with logical properties, so under `dir="rtl"` it renders mirrored:
+    // the next day sits to the LEFT of the current one. Arrow keys are visual in the APG grid
+    // pattern, so they have to mirror with it — Home/End do not (they are "first/last day of
+    // the week", which is a logical position, not a screen side).
+    isRtl() {
+        const el = this._rootEl;
+        return !!(el && el.nodeType === 1 && typeof getComputedStyle === 'function' && getComputedStyle(el).direction === 'rtl');
+    },
     onDayKeydown(e, d) {
         const k = e.key;
-        if (k === 'ArrowLeft') this.moveFocus(-1);
-        else if (k === 'ArrowRight') this.moveFocus(1);
+        const step = this.isRtl() ? -1 : 1;
+        if (k === 'ArrowLeft') this.moveFocus(-step);
+        else if (k === 'ArrowRight') this.moveFocus(step);
         else if (k === 'ArrowUp') this.moveFocus(-7);
         else if (k === 'ArrowDown') this.moveFocus(7);
         else if (k === 'Home') this.focusWeekEdge(false);
@@ -484,6 +621,10 @@ const calendar = (cfg = {}) => ({
     fmt(d) { return d ? _ymd(d) : ''; },
     get multipleValue() { return this.multiple.map(_ymd).join(','); },
 });
+
+// Exported for the engine's unit tests (tests/js/calendar.test.mjs), which drive the
+// factory directly with a stub Alpine scope. Apps use Alpine.data('calendar') instead.
+export { calendar };
 
 // ---------------------------------------------------------------------------
 // Theme export — resolve the CURRENT customization (base color, accent, radius,
