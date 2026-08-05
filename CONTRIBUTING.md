@@ -17,6 +17,15 @@ CI. Here is the map so your change lands in the right place.
 package's `stubs/` is a generated copy that `blatui:add` ships to users. Editing the generated
 copy directly is the mistake to avoid — CI catches it.
 
+**One gotcha when writing a component's doc comment:** the manifest builder infers dependencies
+by scanning each family's source for `<x-ui.*>` / `<x-block.*>` — **comments included**, on
+purpose, because a container that documents its children (`each <x-ui.dock-item> stretches…`)
+genuinely needs them installed alongside. The flip side: naming a component you are steering
+people *away* from ("prefer `<x-ui.alert-dialog>` when…") silently makes it a dependency, and
+`blatui:add` starts dragging a whole extra family in. Mention those in prose without the tag
+syntax. `git diff apps/demo/registry.json` after `build-package.sh` shows what you actually
+declared.
+
 ## Repo layout
 
 The Composer package is the repo **root** (`composer.json` + `src/` + `stubs/`), so Packagist

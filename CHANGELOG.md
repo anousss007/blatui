@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`closeOnOverlay` on `dialog-content`, `sheet-content` and `drawer-content`** (#12). The
+  backdrop click handler was hardcoded, so keeping a modal open on an outside click meant forking
+  the component. `<x-ui.dialog-content :close-on-overlay="false">` gives you a static backdrop — a
+  long form or a multi-step flow a stray click shouldn't discard. It governs the backdrop and
+  nothing else: Escape and the close (X) button stay wired, because a modal you can't leave from
+  the keyboard is a trap. All three components got it rather than `dialog` alone — they shared the
+  same hardcoded handler, and fixing one would have created the very inconsistency the report was
+  about. `alert-dialog` is unchanged: it never closed on an outside click, by design.
 - **`blatui:update` — an update path for components you already own** (#11). `blatui:add --force`
   was the only way to re-sync an installed component, and it overwrote the file with no diff, no
   prompt and no backup — the one destructive corner of the copy-not-dependency model. The new

@@ -241,6 +241,68 @@ class ComponentRenderTest extends TestCase
     }
 
     /**
+     * A stray click on the backdrop should not be able to discard a half-filled form.
+     * `closeOnOverlay` drops the overlay's click handler — and nothing else: a modal that
+     * can't be left from the keyboard is a trap, so Escape stays wired in every case.
+     */
+    public function test_close_on_overlay_only_governs_the_backdrop_click(): void
+    {
+        $overlays = [
+            'dialog' => '<x-ui.dialog><x-ui.dialog-content %s>x</x-ui.dialog-content></x-ui.dialog>',
+            'sheet' => '<x-ui.sheet><x-ui.sheet-content %s>x</x-ui.sheet-content></x-ui.sheet>',
+            'drawer' => '<x-ui.drawer><x-ui.drawer-content %s>x</x-ui.drawer-content></x-ui.drawer>',
+        ];
+
+        foreach ($overlays as $name => $template) {
+            $default = $this->render(sprintf($template, ''));
+            $static = $this->render(sprintf($template, ':close-on-overlay="false"'));
+
+            $this->assertStringContainsString(
+                '@click="open = false"',
+                $this->overlayOf($default, $name),
+                "{$name} should close on a backdrop click by default"
+            );
+            $this->assertStringNotContainsString(
+                '@click="open = false"',
+                $this->overlayOf($static, $name),
+                "{$name} kept the backdrop click handler despite close-on-overlay=false"
+            );
+
+            // Escape is the keyboard way out — it survives in both.
+            $this->assertStringContainsString('@keydown.escape.window="open = false"', $default);
+            $this->assertStringContainsString('@keydown.escape.window="open = false"', $static);
+        }
+
+        // dialog and sheet also ship a close (X) button; it is a separate affordance and
+        // must not be disabled by proxy. (drawer has none — it slots <x-ui.drawer-close>.)
+        foreach (['dialog', 'sheet'] as $name) {
+            $static = $this->render(sprintf($overlays[$name], ':close-on-overlay="false"'));
+
+            $this->assertSame(1, substr_count($static, '@click="open = false"'), "{$name} should keep its close button");
+            $this->assertStringContainsString('<span class="sr-only">Close</span>', $static);
+        }
+    }
+
+    /** The overlay element's attributes, up to its data-slot marker. */
+    private function overlayOf(string $html, string $component): string
+    {
+        $at = strpos($html, 'data-slot="'.$component.'-overlay"');
+        $this->assertNotFalse($at, "{$component}-overlay is missing");
+        $start = strrpos(substr($html, 0, $at), '<div');
+
+        return substr($html, (int) $start, $at - (int) $start);
+    }
+
+    /** alert-dialog is the "must decide" modal — it never closed on an outside click. */
+    public function test_alert_dialog_still_ignores_the_backdrop_click(): void
+    {
+        $html = $this->render('<x-ui.alert-dialog><x-ui.alert-dialog-content>x</x-ui.alert-dialog-content></x-ui.alert-dialog>');
+
+        $this->assertStringNotContainsString('@click="open = false"', $html);
+        $this->assertStringContainsString('role="alertdialog"', $html);
+    }
+
+    /**
      * The toaster used to render a literal class="…" next to a bare {{ $attributes }},
      * so a consumer class produced a second class attribute the browser ignores.
      */

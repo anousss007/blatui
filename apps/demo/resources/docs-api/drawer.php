@@ -11,6 +11,12 @@ return [
             'options' => ['bottom', 'top', 'right', 'left'],
             'description' => 'Which edge of the viewport the drawer slides in from. A drag-handle bar is shown only for the "bottom" direction.',
         ],
+        [
+            'name' => 'closeOnOverlay',
+            'type' => 'bool',
+            'default' => 'true',
+            'description' => 'Set on <x-ui.drawer-content>. Clicking the backdrop closes the drawer. Pass false for a "static backdrop" — a form a stray click should not discard. Escape and the close button are unaffected.',
+        ],
     ],
 
     'slots' => [

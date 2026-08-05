@@ -1,6 +1,12 @@
+{{--
+    closeOnOverlay  clicking the backdrop closes the sheet. Set false for a "static
+                    backdrop" — a form a stray click shouldn't discard. Escape and the
+                    close button are unaffected.
+--}}
 @props([
     'side' => 'right',
     'showClose' => true,
+    'closeOnOverlay' => true,
 ])
 
 @php
@@ -27,7 +33,7 @@
     <div x-show="open" x-cloak class="fixed inset-0 z-50">
         <div
             x-show="open"
-            @click="open = false"
+            @if ($closeOnOverlay) @click="open = false" @endif
             role="presentation"
             aria-hidden="true"
             data-slot="sheet-overlay"

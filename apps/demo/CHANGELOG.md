@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Static backdrop for modals** ([#12](https://github.com/anousss007/blatui/issues/12)) — new
+  `closeOnOverlay` prop (default `true`) on `<x-ui.dialog-content>`, `<x-ui.sheet-content>` and
+  `<x-ui.drawer-content>`. Pass `:close-on-overlay="false"` and a click on the backdrop no longer
+  discards a half-filled form; Escape and the close button still work. See the new
+  [Static backdrop example](https://blatui.remix-it.com/components/dialog).
 - **`php artisan blatui:update`** ([#11](https://github.com/anousss007/blatui/issues/11)) — the
   update path for components you already own. It diffs every installed file against the version
   BlatUI ships and asks before touching anything that differs (`--dry-run`, `--diff`, `--force`,

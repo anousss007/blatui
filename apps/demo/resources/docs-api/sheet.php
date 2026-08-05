@@ -29,6 +29,12 @@ return [
             'description' => 'Set on <x-ui.sheet-content>. Render the built-in top-right close (X) button.',
         ],
         [
+            'name' => 'closeOnOverlay',
+            'type' => 'bool',
+            'default' => 'true',
+            'description' => 'Set on <x-ui.sheet-content>. Clicking the backdrop closes the sheet. Pass false for a "static backdrop" — a form a stray click should not discard. Escape and the close button are unaffected.',
+        ],
+        [
             'name' => 'for',
             'type' => 'string',
             'description' => 'Set on <x-ui.sheet-trigger>. Opens a dispatchable sheet defined elsewhere (matching its id) instead of one in the same scope.',

@@ -28,6 +28,12 @@ return [
             'description' => 'Set on <x-ui.dialog-content>. Render the dialog edge-to-edge (inset-0) instead of a centered box — useful for mobile-style takeovers, editors, and media viewers.',
         ],
         [
+            'name' => 'closeOnOverlay',
+            'type' => 'bool',
+            'default' => 'true',
+            'description' => 'Set on <x-ui.dialog-content>. Clicking the backdrop closes the dialog. Pass false for a "static backdrop" — a long form or a multi-step flow a stray click should not discard. Escape and the close button still work: a dialog must never be impossible to leave from the keyboard. If the point is to force a decision rather than to protect one, reach for <x-ui.alert-dialog> instead — it carries role="alertdialog" and never closes on an outside click.',
+        ],
+        [
             'name' => 'position',
             'type' => 'string',
             'default' => "'center'",
