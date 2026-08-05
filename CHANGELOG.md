@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.22.0] - 2026-08-05
+
+### Added
+- **`blatui:update --ignore-whitespace`** (#11). A project that runs Pint or Prettier over
+  `resources/views` reformats the components it copied, and a byte comparison then reports every
+  one of them as changed — in the first real-world run, 21 of 31 differing files were formatter
+  noise, which buried the 10 that had actually drifted. Files whose content matches once
+  whitespace is dropped are now counted on their own line (*same content, reformatted*) and, with
+  the flag, treated as up to date. The default stays byte-exact — that is the only honest answer
+  to "is this the file we ship?" — but it now names the noise instead of leaving you to spot it,
+  and points at the flag. It forgives layout only: reordered Tailwind classes, flipped quotes and
+  added trailing commas still read as drift, because nothing distinguishes them from a real edit.
+
+### Changed
+- **Geometry that was hardcoded in `rem` now tracks `--spacing`** (#14, diffs contributed by
+  @cmdevpe): the `switch` track height, the `calendar` day-cell size, and both `sidebar-provider`
+  widths (expanded + collapsed rail, which has to keep matching the `size-8` menu button inside
+  it). Each factor is chosen so the computed value is identical at Tailwind's default
+  `--spacing: .25rem`, so nothing moves unless you change the spacing scale; a test locks that
+  arithmetic. The two remaining candidates (`tabs-list`'s `p-[3px]`, the `translate-y-[2px]`
+  checkbox nudge in `table-cell`/`table-head`) are deliberately left absolute: they are px, and a
+  rem-derived replacement only matches them at a 16px root font size — it would change rendering
+  for anyone using a larger root, without touching `--spacing` at all.
+
 ## [1.21.0] - 2026-08-05
 
 ### Added
@@ -787,7 +811,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.21.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.22.0...HEAD
+[1.22.0]: https://github.com/anousss007/blatui/compare/v1.21.0...v1.22.0
 [1.21.0]: https://github.com/anousss007/blatui/compare/v1.20.0...v1.21.0
 [1.20.0]: https://github.com/anousss007/blatui/compare/v1.19.0...v1.20.0
 [1.19.0]: https://github.com/anousss007/blatui/compare/v1.18.0...v1.19.0

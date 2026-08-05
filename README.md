@@ -168,6 +168,15 @@ disk tells the two apart, so BlatUI never overwrites one without showing the dif
 and asking. `--force` still writes a `.bak` next to each file it replaces (opt out
 with `--no-backup`). Files a family gained in a newer release are simply added.
 
+Running Pint or Prettier over `resources/views`? Your formatter rewrites the
+layout of every component you copied, and all of them then read as changed. They
+are counted separately as *same content, reformatted*, and `--ignore-whitespace`
+leaves them out:
+
+```bash
+php artisan blatui:update --dry-run --ignore-whitespace
+```
+
 The CSS/JS foundations are published, not copied — re-sync those with
 `vendor:publish --tag=blatui-foundations --force`; `blatui:init` tells you when
 the engine has fallen behind.
@@ -187,7 +196,7 @@ grab the exact source you want rather than installing it:
 | `blatui:init` | Doctor — checks packages, Tailwind v4, theme tokens, Alpine/engine wiring |
 | `blatui:list [component]` | List all component families, or detail one |
 | `blatui:add <components...>` | Copy components (+ deps) into your project |
-| `blatui:update [components...]` | Diff installed components against this version and update them (`--dry-run`, `--diff`, `--force`) |
+| `blatui:update [components...]` | Diff installed components against this version and update them (`--dry-run`, `--diff`, `--force`, `--ignore-whitespace`) |
 | `blatui:doctor [path]` | Scan your Blade for known footguns (typeless buttons in forms, leaked tags) |
 | `blatui:mcp` | Run the MCP server (stdio) so an AI editor can search and install components |
 | `vendor:publish --tag=blatui-foundations` | Publish theme CSS + JS engine |

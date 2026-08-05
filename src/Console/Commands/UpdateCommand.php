@@ -21,6 +21,12 @@ use Symfony\Component\Console\Formatter\OutputFormatter;
  * this version ships?". It cannot tell *why* it differs — a local customisation
  * and an outdated copy look identical — so anything that differs is shown as a
  * diff and confirmed per file rather than overwritten.
+ *
+ * The one case a byte comparison over-reports is a formatter: a project running
+ * Pint/Prettier across resources/views rewrites the layout of the components it
+ * copied, and every one of them then reads as changed. --ignore-whitespace
+ * classifies those as up to date. They are counted on their own line either way,
+ * so the default stays byte-honest without leaving the noise unexplained.
  */
 class UpdateCommand extends Command
 {
@@ -28,6 +34,7 @@ class UpdateCommand extends Command
         {components?* : Component families to update (default: every installed family)}
         {--diff : Print the full unified diff for each file that differs}
         {--dry-run : Report what would change without writing anything}
+        {--ignore-whitespace : Treat files that differ only in layout (a formatter ran over them) as up to date}
         {--force : Overwrite differing files without confirming}
         {--no-backup : Skip the .bak copy written before an overwrite}
         {--path= : Directory holding the installed components (default: each family\'s namespace dir)}';
@@ -66,8 +73,9 @@ class UpdateCommand extends Command
         }
 
         $upToDate = 0;
-        $changed = [];   // files that differ from the shipped stub
-        $added = [];     // files a family gained upstream that this app never got
+        $reformatted = 0; // same content, different layout — a formatter ran over them
+        $changed = [];    // files that differ from the shipped stub
+        $added = [];      // files a family gained upstream that this app never got
 
         foreach ($installed as $files) {
             foreach ($files as $target => $src) {
@@ -86,15 +94,39 @@ class UpdateCommand extends Command
                     continue;
                 }
 
+                if (Diff::sameIgnoringWhitespace($local, $stub)) {
+                    $reformatted++;
+
+                    // Byte identity is the honest default — say what was found, and only
+                    // skip these when asked to. Nothing is hidden either way.
+                    if ($this->option('ignore-whitespace')) {
+                        continue;
+                    }
+                }
+
                 $changed[$target] = [$local, $stub];
             }
         }
 
+        $ignoringWhitespace = (bool) $this->option('ignore-whitespace');
+
         $this->newLine();
         $this->components->twoColumnDetail('<fg=gray>up to date</>', (string) $upToDate.' file(s)');
+        if ($reformatted) {
+            $this->components->twoColumnDetail(
+                '<fg=gray>same content, reformatted</>',
+                (string) $reformatted.' file(s)'.($ignoringWhitespace ? ' <fg=gray>(skipped)</>' : '')
+            );
+        }
         $this->components->twoColumnDetail('<fg=yellow>differs from registry</>', (string) count($changed).' file(s)');
         if ($added) {
             $this->components->twoColumnDetail('<fg=green>new in this version</>', (string) count($added).' file(s)');
+        }
+
+        // A project that runs a formatter over resources/views reformats the components it
+        // copied; without this the real drift is a third of the list and easy to miss.
+        if ($reformatted && ! $ignoringWhitespace) {
+            $this->line('  <fg=gray>'.$reformatted.' of these differ only in layout — </><fg=green>--ignore-whitespace</><fg=gray> leaves them alone.</>');
         }
 
         if (! $changed && ! $added) {
@@ -153,7 +185,9 @@ class UpdateCommand extends Command
         if ($dryRun) {
             $this->components->info('Dry run — nothing was written. Re-run without --dry-run to apply.');
             if (! $this->option('diff')) {
-                $this->line('  <fg=gray>See what changes: </><fg=green>php artisan blatui:update --diff --dry-run</>');
+                // Carry the flags they are already using — a suggestion that drops
+                // --ignore-whitespace hands back the noise they just filtered out.
+                $this->line('  <fg=gray>See what changes: </><fg=green>php artisan blatui:update --diff --dry-run'.($ignoringWhitespace ? ' --ignore-whitespace' : '').'</>');
             }
 
             return self::SUCCESS;

@@ -133,6 +133,60 @@ class UpdateCommandTest extends TestCase
         $this->assertSame('B', file_get_contents($badge));
     }
 
+    /**
+     * A project that runs Pint/Prettier over resources/views reformats the components it
+     * copied. Byte-wise every one of them then reads as changed, drowning the few that
+     * genuinely drifted — so say how many are only reformatted, and offer the way out.
+     */
+    public function test_a_reformatted_file_is_reported_as_such_and_can_be_ignored(): void
+    {
+        [$button] = $this->install('button');
+        $shipped = file_get_contents($button);
+        // What a formatter does: collapse a multi-line attribute onto one line.
+        file_put_contents($button, preg_replace('/\n\s+/', ' ', $shipped));
+        $reformatted = file_get_contents($button);
+
+        // Default: byte-honest — still listed, with the flag suggested.
+        $this->artisan('blatui:update', ['components' => ['button'], '--no-interaction' => true])
+            ->expectsOutputToContain('same content, reformatted')
+            ->expectsOutputToContain('--ignore-whitespace')
+            ->assertSuccessful();
+        $this->assertSame($reformatted, file_get_contents($button));
+
+        // With the flag: treated as up to date, and left alone even under --force.
+        $this->artisan('blatui:update', ['components' => ['button'], '--ignore-whitespace' => true, '--force' => true])
+            ->expectsOutputToContain('Everything is already in sync.')
+            ->assertSuccessful();
+        $this->assertSame($reformatted, file_get_contents($button));
+        $this->assertFileDoesNotExist($button.'.bak');
+    }
+
+    /** Real drift must survive --ignore-whitespace: only layout is forgiven. */
+    public function test_ignore_whitespace_still_reports_a_real_edit(): void
+    {
+        [$button] = $this->install('button');
+        file_put_contents($button, str_replace('data-slot="button"', 'data-slot="button" data-analytics="cta"', (string) file_get_contents($button)));
+
+        $this->artisan('blatui:update', ['components' => ['button'], '--ignore-whitespace' => true, '--dry-run' => true])
+            ->expectsOutputToContain('differs from registry')
+            ->doesntExpectOutputToContain('Everything is already in sync.')
+            ->assertSuccessful();
+    }
+
+    public function test_whitespace_insensitive_comparison(): void
+    {
+        // A formatter *removes* the spacing it collapses, so this has to ignore whitespace
+        // rather than normalise it — "<div\n  x\n>" becomes "<div x>", not "<div x >".
+        $this->assertTrue(Diff::sameIgnoringWhitespace("<div\n    class=\"a\"\n>x</div>", '<div class="a">x</div>'));
+        $this->assertTrue(Diff::sameIgnoringWhitespace("@keydown=\"\n    fn(\$e)\n\"", '@keydown="fn($e)"'));
+
+        // Reordered classes and flipped quotes change the bytes between the whitespace —
+        // indistinguishable from an edit that matters, and still reported as drift.
+        $this->assertFalse(Diff::sameIgnoringWhitespace('<div class="a b">', '<div class="b a">'));
+        $this->assertFalse(Diff::sameIgnoringWhitespace('<div class="a">', "<div class='a'>"));
+        $this->assertFalse(Diff::sameIgnoringWhitespace('<div class="a">', '<div class="a" hidden>'));
+    }
+
     public function test_unknown_family_fails(): void
     {
         $this->install('button');

@@ -100,7 +100,9 @@
          <x-ui.calendar mode="range" x-model="stay" /> — the parent's value wins on mount,
          then the binding stays live both ways (no re-seeding on every popover open). --}}
     x-modelable="value"
-    style="--cell-size: 2rem;"
+    {{-- Day-cell size tracks the spacing scale, like the p-3 padding around the grid:
+         8 × .25rem = 2rem at the default, so this changes nothing until --spacing does. --}}
+    style="--cell-size: calc(var(--spacing) * 8);"
     @if ($calendarId) data-calendar-id="{{ $calendarId }}" @endif
     @unless ($showOutsideDays) data-hide-outside-days @endunless
     {{ $attributes->twMerge('group/calendar bg-background w-fit rounded-md border p-3') }}

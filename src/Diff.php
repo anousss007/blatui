@@ -149,6 +149,33 @@ class Diff
         return ['added' => $added, 'removed' => $removed];
     }
 
+    /**
+     * True when two files carry the same content and differ only in how it is laid out.
+     *
+     * Projects that run Pint/Prettier over `resources/views` reformat the components they
+     * copied — a multi-line attribute collapsed onto one line reads as a changed file to a
+     * byte comparison, and drowns the handful that genuinely drifted.
+     *
+     * Whitespace is dropped entirely rather than collapsed to a single space: a formatter
+     * that joins `@keydown="\n    expr\n"` into `@keydown="expr"` removes the spacing, it does
+     * not normalise it, so collapsing would still report a difference. The cost is that a
+     * change consisting *only* of a space inside text or a class list reads as equal — which
+     * is why this is opt-in behaviour rather than the default comparison.
+     *
+     * It does NOT forgive every reformatting either: reordered Tailwind classes, flipped
+     * quotes and added trailing commas change the bytes between the whitespace, and are
+     * indistinguishable from an edit that matters.
+     */
+    public static function sameIgnoringWhitespace(string $a, string $b): bool
+    {
+        return self::stripWhitespace($a) === self::stripWhitespace($b);
+    }
+
+    protected static function stripWhitespace(string $text): string
+    {
+        return (string) preg_replace('/\s+/', '', $text);
+    }
+
     /** @return list<string> */
     protected static function split(string $text): array
     {

@@ -19,7 +19,10 @@
     $track = match ($size) {
         'sm' => 'h-4 w-7',
         'lg' => 'h-6 w-10',
-        default => 'h-[1.15rem] w-8',
+        // Width already scales with --spacing (w-8); the height is derived from it so the
+        // pill keeps its ratio when a theme changes the spacing scale. 4.6 × .25rem = 1.15rem,
+        // the shadcn value, so nothing moves at the default.
+        default => 'h-[calc(var(--spacing)*4.6)] w-8',
     };
     $thumb = match ($size) {
         'sm' => 'size-3.5',

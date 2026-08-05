@@ -215,6 +215,12 @@ document.addEventListener('alpine:init', () => {
 php artisan blatui:update button card --force</x-code-block>
                     </div>
 
+                    <div>
+                        <p class="mb-1 text-sm font-medium">Running a formatter over your views?</p>
+                        <p class="text-muted-foreground mb-2 text-sm">Pint or Prettier over <code class="bg-muted rounded px-1 text-xs">resources/views</code> rewrites the layout of every component you copied, so all of them read as changed. They're counted separately as <span class="text-foreground font-medium">same content, reformatted</span>, and this leaves them out:</p>
+                        <x-code-block label="Terminal" icon="terminal">php artisan blatui:update --dry-run --ignore-whitespace</x-code-block>
+                    </div>
+
                     <div class="bg-muted/40 flex items-start gap-2 rounded-lg border p-3 text-sm">
                         <x-lucide-shield-check class="text-primary mt-0.5 size-4 shrink-0" />
                         <span class="text-muted-foreground">A file that differs is either <span class="text-foreground font-medium">your customisation</span> or an <span class="text-foreground font-medium">outdated copy</span> — nothing on disk tells them apart, so BlatUI never overwrites one silently. Even <code class="bg-muted rounded px-1 text-xs">--force</code> keeps your version next to it as <code class="bg-muted rounded px-1 text-xs">.bak</code> (opt out with <code class="bg-muted rounded px-1 text-xs">--no-backup</code>). Files a family gained in a newer release are simply added.</span>

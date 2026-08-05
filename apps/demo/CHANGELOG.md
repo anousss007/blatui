@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`blatui:update --ignore-whitespace`** ([#11](https://github.com/anousss007/blatui/issues/11)) —
+  if you run Pint or Prettier over `resources/views`, your formatter rewrites the layout of every
+  component you copied and they all read as changed. They're now counted separately as *same
+  content, reformatted*, and the flag leaves them out so the real drift is what's left.
+- **Spacing-aware geometry** ([#14](https://github.com/anousss007/blatui/issues/14)) — the switch
+  track, the calendar day cell and both sidebar widths derive from `--spacing` instead of fixed
+  `rem` values, so the **Spacing** dimension in the [theme editor](https://blatui.remix-it.com/themes)
+  no longer distorts them. Identical at the default scale — nothing changes unless you move it.
 - **Static backdrop for modals** ([#12](https://github.com/anousss007/blatui/issues/12)) — new
   `closeOnOverlay` prop (default `true`) on `<x-ui.dialog-content>`, `<x-ui.sheet-content>` and
   `<x-ui.drawer-content>`. Pass `:close-on-overlay="false"` and a click on the backdrop no longer

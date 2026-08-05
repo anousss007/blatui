@@ -161,6 +161,41 @@ class BlatuiTest extends TestCase
         $this->assertStringContainsString("\$attributes->only('class')->twMerge(", $stub);
     }
 
+    /**
+     * Geometry that used to be hardcoded in rem now tracks the --spacing scale, so a theme
+     * that changes it doesn't distort the switch pill, the calendar grid or the collapsed
+     * sidebar rail. The conversion is only safe because it is a no-op at Tailwind's default
+     * .25rem — that arithmetic is the thing to guard, not the string.
+     */
+    public function test_spacing_derived_geometry_is_unchanged_at_the_default_scale(): void
+    {
+        $cases = [
+            ['switch.blade.php', 4.6, '1.15rem'],
+            ['calendar.blade.php', 8, '2rem'],
+            ['sidebar-provider.blade.php', 64, '16rem'],
+            ['sidebar-provider.blade.php', 12, '3rem'],
+        ];
+
+        foreach ($cases as [$file, $n, $original]) {
+            $stub = (string) file_get_contents(dirname(__DIR__).'/stubs/ui/'.$file);
+
+            preg_match_all('/calc\(var\(--spacing\)\s*\*\s*([0-9.]+)\)/', $stub, $matches);
+            $factors = array_map('floatval', $matches[1]);
+
+            $this->assertContains((float) $n, $factors, "{$file} should derive {$original} from --spacing");
+            $this->assertSame($original, $this->rem($n * 0.25), "{$n} × .25rem must still be {$original}");
+            // The comments spell the original out on purpose; only real markup counts here.
+            $code = preg_replace(['/\{\{--.*?--\}\}/s', '#(?<![:/])//[^\n]*#'], '', $stub);
+            $this->assertStringNotContainsString($original, (string) $code, "{$file} still hardcodes {$original}");
+        }
+    }
+
+    /** Format a rem value the way the original literals were written (2.0 → "2rem"). */
+    private function rem(float $value): string
+    {
+        return rtrim(rtrim(number_format($value, 4, '.', ''), '0'), '.').'rem';
+    }
+
     public function test_doctor_flags_typeless_button_in_form(): void
     {
         $dir = sys_get_temp_dir().'/blatui-doctor-'.uniqid();
