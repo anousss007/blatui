@@ -15,7 +15,7 @@ return [
             'name' => 'closeOnOverlay',
             'type' => 'bool',
             'default' => 'true',
-            'description' => 'Set on <x-ui.drawer-content>. Clicking the backdrop closes the drawer. Pass false for a "static backdrop" — a form a stray click should not discard. Escape and the close button are unaffected.',
+            'description' => 'Since 1.21. Set on <x-ui.drawer-content>. Clicking the backdrop closes the drawer. Pass false for a "static backdrop" — a form a stray click should not discard. Escape and the close button are unaffected.',
         ],
     ],
 

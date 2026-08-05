@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.21.0] - 2026-08-05
+
 ### Added
 - **`closeOnOverlay` on `dialog-content`, `sheet-content` and `drawer-content`** (#12). The
   backdrop click handler was hardcoded, so keeping a modal open on an outside click meant forking
@@ -785,7 +787,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.20.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.21.0...HEAD
+[1.21.0]: https://github.com/anousss007/blatui/compare/v1.20.0...v1.21.0
 [1.20.0]: https://github.com/anousss007/blatui/compare/v1.19.0...v1.20.0
 [1.19.0]: https://github.com/anousss007/blatui/compare/v1.18.0...v1.19.0
 [1.18.0]: https://github.com/anousss007/blatui/compare/v1.17.1...v1.18.0

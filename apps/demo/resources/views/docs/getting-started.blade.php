@@ -195,6 +195,11 @@ document.addEventListener('alpine:init', () => {
                 <p class="text-muted-foreground mb-6 text-sm">You own the copied files, so nothing updates behind your back. <code class="bg-muted rounded px-1 text-xs">blatui:update</code> compares what you have against the version this release ships, shows the diff, and lets you decide — file by file.</p>
 
                 <div class="space-y-5">
+                    <div class="bg-muted/40 flex items-start gap-2 rounded-lg border p-3 text-sm">
+                        <x-lucide-package class="text-primary mt-0.5 size-4 shrink-0" />
+                        <span class="text-muted-foreground">Requires <span class="text-foreground font-medium">BlatUI 1.21</span> or newer. On an older install the command isn't registered (<code class="bg-muted rounded px-1 text-xs">Command "blatui:update" is not defined</code>) — run <code class="bg-muted rounded px-1 text-xs">composer update anousss007/blatui</code> first.</span>
+                    </div>
+
                     <div>
                         <p class="mb-1 text-sm font-medium">See what changed first</p>
                         <p class="text-muted-foreground mb-2 text-sm">A dry run writes nothing. Add <code class="bg-muted rounded px-1 text-xs">--diff</code> for the full unified diff of every file that differs.</p>
