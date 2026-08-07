@@ -16,6 +16,7 @@
         open: {{ $defaultOpen ? 'true' : 'false' }},
         openMobile: false,
         isMobile: false,
+        collapsed: false,
         toggle() { this.isMobile ? (this.openMobile = !this.openMobile) : (this.open = !this.open) },
         init() {
             const mq = window.matchMedia('(max-width: 767px)');
@@ -23,6 +24,12 @@
             mq.addEventListener('change', e => this.isMobile = e.matches);
         }
     }"
+    {{-- `collapsed` is a plain property kept in sync, deliberately NOT a getter. Alpine
+         resolves a getter's `this` against the scope that READS it (mergeProxies passes the
+         reading proxy as the receiver), so `!this.open` inside a getter would pick up the
+         `open` of whatever tooltip or collapsible the reader sits in — inverted, silently.
+         A plain value is read straight off this scope, wherever it is read from. --}}
+    x-effect="collapsed = !isMobile && !open"
     style="{{ $style }}"
     {{ $attributes->except('style')->twMerge('group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar') }}
 >

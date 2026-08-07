@@ -10,6 +10,12 @@ return [
             'default' => '0',
             'description' => 'Milliseconds to wait after hover or focus before the tooltip opens.',
         ],
+        [
+            'name' => 'state',
+            'type' => 'string',
+            'default' => "'open'",
+            'description' => 'Since 1.23. Set on <x-ui.tooltip-content>. The Alpine expression driving visibility. Override it when the tooltip sits in a scope where <code>open</code> already means something else — <x-ui.sidebar-menu-button> uses it to drive a tooltip from its own state while the surrounding collapsible keeps <code>open</code>.',
+        ],
     ],
 
     'slots' => [

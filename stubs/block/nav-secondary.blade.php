@@ -5,7 +5,7 @@
         <x-ui.sidebar-menu>
             @foreach ($items as $item)
                 <x-ui.sidebar-menu-item>
-                    <x-ui.sidebar-menu-button href="#" size="sm">
+                    <x-ui.sidebar-menu-button href="#" size="sm" :tooltip="$item['title']">
                         <x-dynamic-component :component="'lucide-'.$item['icon']" />
                         <span>{{ $item['title'] }}</span>
                     </x-ui.sidebar-menu-button>

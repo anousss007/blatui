@@ -240,6 +240,74 @@ class ComponentRenderTest extends TestCase
         $this->assertStringContainsString('calendar:set-range', $html);
     }
 
+    /** Collapsed to the icon rail a menu button shows only its icon — `tooltip` names it. */
+    public function test_sidebar_menu_button_tooltip_is_opt_in_and_gated_on_the_collapsed_rail(): void
+    {
+        $plain = $this->render('<x-ui.sidebar-menu-button href="#"><span>Home</span></x-ui.sidebar-menu-button>');
+        $this->assertStringNotContainsString('sidebar-menu-button-tooltip', $plain);
+        $this->assertStringNotContainsString('tooltip-content', $plain);
+
+        $tipped = $this->render('<x-ui.sidebar-menu-button href="#" tooltip="Home"><span>Home</span></x-ui.sidebar-menu-button>');
+        $this->assertStringContainsString('data-slot="sidebar-menu-button-tooltip"', $tipped);
+        $this->assertStringContainsString('data-side="right"', $tipped);
+        // Only while the rail is collapsed, and read defensively so a button rendered
+        // outside a provider doesn't spam ReferenceErrors.
+        $this->assertStringContainsString('tipOpen &amp;&amp; $data.collapsed', $tipped);
+    }
+
+    /**
+     * menu-action / menu-badge style themselves off the `peer-hover/menu-button` and
+     * `peer-data-[active=true]/menu-button` variants, which need the button to be their
+     * previous sibling — wrapping it for the tooltip would silently break that, so the
+     * wrapper carries the peer identity (and the active state those variants key off).
+     */
+    public function test_tooltip_wrapper_keeps_the_menu_button_peer_relationship(): void
+    {
+        $html = $this->render('<x-ui.sidebar-menu-item><x-ui.sidebar-menu-button tooltip="Home" is-active>x</x-ui.sidebar-menu-button><x-ui.sidebar-menu-action>a</x-ui.sidebar-menu-action></x-ui.sidebar-menu-item>');
+
+        $wrapper = substr($html, (int) strpos($html, 'data-slot="sidebar-menu-button-tooltip"'));
+        $wrapper = substr($wrapper, 0, (int) strpos($wrapper, '>'));
+        $this->assertStringContainsString('peer/menu-button', $wrapper);
+        $this->assertStringContainsString('data-active="true"', $wrapper);
+    }
+
+    /**
+     * Alpine resolves a getter's `this` against the scope that READS it, so a `collapsed`
+     * getter on the provider would pick up the `open` of the tooltip or collapsible the
+     * reader sits in — inverted, silently, in our own sidebar-07 block. Two guards: the
+     * provider keeps a plain synced property, and the tooltip wrapper never introduces
+     * an `open` of its own (the menu button drives its collapsible with `open = !open`).
+     */
+    public function test_collapsed_state_survives_nested_alpine_scopes(): void
+    {
+        $provider = $this->render('<x-ui.sidebar-provider>x</x-ui.sidebar-provider>');
+        $this->assertStringContainsString('collapsed: false', $provider);
+        $this->assertStringContainsString('x-effect="collapsed = !isMobile && !open"', $provider);
+        $this->assertStringNotContainsString('get collapsed', $provider);
+
+        $tipped = $this->render('<x-ui.sidebar-menu-button tooltip="Home">x</x-ui.sidebar-menu-button>');
+        $this->assertStringContainsString('x-data="{ tipOpen: false }"', $tipped);
+
+        // The shipped block composes collapsible + tooltip around the same button.
+        $block = $this->render('<x-block.nav-main :items="[[\'title\' => \'Home\', \'icon\' => \'house\', \'items\' => []]]" />');
+        $this->assertStringContainsString('x-on:click="open = !open"', $block);
+        $this->assertStringContainsString('data-slot="sidebar-menu-button-tooltip"', $block);
+        $this->assertStringNotContainsString('open: false, tipOpen', $block);
+    }
+
+    /** Collapsed, the list must still scroll — and the scrollbar must not eat the rail. */
+    public function test_sidebar_content_scrolls_when_collapsed_without_stealing_rail_width(): void
+    {
+        $html = $this->render('<x-ui.sidebar-content>x</x-ui.sidebar-content>');
+
+        $this->assertStringContainsString('overflow-auto', $html);
+        $this->assertStringContainsString('group-data-[collapsible=icon]:overflow-x-hidden', $html);
+        // The vertical clip is what made the last groups unreachable.
+        $this->assertStringNotContainsString('group-data-[collapsible=icon]:overflow-hidden', $html);
+        // A classic scrollbar would take ~16px out of a 3rem rail; hide it instead of widening.
+        $this->assertStringContainsString('group-data-[collapsible=icon]:[scrollbar-width:none]', $html);
+    }
+
     /**
      * A stray click on the backdrop should not be able to discard a half-filled form.
      * `closeOnOverlay` drops the overlay's click handler — and nothing else: a modal that

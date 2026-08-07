@@ -25,6 +25,11 @@ return [
             'options' => ['offcanvas', 'icon', 'none'],
             'description' => 'Collapse behaviour on desktop. "offcanvas" slides the panel fully out of view, "icon" shrinks it to an icon rail, and "none" renders a static in-flow panel that never collapses.',
         ],
+        [
+            'name' => 'tooltip',
+            'type' => 'string',
+            'description' => 'Since 1.23. Set on <x-ui.sidebar-menu-button>. Label shown on hover or focus while the sidebar is collapsed to the icon rail, where the button text is clipped away — opt in per button, as in shadcn/ui. It is a visual affordance only: the label <span> stays in the DOM when collapsed, so the accessible name never depended on it.',
+        ],
     ],
 
     'slots' => [

@@ -2082,7 +2082,9 @@
             "sidebar-separator.blade.php",
             "sidebar-trigger.blade.php"
         ],
-        "dependencies": [],
+        "dependencies": [
+            "tooltip"
+        ],
         "packages": {
             "composer": [
                 "mallardduck/blade-lucide-icons",

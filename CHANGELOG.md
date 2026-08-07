@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.23.0] - 2026-08-07
+
+### Added
+- **`tooltip` on `sidebar-menu-button`** (#15). Collapsed to the icon rail a menu button shows
+  nothing but its icon; `<x-ui.sidebar-menu-button tooltip="Inbox">` labels it on hover and focus,
+  and only while the rail is collapsed on desktop — opt-in per button, as in shadcn/ui. The
+  shipped `nav-main` / `nav-secondary` blocks now pass it, so `sidebar-07` demonstrates the
+  collapsed behaviour it was always meant to.
+  Note it is a *visual* affordance: the label `<span>` stays in the DOM when the button shrinks,
+  so the accessible name never depended on this.
+- **`state` on `tooltip-content`** — the Alpine expression driving visibility, defaulting to the
+  `open` that `<x-ui.tooltip>` owns. It exists because a sidebar menu button is routinely nested
+  in a `<x-ui.collapsible>` that owns `open` for itself.
+
+### Fixed
+- **The sidebar could not be scrolled once collapsed** (#15). `sidebar-content` clipped overflow
+  in both axes on the icon rail, so with enough groups the bottom items were unreachable. Only the
+  horizontal axis is clipped now. The rail's scrollbar is hidden rather than given room: a classic
+  (non-overlay) scrollbar takes ~16px out of a 3rem rail and squeezes the `size-8` buttons against
+  its track, and widening the rail for everyone would move layout on the many platforms where
+  scrollbars are overlays and nothing was wrong. Wheel, trackpad and Tab all still scroll it.
+- **`collapsed` state is safe to read from nested Alpine scopes.** The provider exposes it as a
+  plain property synced with `x-effect`, deliberately not a getter: Alpine's `mergeProxies` passes
+  the *reading* scope as a getter's receiver, so `!this.open` inside one would resolve against
+  whatever tooltip or collapsible read it — inverting the result in our own `sidebar-07` block.
+  Diagnosed by @cmdevpe before it shipped.
+
 ## [1.22.0] - 2026-08-05
 
 ### Added
@@ -811,7 +838,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.22.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.23.0...HEAD
+[1.23.0]: https://github.com/anousss007/blatui/compare/v1.22.0...v1.23.0
 [1.22.0]: https://github.com/anousss007/blatui/compare/v1.21.0...v1.22.0
 [1.21.0]: https://github.com/anousss007/blatui/compare/v1.20.0...v1.21.0
 [1.20.0]: https://github.com/anousss007/blatui/compare/v1.19.0...v1.20.0

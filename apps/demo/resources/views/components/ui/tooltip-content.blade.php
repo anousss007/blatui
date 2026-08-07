@@ -1,8 +1,15 @@
+{{--
+    state  Alpine expression driving visibility. Defaults to the `open` that
+           <x-ui.tooltip> owns. Override it when the tooltip lives in a scope that
+           already means something else by `open` — a sidebar menu button sits inside
+           a collapsible whose own `open` would otherwise be the one read here.
+--}}
 @props([
     'side' => 'top',
     'align' => 'center',
     'sideOffset' => 4,
     'arrow' => true,
+    'state' => 'open',
 ])
 
 @php
@@ -13,14 +20,14 @@
 <template x-teleport="body" wire:ignore>
     <div
         x-blat-dialog-layer
-        x-show="open"
+        x-show="{{ $state }}"
         x-cloak
         {!! $anchorAttr !!}
         :id="$id('blat-tooltip')"
         role="tooltip"
         data-slot="tooltip-content"
         data-side="{{ $side }}"
-        :data-state="open ? 'open' : 'closed'"
+        :data-state="({{ $state }}) ? 'open' : 'closed'"
         {{-- Opacity-only transition: scaling an x-anchor'd, teleported panel makes it visibly
              resize + reposition on open (anchor recalculates after the reflow). --}}
         x-transition:enter="transition ease-out duration-150"

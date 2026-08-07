@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Sidebar tooltips in icon mode** ([#15](https://github.com/anousss007/blatui/issues/15)) —
+  `<x-ui.sidebar-menu-button tooltip="Inbox">` labels a button on hover/focus while the sidebar is
+  collapsed to the icon rail. The `nav-main` / `nav-secondary` blocks pass it, so
+  [sidebar-07](https://blatui.remix-it.com/blocks/sidebar-07) now behaves as intended when collapsed.
 - **`blatui:update --ignore-whitespace`** ([#11](https://github.com/anousss007/blatui/issues/11)) —
   if you run Pint or Prettier over `resources/views`, your formatter rewrites the layout of every
   component you copied and they all read as changed. They're now counted separately as *same
@@ -28,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [Getting started → Keeping components up to date](https://blatui.remix-it.com/docs#updating).
 
 ### Fixed
+- **The collapsed sidebar can be scrolled again** ([#15](https://github.com/anousss007/blatui/issues/15)) —
+  the icon rail clipped vertical overflow, making the last menu groups unreachable. Its scrollbar is
+  hidden rather than given room, so the rail keeps its width and the buttons stop being squeezed.
 - **Theme export dropped the status palette and the heading font.** *Copy CSS* left out
   `--success`/`--warning`/`--info` (+ their `-foreground`) and `--font-heading`, so a pasted theme
   lost the heading font you had just picked in the editor and any `bg-success`-style utility. The
