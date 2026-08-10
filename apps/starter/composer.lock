@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "anousss007/blatui",
-            "version": "v1.23.0",
+            "version": "v1.24.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/anousss007/blatui.git",
-                "reference": "33d055aa54d579b391ac15cddd17e5ae5c2bce5c"
+                "reference": "b17d2d4913459516b5a9e3482d01bc08120973ba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/anousss007/blatui/zipball/33d055aa54d579b391ac15cddd17e5ae5c2bce5c",
-                "reference": "33d055aa54d579b391ac15cddd17e5ae5c2bce5c",
+                "url": "https://api.github.com/repos/anousss007/blatui/zipball/b17d2d4913459516b5a9e3482d01bc08120973ba",
+                "reference": "b17d2d4913459516b5a9e3482d01bc08120973ba",
                 "shasum": ""
             },
             "require": {
@@ -75,7 +75,7 @@
                 "issues": "https://github.com/anousss007/blatui/issues",
                 "source": "https://github.com/anousss007/blatui"
             },
-            "time": "2026-08-07T07:26:07+00:00"
+            "time": "2026-08-10T16:53:57+00:00"
         },
         {
             "name": "blade-ui-kit/blade-icons",
