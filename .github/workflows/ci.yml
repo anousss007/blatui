@@ -148,7 +148,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          # 8.4 and `composer install`: this job runs the demo the way it is actually
+          # locked, rather than re-resolving it like the drift check does.
+          php-version: "8.4"
           extensions: mbstring, dom, fileinfo
           coverage: none
       - uses: actions/setup-node@v4
