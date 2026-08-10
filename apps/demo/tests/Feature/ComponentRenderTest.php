@@ -240,6 +240,57 @@ class ComponentRenderTest extends TestCase
         $this->assertStringContainsString('calendar:set-range', $html);
     }
 
+    /**
+     * twMerge() mutates the bag it is called on. The sidebar renders a desktop root AND a
+     * teleported mobile panel from the same $attributes, so merging into the shared bag for
+     * the desktop root leaked `hidden md:block` onto the mobile drawer — which then stayed
+     * display:none below md, i.e. the drawer never appeared on a phone.
+     */
+    public function test_sidebar_mobile_panel_does_not_inherit_the_desktop_root_classes(): void
+    {
+        $html = $this->render('<x-ui.sidebar collapsible="icon" class="print:hidden">x</x-ui.sidebar>');
+
+        $panel = $this->classAttributeNear($html, 'aria-label="Sidebar"');
+        $this->assertStringContainsString('flex', $panel, 'the mobile panel must lay out as flex');
+        $this->assertStringNotContainsString('md:block', $panel, 'desktop-only classes leaked onto the mobile panel');
+        $this->assertDoesNotMatchRegularExpression('/(^| )hidden( |$)/', $panel, 'the mobile drawer must not be display:none');
+        $this->assertStringContainsString('print:hidden', $panel, 'the consumer class still reaches the panel');
+
+        // …and the desktop root keeps exactly what it had.
+        $desktop = $this->classAttributeNear($html, 'data-slot="sidebar"');
+        $this->assertStringContainsString('hidden md:block', $desktop);
+        $this->assertStringContainsString('print:hidden', $desktop);
+    }
+
+    /** Off-canvas below md by default; raise it to get the drawer on tablets too. */
+    public function test_sidebar_mobile_breakpoint_is_configurable(): void
+    {
+        $this->assertStringContainsString(
+            "matchMedia('(max-width: 767px)')",
+            $this->render('<x-ui.sidebar-provider>x</x-ui.sidebar-provider>')
+        );
+        $this->assertStringContainsString(
+            "matchMedia('(max-width: 1023px)')",
+            $this->render('<x-ui.sidebar-provider mobile-breakpoint="1023px">x</x-ui.sidebar-provider>')
+        );
+        // A bare number is read as px.
+        $this->assertStringContainsString(
+            "matchMedia('(max-width: 900px)')",
+            $this->render('<x-ui.sidebar-provider :mobile-breakpoint="900">x</x-ui.sidebar-provider>')
+        );
+    }
+
+    /** The class attribute of the element carrying $marker. */
+    private function classAttributeNear(string $html, string $marker): string
+    {
+        $at = strpos($html, $marker);
+        $this->assertNotFalse($at, "{$marker} not found");
+        $tag = substr($html, (int) strrpos(substr($html, 0, $at), '<'));
+        preg_match('/class="([^"]*)"/', $tag, $m);
+
+        return $m[1] ?? '';
+    }
+
     /** Collapsed to the icon rail a menu button shows only its icon — `tooltip` names it. */
     public function test_sidebar_menu_button_tooltip_is_opt_in_and_gated_on_the_collapsed_rail(): void
     {

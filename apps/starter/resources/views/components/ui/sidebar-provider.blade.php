@@ -1,6 +1,15 @@
-@props(['defaultOpen' => true])
+{{--
+    mobileBreakpoint  Viewport width below which the sidebar becomes an off-canvas drawer
+                      instead of collapsing to the icon rail. Defaults to Tailwind's md
+                      (767px). Raise it to 1023px to get the drawer on tablets too, where an
+                      always-docked rail often costs more room than it earns. A bare number
+                      is read as px; anything else is passed to matchMedia as written.
+--}}
+@props(['defaultOpen' => true, 'mobileBreakpoint' => '767px'])
 
 @php
+    $mobileQuery = '(max-width: '.(is_numeric($mobileBreakpoint) ? $mobileBreakpoint.'px' : $mobileBreakpoint).')';
+
     // Merge our default CSS vars with any style passed by the block (e.g. a custom
     // --sidebar-width or --header-height). Passed declarations come last so they win,
     // and we drop the incoming `style` from the bag to avoid a duplicate attribute.
@@ -19,7 +28,7 @@
         collapsed: false,
         toggle() { this.isMobile ? (this.openMobile = !this.openMobile) : (this.open = !this.open) },
         init() {
-            const mq = window.matchMedia('(max-width: 767px)');
+            const mq = window.matchMedia(@js($mobileQuery));
             this.isMobile = mq.matches;
             mq.addEventListener('change', e => this.isMobile = e.matches);
         }

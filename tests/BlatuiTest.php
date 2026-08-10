@@ -155,10 +155,15 @@ class BlatuiTest extends TestCase
         $stub = (string) file_get_contents(dirname(__DIR__).'/stubs/ui/sidebar.blade.php');
 
         // Non-collapsible root, desktop root, and the teleported mobile panel.
-        $this->assertSame(3, substr_count($stub, '$attributes'), 'every sidebar branch must forward the attribute bag');
-        $this->assertStringContainsString("\$attributes->twMerge('text-sidebar-foreground group peer hidden md:block')", $stub);
+        $this->assertStringContainsString("\$rootAttributes->twMerge('bg-sidebar text-sidebar-foreground flex h-full", $stub);
+        $this->assertStringContainsString("\$rootAttributes->twMerge('text-sidebar-foreground group peer hidden md:block'", $stub);
         // The mobile panel is a sibling in the DOM: classes only, or ids collide.
         $this->assertStringContainsString("\$attributes->only('class')->twMerge(", $stub);
+
+        // twMerge() writes the merged class back into the bag, and the desktop root and the
+        // mobile panel are both rendered — merging into the shared bag puts `hidden md:block`
+        // on the mobile drawer and it never appears on a phone. Merge into a copy.
+        $this->assertStringNotContainsString('$attributes->twMerge(', $stub, 'sidebar must never merge into the shared attribute bag');
     }
 
     /**

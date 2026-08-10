@@ -17,6 +17,15 @@ CI. Here is the map so your change lands in the right place.
 package's `stubs/` is a generated copy that `blatui:add` ships to users. Editing the generated
 copy directly is the mistake to avoid — CI catches it.
 
+**`twMerge()` mutates the bag it is called on.** `$attributes->twMerge(…)` writes the merged
+class back into `$attributes` and returns the same instance. That is invisible in the common case
+— one root element, one call — but a component that renders **two** elements from the same bag
+(the sidebar renders a desktop root *and* a teleported mobile panel) will merge the first
+element's classes into the second. That is how `hidden md:block` reached the mobile drawer and
+kept it invisible on phones for three releases. When a bag is used more than once, merge into a
+copy (`$attributes->except('class')`, `->only('class')`) and keep the original untouched. Calls in
+mutually exclusive `@if`/`@else` branches are fine — only one of them ever runs.
+
 **One gotcha when writing a component's doc comment:** the manifest builder infers dependencies
 by scanning each family's source for `<x-ui.*>` / `<x-block.*>` — **comments included**, on
 purpose, because a container that documents its children (`each <x-ui.dock-item> stretches…`)

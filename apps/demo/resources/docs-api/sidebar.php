@@ -26,6 +26,12 @@ return [
             'description' => 'Collapse behaviour on desktop. "offcanvas" slides the panel fully out of view, "icon" shrinks it to an icon rail, and "none" renders a static in-flow panel that never collapses.',
         ],
         [
+            'name' => 'mobileBreakpoint',
+            'type' => 'string',
+            'default' => "'767px'",
+            'description' => 'Since 1.24. Set on <x-ui.sidebar-provider>. Viewport width below which the sidebar becomes an off-canvas drawer instead of collapsing to the icon rail. Raise it to 1023px to get the drawer on tablets too, where an always-docked rail often costs more room than it earns. A bare number is read as px; anything else is passed to matchMedia as written.',
+        ],
+        [
             'name' => 'tooltip',
             'type' => 'string',
             'description' => 'Since 1.23. Set on <x-ui.sidebar-menu-button>. Label shown on hover or focus while the sidebar is collapsed to the icon rail, where the button text is clipped away — opt in per button, as in shadcn/ui. It is a visual affordance only: the label <span> stays in the DOM when collapsed, so the accessible name never depended on it.',

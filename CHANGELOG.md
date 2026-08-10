@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.24.0] - 2026-08-10
+
+### Fixed
+- **The mobile sidebar drawer never appeared** (#16). Regression introduced in 1.21.0 by the fix
+  for #11: `twMerge()` writes the merged class back into the attribute bag it is called on, and
+  `sidebar` renders a desktop root *and* a teleported mobile panel from the same bag — so the
+  desktop root's `hidden md:block` leaked onto the mobile panel, which was then `display: none`
+  below `md`. Clicking the trigger on a phone dimmed the page and showed nothing. The root
+  branches now merge into a copy and leave `$attributes` untouched.
+  Reproduced in a real browser before and after; the drawer now slides in, traps focus, and closes
+  on Escape. The report suspected an `x-trap` / `x-show` race on the panel — that was a red
+  herring, the two directives coexist fine. CONTRIBUTING documents the mutation, and a render test
+  fails if desktop classes ever reach the mobile panel again.
+
+### Added
+- **`mobileBreakpoint` on `sidebar-provider`** (#16). The off-canvas drawer was hardwired to
+  `(max-width: 767px)`, so on tablets the sidebar could only collapse to the icon rail, never hide.
+  `<x-ui.sidebar-provider mobile-breakpoint="1023px">` moves that threshold; a bare number is read
+  as px, anything else is passed to `matchMedia` as written. Default unchanged.
+
 ## [1.23.0] - 2026-08-07
 
 ### Added
@@ -838,7 +858,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.23.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.24.0...HEAD
+[1.24.0]: https://github.com/anousss007/blatui/compare/v1.23.0...v1.24.0
 [1.23.0]: https://github.com/anousss007/blatui/compare/v1.22.0...v1.23.0
 [1.22.0]: https://github.com/anousss007/blatui/compare/v1.21.0...v1.22.0
 [1.21.0]: https://github.com/anousss007/blatui/compare/v1.20.0...v1.21.0

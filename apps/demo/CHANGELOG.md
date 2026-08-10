@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **The mobile sidebar drawer never opened** ([#16](https://github.com/anousss007/blatui/issues/16)) —
+  on a phone the trigger dimmed the page and showed nothing. A regression from 1.21.0: `twMerge()`
+  mutates the attribute bag, so the desktop root's `hidden md:block` leaked onto the teleported
+  mobile panel and kept it `display: none`. Fixed in 1.24.0 — update if your sidebar has a mobile
+  drawer.
+
 ### Added
+- **`mobileBreakpoint` on `<x-ui.sidebar-provider>`** ([#16](https://github.com/anousss007/blatui/issues/16)) —
+  the off-canvas drawer was hardwired below 768px. Pass `mobile-breakpoint="1023px"` to get it on
+  tablets too, where an always-docked icon rail often costs more room than it earns.
 - **Sidebar tooltips in icon mode** ([#15](https://github.com/anousss007/blatui/issues/15)) —
   `<x-ui.sidebar-menu-button tooltip="Inbox">` labels a button on hover/focus while the sidebar is
   collapsed to the icon rail. The `nav-main` / `nav-secondary` blocks pass it, so

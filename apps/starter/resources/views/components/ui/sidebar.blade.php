@@ -6,6 +6,14 @@
 
 @php
     $isLeft = $side === 'left';
+
+    // twMerge() MUTATES the bag it is called on (it offsetSet's the merged class and returns
+    // $this). The desktop root and the mobile panel are BOTH rendered, so merging into
+    // $attributes for one leaks those classes into the other: that is how `hidden md:block`
+    // reached the mobile drawer and kept it display:none below md. Merge into a copy and leave
+    // $attributes exactly as the consumer passed it.
+    $rootAttributes = $attributes->except('class');
+    $userClass = (string) $attributes->get('class', '');
 @endphp
 
 @if ($collapsible === 'none')
@@ -14,7 +22,7 @@
         data-slot="sidebar"
         data-variant="{{ $variant }}"
         data-side="{{ $side }}"
-        {{ $attributes->twMerge('bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col') }}
+        {{ $rootAttributes->twMerge('bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col', $userClass) }}
     >
         {{ $slot }}
     </div>
@@ -23,7 +31,7 @@
      overlay below is a teleported sibling, so it only mirrors the classes —
      duplicating id/x-data/aria across both would collide in the DOM. --}}
 <div
-    {{ $attributes->twMerge('text-sidebar-foreground group peer hidden md:block') }}
+    {{ $rootAttributes->twMerge('text-sidebar-foreground group peer hidden md:block', $userClass) }}
     :data-state="open ? 'expanded' : 'collapsed'"
     :data-collapsible="open ? '' : @js($collapsible)"
     data-variant="{{ $variant }}"
