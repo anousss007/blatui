@@ -96,26 +96,36 @@ npm run test:browser -- --suite=overlays --only=dialog   # one component
 npm run test:browser -- https://blatui.remix-it.com      # or against the live site
 ```
 
+**Every suite runs at every width in the matrix** (`tests/browser/lib/viewports.mjs`): 320, 375,
+639, 640, 767, 768, 900, 1023, 1024, 1280, 1536. Two rules produced that list — bugs cluster at
+the *boundary*, so each Tailwind breakpoint is driven at its value and one pixel below it; and
+they hide *between* breakpoints, so 900px is there because that is where #17 lived, in the gap a
+"phone and laptop" pair never covered. `--viewports=375,1280` narrows a local run, and the header
+always prints the widths it actually used. CI shards the matrix across four parallel jobs, so
+covering eleven widths costs the wall-clock of one.
+
 What it covers, all discovered from the site's own `sitemap.xml` so a new component is included
 the moment it is published:
 
-- **pages** — every component page and every block, at 1280px **and 375px**: no console error, no
-  uncaught exception, no failed request, no `<x-ui.*>` tag that leaked into the HTML, no `x-cloak`
-  left behind (Alpine never booted that subtree).
-- **overlays** — every trigger → content pair present on a page: click it, require the panel to be
-  *visibly on screen*, press Escape, require it gone. Plus the disclosure widgets (accordion,
+- **pages** — every component page and every block: no console error, no uncaught exception, no
+  failed same-origin request, no `<x-ui.*>` tag that leaked into the HTML, no `x-cloak` left
+  behind (Alpine never booted that subtree).
+- **overlays** — every trigger → content pair present on a page: open it, require the panel to be
+  *visibly on screen*, close it, require it gone. Plus the disclosure widgets (accordion,
   collapsible, reasoning, tool-call) toggling both ways.
-- **controls** — switch, checkbox, radio, tabs, toggle-group, select, combobox, command, input,
-  textarea, input-otp, number-input, tags-input, slider, calendar, date-picker, carousel,
-  context-menu (right-click), navigation-menu (hover), stepper, pagination, sonner: interact, then
-  require the reported state to have moved.
+- **controls** — switch, checkbox, radio, tabs, toggle-group, select, combobox (keyboard
+  selection included), command, input, textarea, input-otp, number-input, tags-input, slider,
+  calendar, date-picker, carousel, context-menu (right-click), navigation-menu (hover), stepper,
+  pagination, sonner: interact, then require the reported state to have moved.
 - **buttons** — clicks every visible button on every documented page and fails if the handler
-  throws.
-- **sidebar** — its own suite at three widths. It has produced three separate escapes and every one
-  of them was responsive or interaction state.
+  throws. Which buttons are on screen changes with the width, which is why it sweeps too.
+- **sidebar** — its own suite, asserting the *mode* each width implies: off-canvas drawer below md
+  (open, focus trap, Escape, backdrop) and docked icon rail at or above it (collapse, tooltips,
+  scrolling, plus a breakpoint configured above md). It has produced four separate escapes and
+  every one of them was responsive or interaction state.
 
-When you add a component, the pages/overlays/buttons sweeps pick it up for free. Add a `controls`
-entry when its value lives somewhere only that component knows about.
+When you add a component, the pages/overlays/buttons sweeps pick it up for free, at every width.
+Add a `controls` entry when its value lives somewhere only that component knows about.
 
 ## Pull requests
 

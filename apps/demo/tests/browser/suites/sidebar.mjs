@@ -1,9 +1,10 @@
-// The sidebar, at every width it changes behaviour at.
+// The sidebar, at every width in the matrix.
 //
-// This component has produced three separate escapes (#10, #15, #16) and every one of
+// This component has produced four separate escapes (#10, #15, #16, #17) and every one of
 // them was responsive or interaction state that only a browser can see: a drawer that
-// computed to display:none, a rail that could not scroll, a tooltip that never showed.
-// It gets its own suite because it earns one.
+// computed to display:none, a rail that could not scroll, a tooltip that never showed, a
+// configured breakpoint the CSS ignored. It gets its own suite, and the suite asserts the
+// *mode* the width implies rather than testing two hand-picked widths and hoping.
 import { expect, newPage, visit } from '../lib/harness.mjs';
 import { visibility } from '../lib/probes.mjs';
 
@@ -11,46 +12,43 @@ const BLOCK = '/blocks/sidebar-07/raw';
 const PANEL = '[role="dialog"][aria-label="Sidebar"]';
 const TRIGGER = '[data-slot="sidebar-trigger"]';
 
-export async function run({ browser, reporter, baseUrl, only }) {
-    if (only && !'sidebar'.includes(only)) return;
-    reporter.suite('sidebar');
+/** Tailwind's md — the default the sidebar switches modes at. */
+const MD = 768;
 
-    // ── Mobile: the off-canvas drawer ───────────────────────────────────────────
-    const mobile = await newPage(browser, { width: 375, height: 800 });
-    await visit(mobile, baseUrl + BLOCK);
-
-    await reporter.check('mobile: drawer is closed on load', async () => {
-        const panel = await visibility(mobile, PANEL);
+/** Drawer mode: the sidebar is off-canvas until the trigger opens it. */
+async function checksDrawerMode(page, reporter, at) {
+    await reporter.check(`${at} drawer is closed on load`, async () => {
+        const panel = await visibility(page, PANEL);
 
         return expect.truthy(!panel.visible, `the drawer is on screen before anything was clicked: ${JSON.stringify(panel)}`);
     });
 
-    await reporter.check('mobile: the trigger opens the drawer', async () => {
-        mobile.blatErrors.length = 0;
-        await mobile.click(TRIGGER);
-        await mobile.waitForTimeout(600);
-        const panel = await visibility(mobile, PANEL);
+    await reporter.check(`${at} the trigger opens the drawer`, async () => {
+        page.blatErrors.length = 0;
+        await page.click(TRIGGER);
+        await page.waitForTimeout(600);
+        const panel = await visibility(page, PANEL);
 
-        // Regression guard for #16: the panel was in the DOM, the backdrop was up, and
-        // the panel itself computed to display:none because a desktop class leaked onto it.
+        // Regression guard for #16: the panel was in the DOM and the backdrop was up, while
+        // the panel itself computed to display:none from a class that leaked onto it.
         return (
             expect.truthy(panel.visible, `the drawer never became visible: ${JSON.stringify(panel)}`) ??
             expect.truthy(panel.width > 100, `the drawer opened at ${panel.width}px — it has no width`) ??
-            expect.empty(mobile.blatErrors, 'console errors')
+            expect.empty(page.blatErrors, 'console errors')
         );
     });
 
-    await reporter.check('mobile: focus moves into the drawer', async () => {
-        const inside = await mobile.evaluate((sel) => !!document.activeElement?.closest(sel), PANEL);
+    await reporter.check(`${at} focus moves into the drawer`, async () => {
+        const inside = await page.evaluate((sel) => !!document.activeElement?.closest(sel), PANEL);
 
         return expect.truthy(inside, 'focus stayed outside the open drawer — the focus trap did not engage');
     });
 
-    await reporter.check('mobile: Escape closes it and returns focus to the trigger', async () => {
-        await mobile.keyboard.press('Escape');
-        await mobile.waitForTimeout(600);
-        const panel = await visibility(mobile, PANEL);
-        const returned = await mobile.evaluate((sel) => !!document.activeElement?.closest(sel), TRIGGER);
+    await reporter.check(`${at} Escape closes it and returns focus to the trigger`, async () => {
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(600);
+        const panel = await visibility(page, PANEL);
+        const returned = await page.evaluate((sel) => !!document.activeElement?.closest(sel), TRIGGER);
 
         return (
             expect.truthy(!panel.visible, 'the drawer stayed open after Escape') ??
@@ -58,47 +56,46 @@ export async function run({ browser, reporter, baseUrl, only }) {
         );
     });
 
-    await reporter.check('mobile: the backdrop closes it too', async () => {
-        await mobile.click(TRIGGER);
-        await mobile.waitForTimeout(500);
-        await mobile.mouse.click(360, 400); // outside the panel, on the backdrop
-        await mobile.waitForTimeout(500);
+    await reporter.check(`${at} the backdrop closes it too`, async () => {
+        await page.click(TRIGGER);
+        await page.waitForTimeout(500);
+        const box = await page.locator(PANEL).boundingBox();
+        await page.mouse.click(Math.min(box.x + box.width + 20, page.viewportSize().width - 5), 400);
+        await page.waitForTimeout(500);
 
-        return expect.truthy(!(await visibility(mobile, PANEL)).visible, 'clicking the backdrop did not close the drawer');
+        return expect.truthy(!(await visibility(page, PANEL)).visible, 'clicking the backdrop did not close the drawer');
     });
+}
 
-    await mobile.close();
-
-    // ── Desktop: the icon rail ──────────────────────────────────────────────────
-    const desktop = await newPage(browser, { width: 1280, height: 900 });
-    await visit(desktop, baseUrl + BLOCK);
-
-    await reporter.check('desktop: sidebar is docked, drawer is not used', async () => {
-        const docked = await visibility(desktop, '[data-slot="sidebar"]');
-        const panel = await visibility(desktop, PANEL);
+/** Docked mode: the panel is in the layout, and the trigger collapses it to the icon rail. */
+async function checksDockedMode(page, reporter, at) {
+    await reporter.check(`${at} sidebar is docked and the drawer is not used`, async () => {
+        const docked = await visibility(page, '[data-slot="sidebar"]');
+        const panel = await visibility(page, PANEL);
 
         return (
-            expect.truthy(docked.visible, 'the docked sidebar is not visible at 1280px') ??
-            expect.truthy(!panel.visible, 'the mobile drawer is showing on desktop')
+            expect.truthy(docked.visible, 'the docked sidebar is not visible') ??
+            expect.truthy(!panel.visible, 'the mobile drawer is showing while docked')
         );
     });
 
-    await reporter.check('desktop: the trigger collapses it to the icon rail', async () => {
-        desktop.blatErrors.length = 0;
-        const before = await desktop.evaluate(() => document.querySelector('[data-sidebar="sidebar"]')?.getBoundingClientRect().width);
-        await desktop.click(TRIGGER);
-        await desktop.waitForTimeout(500);
-        const after = await desktop.evaluate(() => document.querySelector('[data-sidebar="sidebar"]')?.getBoundingClientRect().width);
+    await reporter.check(`${at} the trigger collapses it to the icon rail`, async () => {
+        page.blatErrors.length = 0;
+        const widthOf = () => page.evaluate(() => document.querySelector('[data-sidebar="sidebar"]')?.getBoundingClientRect().width);
+        const before = await widthOf();
+        await page.click(TRIGGER);
+        await page.waitForTimeout(500);
+        const after = await widthOf();
 
         return (
             expect.truthy(after < before, `the rail did not shrink: ${before}px → ${after}px`) ??
             expect.truthy(after > 20, `the rail collapsed to ${after}px — icons cannot fit`) ??
-            expect.empty(desktop.blatErrors, 'console errors')
+            expect.empty(page.blatErrors, 'console errors')
         );
     });
 
-    await reporter.check('collapsed: menu buttons still fit inside the rail', async () => {
-        return desktop.evaluate(() => {
+    await reporter.check(`${at} collapsed: menu buttons still fit inside the rail`, async () =>
+        page.evaluate(() => {
             const rail = document.querySelector('[data-sidebar="sidebar"]')?.getBoundingClientRect();
             const buttons = [...document.querySelectorAll('[data-slot="sidebar-menu-button"]')].filter((b) => b.getBoundingClientRect().width > 0);
             if (!rail || !buttons.length) return 'no rail or no visible menu buttons';
@@ -109,24 +106,22 @@ export async function run({ browser, reporter, baseUrl, only }) {
             });
 
             return overflowing.length ? `${overflowing.length} menu button(s) overflow the collapsed rail` : undefined;
-        });
-    });
+        })
+    );
 
-    // The sidebar renders its slot twice (docked panel + teleported mobile drawer), and the
-    // header's team switcher is a dropdown trigger with no tooltip — so target a button that
-    // actually declares one, and match the tooltip by ITS label rather than by index.
-    const TIPPED_BUTTON = '[data-slot="sidebar-menu-button-tooltip"]:visible [data-slot="sidebar-menu-button"]';
-
+    // The sidebar renders its slot twice (docked panel + teleported drawer), and the header's
+    // team switcher is a dropdown trigger with no tooltip — so target a button that declares
+    // one, and match the tooltip by ITS label rather than by index.
     const hoverTippedButton = async () => {
-        const button = desktop.locator(TIPPED_BUTTON).first();
+        const button = page.locator('[data-slot="sidebar-menu-button-tooltip"]:visible [data-slot="sidebar-menu-button"]').first();
         await button.scrollIntoViewIfNeeded();
         const label = (await button.innerText()).trim();
-        await desktop.mouse.move(640, 400); // leave whatever was hovered before
-        await desktop.waitForTimeout(200);
+        await page.mouse.move(page.viewportSize().width / 2, 400); // leave whatever was hovered
+        await page.waitForTimeout(200);
         await button.hover();
-        await desktop.waitForTimeout(500);
+        await page.waitForTimeout(500);
 
-        const shown = await desktop.evaluate(() =>
+        const shown = await page.evaluate(() =>
             [...document.querySelectorAll('[data-slot="tooltip-content"]')]
                 .filter((t) => getComputedStyle(t).display !== 'none' && t.getBoundingClientRect().width > 0)
                 .map((t) => t.textContent.trim())
@@ -135,86 +130,94 @@ export async function run({ browser, reporter, baseUrl, only }) {
         return { label, shown };
     };
 
-    await reporter.check('collapsed: hovering a menu button shows its own tooltip', async () => {
-        desktop.blatErrors.length = 0;
+    await reporter.check(`${at} collapsed: hovering a menu button shows its own tooltip`, async () => {
+        page.blatErrors.length = 0;
         const { label, shown } = await hoverTippedButton();
 
         return (
             expect.truthy(shown.length > 0, `no tooltip became visible while hovering "${label}" in the collapsed rail`) ??
             expect.truthy(shown.includes(label), `the visible tooltip says ${JSON.stringify(shown)}, expected "${label}"`) ??
-            expect.empty(desktop.blatErrors, 'console errors')
+            expect.empty(page.blatErrors, 'console errors')
         );
     });
 
-    await reporter.check('expanded: the same tooltip stays hidden', async () => {
-        await desktop.click(TRIGGER); // back to expanded
-        await desktop.waitForTimeout(500);
-        const { shown } = await hoverTippedButton();
-
-        return expect.truthy(shown.length === 0, `a tooltip showed while the label is already readable: ${JSON.stringify(shown)}`);
-    });
-
-    await reporter.check('collapsed: the rail scrolls to its last item', async () => {
-        await desktop.click(TRIGGER); // collapse again
-        await desktop.waitForTimeout(400);
-
-        return desktop.evaluate(() => {
+    await reporter.check(`${at} collapsed: the rail scrolls to its last item`, async () =>
+        page.evaluate(() => {
             const content = document.querySelector('[data-slot="sidebar-content"]');
             if (!content) return 'no sidebar-content';
-            const cs = getComputedStyle(content);
-            if (cs.overflowY === 'hidden') return 'sidebar-content clips vertical overflow while collapsed — the last groups are unreachable';
+            if (getComputedStyle(content).overflowY === 'hidden') {
+                return 'sidebar-content clips vertical overflow while collapsed — the last groups are unreachable';
+            }
             content.scrollTop = content.scrollHeight;
 
             return content.scrollHeight > content.clientHeight && content.scrollTop === 0
                 ? 'the collapsed rail overflows but refuses to scroll'
                 : undefined;
-        });
+        })
+    );
+
+    await reporter.check(`${at} expanded: the same tooltip stays hidden`, async () => {
+        await page.click(TRIGGER); // back to expanded
+        await page.waitForTimeout(500);
+        const { shown } = await hoverTippedButton();
+
+        return expect.truthy(shown.length === 0, `a tooltip showed while the label is already readable: ${JSON.stringify(shown)}`);
     });
 
-    // ── A breakpoint other than md ───────────────────────────────────────────────
-    // sidebar-provider's mobile-breakpoint decides `isMobile`, but the two panels used to be
-    // painted by static md: classes — so between 768px and a configured 1023px the rail stayed
-    // docked and toggling did nothing visible (#17). Drive `isMobile` directly at a desktop
-    // width: that is the exact disagreement the prop creates.
-    const tablet = await newPage(browser, { width: 900, height: 900 });
-    await visit(tablet, baseUrl + BLOCK);
-
-    await reporter.check('a breakpoint above md hides the rail and enables the drawer', async () => {
-        tablet.blatErrors.length = 0;
-        await tablet.evaluate(() => {
+    // #17: mobile-breakpoint decides `isMobile`, but the panels are painted by CSS. Driving
+    // `isMobile` directly is the exact disagreement a breakpoint other than md creates.
+    await reporter.check(`${at} a breakpoint above md hides the rail and enables the drawer`, async () => {
+        page.blatErrors.length = 0;
+        await page.evaluate(() => {
             window.Alpine.$data(document.querySelector('[data-slot="sidebar-provider"]')).isMobile = true;
         });
-        await tablet.waitForTimeout(300);
+        await page.waitForTimeout(300);
 
-        const rail = await visibility(tablet, '[data-slot="sidebar"]');
+        const rail = await visibility(page, '[data-slot="sidebar"]');
         if (rail.visible) return `the docked rail is still shown while isMobile is true: ${JSON.stringify(rail)}`;
 
-        await tablet.click(TRIGGER);
-        await tablet.waitForTimeout(600);
-        const panel = await visibility(tablet, PANEL);
+        await page.click(TRIGGER);
+        await page.waitForTimeout(600);
+        const panel = await visibility(page, PANEL);
 
         return (
             expect.truthy(panel.visible, `the drawer did not open above md: ${JSON.stringify(panel)}`) ??
             expect.truthy(panel.width > 100, `the drawer opened at ${panel.width}px`) ??
-            expect.empty(tablet.blatErrors, 'console errors')
+            expect.empty(page.blatErrors, 'console errors')
         );
     });
 
-    await reporter.check('back below the breakpoint, the rail returns and the drawer does not linger', async () => {
-        await tablet.evaluate(() => {
-            const d = window.Alpine.$data(document.querySelector('[data-slot="sidebar-provider"]'));
-            d.isMobile = false;
+    await reporter.check(`${at} back below the breakpoint, the rail returns and the drawer does not linger`, async () => {
+        await page.evaluate(() => {
+            window.Alpine.$data(document.querySelector('[data-slot="sidebar-provider"]')).isMobile = false;
         });
-        await tablet.waitForTimeout(400);
+        await page.waitForTimeout(400);
 
-        const rail = await visibility(tablet, '[data-slot="sidebar"]');
-        const panel = await visibility(tablet, PANEL);
+        const rail = await visibility(page, '[data-slot="sidebar"]');
+        const panel = await visibility(page, PANEL);
 
         return (
             expect.truthy(rail.visible, 'the docked rail did not come back') ??
             expect.truthy(!panel.visible, 'the drawer stayed on screen over the docked rail')
         );
     });
+}
 
-    await tablet.close();
+export async function run({ browser, reporter, baseUrl, only, viewports }) {
+    if (only && !'sidebar'.includes(only)) return;
+
+    for (const { name, width, height } of viewports) {
+        reporter.suite(`sidebar @ ${name}px`);
+        const page = await newPage(browser, { width, height });
+        await visit(page, baseUrl + BLOCK);
+
+        // The width decides which mode is correct — that is the contract being tested.
+        if (width < MD) {
+            await checksDrawerMode(page, reporter, `${name}px:`);
+        } else {
+            await checksDockedMode(page, reporter, `${name}px:`);
+        }
+
+        await page.close();
+    }
 }

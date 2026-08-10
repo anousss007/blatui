@@ -139,8 +139,18 @@ jobs:
         run: npm run build
 
   browser-acceptance:
-    name: Browser acceptance (every component, real Chromium)
+    # Every component, every width. Sharded across jobs by viewport so the whole matrix
+    # finishes in the time one shard takes rather than eleven times that.
+    name: Browser acceptance @ ${{ matrix.viewports }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        viewports:
+          - "320,375,639"
+          - "640,767,768"
+          - "900,1023"
+          - "1024,1280,1536"
     defaults:
       run:
         working-directory: apps/demo
@@ -159,9 +169,13 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
       - name: Prepare environment
+        # The demo keeps sessions, cache and queue in the database, and database.sqlite is
+        # gitignored — without this every request 500s and the suite never gets a page.
         run: |
           cp .env.example .env
           php artisan key:generate --force
+          touch database/database.sqlite
+          php artisan migrate --force
       - name: Install JS dependencies
         run: npm ci
       - name: Build front-end assets
@@ -196,11 +210,14 @@ jobs:
       # Asserts on COMPUTED state after real interactions — the layer that would have caught
       # the invisible mobile drawer (#16), which every markup-level test passed straight through.
       - name: Run the browser acceptance suite
-        run: node tests/browser/run.mjs http://127.0.0.1:8123
+        run: node tests/browser/run.mjs http://127.0.0.1:8123 --viewports=${{ matrix.viewports }}
+      - name: Show the demo's log if anything failed
+        if: failure()
+        run: tail -n 60 storage/logs/laravel.log || true
       - name: Upload failure screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-acceptance-shots
+          name: browser-acceptance-shots-${{ strategy.job-index }}
           path: apps/demo/tests/browser/shots/
           if-no-files-found: ignore

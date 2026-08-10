@@ -9,8 +9,8 @@ import { slotsOn, visibility } from '../lib/probes.mjs';
 
 /** slug → checks. Each returns undefined on success or a failure string. */
 const CHECKS = {
-    async switch(page, { reporter }) {
-        await reporter.check('switch: toggles aria-checked', async () => {
+    async switch(page, { reporter, at }) {
+        await reporter.check(`switch: toggles aria-checked ${at}`, async () => {
             const el = page.locator('[data-slot="switch"]:not([disabled])').first();
             const before = await el.getAttribute('aria-checked');
             await el.scrollIntoViewIfNeeded();
@@ -20,15 +20,15 @@ const CHECKS = {
 
             return expect.truthy(before !== after, `aria-checked stayed ${before}`) ?? expect.empty(page.blatErrors, 'console errors');
         });
-        await reporter.check('switch: thumb actually moves', async () => {
+        await reporter.check(`switch: thumb actually moves ${at}`, async () => {
             const thumb = await visibility(page, '[data-slot="switch-thumb"]');
 
             return expect.truthy(thumb.exists && thumb.width > 0, 'the switch thumb has no box');
         });
     },
 
-    async checkbox(page, { reporter }) {
-        await reporter.check('checkbox: toggles state', async () => {
+    async checkbox(page, { reporter, at }) {
+        await reporter.check(`checkbox: toggles state ${at}`, async () => {
             const el = page.locator('[data-slot="checkbox"]:not([disabled])').first();
             const before = await el.getAttribute('data-state');
             await el.scrollIntoViewIfNeeded();
@@ -40,8 +40,8 @@ const CHECKS = {
         });
     },
 
-    async 'radio-group'(page, { reporter }) {
-        await reporter.check('radio-group: selecting one deselects the others', async () => {
+    async 'radio-group'(page, { reporter, at }) {
+        await reporter.check(`radio-group: selecting one deselects the others ${at}`, async () => {
             const items = page.locator('[data-slot="radio-group-item"]:not([disabled])');
             if ((await items.count()) < 2) return 'need at least two radio items to test exclusivity';
             await items.nth(1).scrollIntoViewIfNeeded();
@@ -67,8 +67,8 @@ const CHECKS = {
         });
     },
 
-    async tabs(page, { reporter }) {
-        await reporter.check('tabs: switching shows exactly one panel', async () => {
+    async tabs(page, { reporter, at }) {
+        await reporter.check(`tabs: switching shows exactly one panel ${at}`, async () => {
             const triggers = page.locator('[data-slot="tabs-trigger"]');
             if ((await triggers.count()) < 2) return 'need at least two tabs';
             await triggers.nth(1).scrollIntoViewIfNeeded();
@@ -94,8 +94,8 @@ const CHECKS = {
         });
     },
 
-    async 'toggle-group'(page, { reporter }) {
-        await reporter.check('toggle-group: item flips on click', async () => {
+    async 'toggle-group'(page, { reporter, at }) {
+        await reporter.check(`toggle-group: item flips on click ${at}`, async () => {
             const el = page.locator('[data-slot="toggle-group-item"]:not([disabled])').first();
             const before = await el.getAttribute('data-state');
             await el.scrollIntoViewIfNeeded();
@@ -106,8 +106,8 @@ const CHECKS = {
         });
     },
 
-    async select(page, { reporter }) {
-        await reporter.check('select: picking an option updates the trigger label', async () => {
+    async select(page, { reporter, at }) {
+        await reporter.check(`select: picking an option updates the trigger label ${at}`, async () => {
             const trigger = page.locator('[data-slot="select-trigger"]').first();
             await trigger.scrollIntoViewIfNeeded();
             const before = (await trigger.innerText()).trim();
@@ -127,8 +127,8 @@ const CHECKS = {
         });
     },
 
-    async input(page, { reporter }) {
-        await reporter.check('input: accepts typed text', async () => {
+    async input(page, { reporter, at }) {
+        await reporter.check(`input: accepts typed text ${at}`, async () => {
             const el = page.locator('input[data-slot="input"]:not([disabled]):not([type=file])').first();
             await el.scrollIntoViewIfNeeded();
             await el.fill('blatui');
@@ -137,8 +137,8 @@ const CHECKS = {
         });
     },
 
-    async textarea(page, { reporter }) {
-        await reporter.check('textarea: accepts typed text', async () => {
+    async textarea(page, { reporter, at }) {
+        await reporter.check(`textarea: accepts typed text ${at}`, async () => {
             const el = page.locator('textarea[data-slot="textarea"]:not([disabled])').first();
             await el.scrollIntoViewIfNeeded();
             await el.fill('blatui');
@@ -147,8 +147,8 @@ const CHECKS = {
         });
     },
 
-    async 'input-otp'(page, { reporter }) {
-        await reporter.check('input-otp: typing fills the slots', async () => {
+    async 'input-otp'(page, { reporter, at }) {
+        await reporter.check(`input-otp: typing fills the slots ${at}`, async () => {
             const first = page.locator('[data-slot="input-otp"] input').first();
             await first.scrollIntoViewIfNeeded();
             await first.click();
@@ -162,8 +162,8 @@ const CHECKS = {
         });
     },
 
-    async slider(page, { reporter }) {
-        await reporter.check('slider: arrow keys move the thumb', async () => {
+    async slider(page, { reporter, at }) {
+        await reporter.check(`slider: arrow keys move the thumb ${at}`, async () => {
             const thumb = page.locator('[data-slot="slider-thumb"]').first();
             await thumb.scrollIntoViewIfNeeded();
             const before = await thumb.getAttribute('aria-valuenow');
@@ -175,8 +175,8 @@ const CHECKS = {
         });
     },
 
-    async calendar(page, { reporter }) {
-        await reporter.check('calendar: clicking a day selects it', async () => {
+    async calendar(page, { reporter, at }) {
+        await reporter.check(`calendar: clicking a day selects it ${at}`, async () => {
             const day = page.locator('[data-slot="calendar"] [data-day]:not([aria-disabled="true"])').nth(10);
             if (!(await day.count())) return 'no selectable day cell found';
             await day.scrollIntoViewIfNeeded();
@@ -188,8 +188,8 @@ const CHECKS = {
         });
     },
 
-    async combobox(page, { reporter }) {
-        await reporter.check('combobox: opens, filters as you type, and picks with the keyboard', async () => {
+    async combobox(page, { reporter, at }) {
+        await reporter.check(`combobox: opens, filters as you type, and picks with the keyboard ${at}`, async () => {
             // The combobox exposes no *-trigger slot: its control is the button inside the root.
             const control = page.locator('[data-slot="combobox"] button').first();
             await control.scrollIntoViewIfNeeded();
@@ -218,8 +218,8 @@ const CHECKS = {
         });
     },
 
-    async 'number-input'(page, { reporter }) {
-        await reporter.check('number-input: the steppers move the value', async () => {
+    async 'number-input'(page, { reporter, at }) {
+        await reporter.check(`number-input: the steppers move the value ${at}`, async () => {
             const input = page.locator('[data-slot="number-input"] input, input[data-slot="number-input-field"]').first();
             await input.scrollIntoViewIfNeeded();
             const before = await input.inputValue();
@@ -231,8 +231,8 @@ const CHECKS = {
         });
     },
 
-    async 'tags-input'(page, { reporter }) {
-        await reporter.check('tags-input: Enter adds a tag', async () => {
+    async 'tags-input'(page, { reporter, at }) {
+        await reporter.check(`tags-input: Enter adds a tag ${at}`, async () => {
             const field = page.locator('[data-slot="tags-input"] input').first();
             await field.scrollIntoViewIfNeeded();
             const before = await page.locator('[data-slot="tags-input-item"]').count();
@@ -245,8 +245,8 @@ const CHECKS = {
         });
     },
 
-    async carousel(page, { reporter }) {
-        await reporter.check('carousel: next moves the slides', async () => {
+    async carousel(page, { reporter, at }) {
+        await reporter.check(`carousel: next moves the slides ${at}`, async () => {
             // Assert on where the slide actually is, not on how the component moves it.
             const positionOf = () => page.evaluate(() => document.querySelector('[data-slot="carousel-item"]')?.getBoundingClientRect().x ?? null);
 
@@ -265,8 +265,8 @@ const CHECKS = {
         });
     },
 
-    async 'context-menu'(page, { reporter }) {
-        await reporter.check('context-menu: right-click opens it, Escape closes it', async () => {
+    async 'context-menu'(page, { reporter, at }) {
+        await reporter.check(`context-menu: right-click opens it, Escape closes it ${at}`, async () => {
             const target = page.locator('[data-slot="context-menu-trigger"]').first();
             await target.scrollIntoViewIfNeeded();
             await target.click({ button: 'right' });
@@ -284,8 +284,8 @@ const CHECKS = {
         });
     },
 
-    async 'date-picker'(page, { reporter }) {
-        await reporter.check('date-picker: picking a day fills the field and closes', async () => {
+    async 'date-picker'(page, { reporter, at }) {
+        await reporter.check(`date-picker: picking a day fills the field and closes ${at}`, async () => {
             const trigger = page.locator('[data-slot="date-picker-trigger"], [data-slot="date-picker"] button').first();
             await trigger.scrollIntoViewIfNeeded();
             await trigger.click();
@@ -300,8 +300,8 @@ const CHECKS = {
         });
     },
 
-    async stepper(page, { reporter }) {
-        await reporter.check('stepper: advancing changes the active step', async () => {
+    async stepper(page, { reporter, at }) {
+        await reporter.check(`stepper: advancing changes the active step ${at}`, async () => {
             const before = await page.locator('[data-slot="stepper-item"][data-state="active"]').count();
             const next = page.locator('[data-slot="stepper-trigger"]').nth(1);
             if (!(await next.count())) return 'no second step to move to';
@@ -313,8 +313,8 @@ const CHECKS = {
         });
     },
 
-    async 'navigation-menu'(page, { reporter }) {
-        await reporter.check('navigation-menu: hovering a trigger reveals its panel', async () => {
+    async 'navigation-menu'(page, { reporter, at }) {
+        await reporter.check(`navigation-menu: hovering a trigger reveals its panel ${at}`, async () => {
             const trigger = page.locator('[data-slot="navigation-menu-trigger"]').first();
             await trigger.scrollIntoViewIfNeeded();
             await trigger.hover();
@@ -325,8 +325,8 @@ const CHECKS = {
         });
     },
 
-    async command(page, { reporter }) {
-        await reporter.check('command: typing filters the item list', async () => {
+    async command(page, { reporter, at }) {
+        await reporter.check(`command: typing filters the item list ${at}`, async () => {
             const input = page.locator('[data-slot="command-input"]').first();
             await input.scrollIntoViewIfNeeded();
             const before = await page.locator('[data-slot="command-item"]:visible').count();
@@ -342,16 +342,16 @@ const CHECKS = {
         });
     },
 
-    async pagination(page, { reporter }) {
-        await reporter.check('pagination: renders navigable items', async () => {
+    async pagination(page, { reporter, at }) {
+        await reporter.check(`pagination: renders navigable items ${at}`, async () => {
             const items = await page.locator('[data-slot="pagination-item"]').count();
 
             return expect.truthy(items > 0, 'pagination rendered no items');
         });
     },
 
-    async sonner(page, { reporter }) {
-        await reporter.check('sonner: a toast appears and can be dismissed', async () => {
+    async sonner(page, { reporter, at }) {
+        await reporter.check(`sonner: a toast appears and can be dismissed ${at}`, async () => {
             await page.evaluate(() => window.toast?.success('browser acceptance'));
             await page.waitForTimeout(400);
             const toast = await visibility(page, '[data-slot="sonner-toast"]');
@@ -362,25 +362,29 @@ const CHECKS = {
     },
 };
 
-export async function run({ browser, reporter, baseUrl, inventory, only }) {
-    reporter.suite('controls');
-    const page = await newPage(browser, { width: 1280, height: 900 });
+export async function run({ browser, reporter, baseUrl, inventory, only, viewports }) {
+    // A control that works at 1280px can be unreachable at 320px (clipped listbox, a thumb
+    // pushed off-canvas, a trigger under a sticky bar), so every check runs at every width.
+    for (const { name, width, height } of viewports) {
+        reporter.suite(`controls @ ${name}px`);
+        const page = await newPage(browser, { width, height });
 
-    for (const [slug, check] of Object.entries(CHECKS)) {
-        if (only && !slug.includes(only)) continue;
-        if (!inventory.components.includes(slug)) continue;
+        for (const [slug, check] of Object.entries(CHECKS)) {
+            if (only && !slug.includes(only)) continue;
+            if (!inventory.components.includes(slug)) continue;
 
-        await visit(page, `${baseUrl}/components/${slug}`);
-        page.blatErrors.length = 0;
+            await visit(page, `${baseUrl}/components/${slug}`);
+            page.blatErrors.length = 0;
 
-        const slots = await slotsOn(page);
-        if (!Object.keys(slots).length) {
-            reporter.fail(`${slug}: page rendered nothing`, 'no data-slot on the page');
-            continue;
+            const slots = await slotsOn(page);
+            if (!Object.keys(slots).length) {
+                reporter.fail(`${slug} @ ${name}px: page rendered nothing`, 'no data-slot on the page');
+                continue;
+            }
+
+            await check(page, { reporter, slots, at: `@ ${name}px` });
         }
 
-        await check(page, { reporter, slots });
+        await page.close();
     }
-
-    await page.close();
 }

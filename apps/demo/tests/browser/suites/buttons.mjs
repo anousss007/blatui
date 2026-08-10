@@ -13,18 +13,22 @@ const SKIP_TEXT = /^(view on github|open in new tab|docs|download)$/i;
 
 const MAX_PER_PAGE = 10;
 
-export async function run({ browser, reporter, baseUrl, inventory, only }) {
-    reporter.suite('buttons');
+export async function run({ browser, reporter, baseUrl, inventory, only, viewports }) {
     const slugs = inventory.components.filter((s) => !only || s.includes(only));
 
-    await inLanes(browser, slugs, { lanes: 3, viewport: { width: 1280, height: 900 }, each: async (page, slug) => {
+    // Which buttons are on screen changes with the width — a docs page hides half its
+    // controls on a phone — so the sweep runs at every width rather than picking one.
+    for (const { name, width, height } of viewports) {
+        reporter.suite(`buttons @ ${name}px`);
+
+        await inLanes(browser, slugs, { lanes: 4, viewport: { width, height }, each: async (page, slug) => {
         const url = `${baseUrl}/components/${slug}`;
         await visit(page, url);
 
         const total = await page.locator('[data-slot="button"]:visible').count();
         if (!total) return;
 
-        await reporter.check(`${slug}: ${Math.min(total, MAX_PER_PAGE)} of ${total} buttons handle a click`, async () => {
+        await reporter.check(`${slug} @ ${name}px: ${Math.min(total, MAX_PER_PAGE)} of ${total} buttons handle a click`, async () => {
             const broken = [];
 
             for (let i = 0; i < Math.min(total, MAX_PER_PAGE); i++) {
@@ -60,6 +64,7 @@ export async function run({ browser, reporter, baseUrl, inventory, only }) {
 
             return expect.empty(broken, 'buttons whose click threw') ?? expect.empty(leaked, 'component tags leaked after interaction');
         });
-        reporter.progress(`buttons ${slug}`);
-    } });
+            reporter.progress(`buttons ${name}px ${slug}`);
+        } });
+    }
 }

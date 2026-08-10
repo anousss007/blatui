@@ -43,7 +43,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     stepper, pagination and sonner.
   - **buttons** — clicks every visible button on every documented page and fails if a handler
     throws.
-  - **sidebar** — its own suite at three widths, since it has produced three separate escapes.
+  - **sidebar** — its own suite, asserting the mode each width implies, since it has produced
+    four separate escapes on its own.
+
+  **Every suite runs at every width in the matrix**: 320, 375, 639, 640, 767, 768, 900, 1023,
+  1024, 1280, 1536. Each Tailwind breakpoint is driven at its value *and one pixel below it*,
+  because that is where an off-by-one in a min/max pair shows, and 900px is in the list because
+  #17 lived between md and lg — in the gap a "phone and laptop" pair walks straight past.
+
   Targets come from the site's own `sitemap.xml`, so a new component is covered the moment it is
   published, and the same run works against localhost or production.
 

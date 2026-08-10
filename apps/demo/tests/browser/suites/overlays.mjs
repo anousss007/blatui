@@ -17,11 +17,15 @@ const NOT_ESCAPABLE = new Set(['alert-dialog-content']);
 /** Hover-only triggers — clicking them proves nothing. */
 const HOVER_TRIGGERS = new Set(['tooltip-trigger', 'hover-card-trigger']);
 
-export async function run({ browser, reporter, baseUrl, inventory, only }) {
-    reporter.suite('overlays');
+export async function run({ browser, reporter, baseUrl, inventory, only, viewports }) {
     const slugs = inventory.components.filter((s) => !only || s.includes(only));
 
-    await inLanes(browser, slugs, { lanes: 3, viewport: { width: 1280, height: 900 }, each: async (page, slug) => {
+    // Every width: an overlay that opens at 1280px can be clipped, mispositioned or hidden
+    // outright at 375px or 900px, and only driving it there says so.
+    for (const { name, width, height } of viewports) {
+        reporter.suite(`overlays @ ${name}px`);
+
+        await inLanes(browser, slugs, { lanes: 4, viewport: { width, height }, each: async (page, slug) => {
         await visit(page, `${baseUrl}/components/${slug}`);
         const slots = await slotsOn(page);
 
@@ -103,6 +107,7 @@ export async function run({ browser, reporter, baseUrl, inventory, only }) {
                 );
             });
         }
-        reporter.progress(`overlays ${slug}`);
-    } });
+            reporter.progress(`overlays ${name}px ${slug}`);
+        } });
+    }
 }
