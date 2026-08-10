@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Browser acceptance suite** — every component driven in a real Chromium, at desktop and
+  mobile widths, wired into CI. The regressions that reached users (#15, #16) were all invisible
+  to the markup and engine tests: a leaked class that computed to `display: none`, a tooltip that
+  never opened, a rail that could not scroll. The rule in this layer is to assert on *computed
+  state after a real interaction*, never on markup.
+  - **pages** — all 156 component pages and 64 blocks at 1280px and 375px: no console error, no
+    uncaught exception, no failed same-origin request, no `<x-ui.*>` tag leaked into the HTML, no
+    `x-cloak` left behind.
+  - **overlays** — every trigger → content pair present on a page: open it, require the panel to
+    be visibly on screen, close it, require it gone. Plus the disclosure widgets both ways.
+  - **controls** — 23 checks across switch, checkbox, radio, tabs, toggle-group, select, combobox
+    (including keyboard selection), command, input, textarea, input-otp, number-input, tags-input,
+    slider, calendar, date-picker, carousel, context-menu (right-click), navigation-menu (hover),
+    stepper, pagination and sonner.
+  - **buttons** — clicks every visible button on every documented page and fails if a handler
+    throws.
+  - **sidebar** — its own suite at three widths, since it has produced three separate escapes.
+  Targets come from the site's own `sitemap.xml`, so a new component is covered the moment it is
+  published, and the same run works against localhost or production.
+
+### Fixed
+- **`sidebar-09` threw `active is not defined` on every load** — found by the new suite within
+  minutes of it existing, along with two docs previews that threw on click (`$wire` with no
+  Livewire runtime, and a clipboard write the headless browser had not been granted). `<x-ui.sidebar>` renders its slot twice (docked panel + teleported
+  mobile drawer) but forwarded the consumer's `x-data` to only one of them, so the second copy
+  referenced variables that did not exist in its scope. The mobile panel now receives the
+  consumer's attributes too, minus the handful that must not appear twice in one document
+  (`id`, and the dialog semantics it declares itself).
+
+
 ## [1.24.0] - 2026-08-10
 
 ### Fixed

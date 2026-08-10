@@ -48,7 +48,7 @@ apps/starter/                  → the Laravel starter kit
 scripts/build-package.sh       → regenerates stubs/ from apps/demo
 tests/                         → Testbench-based package tests
 apps/demo/tests/js/            → engine unit tests (node --test, no deps)
-apps/demo/tests/browser/       → Playwright acceptance runs (manual, see below)
+apps/demo/tests/browser/       → Playwright acceptance suite (runs in CI, see below)
 ```
 
 ## The loop
@@ -64,25 +64,58 @@ bash scripts/build-package.sh
 composer install && vendor/bin/pint && vendor/bin/phpunit
 ```
 
-CI runs the package tests (PHP 8.2–8.4), Pint, the JS engine tests, and a **drift check** that
+CI runs the package tests (PHP 8.2–8.4), Pint, the JS engine tests, a **drift check** that
 regenerates the package and fails if `stubs/` differs from the authored source — so a hand-edited
-or stale stub is rejected with a pointer back to the demo file.
+or stale stub is rejected with a pointer back to the demo file — and the **browser acceptance
+suite** below.
 
-### JS tests
+### Three test layers, and what each one is for
 
-Components whose behaviour lives in `resources/js/blatui-core.js` have two extra layers:
+| Layer | Answers | Where |
+|---|---|---|
+| Render tests (PHPUnit) | *Does the component emit the right markup?* | `apps/demo/tests/Feature` |
+| Engine tests (`node --test`) | *Does the Alpine logic compute the right thing?* | `apps/demo/tests/js` |
+| **Browser acceptance (Playwright)** | *Does it actually work when a user clicks it?* | `apps/demo/tests/browser` |
+
+The third layer exists because the first two cannot see the bugs that reached users. A class that
+resolves to `display: none` on the mobile drawer, a tooltip that never opens, a rail that cannot
+scroll — the markup is correct in every one of those, and only a real browser disagrees. **Assert
+on computed state after a real interaction; never on markup.** Markup is layer one's job.
 
 ```bash
 cd apps/demo
-npm test                      # engine unit tests — zero-dependency `node --test`, run in CI
+npm test                      # engine unit tests — zero-dependency `node --test`
 
-# browser acceptance — NOT in CI: needs a served demo + a ~115 MB browser download.
-# Run it by hand before releasing a change to the calendar or the pickers.
+# Browser acceptance. Playwright is deliberately NOT a devDependency: its postinstall would
+# drag a ~115 MB browser download into every `npm install` here. CI installs it in one job.
 npm i -D playwright && npx playwright install chromium
 npm run build && php artisan serve --port=8123
-npm run test:browser
-npm run test:browser -- https://blatui.remix-it.com   # or against the live site
+npm run test:browser                                     # everything, ~5 suites
+npm run test:browser -- --suite=sidebar                  # one suite
+npm run test:browser -- --suite=overlays --only=dialog   # one component
+npm run test:browser -- https://blatui.remix-it.com      # or against the live site
 ```
+
+What it covers, all discovered from the site's own `sitemap.xml` so a new component is included
+the moment it is published:
+
+- **pages** — every component page and every block, at 1280px **and 375px**: no console error, no
+  uncaught exception, no failed request, no `<x-ui.*>` tag that leaked into the HTML, no `x-cloak`
+  left behind (Alpine never booted that subtree).
+- **overlays** — every trigger → content pair present on a page: click it, require the panel to be
+  *visibly on screen*, press Escape, require it gone. Plus the disclosure widgets (accordion,
+  collapsible, reasoning, tool-call) toggling both ways.
+- **controls** — switch, checkbox, radio, tabs, toggle-group, select, combobox, command, input,
+  textarea, input-otp, number-input, tags-input, slider, calendar, date-picker, carousel,
+  context-menu (right-click), navigation-menu (hover), stepper, pagination, sonner: interact, then
+  require the reported state to have moved.
+- **buttons** — clicks every visible button on every documented page and fails if the handler
+  throws.
+- **sidebar** — its own suite at three widths. It has produced three separate escapes and every one
+  of them was responsive or interaction state.
+
+When you add a component, the pages/overlays/buttons sweeps pick it up for free. Add a `controls`
+entry when its value lives somewhere only that component knows about.
 
 ## Pull requests
 

@@ -27,9 +27,10 @@
         {{ $slot }}
     </div>
 @else
-{{-- Desktop. The consumer's attributes land here (the in-flow root); the mobile
-     overlay below is a teleported sibling, so it only mirrors the classes —
-     duplicating id/x-data/aria across both would collide in the DOM. --}}
+{{-- Desktop root. The slot is rendered again in the mobile overlay below, so BOTH need the
+     consumer's attributes: an `x-data` that only lands here leaves the mobile copy of the
+     slot referencing variables that do not exist in its scope. The overlay drops just the
+     handful that must not appear twice — see there. --}}
 <div
     {{ $rootAttributes->twMerge('text-sidebar-foreground group peer hidden md:block', $userClass) }}
     :data-state="open ? 'expanded' : 'collapsed'"
@@ -93,7 +94,11 @@
             x-transition:leave="transition ease-in-out duration-200"
             x-transition:leave-start="translate-x-0"
             x-transition:leave-end="{{ $isLeft ? '-translate-x-full' : 'translate-x-full' }}"
-            {{ $attributes->only('class')->twMerge('bg-sidebar text-sidebar-foreground fixed inset-y-0 '.($isLeft ? 'left-0' : 'right-0').' z-50 flex h-svh w-(--sidebar-width) flex-col') }}
+            {{-- Everything the consumer passed, minus what cannot exist twice in one document
+                 (`id`) or would fight the dialog semantics this panel already declares. An
+                 `x-data` here is deliberate: this copy of the slot needs its own scope, and
+                 only one of the two copies is ever on screen. --}}
+            {{ $attributes->except(['id', 'role', 'aria-modal', 'aria-label', 'tabindex'])->twMerge('bg-sidebar text-sidebar-foreground fixed inset-y-0 '.($isLeft ? 'left-0' : 'right-0').' z-50 flex h-svh w-(--sidebar-width) flex-col') }}
         >
             {{ $slot }}
         </div>

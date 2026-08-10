@@ -6,7 +6,8 @@
         "build": "vite build",
         "dev": "vite",
         "test": "node --test \"tests/js/*.test.mjs\"",
-        "test:browser": "node tests/browser/calendar.acceptance.mjs"
+        "test:browser": "node tests/browser/run.mjs",
+        "test:browser:calendar": "node tests/browser/calendar.acceptance.mjs"
     },
     "devDependencies": {
         "@floating-ui/dom": "^1.7.6",

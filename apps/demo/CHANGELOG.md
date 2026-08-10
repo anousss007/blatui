@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **`sidebar-09` threw a JavaScript error on every load** — `<x-ui.sidebar>` renders its slot
+  twice (docked panel + mobile drawer) and forwarded the consumer's `x-data` to only one of them,
+  so the drawer's copy referenced variables that did not exist. Found by the new browser
+  acceptance suite.
 - **The mobile sidebar drawer never opened** ([#16](https://github.com/anousss007/blatui/issues/16)) —
   on a phone the trigger dimmed the page and showed nothing. A regression from 1.21.0: `twMerge()`
   mutates the attribute bag, so the desktop root's `hidden md:block` leaked onto the teleported

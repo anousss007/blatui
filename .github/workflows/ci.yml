@@ -137,3 +137,60 @@ jobs:
         run: npm ci
       - name: Build front-end assets
         run: npm run build
+
+  browser-acceptance:
+    name: Browser acceptance (every component, real Chromium)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/demo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, dom, fileinfo
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+      - name: Install JS dependencies
+        run: npm ci
+      - name: Build front-end assets
+        run: npm run build
+      # Playwright is not a devDependency (its postinstall would drag a ~115 MB browser
+      # download into every `npm install` in the demo), so it is installed only here.
+      - name: Cache the Chromium download
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('apps/demo/package-lock.json') }}
+      - name: Install Playwright
+        run: npm i --no-save playwright && npx playwright install --with-deps chromium
+      - name: Serve the demo
+        # Multiple workers: the suite drives four pages in parallel and a single-threaded
+        # dev server would serialise the whole run behind PHP.
+        run: |
+          PHP_CLI_SERVER_WORKERS=8 php artisan serve --port=8123 &
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8123 >/dev/null && break
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:8123 >/dev/null
+      # Asserts on COMPUTED state after real interactions — the layer that would have caught
+      # the invisible mobile drawer (#16), which every markup-level test passed straight through.
+      - name: Run the browser acceptance suite
+        run: node tests/browser/run.mjs http://127.0.0.1:8123
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-acceptance-shots
+          path: apps/demo/tests/browser/shots/
+          if-no-files-found: ignore

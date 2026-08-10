@@ -157,8 +157,9 @@ class BlatuiTest extends TestCase
         // Non-collapsible root, desktop root, and the teleported mobile panel.
         $this->assertStringContainsString("\$rootAttributes->twMerge('bg-sidebar text-sidebar-foreground flex h-full", $stub);
         $this->assertStringContainsString("\$rootAttributes->twMerge('text-sidebar-foreground group peer hidden md:block'", $stub);
-        // The mobile panel is a sibling in the DOM: classes only, or ids collide.
-        $this->assertStringContainsString("\$attributes->only('class')->twMerge(", $stub);
+        // The mobile panel renders the same slot again, so it needs the consumer's scope
+        // attributes too — minus the ones that must not appear twice in one document.
+        $this->assertStringContainsString("\$attributes->except(['id', 'role', 'aria-modal', 'aria-label', 'tabindex'])->twMerge(", $stub);
 
         // twMerge() writes the merged class back into the bag, and the desktop root and the
         // mobile panel are both rendered — merging into the shared bag puts `hidden md:block`
