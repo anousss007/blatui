@@ -209,6 +209,8 @@ jobs:
           }
       # Asserts on COMPUTED state after real interactions — the layer that would have caught
       # the invisible mobile drawer (#16), which every markup-level test passed straight through.
+      # The visual suite compares against the committed baseline; it never records one here, so a
+      # rendering change has to be reviewed in a diff rather than absorbed silently.
       - name: Run the browser acceptance suite
         run: node tests/browser/run.mjs http://127.0.0.1:8123 --viewports=${{ matrix.viewports }}
       - name: Show the demo's log if anything failed

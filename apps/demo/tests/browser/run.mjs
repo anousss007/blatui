@@ -13,8 +13,10 @@ import * as overlays from './suites/overlays.mjs';
 import * as controls from './suites/controls.mjs';
 import * as sidebar from './suites/sidebar.mjs';
 import * as buttons from './suites/buttons.mjs';
+import * as visual from './suites/visual.mjs';
+import * as layout from './suites/layout.mjs';
 
-const SUITES = { pages, overlays, controls, buttons, sidebar };
+const SUITES = { pages, layout, overlays, controls, buttons, sidebar, visual };
 
 const args = process.argv.slice(2);
 const baseUrl = (args.find((a) => a.startsWith('http')) || 'http://127.0.0.1:8123').replace(/\/$/, '');
@@ -22,6 +24,7 @@ const flag = (name) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[
 const wanted = flag('suite');
 const only = flag('only');
 const viewports = selectViewports(flag('viewports'));
+const updateBaseline = args.includes('--update-baseline');
 
 setOrigin(baseUrl);
 const inventory = await discover(baseUrl);
@@ -35,7 +38,7 @@ const reporter = createReporter();
 
 for (const [name, suite] of Object.entries(SUITES)) {
     if (wanted && name !== wanted) continue;
-    await suite.run({ browser, reporter, baseUrl, inventory, only, viewports });
+    await suite.run({ browser, reporter, baseUrl, inventory, only, viewports, updateBaseline });
 }
 
 await browser.close();

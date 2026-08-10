@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.24.2] - 2026-08-10
+
+### Added
+- **Browser acceptance suite** — every component driven in a real Chromium, at every width in
+  the breakpoint matrix, wired into CI. The regressions that reached users (#15, #16) were all invisible
+  to the markup and engine tests: a leaked class that computed to `display: none`, a tooltip that
+  never opened, a rail that could not scroll. The rule in this layer is to assert on *computed
+  state after a real interaction*, never on markup.
+  - **pages** — all 156 component pages and 64 blocks at 1280px and 375px: no console error, no
+    uncaught exception, no failed same-origin request, no `<x-ui.*>` tag leaked into the HTML, no
+    `x-cloak` left behind.
+  - **overlays** — every trigger → content pair present on a page: open it, require the panel to
+    be visibly on screen, close it, require it gone. Plus the disclosure widgets both ways.
+  - **controls** — 23 checks across switch, checkbox, radio, tabs, toggle-group, select, combobox
+    (including keyboard selection), command, input, textarea, input-otp, number-input, tags-input,
+    slider, calendar, date-picker, carousel, context-menu (right-click), navigation-menu (hover),
+    stepper, pagination and sonner.
+  - **buttons** — clicks every visible button on every documented page and fails if a handler
+    throws.
+  - **layout** — baseline-free invariants at every width: no sideways page scroll, no component
+    squashed to a zero dimension, nothing stranded off-screen, no text spilling its box. This is
+    the one that catches *looks broken* rather than *looks different*.
+  - **visual** — a 256-bit perceptual fingerprint of every example block, per component per
+    width, against a committed baseline. Sensitive enough to catch a 4px padding change, and
+    small enough (~70 bytes an entry) that the baseline is a reviewable JSON file rather than
+    thousands of PNGs. Renderings that cannot reproduce themselves are detected and reported as
+    uncovered instead of made flaky.
+  - **sidebar** — its own suite, asserting the mode each width implies, since it has produced
+    four separate escapes on its own.
+
+  **Every suite runs at every width in the matrix**: 320, 375, 639, 640, 767, 768, 900, 1023,
+  1024, 1280, 1536. Each Tailwind breakpoint is driven at its value *and one pixel below it*,
+  because that is where an off-by-one in a min/max pair shows, and 900px is in the list because
+  #17 lived between md and lg — in the gap a "phone and laptop" pair walks straight past.
+
+  Targets come from the site's own `sitemap.xml`, so a new component is covered the moment it is
+  published, and the same run works against localhost or production.
+
+### Fixed
+- **`sidebar-09` threw `active is not defined` on every load** — found by the new suite within
+  minutes of it existing, along with two docs previews that threw on click (`$wire` with no
+  Livewire runtime, and a clipboard write the headless browser had not been granted).
+  `<x-ui.sidebar>` renders its slot twice (docked panel + teleported mobile drawer) but forwarded
+  the consumer's `x-data` to only one of them, so the second copy referenced variables that did
+  not exist in its scope. The mobile panel now receives the consumer's attributes too, minus the
+  handful that must not appear twice in one document (`id`, and the dialog semantics it declares
+  itself).
+- **`mini-cart` and `notification-center` could push a 320px page sideways.** Both panels are
+  `w-80` — exactly 320px — so on the narrowest phones they were wider than the viewport once
+  positioned, and the whole page scrolled horizontally. Capped at `calc(100vw - 1rem)`.
+  Found by the new layout suite, not by a user.
+
+
 ## [1.24.1] - 2026-08-10
 
 ### Fixed
@@ -24,44 +77,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Guarded at both levels: a render test for the markup contract, and a browser check that drives
   `isMobile` at a desktop width and requires the rail to hide and the drawer to open (it fails on
   the pre-fix component).
-
-
-### Added
-- **Browser acceptance suite** — every component driven in a real Chromium, at desktop and
-  mobile widths, wired into CI. The regressions that reached users (#15, #16) were all invisible
-  to the markup and engine tests: a leaked class that computed to `display: none`, a tooltip that
-  never opened, a rail that could not scroll. The rule in this layer is to assert on *computed
-  state after a real interaction*, never on markup.
-  - **pages** — all 156 component pages and 64 blocks at 1280px and 375px: no console error, no
-    uncaught exception, no failed same-origin request, no `<x-ui.*>` tag leaked into the HTML, no
-    `x-cloak` left behind.
-  - **overlays** — every trigger → content pair present on a page: open it, require the panel to
-    be visibly on screen, close it, require it gone. Plus the disclosure widgets both ways.
-  - **controls** — 23 checks across switch, checkbox, radio, tabs, toggle-group, select, combobox
-    (including keyboard selection), command, input, textarea, input-otp, number-input, tags-input,
-    slider, calendar, date-picker, carousel, context-menu (right-click), navigation-menu (hover),
-    stepper, pagination and sonner.
-  - **buttons** — clicks every visible button on every documented page and fails if a handler
-    throws.
-  - **sidebar** — its own suite, asserting the mode each width implies, since it has produced
-    four separate escapes on its own.
-
-  **Every suite runs at every width in the matrix**: 320, 375, 639, 640, 767, 768, 900, 1023,
-  1024, 1280, 1536. Each Tailwind breakpoint is driven at its value *and one pixel below it*,
-  because that is where an off-by-one in a min/max pair shows, and 900px is in the list because
-  #17 lived between md and lg — in the gap a "phone and laptop" pair walks straight past.
-
-  Targets come from the site's own `sitemap.xml`, so a new component is covered the moment it is
-  published, and the same run works against localhost or production.
-
-### Fixed
-- **`sidebar-09` threw `active is not defined` on every load** — found by the new suite within
-  minutes of it existing, along with two docs previews that threw on click (`$wire` with no
-  Livewire runtime, and a clipboard write the headless browser had not been granted). `<x-ui.sidebar>` renders its slot twice (docked panel + teleported
-  mobile drawer) but forwarded the consumer's `x-data` to only one of them, so the second copy
-  referenced variables that did not exist in its scope. The mobile panel now receives the
-  consumer's attributes too, minus the handful that must not appear twice in one document
-  (`id`, and the dialog semantics it declares itself).
 
 
 ## [1.24.0] - 2026-08-10
@@ -915,7 +930,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.24.1...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.24.2...HEAD
+[1.24.2]: https://github.com/anousss007/blatui/compare/v1.24.1...v1.24.2
 [1.24.1]: https://github.com/anousss007/blatui/compare/v1.24.0...v1.24.1
 [1.24.0]: https://github.com/anousss007/blatui/compare/v1.23.0...v1.24.0
 [1.23.0]: https://github.com/anousss007/blatui/compare/v1.22.0...v1.23.0

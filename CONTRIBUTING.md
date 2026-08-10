@@ -119,6 +119,24 @@ the moment it is published:
   pagination, sonner: interact, then require the reported state to have moved.
 - **buttons** — clicks every visible button on every documented page and fails if the handler
   throws. Which buttons are on screen changes with the width, which is why it sweeps too.
+- **layout** — invariants that need no baseline: the page must not scroll sideways, no component
+  may be squashed to a zero dimension, nothing may be stranded off the left edge, no text may
+  spill out of its box. This is the suite that catches *looks broken* rather than *looks
+  different*. Four components size themselves from their content and still overflow a 320px
+  viewport, as upstream shadcn does; they are listed in the suite and printed on every run rather
+  than hidden, and enforced normally from 375px up.
+- **visual** — a perceptual fingerprint (256-bit dHash) of every example block, per component per
+  width, compared against `tests/browser/baseline/visual.json`. Catches a padding that collapsed,
+  a colour that inverted, a grid that reflowed — verified down to a 4px padding change. Renderings
+  that cannot reproduce themselves are detected by capturing three times and reported as uncovered
+  rather than made flaky, and six components whose rendering is a function of time rather than of
+  the code (`number-ticker`, `streaming-text`, `typewriter`, `marquee`, `confetti`, `countdown`)
+  are excluded by name and printed on every run. Cross-origin requests are
+  blocked during capture — the demo's webfonts come from a CDN, and text in a different face would
+  move every hash, so a baseline recorded on a laptop would fail wholesale on a CI runner. Update with
+  `npm run test:browser -- --suite=visual --update-baseline` and review the diff: an intentional
+  restyle changes hashes for exactly the components you touched. Failures write the actual PNG to
+  `tests/browser/shots/`.
 - **sidebar** — its own suite, asserting the *mode* each width implies: off-canvas drawer below md
   (open, focus trap, Escape, backdrop) and docked icon rail at or above it (collapse, tooltips,
   scrolling, plus a breakpoint configured above md). It has produced four separate escapes and

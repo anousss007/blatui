@@ -87,7 +87,7 @@
         x-transition:leave="transition ease-in duration-100"
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
-        class="bg-popover text-popover-foreground fixed z-50 flex max-h-[28rem] w-80 origin-top flex-col overflow-hidden rounded-md border shadow-md outline-hidden sm:w-96"
+        class="bg-popover text-popover-foreground fixed z-50 flex max-h-[28rem] w-80 max-w-[calc(100vw-1rem)] origin-top flex-col overflow-hidden rounded-md border shadow-md outline-hidden sm:w-96"
     >
         {{-- Header --}}
         <div class="flex items-center justify-between gap-2 border-b px-4 py-3">
