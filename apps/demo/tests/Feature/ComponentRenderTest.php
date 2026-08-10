@@ -262,6 +262,26 @@ class ComponentRenderTest extends TestCase
         $this->assertStringContainsString('print:hidden', $desktop);
     }
 
+    /**
+     * mobile-breakpoint decides `isMobile`, but the panels are painted by CSS. Static `md:`
+     * classes alone meant a configured 1023px did nothing between 768px and 1023px: the rail
+     * stayed docked and the drawer stayed hidden. The classes remain as the no-JS default —
+     * so the rail paints with the page — and `isMobile` overrides them when they disagree.
+     */
+    public function test_sidebar_panel_visibility_follows_is_mobile_not_only_the_md_breakpoint(): void
+    {
+        $html = $this->render('<x-ui.sidebar collapsible="icon">x</x-ui.sidebar>');
+
+        // Desktop root: CSS default kept, overridden when isMobile disagrees with it.
+        $this->assertStringContainsString('hidden md:block', $html);
+        $this->assertStringContainsString("{ 'md:hidden!': isMobile }", $html);
+
+        // The drawer is gated on isMobile itself, so a breakpoint above md still gets it.
+        $this->assertStringContainsString('x-show="openMobile && isMobile"', $html);
+        $wrapper = $this->classAttributeNear($html, 'x-show="openMobile && isMobile"');
+        $this->assertStringNotContainsString('md:hidden', $wrapper, 'the drawer wrapper must not be pinned to md');
+    }
+
     /** Off-canvas below md by default; raise it to get the drawer on tablets too. */
     public function test_sidebar_mobile_breakpoint_is_configurable(): void
     {

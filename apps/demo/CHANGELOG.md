@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **`mobile-breakpoint` now really moves the breakpoint** ([#17](https://github.com/anousss007/blatui/issues/17)) —
+  it changed which branch the trigger took, but the panels were still shown and hidden by static
+  `md:` classes, so a configured 1023px did nothing between 768px and 1023px. Fixed in 1.24.1.
 - **`sidebar-09` threw a JavaScript error on every load** — `<x-ui.sidebar>` renders its slot
   twice (docked panel + mobile drawer) and forwarded the consumer's `x-data` to only one of them,
   so the drawer's copy referenced variables that did not exist. Found by the new browser

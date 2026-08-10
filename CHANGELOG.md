@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.24.1] - 2026-08-10
+
+### Fixed
+- **`mobileBreakpoint` did not actually move the breakpoint** (#17). 1.24.0 wired the prop to
+  `isMobile`, which decides what the trigger toggles — but the two panels are *painted* by CSS,
+  and that was still three static `md:` classes pinned to 768px. Between 768px and a configured
+  1023px the JS said "mobile" while the CSS kept the rail docked and the drawer hidden, so the
+  trigger flipped `openMobile` and nothing appeared. The prop only ever worked for values it did
+  not change.
+  The `md:` classes stay as the no-JS default — so the docked rail still paints with the page
+  instead of popping in after Alpine boots — and `isMobile` now overrides them when the two
+  disagree, which is exactly what a breakpoint other than `md` means. The drawer is gated on
+  `isMobile` itself, so dragging a window past the breakpoint while it is open closes it rather
+  than leaving it floating over the docked rail.
+  Guarded at both levels: a render test for the markup contract, and a browser check that drives
+  `isMobile` at a desktop width and requires the rail to hide and the drawer to open (it fails on
+  the pre-fix component).
+
+
 ### Added
 - **Browser acceptance suite** — every component driven in a real Chromium, at desktop and
   mobile widths, wired into CI. The regressions that reached users (#15, #16) were all invisible
@@ -889,7 +908,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.24.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.24.1...HEAD
+[1.24.1]: https://github.com/anousss007/blatui/compare/v1.24.0...v1.24.1
 [1.24.0]: https://github.com/anousss007/blatui/compare/v1.23.0...v1.24.0
 [1.23.0]: https://github.com/anousss007/blatui/compare/v1.22.0...v1.23.0
 [1.22.0]: https://github.com/anousss007/blatui/compare/v1.21.0...v1.22.0

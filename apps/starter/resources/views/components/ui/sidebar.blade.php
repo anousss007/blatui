@@ -33,6 +33,11 @@
      handful that must not appear twice — see there. --}}
 <div
     {{ $rootAttributes->twMerge('text-sidebar-foreground group peer hidden md:block', $userClass) }}
+    {{-- The static md: classes are the no-JS default, so the docked rail paints with the page
+         instead of popping in after Alpine boots. `isMobile` (which sidebar-provider computes
+         from its own mobile-breakpoint) then overrides them when the two disagree — which is
+         exactly what a breakpoint other than md means. --}}
+    :class="{ 'md:hidden!': isMobile }"
     :data-state="open ? 'expanded' : 'collapsed'"
     :data-collapsible="open ? '' : @js($collapsible)"
     data-variant="{{ $variant }}"
@@ -66,7 +71,10 @@
 
 {{-- Mobile overlay --}}
 <template x-teleport="body">
-    <div x-show="openMobile" x-cloak class="fixed inset-0 z-50 md:hidden">
+    {{-- No md:hidden here: the drawer is gated on isMobile itself, so a breakpoint above md
+         still gets it — and a viewport dragged past the breakpoint while it is open closes it
+         rather than leaving a drawer floating over the docked rail. --}}
+    <div x-show="openMobile && isMobile" x-cloak class="fixed inset-0 z-50">
         <div
             x-show="openMobile"
             @click="openMobile = false"

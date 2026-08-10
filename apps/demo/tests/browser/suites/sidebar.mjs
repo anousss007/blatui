@@ -171,5 +171,50 @@ export async function run({ browser, reporter, baseUrl, only }) {
         });
     });
 
-    await desktop.close();
+    // ── A breakpoint other than md ───────────────────────────────────────────────
+    // sidebar-provider's mobile-breakpoint decides `isMobile`, but the two panels used to be
+    // painted by static md: classes — so between 768px and a configured 1023px the rail stayed
+    // docked and toggling did nothing visible (#17). Drive `isMobile` directly at a desktop
+    // width: that is the exact disagreement the prop creates.
+    const tablet = await newPage(browser, { width: 900, height: 900 });
+    await visit(tablet, baseUrl + BLOCK);
+
+    await reporter.check('a breakpoint above md hides the rail and enables the drawer', async () => {
+        tablet.blatErrors.length = 0;
+        await tablet.evaluate(() => {
+            window.Alpine.$data(document.querySelector('[data-slot="sidebar-provider"]')).isMobile = true;
+        });
+        await tablet.waitForTimeout(300);
+
+        const rail = await visibility(tablet, '[data-slot="sidebar"]');
+        if (rail.visible) return `the docked rail is still shown while isMobile is true: ${JSON.stringify(rail)}`;
+
+        await tablet.click(TRIGGER);
+        await tablet.waitForTimeout(600);
+        const panel = await visibility(tablet, PANEL);
+
+        return (
+            expect.truthy(panel.visible, `the drawer did not open above md: ${JSON.stringify(panel)}`) ??
+            expect.truthy(panel.width > 100, `the drawer opened at ${panel.width}px`) ??
+            expect.empty(tablet.blatErrors, 'console errors')
+        );
+    });
+
+    await reporter.check('back below the breakpoint, the rail returns and the drawer does not linger', async () => {
+        await tablet.evaluate(() => {
+            const d = window.Alpine.$data(document.querySelector('[data-slot="sidebar-provider"]'));
+            d.isMobile = false;
+        });
+        await tablet.waitForTimeout(400);
+
+        const rail = await visibility(tablet, '[data-slot="sidebar"]');
+        const panel = await visibility(tablet, PANEL);
+
+        return (
+            expect.truthy(rail.visible, 'the docked rail did not come back') ??
+            expect.truthy(!panel.visible, 'the drawer stayed on screen over the docked rail')
+        );
+    });
+
+    await tablet.close();
 }

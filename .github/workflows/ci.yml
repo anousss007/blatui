@@ -180,11 +180,19 @@ jobs:
         # dev server would serialise the whole run behind PHP.
         run: |
           PHP_CLI_SERVER_WORKERS=8 php artisan serve --port=8123 &
+          # Wait for the sitemap specifically: it is what the runner reads to discover
+          # every component and block, so a server that answers but cannot serve it is
+          # not ready. Print what it did answer, otherwise a red run says nothing.
           for i in $(seq 1 60); do
-            curl -sf http://127.0.0.1:8123 >/dev/null && break
+            curl -sf http://127.0.0.1:8123/sitemap.xml -o /tmp/sitemap.xml && break
             sleep 1
           done
-          curl -sf http://127.0.0.1:8123 >/dev/null
+          grep -q '<loc>' /tmp/sitemap.xml 2>/dev/null || {
+            echo "::error::the demo did not serve a usable sitemap.xml"
+            curl -s -o /tmp/probe.html -w 'sitemap %{http_code}, home %{http_code}\n' http://127.0.0.1:8123/sitemap.xml
+            head -c 1000 /tmp/probe.html
+            exit 1
+          }
       # Asserts on COMPUTED state after real interactions — the layer that would have caught
       # the invisible mobile drawer (#16), which every markup-level test passed straight through.
       - name: Run the browser acceptance suite
