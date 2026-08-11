@@ -18,12 +18,12 @@ const GRID_H = 16;
 /**
  * Bits that may differ before two renderings are considered different.
  *
- * The noise floor between two fresh browser contexts rendering the same page measured 0 bits,
- * so this is not absorbing jitter — it is headroom for a machine whose font rendering differs
- * slightly from the one that recorded the baseline. Small enough that a padding change on one
- * button inside a busy example still trips it.
+ * Measured rather than guessed. Two fresh contexts rendering the same simple page differ by 0
+ * bits; the noisiest real case — a group of avatars whose remote images resolve in a slightly
+ * different order — differs by 5; a 4px padding change on one button inside a busy example
+ * differs by 14. Eight sits between the noise and the smallest change worth catching.
  */
-export const TOLERANCE = 4;
+export const TOLERANCE = 8;
 
 /**
  * Stop the page from loading anything we do not control.
@@ -60,6 +60,26 @@ export async function freeze(page) {
             scroll-behavior: auto !important;
         }`,
     });
+    // Walk the page top to bottom first. Images below the fold are lazy: their request does not
+    // start until something scrolls them into view, and the thing that eventually does is the
+    // capture itself — so the first look at an example records the image still pending and the
+    // next one records its fallback. Trigger them all, then wait.
+    await page.evaluate(async () => {
+        const step = window.innerHeight;
+        for (let y = 0; y < document.body.scrollHeight; y += step) {
+            window.scrollTo(0, y);
+            await new Promise((r) => requestAnimationFrame(r));
+        }
+        window.scrollTo(0, 0);
+    });
+
+    // Every image has to have finished — loaded or failed. An avatar swaps to its fallback on
+    // the image's error event, so capturing while a request is still in flight records whichever
+    // of the two states won the race that time, and the next machine records the other one.
+    await page
+        .waitForFunction(() => [...document.images].every((img) => img.complete), null, { timeout: 5000 })
+        .catch(() => {});
+
     // Let the frozen styles settle, any in-flight transition land on its end state, and any
     // JS-driven intro (typing, counting up, streaming) reach the state it holds. Capturing a
     // component mid-intro records a frame that will never occur again, and every later run

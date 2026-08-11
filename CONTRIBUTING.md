@@ -126,8 +126,11 @@ the moment it is published:
   viewport, as upstream shadcn does; they are listed in the suite and printed on every run rather
   than hidden, and enforced normally from 375px up.
 - **visual** — a perceptual fingerprint (256-bit dHash) of every example block, per component per
-  width, compared against `tests/browser/baseline/visual.json`. Catches a padding that collapsed,
-  a colour that inverted, a grid that reflowed — verified down to a 4px padding change. Renderings
+  width, compared against `tests/browser/baseline/visual.json`. Catches a padding that collapsed, a
+  colour that inverted, a grid that reflowed. The threshold is measured, not guessed: two runs of
+  the same page differ by 0 bits, the noisiest real case (avatars whose remote images resolve in a
+  different order) by 5, and a 4px padding change by 14 — so 8 bits sits between the noise and the
+  smallest change worth catching. Renderings
   that cannot reproduce themselves are detected by capturing three times and reported as uncovered
   rather than made flaky, and six components whose rendering is a function of time rather than of
   the code (`number-ticker`, `streaming-text`, `typewriter`, `marquee`, `confetti`, `countdown`)
