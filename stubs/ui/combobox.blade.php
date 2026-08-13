@@ -205,25 +205,31 @@
         x-blat-dialog-layer
         x-show="open"
         x-cloak
+        data-slot="combobox-content"
+        {{-- x-blat-anchor, not Alpine's x-anchor: same house directive as select-content and
+             dropdown-menu-content, so a panel opened from inside a modal's top layer positions
+             the same way everywhere, and a long list opened from a low trigger gets capped to the
+             viewport instead of running off it. `.match-width` keeps the panel at least as wide as
+             the trigger and — unlike the offsetWidth read it replaces — re-measures whenever the
+             trigger resizes, including the 0px→full jump when a dialog opens (issue #18). --}}
         @if ($isInput)
-            x-anchor.fixed.bottom-start.offset.4="$refs.control"
+            x-blat-anchor.bottom-start.offset.4.match-width="$refs.control"
             @click.outside="open && !$refs.control.contains($event.target) && close()"
         @else
-            x-anchor.fixed.bottom-start.offset.4="$refs.trigger"
+            x-blat-anchor.bottom-start.offset.4.match-width="$refs.trigger"
             @click.outside="close(false)"
             @keydown.escape.prevent.stop="close()"
         @endif
-        {{-- Panel matches the TRIGGER width (not the passed `$width` class — applying that to a
-             body-teleported node made it the viewport width). Grows no narrower than the anchor. --}}
-        x-bind:style="($refs.trigger || $refs.control) ? ('min-width:' + ($refs.trigger || $refs.control).offsetWidth + 'px') : ''"
-        class="bg-popover text-popover-foreground z-50 w-fit origin-top overflow-hidden rounded-md border {{ $isInput ? 'p-1' : 'p-0' }} shadow-md"
+        {{-- Column flex + overflow-hidden: when the anchor caps the panel's height, the list below
+             (min-h-0, overflow-y-auto) is what shrinks and scrolls — the search box stays put. --}}
+        class="bg-popover text-popover-foreground z-50 flex w-fit flex-col origin-top overflow-hidden rounded-md border {{ $isInput ? 'p-1' : 'p-0' }} shadow-md"
         x-transition:enter="transition ease-out duration-150"
         x-transition:enter-start="opacity-0 scale-95"
         x-transition:enter-end="opacity-100 scale-100"
     >
-        <div class="flex h-full w-full flex-col overflow-hidden rounded-md">
+        <div class="flex h-full w-full min-h-0 flex-col overflow-hidden rounded-md">
             @if (! $isInput && $searchable)
-            <div class="flex h-9 items-center gap-2 border-b px-3">
+            <div class="flex h-9 shrink-0 items-center gap-2 border-b px-3">
                 <x-lucide-search class="size-4 shrink-0 opacity-50" aria-hidden="true" />
                 <input
                     x-ref="search"
@@ -259,7 +265,7 @@
                     @keydown.end.prevent="edge('last')"
                     @keydown.enter.prevent="selectActive()"
                 @endif
-                class="max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto {{ $isInput ? '' : 'p-1' }} outline-hidden"
+                class="max-h-[300px] min-h-0 scroll-py-1 overflow-x-hidden overflow-y-auto {{ $isInput ? '' : 'p-1' }} outline-hidden"
             >
                 <div x-show="visibleCount === 0" class="py-6 text-center text-sm">{{ $empty }}</div>
                 <template x-for="option in options" :key="option.value">

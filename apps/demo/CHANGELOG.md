@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **`combobox` no longer opens narrower than its trigger inside a dialog**
+  ([#18](https://github.com/anousss007/blatui/issues/18)) — the panel measured the trigger once, at
+  init, which for a combobox in a dialog that starts closed meant measuring it while it was hidden
+  and 0px wide. It now re-measures whenever the trigger resizes, and is capped to the space
+  available so a long list scrolls instead of running off the screen. New *Nested in dialog*
+  example on the combobox page. Fixed in 1.24.3.
 - **`mobile-breakpoint` now really moves the breakpoint** ([#17](https://github.com/anousss007/blatui/issues/17)) —
   it changed which branch the trigger took, but the panels were still shown and hidden by static
   `md:` classes, so a configured 1023px did nothing between 768px and 1023px. Fixed in 1.24.1.

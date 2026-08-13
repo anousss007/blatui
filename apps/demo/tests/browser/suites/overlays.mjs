@@ -17,6 +17,33 @@ const NOT_ESCAPABLE = new Set(['alert-dialog-content']);
 /** Hover-only triggers — clicking them proves nothing. */
 const HOVER_TRIGGERS = new Set(['tooltip-trigger', 'hover-card-trigger']);
 
+/**
+ * Popovers driven from INSIDE an open dialog — the shape behind issue #18.
+ *
+ * A trigger that lives in a dialog measures 0×0 for as long as the dialog is closed, and Alpine
+ * initialises the popover long before anyone opens it. So anything the component reads once at
+ * init — where the trigger is, how wide it is — is measured against nothing, and a component that
+ * never re-measures ships a panel pinned to the viewport corner or frozen at min-width:0. The
+ * suite above only counts panels; it is blind to a panel that is visible in the wrong place.
+ *
+ * Anything here is [trigger selector, panel selector, does the panel take its width from the
+ * trigger]. Both selectors are looked up inside the open dialog / among the page's teleported
+ * panels, so adding a component's "inside a dialog" example to the docs is enough to cover it
+ * here. Only the combobox width-matches: a select or a menu sizes itself to its own content by
+ * design, and asserting otherwise would be inventing a requirement.
+ */
+const NESTED_POPOVERS = [
+    ['[data-slot="combobox"] button', '[data-slot="combobox-content"]', true],
+    ['[data-slot="select-trigger"]', '[data-slot="select-content"]', false],
+    ['[data-slot="dropdown-menu-trigger"]', '[data-slot="dropdown-menu-content"]', false],
+];
+
+/** Slack for sub-pixel rounding when comparing two boxes. */
+const EPSILON = 2;
+
+/** The gap an anchored panel is allowed to leave between itself and its trigger. */
+const ANCHOR_GAP = 24;
+
 export async function run({ browser, reporter, baseUrl, inventory, only, viewports }) {
     const slugs = inventory.components.filter((s) => !only || s.includes(only));
 
@@ -107,7 +134,89 @@ export async function run({ browser, reporter, baseUrl, inventory, only, viewpor
                 );
             });
         }
+        await nestedPopovers({ page, reporter, slug, slots });
+
             reporter.progress(`overlays ${name}px ${slug}`);
         } });
     }
+}
+
+/**
+ * Open every dialog on the page, and for each popover nested inside one, assert its panel lands
+ * ON its trigger — beside it, and no narrower than it. Silently does nothing on the pages that
+ * have no such example, which is most of them.
+ */
+async function nestedPopovers({ page, reporter, slug, slots }) {
+    if (!slots['dialog-trigger']) return;
+
+    const dialogTrigger = await probeTrigger(page, 'dialog-trigger');
+    if (!dialogTrigger) return;
+
+    for (const [triggerSel, panelSel, matchesWidth] of NESTED_POPOVERS) {
+        await dismiss(page);
+        await dialogTrigger.scrollIntoViewIfNeeded({ timeout: 3000 });
+        await dialogTrigger.click({ timeout: 3000 });
+        if ((await waitForCount(page, 'dialog-content', (n) => n > 0)) === 0) return;
+
+        const nested = page.locator(`[data-slot="dialog-content"]:visible ${triggerSel}`).first();
+        if (!(await nested.count()) || !(await nested.isVisible())) continue;
+
+        await reporter.check(`${slug}: ${triggerSel} anchors to its trigger inside a dialog`, async () => {
+            page.blatErrors.length = 0;
+            await nested.click({ timeout: 3000 });
+
+            const boxes = await page
+                .waitForFunction(
+                    ([t, p]) => {
+                        const trigger = [...document.querySelectorAll(`[data-slot="dialog-content"] ${t}`)].find((e) => e.offsetParent !== null);
+                        const panel = [...document.querySelectorAll(p)].find((e) => getComputedStyle(e).display !== 'none');
+                        if (!trigger || !panel) return false;
+                        const box = (e) => {
+                            const r = e.getBoundingClientRect();
+                            return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height };
+                        };
+
+                        // Panels open with a scale transition, and a box measured mid-animation is
+                        // a smaller box: measure only once two consecutive frames agree.
+                        const now = box(panel);
+                        const prev = panel.__blatPrevBox;
+                        panel.__blatPrevBox = now;
+                        if (!prev || Math.abs(prev.width - now.width) > 0.5 || Math.abs(prev.top - now.top) > 0.5) return false;
+
+                        return { trigger: box(trigger), panel: now };
+                    },
+                    [triggerSel, panelSel],
+                    { timeout: 3000 },
+                )
+                .then((h) => h.jsonValue())
+                .catch(() => null);
+
+            if (!boxes) return `no ${panelSel} became visible inside the dialog`;
+
+            const { trigger, panel } = boxes;
+            // Beside the trigger on the cross axis, and touching it on the main axis: a panel
+            // computed while the dialog was still hidden lands in the viewport corner instead.
+            const overlapsX = panel.right > trigger.left + EPSILON && panel.left < trigger.right - EPSILON;
+            const below = panel.top >= trigger.bottom - EPSILON && panel.top <= trigger.bottom + ANCHOR_GAP;
+            const above = panel.bottom <= trigger.top + EPSILON && panel.bottom >= trigger.top - ANCHOR_GAP;
+
+            return (
+                expect.truthy(
+                    overlapsX && (below || above),
+                    `panel is not anchored to its trigger: trigger at ${Math.round(trigger.left)},${Math.round(trigger.top)} ` +
+                        `(${Math.round(trigger.width)}×${Math.round(trigger.height)}), panel at ${Math.round(panel.left)},${Math.round(panel.top)}`,
+                ) ??
+                (matchesWidth
+                    ? expect.truthy(
+                          panel.width >= trigger.width - EPSILON,
+                          `panel is narrower than its trigger (${Math.round(panel.width)}px vs ${Math.round(trigger.width)}px) — ` +
+                              'a width measured once, while the dialog was still closed',
+                      )
+                    : undefined) ??
+                expect.empty(page.blatErrors, 'console errors while opening')
+            );
+        });
+    }
+
+    await dismiss(page);
 }

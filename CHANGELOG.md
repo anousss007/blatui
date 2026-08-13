@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.24.3] - 2026-08-13
+
+### Fixed
+- **`combobox` opened narrower than its trigger inside a dialog** (#18). The panel takes its width
+  from the trigger, but it read `$refs.trigger.offsetWidth` once from a Blade `x-bind:style` —
+  and nothing in that expression is reactive, so Alpine ran it exactly once, at init. For a
+  combobox nested in a dialog that starts closed, that one measurement happens behind
+  `display: none`, where the trigger is 0px wide: `min-width` froze at `0px` for the component's
+  lifetime and the `w-fit` panel shrank to its content, on every open, forever.
+  The panel now anchors with `x-blat-anchor.…​.match-width` — the same house directive as
+  `select-content` and `dropdown-menu-content` — which takes the width from floating-ui's measured
+  reference rect on every reposition, so a trigger that was 0px wide at init widens the panel the
+  moment it is shown. A 0-wide reference is skipped rather than written as `min-width: 0`.
+  Two things came with the move off Alpine's `x-anchor`: the panel is now capped to the space
+  actually available (it is a column flex box, so the list scrolls and the search field stays put)
+  instead of running off a low viewport, and `flip`/`shift` keep it on screen.
+  The report also blamed `x-anchor`'s `absolute` strategy for a popover pinned to the viewport
+  corner. That part did not reproduce here — the combobox already passed `.fixed`, which
+  `@alpinejs/anchor` maps to `strategy: 'fixed'`, and in a BlatUI dialog the panel anchored
+  correctly before this change. The `left: 5px; top: 4px` in the report is real, though: it is
+  `shift({padding: 5})` plus the 4px offset against a 0×0 reference — the same
+  measured-while-hidden position, which floating-ui's `autoUpdate` normally corrects on open.
+  Every other floating component was driven inside a dialog while checking this — select,
+  popover, tooltip, hover-card, dropdown-menu and its submenu — and all of them anchor correctly.
+- **Coverage for the shape, not just the bug**: the overlays suite now opens each dialog on a
+  page and measures any popover nested inside it against its trigger — beside it, and no narrower
+  than it. It fails on the pre-fix combobox (252px panel under a 375px trigger). A
+  *Nested in dialog* example on the combobox page gives it something to drive, and documents the
+  pattern.
+
 ## [1.24.2] - 2026-08-10
 
 ### Added
@@ -930,7 +960,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.24.2...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.24.3...HEAD
+[1.24.3]: https://github.com/anousss007/blatui/compare/v1.24.2...v1.24.3
 [1.24.2]: https://github.com/anousss007/blatui/compare/v1.24.1...v1.24.2
 [1.24.1]: https://github.com/anousss007/blatui/compare/v1.24.0...v1.24.1
 [1.24.0]: https://github.com/anousss007/blatui/compare/v1.23.0...v1.24.0
