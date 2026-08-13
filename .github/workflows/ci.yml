@@ -188,7 +188,13 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('apps/demo/package-lock.json') }}
       - name: Install Playwright
-        run: npm i --no-save playwright && npx playwright install --with-deps chromium
+        # Pinned, and read from package.json so the runner and a laptop install the same
+        # build. Chromium's text rendering moves between versions, and the visual baseline
+        # is a hash of rendered pixels: an unpinned upgrade re-renders every page slightly
+        # differently and fails the suite everywhere at once, for no change of ours.
+        run: |
+          VERSION=$(node -p "require('./package.json').blatui.playwright")
+          npm i --no-save "playwright@${VERSION}" && npx playwright install --with-deps chromium
       - name: Serve the demo
         # Multiple workers: the suite drives four pages in parallel and a single-threaded
         # dev server would serialise the whole run behind PHP.

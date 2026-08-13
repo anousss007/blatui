@@ -37,7 +37,21 @@ const MAX_EXAMPLES = 4;
  * them fail intermittently would teach everyone to ignore this suite. They are still covered by
  * every other suite, and the exclusions are printed on each run.
  */
-const TIME_DEPENDENT = new Set(['number-ticker', 'streaming-text', 'typewriter', 'marquee', 'confetti', 'countdown']);
+const TIME_DEPENDENT = new Set([
+    'number-ticker',
+    'streaming-text',
+    'typewriter',
+    'marquee',
+    'confetti',
+    'countdown',
+    // A single example rather than a whole component: `slug#index` excludes just that block.
+    // image#2 is the blur-up placeholder, and its full-size image is a third-party URL the
+    // capture blocks on purpose. Whether the swap out of the placeholder lands before the
+    // shot depends on how fast that abort arrives, which under four parallel lanes is a coin
+    // flip — it settles into either state and holds there, so a re-capture agrees with itself
+    // and the entry reads as a regression instead of as the race it is.
+    'image#2',
+]);
 
 const BASELINE = new URL('../baseline/visual.json', import.meta.url).pathname;
 const SHOTS = new URL('../shots/', import.meta.url).pathname;
@@ -85,6 +99,7 @@ export async function run({ browser, reporter, baseUrl, inventory, only, viewpor
 
                 for (let i = 0; i < blocks; i++) {
                     const id = `${key}#${i}`;
+                    if (TIME_DEPENDENT.has(`${slug}#${i}`)) continue;
 
                     const shot = await fingerprint(page, EXAMPLE, i).catch(() => null);
                     if (!shot) continue; // not rendered at this width (hidden by a media query)

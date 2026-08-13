@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **The site's own typeface never loaded.** `--font-sans` names *Instrument Sans* and the Vite
+  fonts pipeline dutifully downloaded it, but nothing ever emitted the `@font-face` rules —
+  `document.fonts` was empty on every page. Every visitor read the site in whatever their machine
+  maps `sans-serif` to. The layout now emits `Vite::fonts()`, so the design renders as designed and
+  is served from our own origin instead of a third party.
+- **The visual baseline could not be reproduced outside CI.** Same root cause: with the webfont CDN
+  blocked during capture (as it must be), text fell through to the local `sans-serif`, so a laptop
+  recorded Noto Sans and a runner recorded something else — ~1500 of 5929 fingerprints disagreed and
+  every local run looked like a wall of regressions. With the fonts served from the origin, capture
+  no longer depends on what the machine has installed. *JetBrains Mono* is self-hosted for the same
+  reason, and the docs site leads its `--font-mono` with it — kept out of `resources/css/app.css`,
+  which is copied verbatim into the package, so consumers keep a neutral system stack.
+- **Playwright was installed unpinned in CI** (`npm i playwright`), so any release could hand the
+  suite a different Chromium — and the baseline is a hash of rendered pixels. The version is pinned
+  in `package.json`, read from there by the workflow, and the suite warns when the local install
+  differs instead of letting someone chase phantom regressions.
+  Baseline regenerated against the real typefaces (5929 entries).
+
 - **Popovers no longer get stranded in the corner when a Livewire re-render replaces their trigger**
   ([#18](https://github.com/anousss007/blatui/issues/18)) — anchoring watched the trigger *node*, so
   a morph that swapped that node left the popover measuring something no longer on the page. It now

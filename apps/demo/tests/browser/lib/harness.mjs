@@ -26,11 +26,34 @@ export function setOrigin(baseUrl) {
 
 const isOurs = (url) => !ownOrigin || url.startsWith(ownOrigin) || url.startsWith('/');
 
+/**
+ * The Playwright build the baseline was recorded with, pinned in package.json and installed by
+ * the same value in CI. Chromium renders text a little differently between versions, and the
+ * visual baseline is a hash of rendered pixels — so a mismatched local install reports dozens of
+ * regressions that are really just a different browser. Say so instead of letting someone chase
+ * a phantom.
+ */
+async function warnOnPlaywrightDrift() {
+    const [pinned, installed] = await Promise.all([
+        import('../../../package.json', { with: { type: 'json' } }).then((m) => m.default.blatui?.playwright).catch(() => null),
+        import('playwright/package.json', { with: { type: 'json' } }).then((m) => m.default.version).catch(() => null),
+    ]);
+
+    if (pinned && installed && pinned !== installed) {
+        console.warn(
+            `\n  playwright ${installed} installed, ${pinned} pinned in package.json.\n` +
+                `  The visual suite compares rendered pixels, so expect it to disagree with the baseline.\n` +
+                `  Install the pinned build:  npm i --no-save playwright@${pinned} && npx playwright install chromium\n`,
+        );
+    }
+}
+
 export async function launch() {
     const { chromium } = await import('playwright').catch(() => {
         console.error('playwright is not installed. Run:\n  npm i -D playwright && npx playwright install chromium');
         process.exit(2);
     });
+    await warnOnPlaywrightDrift();
     mkdirSync(SHOTS, { recursive: true });
 
     return chromium.launch();

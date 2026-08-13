@@ -154,6 +154,11 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/favicon.svg">
 
+    {{-- The site's own typefaces, self-hosted by the Vite fonts pipeline. This has to be
+         emitted for them to load at all: --font-sans names 'Instrument Sans', and without
+         these @font-face rules the browser skipped straight to the system fallback. --}}
+    {{ Vite::fonts() }}
+
     {{-- Customizer font families (privacy-friendly Bunny mirror; graceful fallback offline) --}}
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
     <link rel="stylesheet" href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700|geist:400,500,600,700|inter:400,500,600,700|jetbrains-mono:400,500,600,700|lora:400,500,600,700|manrope:400,500,600,700|outfit:400,500,600,700|plus-jakarta-sans:400,500,600,700|sora:400,500,600,700|source-serif-4:400,500,600,700|space-grotesk:400,500,600,700">
@@ -237,6 +242,14 @@
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- After app.css on purpose: this overrides the token it defines. Demo-site only — the
+         package's --font-mono stays a neutral system stack for consumers, while the docs site
+         leads with the self-hosted face so code samples render from our own origin instead of
+         through whatever monospace the machine happens to map ui-monospace to. --}}
+    <style>
+        :root { --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    </style>
 </head>
 <body x-data class="min-h-screen bg-background font-sans text-foreground antialiased">
     {{ $slot }}
