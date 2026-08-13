@@ -176,8 +176,22 @@ async function nestedPopovers({ page, reporter, slug, slots }) {
                             return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height };
                         };
 
-                        // Panels open with a scale transition, and a box measured mid-animation is
-                        // a smaller box: measure only once two consecutive frames agree.
+                        // Panels open with a scale transition, and a box measured mid-animation is a
+                        // smaller box — a panel scaling in from 95% reads as 5% too narrow, which is
+                        // exactly how a passing width fails on a slow runner. Two agreeing frames do
+                        // not settle it: there is a frame where the panel is already displayed at
+                        // scale-95 and no transition has started yet, so two polls can agree on the
+                        // wrong number. Require the scale to be back to 1 and nothing still running.
+                        // Tailwind v4 animates the `scale` property, so `transform` stays `none`
+                        // here — both are checked so this does not quietly stop working if that
+                        // changes.
+                        const cs = getComputedStyle(panel);
+                        const settled =
+                            (cs.scale === 'none' || Math.abs(parseFloat(cs.scale) - 1) < 0.01) &&
+                            (cs.transform === 'none' || /^matrix\(1,\s*0,\s*0,\s*1,/.test(cs.transform)) &&
+                            !panel.getAnimations().some((a) => a.playState === 'running');
+                        if (!settled) return false;
+
                         const now = box(panel);
                         const prev = panel.__blatPrevBox;
                         panel.__blatPrevBox = now;
