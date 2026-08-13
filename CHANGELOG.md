@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.24.4] - 2026-08-13
+
+### Fixed
+- **A popover whose trigger is replaced under it never finds its way back** (#18, the half that
+  1.24.3 did not fix). Anchoring hands floating-ui's `autoUpdate` a NODE and keeps it forever. A
+  framework that morphs the DOM can decide the trigger is not the same element and swap it for a
+  fresh one — Livewire's morph does exactly this, which the reporter traced with Livewire's own
+  `morph.*` hooks after a `$this->form->reset()` in a dialog's open handler. From then on the
+  popover measures a detached node: 0×0, every time, so it parks in the viewport corner and stays
+  there for the life of the page, because nothing will ever resize or scroll the node being
+  watched.
+  `x-blat-anchor` now notices its reference has left the document and re-resolves the expression,
+  rebinding `autoUpdate` to the live node. Alpine's `x-ref` registry follows the swap, so the
+  expression yields the new element; the popover itself is still observed, which is what gets us
+  back into a reposition when it is next shown. No `wire:ignore` needed on the consumer's side —
+  and unlike that workaround, server-driven changes to `:options` keep reaching the component.
+  This needs no Livewire to reproduce: replacing the trigger node on a plain page did it, which is
+  what the new regression check does (before: panel at 8,4 with the trigger at 668,432).
+- **The same fragility in every other floating component.** `popover-content`, `tooltip-content`,
+  `hover-card-content`, `menubar-content`, `menubar-sub-content`, `context-menu-sub-content`,
+  `dropdown-menu-sub-content`, `navigation-menu-content`, `mini-cart` and `notification-center`
+  were still on Alpine's `x-anchor`, which resolves its reference once and has no way to recover.
+  All ten now use `x-blat-anchor`, so the whole registry survives a morph and positions the same
+  way everywhere.
+
+### Added
+- **`.no-size` modifier on `x-blat-anchor`** — opt out of the height cap. The cap only helps a
+  popover that can scroll once capped: the popover itself (`select-content`,
+  `dropdown-menu-content`) or an inner scroller it can shrink (`date-picker`, `combobox`). On a
+  tooltip, a hover card or a menu that sizes to its items it would only cut content off, so the
+  ten components migrated above opt out and keep `flip`/`shift` — behaviour identical to what
+  `x-anchor` gave them, plus the recovery.
+
 ## [1.24.3] - 2026-08-13
 
 ### Fixed
@@ -960,7 +993,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.24.3...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.24.4...HEAD
+[1.24.4]: https://github.com/anousss007/blatui/compare/v1.24.3...v1.24.4
 [1.24.3]: https://github.com/anousss007/blatui/compare/v1.24.2...v1.24.3
 [1.24.2]: https://github.com/anousss007/blatui/compare/v1.24.1...v1.24.2
 [1.24.1]: https://github.com/anousss007/blatui/compare/v1.24.0...v1.24.1

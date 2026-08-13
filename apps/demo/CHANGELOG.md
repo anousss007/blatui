@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Popovers no longer get stranded in the corner when a Livewire re-render replaces their trigger**
+  ([#18](https://github.com/anousss007/blatui/issues/18)) — anchoring watched the trigger *node*, so
+  a morph that swapped that node left the popover measuring something no longer on the page. It now
+  notices and re-attaches to the live trigger. Every floating component moved onto the same anchor
+  for it: popover, tooltip, hover-card, menubar (+ submenu), context-menu submenu, dropdown-menu
+  submenu, navigation-menu, mini-cart and notification-center. Fixed in 1.24.4.
 - **`combobox` no longer opens narrower than its trigger inside a dialog**
   ([#18](https://github.com/anousss007/blatui/issues/18)) — the panel measured the trigger once, at
   init, which for a combobox in a dialog that starts closed meant measuring it while it was hidden

@@ -70,7 +70,7 @@
         x-show="open"
         x-cloak
         x-ref="panel"
-        x-anchor.bottom-end.offset.8="$refs.trigger"
+        x-blat-anchor.bottom-end.offset.8.no-size="$refs.trigger"
         @click.outside="close(false)"
         @keydown.escape.prevent.stop="close()"
         x-trap="open"

@@ -5,7 +5,7 @@
         x-cloak
         x-ref="submenu"
         x-init="_menu = $el"
-        x-anchor.fixed.right-start.offset.4="$refs.subtrigger"
+        x-blat-anchor.right-start.offset.4.no-size="$refs.subtrigger"
         @mouseenter="cancelClose()"
         @mouseleave="closeSoon()"
         @keydown.escape.prevent.stop="closeMenu()"

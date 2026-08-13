@@ -7,7 +7,7 @@
 
 @php
     $placement = $side.($align === 'center' ? '' : '-'.$align);
-    $anchorAttr = 'x-anchor.fixed.'.$placement.'.offset.'.$sideOffset.'="$refs.trigger"';
+    $anchorAttr = 'x-blat-anchor.'.$placement.'.offset.'.$sideOffset.'.no-size="$refs.trigger"';
 @endphp
 
 <template x-teleport="body" wire:ignore>

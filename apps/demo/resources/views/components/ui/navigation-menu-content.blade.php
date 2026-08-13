@@ -1,7 +1,7 @@
 <div
     x-show="active === id"
     x-cloak
-    x-anchor.bottom-start.offset.8="$refs.trigger"
+    x-blat-anchor.bottom-start.offset.8.no-size="$refs.trigger"
     @mouseenter="active = id"
     @click.outside="if (active === id) active = null"
     @keydown.escape.window="active = null"

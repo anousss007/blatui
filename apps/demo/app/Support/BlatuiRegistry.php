@@ -251,7 +251,10 @@ class BlatuiRegistry
         if (str_contains($source, '->twMerge(')) {
             $packages['composer'][] = 'gehrisandro/tailwind-merge-laravel';
         }
-        if (preg_match('/x-anchor/', $source)) {
+        // Match the directive in use, not a mention of it: components that moved to x-blat-anchor
+        // still discuss x-anchor in a comment, and a comment is not a dependency. The lookbehind
+        // also keeps `x-blat-anchor` itself from ever counting.
+        if (preg_match('/(?<![\w-])x-anchor[.\s=]/', $source)) {
             $packages['npm'][] = '@alpinejs/anchor';
         }
         if (preg_match('/x-collapse/', $source)) {

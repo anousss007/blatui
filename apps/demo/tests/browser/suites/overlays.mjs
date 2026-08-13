@@ -38,6 +38,25 @@ const NESTED_POPOVERS = [
     ['[data-slot="dropdown-menu-trigger"]', '[data-slot="dropdown-menu-content"]', false],
 ];
 
+/**
+ * Popovers whose trigger gets replaced under them, which is what a DOM-morphing framework does.
+ *
+ * Livewire's morph, Turbo, htmx: a re-render can decide the trigger element is not the same node
+ * and swap it for a fresh one — the reporter of #18 traced exactly that with Livewire's own
+ * `morph.*` hooks. The popover was handed a NODE at init, so it is then measuring one that is no
+ * longer in the document: every measurement is 0x0 and it parks in the viewport corner for good.
+ * None of that needs Livewire to reproduce — replacing the node here is the same event, which is
+ * the point of testing it this way.
+ *
+ * [slug the example lives on, trigger selector, panel selector].
+ */
+const SWAPPED_TRIGGERS = [
+    ['combobox', '[data-slot="combobox"] button[x-ref="trigger"]', '[data-slot="combobox-content"]'],
+    ['select', '[data-slot="select-trigger"]', '[data-slot="select-content"]'],
+    ['dropdown-menu', '[data-slot="dropdown-menu-trigger"]', '[data-slot="dropdown-menu-content"]'],
+    ['popover', '[data-slot="popover-trigger"]', '[data-slot="popover-content"]'],
+];
+
 /** Slack for sub-pixel rounding when comparing two boxes. */
 const EPSILON = 2;
 
@@ -135,6 +154,7 @@ export async function run({ browser, reporter, baseUrl, inventory, only, viewpor
             });
         }
         await nestedPopovers({ page, reporter, slug, slots });
+        await swappedTrigger({ page, reporter, slug });
 
             reporter.progress(`overlays ${name}px ${slug}`);
         } });
@@ -231,6 +251,80 @@ async function nestedPopovers({ page, reporter, slug, slots }) {
             );
         });
     }
+
+    await dismiss(page);
+}
+
+/**
+ * Replace the trigger node the way a morphing framework does, then open the popover and require it
+ * to still land on the trigger. Anchoring that resolves its reference once cannot survive this.
+ */
+async function swappedTrigger({ page, reporter, slug }) {
+    const entry = SWAPPED_TRIGGERS.find(([s]) => s === slug);
+    if (!entry) return;
+
+    const [, triggerSel, panelSel] = entry;
+    await dismiss(page);
+
+    const swapped = await page.evaluate((sel) => {
+        const btn = [...document.querySelectorAll(sel)].find((e) => e.offsetParent !== null);
+        if (!btn) return false;
+        // Let Alpine's own mutation observer initialise the replacement, as it would for a node a
+        // framework inserted. Doing it by hand races the teardown of the node being removed and
+        // loses the x-ref, which is an artefact of the test, not of a real swap.
+        btn.replaceWith(btn.cloneNode(true));
+
+        return true;
+    }, triggerSel);
+
+    if (!swapped) return;
+    await page.waitForTimeout(300); // Alpine's observer is a microtask + init; nothing to poll on
+
+    await reporter.check(`${slug}: re-anchors after its trigger node is replaced`, async () => {
+        page.blatErrors.length = 0;
+        const trigger = page.locator(triggerSel).first();
+        await trigger.scrollIntoViewIfNeeded({ timeout: 3000 });
+        await trigger.click({ timeout: 3000 });
+
+        const boxes = await page
+            .waitForFunction(
+                ([t, p]) => {
+                    const el = [...document.querySelectorAll(t)].find((e) => e.offsetParent !== null);
+                    const panel = [...document.querySelectorAll(p)].find((e) => getComputedStyle(e).display !== 'none');
+                    if (!el || !panel) return false;
+                    const cs = getComputedStyle(panel);
+                    const settled =
+                        (cs.scale === 'none' || Math.abs(parseFloat(cs.scale) - 1) < 0.01) &&
+                        !panel.getAnimations().some((a) => a.playState === 'running');
+                    if (!settled) return false;
+                    const b = (e) => {
+                        const r = e.getBoundingClientRect();
+                        return { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+                    };
+
+                    return { trigger: b(el), panel: b(panel) };
+                },
+                [triggerSel, panelSel],
+                { timeout: 3000 },
+            )
+            .then((h) => h.jsonValue())
+            .catch(() => null);
+
+        if (!boxes) return `no ${panelSel} became visible after the trigger was replaced`;
+
+        const { trigger: t, panel: p } = boxes;
+        const near = p.right > t.left - ANCHOR_GAP && p.left < t.right + ANCHOR_GAP;
+        const beside = p.top >= t.bottom - EPSILON - ANCHOR_GAP && p.top <= t.bottom + ANCHOR_GAP;
+        const over = p.bottom <= t.top + EPSILON + ANCHOR_GAP && p.bottom >= t.top - ANCHOR_GAP;
+
+        return (
+            expect.truthy(
+                near && (beside || over),
+                `panel no longer follows its trigger: trigger at ${Math.round(t.left)},${Math.round(t.top)}, ` +
+                    `panel at ${Math.round(p.left)},${Math.round(p.top)} — the anchor is still measuring the replaced node`,
+            ) ?? expect.empty(page.blatErrors, 'console errors after the swap')
+        );
+    });
 
     await dismiss(page);
 }

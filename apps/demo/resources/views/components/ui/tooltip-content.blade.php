@@ -14,7 +14,7 @@
 
 @php
     $placement = $side.($align === 'center' ? '' : '-'.$align);
-    $anchorAttr = 'x-anchor.fixed.'.$placement.'.offset.'.$sideOffset.'="$refs.trigger"';
+    $anchorAttr = 'x-blat-anchor.'.$placement.'.offset.'.$sideOffset.'.no-size="$refs.trigger"';
 @endphp
 
 <template x-teleport="body" wire:ignore>
@@ -28,7 +28,7 @@
         data-slot="tooltip-content"
         data-side="{{ $side }}"
         :data-state="({{ $state }}) ? 'open' : 'closed'"
-        {{-- Opacity-only transition: scaling an x-anchor'd, teleported panel makes it visibly
+        {{-- Opacity-only transition: scaling an anchored, teleported panel makes it visibly
              resize + reposition on open (anchor recalculates after the reflow). --}}
         x-transition:enter="transition ease-out duration-150"
         x-transition:enter-start="opacity-0"

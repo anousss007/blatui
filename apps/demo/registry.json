@@ -496,9 +496,6 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
-            ],
-            "npm": [
-                "@alpinejs/anchor"
             ]
         }
     },
@@ -617,9 +614,6 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
-            ],
-            "npm": [
-                "@alpinejs/anchor"
             ]
         }
     },
@@ -691,7 +685,6 @@
                 "gehrisandro/tailwind-merge-laravel"
             ],
             "npm": [
-                "@alpinejs/anchor",
                 "@alpinejs/focus"
             ]
         }
@@ -712,7 +705,6 @@
                 "gehrisandro/tailwind-merge-laravel"
             ],
             "npm": [
-                "@alpinejs/anchor",
                 "@alpinejs/focus"
             ]
         }
@@ -873,9 +865,6 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
-            ],
-            "npm": [
-                "@alpinejs/anchor"
             ]
         }
     },
@@ -1046,9 +1035,6 @@
         "packages": {
             "composer": [
                 "gehrisandro/tailwind-merge-laravel"
-            ],
-            "npm": [
-                "@alpinejs/anchor"
             ]
         }
     },
@@ -1432,9 +1418,6 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
-            ],
-            "npm": [
-                "@alpinejs/anchor"
             ]
         }
     },
@@ -1476,7 +1459,6 @@
                 "gehrisandro/tailwind-merge-laravel"
             ],
             "npm": [
-                "@alpinejs/anchor",
                 "@alpinejs/focus"
             ]
         }
@@ -1560,9 +1542,6 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
-            ],
-            "npm": [
-                "@alpinejs/anchor"
             ]
         }
     },
@@ -1578,7 +1557,6 @@
                 "gehrisandro/tailwind-merge-laravel"
             ],
             "npm": [
-                "@alpinejs/anchor",
                 "@alpinejs/focus"
             ]
         }
@@ -1725,7 +1703,6 @@
                 "gehrisandro/tailwind-merge-laravel"
             ],
             "npm": [
-                "@alpinejs/anchor",
                 "@alpinejs/focus"
             ]
         }
@@ -2550,9 +2527,6 @@
         "packages": {
             "composer": [
                 "gehrisandro/tailwind-merge-laravel"
-            ],
-            "npm": [
-                "@alpinejs/anchor"
             ]
         }
     },

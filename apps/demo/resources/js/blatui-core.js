@@ -908,13 +908,14 @@ function blatLabelledByDirective(el, { expression }, { evaluate }) {
 //   • size() — caps the popover's height to the space actually available and lets it scroll,
 //     so a calendar / long menu can't overflow off-screen when the trigger sits low (the exact
 //     failure inside a centered modal). flip()+shift() keep it pointed at and within the viewport.
+//   • `.no-size` — opt out of the height cap for a popover that cannot scroll (see below).
 //   • `.match-width` — the popover is never narrower than its trigger. It reads the width from
 //     floating-ui's measured reference rect on every reposition, so a trigger that was 0px wide
 //     at init (a popover inside a dialog that starts closed) still widens the moment it is shown.
 //     A one-shot `offsetWidth` read in a Blade binding cannot: nothing there is reactive, so the
 //     0px it measured behind `display:none` would stick for the component's lifetime (issue #18).
 // Modifiers mirror x-anchor: a placement (e.g. bottom-start), `.offset N`, `.no-flip`, plus the
-// `.match-width` above.
+// `.match-width` and `.no-size` above.
 const BLAT_ANCHOR_PLACEMENTS = ['top', 'top-start', 'top-end', 'right', 'right-start', 'right-end', 'bottom', 'bottom-start', 'bottom-end', 'left', 'left-start', 'left-end'];
 function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cleanup }) {
     const placement = BLAT_ANCHOR_PLACEMENTS.find((p) => modifiers.includes(p)) || 'bottom';
@@ -925,6 +926,12 @@ function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cle
     }
     const allowFlip = !modifiers.includes('no-flip');
     const matchWidth = modifiers.includes('match-width');
+    // `.no-size` — do not cap the height. The cap only works on a popover that can scroll at its
+    // capped height: either the popover itself (select-content, dropdown-menu-content: max-h +
+    // overflow-y-auto) or, for one that is overflow-hidden, an inner scroller it can shrink
+    // (date-picker, combobox). On anything else — a tooltip, a hover card, a menu that sizes to
+    // its items — a cap only cuts content off, so those opt out and keep flip/shift instead.
+    const capHeight = !modifiers.includes('no-size');
     const PAD = 8;
     // The popover's own design cap (e.g. `max-h-96`), read once before we set anything inline.
     // size() only shrinks *below* this when the viewport is tight — it never makes the popover
@@ -933,38 +940,69 @@ function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cle
     const getReference = evaluateLater(expression);
 
     let stop = null;
-    getReference((reference) => {
-        if (!reference || stop) return;
-        const update = () =>
-            computePosition(reference, el, {
-                strategy: 'fixed',
-                placement,
-                middleware: [
-                    flOffset(offsetValue),
-                    allowFlip && flip({ padding: PAD }),
-                    shift({ padding: PAD }),
-                    size({
-                        padding: PAD,
-                        apply({ availableHeight, rects }) {
-                            // Fit the available space but never exceed the design cap (min 140px so it
-                            // never collapses). The popover carries overflow-y-auto, so it scrolls.
-                            const h = Math.min(designMax, Math.max(140, Math.floor(availableHeight)));
-                            el.style.maxHeight = Number.isFinite(h) ? `${h}px` : '';
-                            // Skip a 0-wide reference (the trigger is still hidden): writing 0px would
-                            // read as "no minimum" and we'd never know to widen it later. Write only on
-                            // change — setting the width resizes the popover, which autoUpdate observes.
-                            if (matchWidth && rects.reference.width > 0) {
-                                const w = `${Math.round(rects.reference.width)}px`;
-                                if (el.style.minWidth !== w) el.style.minWidth = w;
-                            }
-                        },
-                    }),
-                ].filter(Boolean),
-            }).then(({ x, y }) => {
-                Object.assign(el.style, { position: 'fixed', left: `${x}px`, top: `${y}px` });
-            });
+    let reference = null;
+
+    // Re-resolve the trigger when the one we are anchored to leaves the document.
+    //
+    // autoUpdate watches a NODE, not an expression. A framework that morphs the DOM — Livewire,
+    // Turbo, htmx — can decide the trigger is not the same element and swap it for a fresh one
+    // (Livewire's morph does exactly this when a re-render lands on a subtree it walks into). The
+    // popover then holds a detached node: every measurement is 0x0, so it parks in the viewport
+    // corner and stays there for the life of the page, because the observers that would correct it
+    // are watching a node nothing will ever resize or scroll again. Alpine's x-ref registry follows
+    // the swap, so re-evaluating the expression yields the live node; the popover itself is still
+    // observed either way, which is what gets us back here when it is next shown.
+    const rebind = (next) => {
+        if (!next) return;
+        if (stop) stop();
+        reference = next;
         stop = autoUpdate(reference, el, update);
+    };
+
+    function update() {
+        // Strict false: a virtual reference (a plain getBoundingClientRect object) has no
+        // isConnected and must not be treated as detached.
+        if (reference?.isConnected === false) {
+            let fresh = null;
+            getReference((r) => (fresh = r));
+            if (fresh && fresh !== reference) return rebind(fresh); // rebinding measures immediately
+        }
+
+        return position();
+    }
+
+    const position = () =>
+    computePosition(reference, el, {
+        strategy: 'fixed',
+        placement,
+        middleware: [
+            flOffset(offsetValue),
+            allowFlip && flip({ padding: PAD }),
+            shift({ padding: PAD }),
+            size({
+                padding: PAD,
+                apply({ availableHeight, rects }) {
+                    // Fit the available space but never exceed the design cap (min 140px so it
+                    // never collapses). The popover carries overflow-y-auto, so it scrolls.
+                    if (capHeight) {
+                        const h = Math.min(designMax, Math.max(140, Math.floor(availableHeight)));
+                        el.style.maxHeight = Number.isFinite(h) ? `${h}px` : '';
+                    }
+                    // Skip a 0-wide reference (the trigger is still hidden): writing 0px would
+                    // read as "no minimum" and we'd never know to widen it later. Write only on
+                    // change — setting the width resizes the popover, which autoUpdate observes.
+                    if (matchWidth && rects.reference.width > 0) {
+                        const w = `${Math.round(rects.reference.width)}px`;
+                        if (el.style.minWidth !== w) el.style.minWidth = w;
+                    }
+                },
+            }),
+        ].filter(Boolean),
+    }).then(({ x, y }) => {
+        Object.assign(el.style, { position: 'fixed', left: `${x}px`, top: `${y}px` });
     });
+
+    getReference((initial) => rebind(initial));
 
     cleanup(() => stop && stop());
 }

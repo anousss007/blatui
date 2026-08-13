@@ -197,7 +197,7 @@
     </button>
 
     {{-- Teleported to <body> so the popover is never clipped by an overflow-hidden ancestor
-         (a card, table cell, the docs preview…). x-anchor still positions it at the trigger. --}}
+         (a card, table cell, the docs preview…). x-blat-anchor still positions it at the trigger. --}}
     <template x-teleport="body" wire:ignore>
     <div
         x-blat-dialog-layer
