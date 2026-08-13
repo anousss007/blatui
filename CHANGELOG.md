@@ -33,6 +33,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   way everywhere.
 
 ### Added
+- **`.absolute` and `.pad N` modifiers on `x-blat-anchor`** — what the two page-level popovers
+  needed to migrate without moving a pixel. `mini-cart` and `notification-center` can sit open
+  while the page scrolls their trigger off screen, and under the default `fixed` strategy `shift()`
+  then pins the panel to the viewport edge, stranded from what it belongs to (the visual suite
+  caught exactly this: the notification panel jumped 500px up the page). `.absolute` keeps them in
+  document coords, and `.pad 5` keeps the 5px viewport gutter Alpine's `x-anchor` gave them —
+  without it the migration would have shifted them 3px, which at a 320px viewport is a visible
+  change to a 320px-wide panel for no reason. Verified pixel-identical to 1.24.3 for both, at
+  320/375/639.
 - **`.no-size` modifier on `x-blat-anchor`** — opt out of the height cap. The cap only helps a
   popover that can scroll once capped: the popover itself (`select-content`,
   `dropdown-menu-content`) or an inner scroller it can shrink (`date-picker`, `combobox`). On a

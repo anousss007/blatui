@@ -909,6 +909,14 @@ function blatLabelledByDirective(el, { expression }, { evaluate }) {
 //     so a calendar / long menu can't overflow off-screen when the trigger sits low (the exact
 //     failure inside a centered modal). flip()+shift() keep it pointed at and within the viewport.
 //   • `.no-size` — opt out of the height cap for a popover that cannot scroll (see below).
+//   • `.pad N` — the gutter kept between popover and viewport edge (default 8). Only visible when
+//     the popover would otherwise overflow and shift() clamps it, which is why the two components
+//     that came from Alpine's x-anchor keep its 5: the migration should not move them 3px.
+//   • `.absolute` — position in DOCUMENT coords instead. For a page-level popover that can stay
+//     open while its trigger scrolls away (mini-cart, notification-center), 'fixed' + shift() pins
+//     it to the viewport edge once the trigger has left the screen, so it hangs there detached from
+//     what it belongs to. Those want to scroll with the page. Anything that can appear over a modal
+//     wants the default.
 //   • `.match-width` — the popover is never narrower than its trigger. It reads the width from
 //     floating-ui's measured reference rect on every reposition, so a trigger that was 0px wide
 //     at init (a popover inside a dialog that starts closed) still widens the moment it is shown.
@@ -932,7 +940,8 @@ function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cle
     // (date-picker, combobox). On anything else — a tooltip, a hover card, a menu that sizes to
     // its items — a cap only cuts content off, so those opt out and keep flip/shift instead.
     const capHeight = !modifiers.includes('no-size');
-    const PAD = 8;
+    const strategy = modifiers.includes('absolute') ? 'absolute' : 'fixed';
+    const PAD = modifiers.includes('pad') ? Number(modifiers[modifiers.indexOf('pad') + 1]) || 8 : 8;
     // The popover's own design cap (e.g. `max-h-96`), read once before we set anything inline.
     // size() only shrinks *below* this when the viewport is tight — it never makes the popover
     // taller than the component intended. Infinity when the component sets no cap (e.g. calendars).
@@ -973,7 +982,7 @@ function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cle
 
     const position = () =>
     computePosition(reference, el, {
-        strategy: 'fixed',
+        strategy,
         placement,
         middleware: [
             flOffset(offsetValue),
@@ -999,7 +1008,7 @@ function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cle
             }),
         ].filter(Boolean),
     }).then(({ x, y }) => {
-        Object.assign(el.style, { position: 'fixed', left: `${x}px`, top: `${y}px` });
+        Object.assign(el.style, { position: strategy, left: `${x}px`, top: `${y}px` });
     });
 
     getReference((initial) => rebind(initial));
