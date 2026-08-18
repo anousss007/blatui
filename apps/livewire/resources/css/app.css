@@ -1,0 +1,12 @@
+@import '../../../demo/resources/css/app.css';
+
+/*
+ * The demo's stylesheet already `@source`s the authored components (its own ../views), and
+ * Tailwind resolves each `@source` relative to the file that declares it — so those still
+ * point at apps/demo. These two add THIS app's own markup: the Livewire views below and the
+ * Blade they compile to. Without them every utility used only by a testbed page is dropped
+ * from the build and a check fails on a class that was never emitted rather than on the bug
+ * it was written for.
+ */
+@source '../views';
+@source '../../storage/framework/views/*.php';

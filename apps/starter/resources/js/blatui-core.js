@@ -833,9 +833,95 @@ function resolveControl(el) {
 }
 
 let _blatId = 0;
+function mintId(prefix = 'blat') {
+    return `${prefix}-${++_blatId}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
 function ensureId(node, prefix = 'blat') {
-    if (!node.id) node.id = `${prefix}-${++_blatId}-${Math.random().toString(36).slice(2, 7)}`;
+    if (!node.id) node.id = mintId(prefix);
     return node.id;
+}
+
+/**
+ * ensureId, but remembering the id it handed out for a given role.
+ *
+ * A morph strips ids we generated (the server's markup has never had them), and the re-wire
+ * that follows would otherwise mint a brand new one on every single re-render — an idref that
+ * keeps changing under a screen reader, and a counter that climbs forever on a page that polls.
+ *
+ * The memo lives on `owner` — the container the directive is bound to — rather than in the
+ * directive's closure, because the closure is not guaranteed to outlive a re-render either.
+ * Whether Alpine re-initialises a directive after one is decided by how the framework diffed
+ * that particular subtree: measured on Livewire 4, a field that merely gained an error message
+ * is not re-initialised, while a field whose child nodes were replaced is.
+ *
+ * Best-effort, deliberately. When a morph replaces the container itself the memo goes with it
+ * and the next id is a fresh one — measured on Livewire 4, that costs one re-mint per morph
+ * for a replaced description node, while the control's id (the one `label[for]` points at)
+ * stays put. Guaranteeing more would mean a global registry keyed by something that survives
+ * an arbitrary framework's diffing, and there is no such key. Correct wiring does not depend
+ * on this: the ids are internal, and every idref is rewritten in the same pass that mints them.
+ */
+function stableIds(owner) {
+    const minted = (owner._blatIds ??= {});
+
+    return (node, role, prefix) => {
+        if (node.id) return (minted[role] = node.id);
+        node.id = minted[role] || mintId(prefix);
+
+        return (minted[role] = node.id);
+    };
+}
+
+/**
+ * Write an attribute only when it would actually change, and treat null/'' as "remove".
+ *
+ * The "only when it would change" half is not a micro-optimisation — it is what makes
+ * keepWired() below terminate. See there.
+ */
+function setAttr(node, name, value) {
+    if (value === null || value === undefined || value === '') {
+        if (node.hasAttribute(name)) node.removeAttribute(name);
+    } else if (node.getAttribute(name) !== value) {
+        node.setAttribute(name, String(value));
+    }
+}
+
+/**
+ * Attributes BlatUI derives from the DOM rather than from the server's markup. Narrowing the
+ * observer to these is what keeps it quiet: a component that writes `style` or `class` on
+ * every animation frame must not wake every field on the page.
+ */
+const WIRED_ATTRS = ['id', 'for', 'aria-describedby', 'aria-labelledby', 'aria-invalid', 'aria-controls', 'aria-haspopup', 'aria-expanded', 'data-invalid', 'data-state'];
+
+/**
+ * Keep DOM-derived wiring applied, instead of applying it once and hoping.
+ *
+ * Several directives here resolve a fact out of the rendered DOM — is there an error slot,
+ * which node is the title, where is the real control — and write ARIA onto it. Doing that in
+ * a `queueMicrotask` at init assumes two things that are only true on a static page:
+ *
+ *   1. the DOM it read is the DOM forever. A Livewire morph adds the error message to a field
+ *      that rendered valid, and the field element itself is never recreated — so Alpine never
+ *      re-runs the directive and the wiring is simply never applied (issue #19).
+ *   2. what we wrote stays written. It does not: these attributes exist only in the browser,
+ *      the server's HTML has never heard of them, and a morph syncs attributes against the
+ *      server's version — so it strips `id`, `for` and `aria-describedby` back off on the next
+ *      unrelated re-render, and the field silently loses its accessible name.
+ *
+ * So the wiring is re-derived whenever the subtree changes. This is a MutationObserver rather
+ * than a Livewire hook on purpose: the same thing happens under Turbo, htmx, or a plain
+ * `el.replaceWith(el.cloneNode(true))`, and none of those would fire a Livewire hook.
+ *
+ * `sync` MUST be idempotent — write only through setAttr(), and only values it would compute
+ * again next pass. The observer sees our own writes: an idempotent sync makes the second pass
+ * a no-op and the loop stops, a sync that writes unconditionally never stops.
+ */
+function keepWired(el, sync, cleanup) {
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: WIRED_ATTRS });
+    cleanup?.(() => observer.disconnect());
 }
 
 // x-blat-trigger="{ haspopup: 'menu', controls: $id('blat-content'), state: 'open' }"
@@ -844,32 +930,46 @@ function ensureId(node, prefix = 'blat') {
 //   `controls` → aria-controls (the popup content id)
 //   `state`    → reactive boolean expression for expanded state (default 'open')
 //   `labelledby`/`describedby` → static id refs (e.g. tooltip describing a trigger)
-function blatTriggerDirective(el, { expression }, { evaluate, effect }) {
+function blatTriggerDirective(el, { expression }, { evaluate, effect, cleanup }) {
     const cfg = expression ? evaluate(expression) : {};
-    const control = resolveControl(el);
-    if (!control) return;
-    // For triggers whose slot may be plain text (tooltip/hover-card), make the
-    // resolved control keyboard-focusable when it isn't already.
-    if (cfg.focusable && !control.matches('button, a[href], input, select, textarea, [tabindex]')) {
-        control.tabIndex = 0;
-    }
-    if (cfg.id && !control.id) control.id = cfg.id;
-    if (cfg.haspopup) control.setAttribute('aria-haspopup', cfg.haspopup === true ? 'true' : cfg.haspopup);
-    if (cfg.controls) control.setAttribute('aria-controls', cfg.controls);
-    if (cfg.labelledby) control.setAttribute('aria-labelledby', cfg.labelledby);
-    if (cfg.describedby) control.setAttribute('aria-describedby', cfg.describedby);
-    if (cfg.state === null) return; // opt out of expanded tracking (plain tooltip/hovercard target)
+    const tracksState = cfg.state !== null; // null → opt out (plain tooltip/hovercard target)
     const stateExpr = cfg.state || 'open';
-    effect(() => {
-        let open = false;
-        try {
-            open = !!evaluate(stateExpr);
-        } catch (e) {
-            /* state not yet in scope */
+    let open = false;
+
+    // The control is re-resolved on every pass, not captured: a morph can replace the wrapper's
+    // <button> with a fresh node, and wiring the old one leaves the live trigger bare.
+    const sync = () => {
+        const control = resolveControl(el);
+        if (!control) return;
+        // For triggers whose slot may be plain text (tooltip/hover-card), make the
+        // resolved control keyboard-focusable when it isn't already.
+        if (cfg.focusable && !control.matches('button, a[href], input, select, textarea, [tabindex]')) {
+            control.tabIndex = 0;
         }
-        control.setAttribute('aria-expanded', open ? 'true' : 'false');
-        control.setAttribute('data-state', open ? 'open' : 'closed');
-    });
+        if (cfg.id && !control.id) control.id = cfg.id;
+        if (cfg.haspopup) setAttr(control, 'aria-haspopup', cfg.haspopup === true ? 'true' : cfg.haspopup);
+        if (cfg.controls) setAttr(control, 'aria-controls', cfg.controls);
+        if (cfg.labelledby) setAttr(control, 'aria-labelledby', cfg.labelledby);
+        if (cfg.describedby) setAttr(control, 'aria-describedby', cfg.describedby);
+        if (!tracksState) return;
+        setAttr(control, 'aria-expanded', open ? 'true' : 'false');
+        setAttr(control, 'data-state', open ? 'open' : 'closed');
+    };
+
+    if (tracksState) {
+        // Alpine's effect covers "the state changed"; keepWired covers "the DOM changed under
+        // us". Both funnel through the same idempotent sync, so they cannot disagree.
+        effect(() => {
+            try {
+                open = !!evaluate(stateExpr);
+            } catch (e) {
+                /* state not yet in scope */
+            }
+            sync();
+        });
+    }
+
+    keepWired(el, sync, cleanup);
 }
 
 // x-blat-labelledby="{ label: '[data-slot=dialog-title]', description: '[data-slot=dialog-description]' }"
@@ -877,19 +977,35 @@ function blatTriggerDirective(el, { expression }, { evaluate, effect }) {
 //   whichever title/description slots the author actually rendered (Radix does
 //   this through context; we resolve it from the DOM so absent slots add no
 //   dangling idref).
-function blatLabelledByDirective(el, { expression }, { evaluate }) {
+function blatLabelledByDirective(el, { expression }, { evaluate, cleanup }) {
     const cfg = expression ? evaluate(expression) : {};
+    // Only ever withdraw an idref we put there ourselves. An author who sets aria-describedby
+    // on the container by hand keeps it, title slot or no title slot.
+    const ours = {};
+    const idFor = stableIds(el);
+
     const wire = (sel, attr) => {
         if (!sel) return;
         const node = el.querySelector(sel);
-        if (node) el.setAttribute(attr, ensureId(node, 'blat-label'));
+        if (node) {
+            setAttr(el, attr, (ours[attr] = idFor(node, attr, 'blat-label')));
+        } else if (ours[attr] && el.getAttribute(attr) === ours[attr]) {
+            setAttr(el, attr, null);
+            delete ours[attr];
+        }
     };
-    // Slots render synchronously inside the teleported content; a microtask is
-    // enough to let x-show/x-cloak settle without a visible reflow.
-    queueMicrotask(() => {
-        wire(cfg.label, 'aria-labelledby');
-        wire(cfg.description, 'aria-describedby');
-    });
+
+    // Re-derived on every change rather than once: the title of a dialog is routinely
+    // rendered by the framework that owns the page, so the slot can arrive, change or leave
+    // long after this container was created.
+    keepWired(
+        el,
+        () => {
+            wire(cfg.label, 'aria-labelledby');
+            wire(cfg.description, 'aria-describedby');
+        },
+        cleanup,
+    );
 }
 
 // x-blat-dialog-layer — put a teleported popover in the right stacking layer. When its
@@ -1016,6 +1132,13 @@ function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cle
     cleanup(() => stop && stop());
 }
 
+// Left one-shot on purpose, unlike its neighbours. The others were re-derived because a
+// re-render demonstrably breaks them; this one resolves a structural fact — is the popover's
+// home inside a native <dialog> — that is fixed by the time the popover exists, and it was
+// measured still correct in a real native modal (apps/livewire /native-dialog). It is not
+// re-derived across a morph because no morph could be made to break it: re-rendering a native
+// <dialog>'s subtree closes the modal outright, which is the app's problem long before it is
+// this directive's. Change that if a report ever shows otherwise — not before.
 function blatDialogLayerDirective(el) {
     queueMicrotask(() => {
         const home = el._x_teleportBack;
@@ -1036,30 +1159,55 @@ function blatDialogLayerDirective(el) {
 //   aria-describedby ← description + error ids, aria-invalid + data-invalid when
 //   an error is present, and label[for] ← control id when not already set. Radix/
 //   Base UI do this through React context; we resolve it from the rendered DOM.
-function blatFieldDirective(el) {
-    queueMicrotask(() => {
-        const control = el.querySelector(
-            'input:not([type=hidden]), textarea, select, [role="checkbox"], [role="switch"], [role="radiogroup"], [role="combobox"], [role="slider"], [role="spinbutton"]',
-        );
+const FIELD_CONTROL =
+    'input:not([type=hidden]), textarea, select, [role="checkbox"], [role="switch"], [role="radiogroup"], [role="combobox"], [role="slider"], [role="spinbutton"]';
+
+function blatFieldDirective(el, _directive, { cleanup }) {
+    // The idrefs and the aria-invalid we contributed last pass. Tracked so a later pass can
+    // withdraw exactly what we added — a field that goes valid again has to lose data-invalid,
+    // and an aria-describedby the app wrote itself has to survive us.
+    let ourIds = [];
+    let ourInvalid = false;
+    const idFor = stableIds(el);
+
+    const sync = () => {
+        const control = el.querySelector(FIELD_CONTROL);
         if (!control) return;
-        const ids = [];
+
         const desc = el.querySelector('[data-slot="field-description"]');
         const err = el.querySelector('[data-slot="field-error"]');
-        if (desc) ids.push(ensureId(desc, 'field-desc'));
-        if (err) ids.push(ensureId(err, 'field-err'));
-        if (ids.length) {
-            const prev = control.getAttribute('aria-describedby');
-            control.setAttribute('aria-describedby', [prev, ...ids].filter(Boolean).join(' '));
-        }
+
+        const ids = [];
+        if (desc) ids.push(idFor(desc, 'desc', 'field-desc'));
+        if (err) ids.push(idFor(err, 'err', 'field-err'));
+
+        // Rebuild rather than append: appending is what made the original one-shot version
+        // safe only because it ran once. Anything on the control that is neither ours-from-last
+        // -pass nor ours-this-pass is the author's and is kept, in its original order.
+        const present = (control.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+        const theirs = present.filter((id) => !ourIds.includes(id) && !ids.includes(id));
+        setAttr(control, 'aria-describedby', [...theirs, ...ids].join(' '));
+        ourIds = ids;
+
+        // aria-invalid is the one attribute an app commonly drives itself (it was the
+        // documented workaround for #19), so we add ours and remove only ours.
         if (err) {
-            control.setAttribute('aria-invalid', 'true');
-            el.setAttribute('data-invalid', 'true');
+            setAttr(control, 'aria-invalid', 'true');
+            ourInvalid = true;
+        } else if (ourInvalid) {
+            setAttr(control, 'aria-invalid', null);
+            ourInvalid = false;
         }
+
+        setAttr(el, 'data-invalid', err ? 'true' : null);
+
         const label = el.querySelector('[data-slot="field-label"]');
         if (label && !label.getAttribute('for')) {
-            label.setAttribute('for', ensureId(control, 'field-control'));
+            setAttr(label, 'for', idFor(control, 'control', 'field-control'));
         }
-    });
+    };
+
+    keepWired(el, sync, cleanup);
 }
 
 // $blatNav(event[, opts]) — APG roving focus for composite widgets (menus,

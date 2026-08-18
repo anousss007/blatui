@@ -26,6 +26,16 @@ kept it invisible on phones for three releases. When a bag is used more than onc
 copy (`$attributes->except('class')`, `->only('class')`) and keep the original untouched. Calls in
 mutually exclusive `@if`/`@else` branches are fine — only one of them ever runs.
 
+**Wiring you derive from the DOM has to be re-derived, not remembered.** Several directives in
+`blatui-core.js` resolve a fact out of the rendered DOM — is there an error slot, which node is
+the title, where is the real control — and write ARIA onto it. Doing that once, in a
+`queueMicrotask` at init, is correct only on a page that never re-renders. Under Livewire (or
+Turbo, or htmx) two things go wrong: the fact changes and nothing re-runs the directive, and the
+attributes you wrote get stripped, because they exist only in the browser and a morph syncs
+attributes against the server's HTML, which has never heard of them. Issues #5, #18 and #19 were
+all this. Route new wiring of that kind through `keepWired()`, and keep its `sync` idempotent —
+write via `setAttr()`, which is what stops the observer seeing its own writes and spinning.
+
 **One gotcha when writing a component's doc comment:** the manifest builder infers dependencies
 by scanning each family's source for `<x-ui.*>` / `<x-block.*>` — **comments included**, on
 purpose, because a container that documents its children (`each <x-ui.dock-item> stretches…`)
@@ -45,10 +55,12 @@ tooling are excluded from the published tarball via `.gitattributes` (`export-ig
 composer.json  src/  stubs/   → the published package
 apps/demo/                     → authors + renders components; the live docs site
 apps/starter/                  → the Laravel starter kit
+apps/livewire/                 → morph testbed: the components under a real Livewire re-render
 scripts/build-package.sh       → regenerates stubs/ from apps/demo
 tests/                         → Testbench-based package tests
 apps/demo/tests/js/            → engine unit tests (node --test, no deps)
 apps/demo/tests/browser/       → Playwright acceptance suite (runs in CI, see below)
+apps/livewire/tests/browser/   → morph acceptance suite (reuses the harness above)
 ```
 
 ## The loop
@@ -69,13 +81,14 @@ regenerates the package and fails if `stubs/` differs from the authored source �
 or stale stub is rejected with a pointer back to the demo file — and the **browser acceptance
 suite** below.
 
-### Three test layers, and what each one is for
+### Four test layers, and what each one is for
 
 | Layer | Answers | Where |
 |---|---|---|
 | Render tests (PHPUnit) | *Does the component emit the right markup?* | `apps/demo/tests/Feature` |
 | Engine tests (`node --test`) | *Does the Alpine logic compute the right thing?* | `apps/demo/tests/js` |
 | **Browser acceptance (Playwright)** | *Does it actually work when a user clicks it?* | `apps/demo/tests/browser` |
+| **Morph acceptance (Playwright)** | *Does it still work after the server re-renders it?* | `apps/livewire/tests/browser` |
 
 The third layer exists because the first two cannot see the bugs that reached users. A class that
 resolves to `display: none` on the mobile drawer, a tooltip that never opens, a rail that cannot
@@ -147,6 +160,30 @@ the moment it is published:
 
 When you add a component, the pages/overlays/buttons sweeps pick it up for free, at every width.
 Add a `controls` entry when its value lives somewhere only that component knows about.
+
+### The fourth layer: a real Livewire re-render
+
+`apps/demo` has no Livewire — `resources/js/app.js` stubs `$wire` with a no-op proxy so the docs
+examples don't throw — so every component renders there in the one mode where a fact read at init
+stays true forever. Three user-reported bugs (#5, #18, #19) lived in exactly that gap, and none of
+the three layers above could see any of them.
+
+`apps/livewire` closes it. It holds **no copy** of the components: Blade resolves `<x-ui.*>`
+straight out of `apps/demo/resources/views/components`, and Vite imports the demo's authored
+`blatui-core.js` and `app.css` by relative path — so there is nothing to regenerate and no drift
+job to fail.
+
+```bash
+cd apps/livewire
+composer install && npm ci && npm run build
+cp .env.example .env && php artisan key:generate     # no database — file/sync drivers
+php artisan serve --port=8124 &
+npm run test:browser
+```
+
+Same rule as the browser suite, and one more: **a check here has to fail on the pre-fix engine.**
+`git stash` the fix, rebuild, and watch it go red before you keep it. Every check currently in the
+suite does.
 
 ## Pull requests
 

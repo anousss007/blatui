@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.25.0] - 2026-08-18
+
+### Fixed
+- **Wiring derived from the DOM was applied once at init and never again** (#19). `x-blat-field`
+  looked for a `[data-slot="field-error"]` child inside a `queueMicrotask` at directive-init time.
+  On a page that re-renders, both halves of that are wrong. The field renders valid, so there is
+  no error slot to find; a later failed submit morphs one in over the existing DOM and the `field`
+  div itself is never recreated, so Alpine never re-runs the directive and `data-invalid` /
+  `aria-invalid` are never set — the label keeps its default colour with the error message
+  visible directly below it. Reported against Livewire 4, but nothing about it needs Livewire.
+- **And the attributes it did write were being stripped again.** Worse than reported, and present
+  even with no validation error in play. `aria-describedby`, `aria-invalid`, `data-invalid`, the
+  generated `id` on the control and the `for` on the label exist only in the browser — the
+  server's HTML has never had them — and a morph syncs attributes against the server's version.
+  So an unrelated re-render silently removed them: measured, a field's `aria-describedby` went
+  from correct on first render to empty after one tick of an unrelated property, and an
+  auto-wired label lost its `for` and the control lost its `id`, i.e. the field lost its
+  accessible name entirely.
+- **The same one-shot shape in two more directives.** `x-blat-labelledby` (a dialog's
+  `aria-labelledby` / `aria-describedby`) and `x-blat-trigger` (`aria-haspopup`, `aria-controls`,
+  `aria-expanded`, `data-state`) wrote their attributes once at init too, so a morph that replaced
+  a trigger left it with no popup semantics at all. Found by sweeping for the pattern rather than
+  waiting for the reports.
+- **Wiring is now withdrawn as well as applied.** Fix a field and submit again and `data-invalid`,
+  `aria-invalid` and the error's idref come back off. Previously a field that had ever been
+  invalid stayed styled invalid for the life of the page — unreported only because nobody got the
+  first half to work. Only what BlatUI added is withdrawn: an `aria-describedby` or `aria-invalid`
+  the app drives itself survives untouched, so the `:aria-invalid="$errors->has(…)"` workaround
+  from #19 can stay in place.
+
+### Added
+- **`keepWired()` in the engine** — the mechanism the three directives above now share. It
+  re-derives a component's DOM-resolved wiring whenever the subtree changes, instead of capturing
+  it once. Deliberately a `MutationObserver` rather than a Livewire hook: the same failure occurs
+  under Turbo, under htmx, and under a plain `el.replaceWith(el.cloneNode(true))`, none of which
+  would fire one. Writes go through a new `setAttr()` that only touches an attribute when the
+  value would actually change, which is what keeps the observer from seeing its own writes and
+  spinning — measured on the busiest docs page: 130 observers, zero mutations while idle.
+  Re-running the directive instead would not have been reliable: whether Alpine re-initialises one
+  after a re-render is decided by how the framework diffed that subtree, and on Livewire 4 a field
+  that merely gains an error message is not re-initialised while a field whose children were
+  replaced is.
+- **`apps/livewire`, a morph testbed, and a fourth CI layer.** The reason #5, #18 and #19 all had
+  to be found by users: `apps/demo` is the only place components render and it has never had a
+  Livewire runtime — it stubs `$wire` with a no-op proxy so the docs examples don't throw — so
+  every existing check ran against a page that can never morph. The new app re-renders the DOM
+  under the components for real. It holds no copy of them (Blade resolves `<x-ui.*>` straight out
+  of `apps/demo`), so there is nothing to regenerate and no drift job to fail. Its suite asserts
+  computed state after real server round-trips and runs in CI on every push; it fails on the
+  pre-fix engine, which was checked by reverting the fix rather than assumed. One side effect:
+  #18's 1.24.4 fix had never been exercised against a real morph, because nothing in the repo
+  could produce one. It is now, and it holds.
+
 ## [1.24.4] - 2026-08-13
 
 ### Fixed
@@ -1002,7 +1055,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.24.4...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.25.0...HEAD
+[1.25.0]: https://github.com/anousss007/blatui/compare/v1.24.4...v1.25.0
 [1.24.4]: https://github.com/anousss007/blatui/compare/v1.24.3...v1.24.4
 [1.24.3]: https://github.com/anousss007/blatui/compare/v1.24.2...v1.24.3
 [1.24.2]: https://github.com/anousss007/blatui/compare/v1.24.1...v1.24.2

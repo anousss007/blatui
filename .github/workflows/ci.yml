@@ -138,6 +138,72 @@ jobs:
       - name: Build front-end assets
         run: npm run build
 
+  morph-acceptance:
+    # The Livewire layer. apps/demo has no Livewire runtime, so nothing there ever morphs and
+    # this whole class of bug — wiring derived from the DOM at init, then never re-derived or
+    # stripped by the next re-render — is invisible to every other job here. Issues #5, #18 and
+    # #19 all lived in that gap.
+    name: Morph acceptance (Livewire)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, dom, fileinfo
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install PHP dependencies
+        working-directory: apps/livewire
+        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Prepare environment
+        # No database: the app runs on file/sync drivers, so there is nothing to migrate.
+        working-directory: apps/livewire
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+      - name: Install JS dependencies
+        working-directory: apps/livewire
+        run: npm ci
+      - name: Build front-end assets
+        # Compiles the DEMO's authored components and engine — this app holds no copy of them.
+        working-directory: apps/livewire
+        run: npm run build
+      - name: Cache the Chromium download
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('apps/demo/package-lock.json') }}
+      - name: Install Playwright
+        # Into apps/demo, not here: the suite reuses the demo's browser harness, so that is
+        # where its `import('playwright')` resolves from. Same pinned build as the other job.
+        working-directory: apps/demo
+        run: |
+          VERSION=$(node -p "require('./package.json').blatui.playwright")
+          npm i --no-save "playwright@${VERSION}" && npx playwright install --with-deps chromium
+      - name: Serve the testbed
+        working-directory: apps/livewire
+        run: |
+          PHP_CLI_SERVER_WORKERS=4 php artisan serve --port=8124 &
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8124/field -o /tmp/field.html && break
+            sleep 1
+          done
+          grep -q 'data-slot="field"' /tmp/field.html 2>/dev/null || {
+            echo "::error::the testbed did not serve a usable page"
+            curl -s -o /tmp/probe.html -w 'field %{http_code}\n' http://127.0.0.1:8124/field
+            head -c 1000 /tmp/probe.html
+            exit 1
+          }
+      - name: Run the morph acceptance suite
+        working-directory: apps/livewire
+        run: npm run test:browser -- http://127.0.0.1:8124
+      - name: Show the testbed's log if anything failed
+        if: failure()
+        run: tail -n 60 apps/livewire/storage/logs/laravel.log || true
+
   browser-acceptance:
     # Every component, every width. Sharded across jobs by viewport so the whole matrix
     # finishes in the time one shard takes rather than eleven times that.
