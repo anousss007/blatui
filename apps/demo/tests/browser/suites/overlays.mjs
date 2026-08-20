@@ -155,6 +155,7 @@ export async function run({ browser, reporter, baseUrl, inventory, only, viewpor
         }
         await nestedPopovers({ page, reporter, slug, slots });
         await swappedTrigger({ page, reporter, slug });
+        await tooltipAfterOverlay({ page, reporter, slug });
 
             reporter.progress(`overlays ${name}px ${slug}`);
         } });
@@ -324,6 +325,56 @@ async function swappedTrigger({ page, reporter, slug }) {
                     `panel at ${Math.round(p.left)},${Math.round(p.top)} — the anchor is still measuring the replaced node`,
             ) ?? expect.empty(page.blatErrors, 'console errors after the swap')
         );
+    });
+
+    await dismiss(page);
+}
+
+/**
+ * A tooltip whose trigger also opens an overlay has to stay down once the overlay closes.
+ *
+ * Closing a dialog returns focus to the control that opened it — correct, and required for
+ * keyboard users. But the tooltip listens for `focusin`, so a focus restoration after a
+ * mouse-driven open reads as "the user focused this" and the tooltip reopens with the pointer
+ * nowhere near it. It then sits there for good: `mouseleave` already fired, so nothing is
+ * coming to take it down (#20).
+ *
+ * Worth knowing when reading a report of this: a stuck tooltip is a real element with a real
+ * box that takes pointer events, so depending on `side` and the surrounding layout it can sit
+ * over a neighbouring action and stop it responding to clicks at all. That part is not asserted
+ * here — whether the boxes overlap is a property of the example's geometry rather than of the
+ * component, and a check that only passes because of how this page happens to be laid out is
+ * not a guard.
+ */
+async function tooltipAfterOverlay({ page, reporter, slug }) {
+    if (slug !== 'tooltip') return;
+    await dismiss(page);
+
+    const trigger = page.locator('[data-slot="alert-dialog-trigger"] button').first();
+    if (!(await trigger.count())) return;
+
+    const shownTips = () =>
+        page.$$eval('[data-slot="tooltip-content"]', (els) => els.filter((e) => getComputedStyle(e).display !== 'none').length);
+
+    await reporter.check(`${slug}: stays down after the overlay its trigger opened closes`, async () => {
+        page.blatErrors.length = 0;
+        await trigger.scrollIntoViewIfNeeded({ timeout: 3000 });
+        await trigger.hover({ timeout: 3000 });
+        await page.waitForFunction(() => [...document.querySelectorAll('[data-slot="tooltip-content"]')].some((e) => getComputedStyle(e).display !== 'none'), null, { timeout: 3000 }).catch(() => {});
+
+        await trigger.click({ timeout: 3000 });
+        await page.waitForSelector('[data-slot="alert-dialog-content"]', { state: 'visible', timeout: 3000 });
+
+        // Cancel, which is where the focus trap hands focus back to the trigger.
+        await page.locator('[data-slot="alert-dialog-cancel"]').first().click({ timeout: 3000 });
+        await page.waitForSelector('[data-slot="alert-dialog-content"]', { state: 'hidden', timeout: 3000 }).catch(() => {});
+        // Move the pointer off the trigger: a tooltip still up now is up for good.
+        await page.mouse.move(5, 5);
+        await page.waitForTimeout(400);
+
+        const open = await shownTips();
+
+        return expect.equal(open, 0, 'tooltips still visible after the dialog closed') ?? expect.empty(page.blatErrors, 'console errors');
     });
 
     await dismiss(page);

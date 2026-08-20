@@ -8,7 +8,7 @@
     x-id="['blat-tooltip']"
     @mouseenter="show()"
     @mouseleave="hide()"
-    @focusin="show()"
+    @focusin="$event.target.matches(':focus-visible') && show()"
     @focusout="hide()"
     @keydown.escape="hide()"
     {{ $attributes->twMerge('relative inline-block') }}

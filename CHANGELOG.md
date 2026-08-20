@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.25.1] - 2026-08-20
+
+### Fixed
+- **A tooltip stayed open for good once its trigger opened an overlay** (#20). Closing a dialog
+  returns focus to the control that opened it, which is correct and required for keyboard users.
+  But `tooltip` shows on `focusin`, so a focus restoration following a *mouse* click read as "the
+  user focused this" and the tooltip reappeared with the pointer nowhere near it — and then stayed,
+  because `mouseleave` had already fired and nothing else was coming to take it down. Hovering
+  another trigger left two on screen at once. `focusin` is now gated on `:focus-visible`, which is
+  only true when the browser attributes the focus to keyboard interaction, so Tab still shows a
+  tooltip and a programmatic focus restoration no longer does. Present since the accessibility
+  overhaul in 1.2.0, and it needs no Livewire: the reporter's repro is a `tooltip-trigger` wrapping
+  an `alert-dialog-trigger`, which is the ordinary row-actions shape.
+  Worth knowing if you hit this on your own components: a stuck tooltip is a real element that
+  takes pointer events, so depending on `side` and the layout around it, it can sit over a
+  neighbouring action and stop it responding to clicks entirely — the symptom reads as a dead
+  button rather than as a tooltip bug.
+
+### Added
+- **A `tooltip` "row actions" example, and the overlay hand-off is now covered.** The overlays
+  suite drove tooltips and dialogs separately and never drove one *through* the other, so it
+  passed identically before and after this fix. It now opens the dialog from a tooltip's own
+  trigger, closes it, moves the pointer away and requires nothing to be left on screen; it fails
+  on the pre-fix component, which was verified by reverting the fix rather than assumed.
+
 ## [1.25.0] - 2026-08-18
 
 ### Fixed
@@ -1055,7 +1080,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.25.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.25.1...HEAD
+[1.25.1]: https://github.com/anousss007/blatui/compare/v1.25.0...v1.25.1
 [1.25.0]: https://github.com/anousss007/blatui/compare/v1.24.4...v1.25.0
 [1.24.4]: https://github.com/anousss007/blatui/compare/v1.24.3...v1.24.4
 [1.24.3]: https://github.com/anousss007/blatui/compare/v1.24.2...v1.24.3
