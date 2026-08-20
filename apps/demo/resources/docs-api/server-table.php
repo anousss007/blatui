@@ -111,6 +111,41 @@ return [
             'description' => 'Placeholder (and accessible label) for the search input.',
         ],
         [
+            'name' => 'perPageOptions',
+            'type' => 'array',
+            'default' => '[]',
+            'description' => 'Page sizes offered in a select in the toolbar. A plain list ([10, 25, 50]) labels each option with its own value; a map ([10 => \'10 per page\']) uses your labels. Empty renders no select. Reset the paginator when it changes (updatedPerPage() => $this->resetPage()), or page 5 at 10-per-page lands past the end of the same result set at 50.',
+        ],
+        [
+            'name' => 'perPageModel',
+            'type' => 'string',
+            'default' => "'perPage'",
+            'description' => 'The Livewire property the page-size select binds to via wire:model.live.',
+        ],
+        [
+            'name' => 'perPageLabel',
+            'type' => 'string',
+            'default' => "'Rows per page'",
+            'description' => 'Accessible label for the page-size select.',
+        ],
+        [
+            'name' => 'toggleableColumns',
+            'type' => 'bool',
+            'default' => 'false',
+            'description' => 'Show a checkbox dropdown in the toolbar for hiding and showing columns. Filtering is server-side like sorting: a hidden column is not rendered at all, so its cells are never built and never cross the wire.',
+        ],
+        [
+            'name' => 'visibleColumns',
+            'type' => 'array|null',
+            'description' => 'The column keys currently visible. null means the table is not being controlled and every column shows; an empty array means every hideable column is hidden, which is a state the host can reach by unchecking everything. Columns marked hideable => false always render regardless.',
+        ],
+        [
+            'name' => 'toggleColumnMethod',
+            'type' => 'string',
+            'default' => "'toggleColumn'",
+            'description' => 'The Livewire method each checkbox calls with the column key, e.g. wire:click="toggleColumn(\'email\')". You own the state, exactly as you own $sort — the component reports the toggle and re-renders from what you hand back.',
+        ],
+        [
             'name' => 'caption',
             'type' => 'string',
             'description' => 'An accessible <caption> describing the table. Rendered sr-only unless captionVisible is true.',
@@ -175,6 +210,12 @@ return [
                     'type' => 'bool',
                     'default' => 'false',
                     'description' => 'Render the header as a sort button (wire:click to sortMethod). You perform the ordering server-side.',
+                ],
+                [
+                    'name' => 'hideable',
+                    'type' => 'bool',
+                    'default' => 'true',
+                    'description' => 'Whether toggleableColumns may hide this column. false keeps it out of the menu and always on screen — for the name or identifier column a row is unreadable without.',
                 ],
                 [
                     'name' => 'align',
@@ -267,6 +308,10 @@ return [
     ],
 
     'slots' => [
+        [
+            'name' => 'toolbar',
+            'description' => 'An open slot on the toolbar row, beside the search input and before the page-size and column controls. For the filters no prop will ever cover — a status select, a date range, a bulk-action button — bound to your own Livewire properties. Present the toolbar row even with searchable off.',
+        ],
         [
             'name' => 'actions (via actionsView)',
             'description' => 'For custom action markup, pass actionsView="your.view"; it is included per row with the real $row model in scope, so wire:click="edit($row->id)" works natively. This is the server-rendered counterpart to the data-table actions slot.',

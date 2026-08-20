@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.26.0] - 2026-08-20
+
+### Fixed
+- **`server-table` drew a card inside a card on mobile** (#21). With `variant="card"` and
+  `responsive="stack"`, the wrapper kept its `bg-card rounded-lg border shadow-xs` at every width
+  while each `<tr>` below `md` had already become its own bordered, rounded card — two nested
+  surfaces, two borders, two radii. The wrapper now stands down below `md` and takes over at `md`,
+  where the rows are an ordinary table again. Desktop rendering is unchanged, measured.
+- **The last row in stacked mode had no border at all** (#21). `tbody` carries
+  `[&_tr:last-child]:border-0` to drop the trailing rule on a real table, and below `md` that won
+  against the `max-md:border` making each row a card — so the last card lost its outline entirely.
+  The rule is now scoped to `md` and up.
+- **Stacked cards were cramped** (#21). Cells only had `p-2` and nothing separated one field from
+  the next. Cells get `max-md:px-4 max-md:py-2.5` and the row draws `divide-y` between them, which
+  also replaces the hand-rolled `border-t` that the actions cell used to carry.
+
+### Added
+- **A `toolbar` slot on `server-table`.** An open slot on the toolbar row, after the search input
+  and before the built-in controls, for the filters no prop will ever cover — a status select, a
+  date range, a bulk-action button — bound to your own Livewire properties. The toolbar row now
+  appears whenever anything wants to be in it, not only when `searchable` is set.
+- **`per-page-options` / `per-page-model` on `server-table`.** Renders a page-size select bound to
+  a Livewire property, the way `searchable` binds an input. A plain list (`[10, 25, 50]`) labels
+  each option with its value; a map (`[10 => '10 per page']`) uses your labels. Reset the paginator
+  when it changes (`updatedPerPage()` => `$this->resetPage()`), or page 5 at 10-per-page lands past
+  the end of the same result set at 50.
+- **`toggleable-columns` on `server-table`** — a checkbox dropdown for hiding and showing columns.
+  Filtering is server-side, like sorting: a hidden column is never rendered, so its cells are not
+  built and never cross the wire, which is the point in a component named for the server. The host
+  owns the state exactly as it owns `$sort` — pass `:visible-columns` and implement the method named
+  by `toggle-column-method` (default `toggleColumn`). A column marked `['hideable' => false]` stays
+  out of the menu and always on screen, for the one column a row is unreadable without. `null`
+  visible-columns means "not controlled, show everything"; an empty array means everything hideable
+  is hidden, which is a state you can reach by unchecking them all and which survives a round trip.
+
+### Internal
+- The layout suite now requires a stacked row to read as **one** bordered card, which fails on the
+  pre-fix component at 375px. The morph app drives the new toolbar end to end under a real Livewire
+  runtime — hiding a column has to drop the rendered cell count, not just hide it, and the menu's
+  tick marks have to match the server after the re-render rather than keeping the Alpine state they
+  were seeded with.
+
 ## [1.25.1] - 2026-08-20
 
 ### Fixed
@@ -1080,7 +1122,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.25.1...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.26.0...HEAD
+[1.26.0]: https://github.com/anousss007/blatui/compare/v1.25.1...v1.26.0
 [1.25.1]: https://github.com/anousss007/blatui/compare/v1.25.0...v1.25.1
 [1.25.0]: https://github.com/anousss007/blatui/compare/v1.24.4...v1.25.0
 [1.24.4]: https://github.com/anousss007/blatui/compare/v1.24.3...v1.24.4

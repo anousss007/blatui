@@ -194,6 +194,64 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /native-dialog', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/native-dialog');
 
+    // ---------------------------------------------- issue #21: the server-table toolbar round-trips
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/data-table`);
+
+    const table = () =>
+        page.evaluate(() => ({
+            perPage: document.querySelector('[data-testid=per-page]')?.textContent.trim(),
+            visible: document.querySelector('[data-testid=visible]')?.textContent.trim(),
+            headers: [...document.querySelectorAll('thead th')].map((t) => t.textContent.trim()).filter(Boolean),
+            cells: document.querySelectorAll('tbody tr:first-child td').length,
+            toolbarSlot: !!document.querySelector('[data-testid=toolbar-slot]'),
+        }));
+
+    const start = await table();
+    await reporter.check('server-table renders its toolbar', async () =>
+        expect.truthy(start.toolbarSlot, 'the toolbar slot did not render') ||
+        expect.equal(start.headers.length, 4, 'columns on first render'));
+
+    // Hide a column. The point of doing this server-side is that the cells stop being built at
+    // all, so the count has to drop — a CSS-hidden column would leave it at 4.
+    await page.click('[data-slot="server-table"] [data-slot="dropdown-menu-trigger"] button');
+    await page.waitForSelector('[data-slot="dropdown-menu-content"]', { state: 'visible', timeout: 5000 });
+
+    const menu = await page.$$eval('[data-slot="dropdown-menu-checkbox-item"]', (els) =>
+        els.map((e) => e.textContent.trim()));
+    await reporter.check('server-table keeps un-hideable columns out of the menu', async () =>
+        expect.truthy(!menu.includes('Name'), `a column marked hideable => false is offered anyway: ${menu.join(', ')}`));
+
+    for (const item of await page.$$('[data-slot="dropdown-menu-checkbox-item"]')) {
+        if ((await item.textContent()).trim() === 'Role') {
+            await item.click();
+            break;
+        }
+    }
+    await page.waitForFunction(() => document.querySelector('[data-testid=visible]')?.textContent.includes('role') === false, null, { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(250);
+
+    const hidden = await table();
+    await reporter.check('server-table hides a column server-side', async () =>
+        expect.truthy(!hidden.headers.includes('Role'), `Role is still a header: ${hidden.headers.join(', ')}`) ||
+        expect.equal(hidden.cells, 3, 'cells rendered per row after hiding one column'));
+
+    // Reopen: the tick is Alpine state seeded from the server, and a morph that keeps the node
+    // would leave the old value behind. This is the check that catches that.
+    await page.click('[data-slot="server-table"] [data-slot="dropdown-menu-trigger"] button');
+    await page.waitForSelector('[data-slot="dropdown-menu-content"]', { state: 'visible', timeout: 5000 });
+    const ticks = await page.$$eval('[data-slot="dropdown-menu-checkbox-item"]', (els) =>
+        Object.fromEntries(els.map((e) => [e.textContent.trim(), e.getAttribute('aria-checked')])));
+
+    await reporter.check('server-table column ticks match the server after a morph', async () =>
+        expect.equal(ticks.Role, 'false', 'the tick for the column just hidden') ||
+        expect.equal(ticks.Email, 'true', 'the tick for a column still shown'));
+
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(200);
+    await reporter.check('no console errors on /data-table', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/data-table');
+
     await page.close();
 }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\DataTable;
 use App\Livewire\DialogField;
 use App\Livewire\DialogPopover;
 use App\Livewire\FieldValidation;
@@ -17,3 +18,4 @@ Route::get('/dialog-field', DialogField::class);
 Route::get('/dialog-popover', DialogPopover::class);
 Route::get('/label-wiring', LabelWiring::class);
 Route::get('/native-dialog', NativeDialog::class);
+Route::get('/data-table', DataTable::class);

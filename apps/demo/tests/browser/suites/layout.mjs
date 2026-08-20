@@ -166,6 +166,43 @@ export async function run({ browser, reporter, baseUrl, inventory, only, viewpor
 
                     return expect.empty(spilling, 'text overflowing its container');
                 });
+
+                // A row that has become its own card has to look like one card. Two bugs made it
+                // look like two, and neither is visible above md — where the same markup is a
+                // perfectly ordinary table (#21).
+                await reporter.check(`${slug} @ ${name}px: stacked rows are single, bordered cards`, async () => {
+                    if (width >= 768) return; // stack mode only exists below md
+
+                    const bad = await page.evaluate(() => {
+                        const out = [];
+                        for (const table of document.querySelectorAll('[data-slot="server-table"], [data-slot="table"]')) {
+                            const root = table.closest('[data-slot="server-table"]') ?? table;
+                            const rows = [...root.querySelectorAll('tbody tr')];
+                            // Stack mode is what makes a <tr> a block-level card; anything else here
+                            // is an ordinary table and none of this applies to it.
+                            const cards = rows.filter((r) => getComputedStyle(r).display === 'block');
+                            if (!cards.length) continue;
+
+                            // Every card needs its border, including the last — dropping the last
+                            // row's border is a real-table nicety that has no business here.
+                            for (const [i, card] of cards.entries()) {
+                                if (parseFloat(getComputedStyle(card).borderBottomWidth) < 1) {
+                                    out.push(`row ${i} of ${cards.length} has no border while stacked as a card`);
+                                }
+                            }
+
+                            // ...and it must not be sitting inside a second bordered surface.
+                            const wrapper = cards[0].closest('div');
+                            if (wrapper && parseFloat(getComputedStyle(wrapper).borderTopWidth) >= 1) {
+                                out.push('the cards are wrapped in a second bordered card');
+                            }
+                        }
+
+                        return out.slice(0, 5);
+                    });
+
+                    return expect.empty(bad, 'stacked rows do not read as single cards');
+                });
             },
         });
 

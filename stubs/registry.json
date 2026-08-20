@@ -2003,7 +2003,8 @@
         "dependencies": [
             "button",
             "dropdown-menu",
-            "input"
+            "input",
+            "select"
         ],
         "packages": {
             "composer": [
