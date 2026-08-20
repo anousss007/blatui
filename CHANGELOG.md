@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.26.1] - 2026-08-20
+
+### Fixed
+- **The starter kit's dashboard chart never rendered.** `resources/js/app.js` imported only
+  `blatui.js`, which deliberately leaves the chart engine out (ApexCharts is ~140kb gzipped and
+  most apps have no charts). But the dashboard's area chart calls `window.Chart.load()` /
+  `buildChartOptions()` directly, and `window.Chart` is defined by importing `blatui-charts.js` —
+  which nothing did. So the page threw `Cannot read properties of undefined (reading 'load')` and
+  the chart simply never appeared; the file's own comment claimed it registered charts. The
+  starter now opts in through a small `resources/js/charts.js`, imported *before* `blatui.js`
+  because that file boots Alpine as it evaluates and Alpine walks the DOM immediately — the
+  helpers a page's own `x-data` reaches for have to exist by then. Two chart canvases render where
+  there were none. Only the starter kit is affected; the package's own chart component was always
+  fine, and nothing in `stubs/` changes.
+
 ## [1.26.0] - 2026-08-20
 
 ### Fixed
@@ -1138,7 +1153,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.26.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.26.1...HEAD
+[1.26.1]: https://github.com/anousss007/blatui/compare/v1.26.0...v1.26.1
 [1.26.0]: https://github.com/anousss007/blatui/compare/v1.25.1...v1.26.0
 [1.25.1]: https://github.com/anousss007/blatui/compare/v1.25.0...v1.25.1
 [1.25.0]: https://github.com/anousss007/blatui/compare/v1.24.4...v1.25.0
