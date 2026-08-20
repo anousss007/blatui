@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/greenfield.js'],
             refresh: true,
         }),
         tailwindcss(),
@@ -20,6 +20,6 @@ export default defineConfig({
     // resolve against apps/demo/node_modules if that happens to exist — a second copy of a
     // plugin, silently. Pin every shared dependency to THIS app's install.
     resolve: {
-        dedupe: ['@alpinejs/anchor', '@alpinejs/collapse', '@alpinejs/focus', '@floating-ui/dom'],
+        dedupe: ['alpinejs', '@alpinejs/anchor', '@alpinejs/collapse', '@alpinejs/focus', '@floating-ui/dom'],
     },
 });

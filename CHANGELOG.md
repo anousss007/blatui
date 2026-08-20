@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.26.0] - 2026-08-20
 
 ### Fixed
+- **BlatUI never registered at all in a Livewire app that followed get-started.** The published
+  bootstrap (`blatui.js`, what `blatui:init` writes and what get-started tells you to import)
+  guarded its whole setup on `if (! window.Alpine)`. Livewire ships its own Alpine and loads as a
+  classic `<script>` that runs during parse, while a Vite entry is a module that runs after — so
+  in a Livewire app `window.Alpine` was *already set* by the time the guard ran, and registration
+  was skipped entirely. Alpine ran, Livewire ran, and every BlatUI directive, magic and store was
+  missing: `blatMenu is not defined`, `closeMenu is not defined`, no `x-blat-field`, menus opening
+  unanchored at the left edge of the viewport. Registration now happens on `alpine:init` — the one
+  moment when whoever owns Alpine has not yet started it — which covers both the app that brings
+  its own Alpine and the app that inherits Livewire's. Nothing changes for a non-Livewire app; the
+  greenfield path still boots and starts Alpine exactly as before, verified against the starter kit.
 - **`server-table` drew a card inside a card on mobile** (#21). With `variant="card"` and
   `responsive="stack"`, the wrapper kept its `bg-card rounded-lg border shadow-xs` at every width
   while each `<tr>` below `md` had already become its own bordered, rounded card — two nested
@@ -43,6 +54,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is hidden, which is a state you can reach by unchecking them all and which survives a round trip.
 
 ### Internal
+- **The published bootstrap is now browser-tested, in both of the configurations it supports.** It
+  never had been: apps/demo wires Alpine its own way and the starter kit was only ever built, never
+  driven. The morph app now serves a page booted by `blatui.js` verbatim, alongside a real Livewire
+  runtime, and requires the theme store to exist, `x-blat-field` to wire a morphed-in error, and an
+  anchored popover to land on its trigger. All four checks fail on the pre-fix bootstrap.
 - The layout suite now requires a stacked row to read as **one** bordered card, which fails on the
   pre-fix component at 375px. The morph app drives the new toolbar end to end under a real Livewire
   runtime — hiding a column has to drop the rendered cell count, not just hide it, and the menu's

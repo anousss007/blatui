@@ -252,6 +252,66 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /data-table', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/data-table');
 
+    // ------------------------- the published bootstrap, in a Livewire app (the get-started path)
+    //
+    // This page loads resources/js/greenfield.js, which is blatui.js as `blatui:init` writes it,
+    // rather than registering into Livewire's Alpine the way the other pages do. It is the
+    // configuration a reader lands in by following get-started and then the Livewire page, and it
+    // was completely broken: livewire.js is a classic script that runs during parse while a Vite
+    // entry is a module that runs after, so `window.Alpine` was already Livewire's by the time the
+    // bootstrap's `if (!window.Alpine)` guard was evaluated — and registration was skipped
+    // entirely. Alpine ran, Livewire ran, and every BlatUI directive was undefined.
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/greenfield`);
+
+    await reporter.check('the published bootstrap registers BlatUI alongside Livewire', async () => {
+        const env = await page.evaluate(() => ({
+            livewire: !!window.Livewire,
+            registered: !!(window.Alpine?.store && window.Alpine.store('theme')),
+        }));
+
+        return expect.truthy(env.livewire, 'Livewire is not running on this page, so it proves nothing') ||
+            expect.truthy(env.registered, 'BlatUI never registered: Alpine is running, Livewire is running, and the theme store is missing');
+    });
+
+    await page.click('[data-testid=submit]');
+    await page.waitForSelector('[data-testid=field-name] [data-slot="field-error"]', { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(300);
+
+    await reporter.check('directives work under the published bootstrap', async () => {
+        const f = await page.$eval('[data-testid=field-name]', (el) => ({
+            invalid: el.getAttribute('data-invalid'),
+            ariaInvalid: el.querySelector('input')?.getAttribute('aria-invalid') ?? null,
+        }));
+
+        return expect.equal(f.invalid, 'true', 'data-invalid under the published bootstrap') ||
+            expect.equal(f.ariaInvalid, 'true', 'aria-invalid under the published bootstrap');
+    });
+
+    // A teleported, anchored popover needs the Alpine plugins on the same instance that walked the
+    // tree. Unregistered, it still becomes visible — it just lands in the corner with no data.
+    await page.click('[data-testid=menu]');
+    await page.waitForSelector('[data-slot="dropdown-menu-content"]', { state: 'visible', timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(300);
+
+    await reporter.check('anchored popovers work under the published bootstrap', async () => {
+        const box = await page.evaluate(() => {
+            const trigger = document.querySelector('[data-testid=menu]');
+            const panel = [...document.querySelectorAll('[data-slot="dropdown-menu-content"]')].find((e) => getComputedStyle(e).display !== 'none');
+            if (!trigger || !panel) return null;
+            const t = trigger.getBoundingClientRect();
+            const p = panel.getBoundingClientRect();
+
+            return { dx: Math.abs(p.x - t.x), px: Math.round(p.x) };
+        });
+
+        return expect.truthy(box, 'the menu never opened') ||
+            (box.dx > 24 ? `menu opened at x=${box.px}, ${Math.round(box.dx)}px from its trigger — the anchor never ran` : undefined);
+    });
+
+    await reporter.check('no console errors on /greenfield', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/greenfield');
+
     await page.close();
 }
 
