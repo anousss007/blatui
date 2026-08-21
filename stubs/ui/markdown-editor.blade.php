@@ -36,17 +36,28 @@
     $uid = $id ?: 'blat-md-'.\Illuminate\Support\Str::random(6);
     $textareaId = $uid.'-textarea';
 
-    // Livewire bridge — entangle the markdown `source` with a consumer's wire:model when present.
+    // Livewire bridge — bind the markdown `source` to a consumer's wire:model when present, through
+    // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
+    // re-point it.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
-    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+    if ($hasWire) {
+        $attributes = $attributes->whereDoesntStartWith('wire:model')->merge(array_filter([
+            'data-blat-model' => $wireModel->value(),
+            'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+        ]));
+    }
 @endphp
 
 @once
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('blatMarkdownEditor', (initial = '') => ({
-                source: initial,
+            // The editor's `source` IS the bound value: a wire:model through $blatModel, or a
+            // local holder when there is none (see blatui-core.js). No second copy to sync.
+            Alpine.data('blatMarkdownEditor', (model) => ({
+                _model: model,
+                get source() { return this._model.value ?? ''; },
+                set source(v) { this._model.value = v; },
                 view: 'write',
                 get html() { return this.render(this.source); },
 
@@ -202,7 +213,7 @@
 
 <div
     data-slot="markdown-editor"
-    x-data="blatMarkdownEditor(@if ($hasWire)@entangle($wireModel)@else @js((string) $value)@endif)"
+    x-data="blatMarkdownEditor($blatModel(@js((string) $value)))"
     {{ $attributes->twMerge('border-input bg-background flex w-full flex-col overflow-hidden rounded-md border shadow-xs') }}
 >
     {{-- Toolbar + tab switch --}}

@@ -36,11 +36,23 @@
     $thumbCls = 'border-primary bg-background ring-ring/50 absolute block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden'
         .($vertical ? ' left-1/2 -translate-x-1/2 translate-y-1/2' : ' top-1/2 -translate-x-1/2 -translate-y-1/2');
 
-    // Livewire bridge — entangle the single-value slider with a consumer's wire:model when present.
+    // Livewire bridge — bind the single-value slider to a consumer's wire:model when present, via
+    // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
+    // re-point it.
     // No-op (and stripped) without Livewire. Range mode keeps its min/max hidden inputs.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
-    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+    if ($hasWire) {
+        $attributes = $attributes->whereDoesntStartWith('wire:model');
+        // Range mode carries its own pair of hidden inputs and is not bound through $blatModel, so the
+        // data attribute — which is what turns the binding on — is only rendered for a single value.
+        if (! $range) {
+            $attributes = $attributes->merge(array_filter([
+                'data-blat-model' => $wireModel->value(),
+                'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+            ]));
+        }
+    }
 @endphp
 
 <div
@@ -55,7 +67,9 @@
         disabled: {{ $disabled ? 'true' : 'false' }},
         range: {{ $range ? 'true' : 'false' }},
         vertical: {{ $vertical ? 'true' : 'false' }},
-        value: @if ($hasWire && ! $range)@entangle($wireModel)@else {{ $range ? 0 : $value }}@endif,
+        _model: $blatModel({{ $range ? 0 : $value }}),
+        get value() { return this._model.value; },
+        set value(v) { this._model.value = v; },
         low: {{ $range ? $low : 0 }},
         high: {{ $range ? $high : 0 }},
         dragging: false,
@@ -65,7 +79,10 @@
         get lowPercent() { return this.pct(this.low) },
         get highPercent() { return this.pct(this.high) },
         clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)) },
-        snap(raw) { return this.clamp(Math.round(raw / this.step) * this.step, this.min, this.max) },
+        // Every move goes through $blatNumber so the value stays on the steps the author
+        // declared: `0.1 + 0.1 + 0.1` is 0.30000000000000004, and under wire:model that drift
+        // is written straight into the consumer's property.
+        snap(raw) { return this.clamp(this.$blatNumber.snap(raw, this.step), this.min, this.max) },
         valAt(e) {
             const r = this.$refs.track.getBoundingClientRect();
             let ratio = this.vertical ? (1 - (e.clientY - r.top) / r.height) : ((e.clientX - r.left) / r.width);
@@ -92,10 +109,10 @@
             else this.high = this.clamp(v, this.low, this.max);
         },
         stop() { this.dragging = false; this.active = null; },
-        bump(d) { if (this.disabled) return; this.value = this.clamp(this.value + d * this.step, this.min, this.max); },
-        bumpLow(d) { if (this.disabled) return; this.low = this.clamp(this.low + d * this.step, this.min, this.high); },
-        bumpHigh(d) { if (this.disabled) return; this.high = this.clamp(this.high + d * this.step, this.low, this.max); },
-        page(d) { if (this.disabled) return; this.value = this.clamp(this.value + d * Math.max(this.step, (this.max - this.min) / 10), this.min, this.max); }
+        bump(d) { if (this.disabled) return; this.value = this.clamp(this.$blatNumber.step(this.value, d * this.step, this.step), this.min, this.max); },
+        bumpLow(d) { if (this.disabled) return; this.low = this.clamp(this.$blatNumber.step(this.low, d * this.step, this.step), this.min, this.high); },
+        bumpHigh(d) { if (this.disabled) return; this.high = this.clamp(this.$blatNumber.step(this.high, d * this.step, this.step), this.low, this.max); },
+        page(d) { if (this.disabled) return; const big = Math.max(this.step, (this.max - this.min) / 10); this.value = this.clamp(this.$blatNumber.step(this.value, d * big, this.step), this.min, this.max); }
     }"
     @pointermove.window="move($event)"
     @pointerup.window="stop()"

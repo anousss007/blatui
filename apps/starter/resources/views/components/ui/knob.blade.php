@@ -34,10 +34,19 @@
     $sweep = 0.75;                              // 270° of the full circle
     $arcLen = $circ * $sweep;
 
-    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    // Livewire bridge — bind Alpine state to a consumer's wire:model when present. The property
+    // path travels as a data attribute rather than baked into x-data (which Alpine evaluates once),
+    // so a morph that re-points or re-mounts the component is followed. $blatModel reads and writes
+    // the Livewire property directly; without Livewire it just holds the value locally, so the
+    // component still works in plain Blade/Alpine. See the bridge in blatui-core.js.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
-    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+    if ($hasWire) {
+        $attributes = $attributes->whereDoesntStartWith('wire:model')->merge(array_filter([
+            'data-blat-model' => $wireModel->value(),
+            'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+        ]));
+    }
 @endphp
 
 <div
@@ -48,18 +57,19 @@
         max: @js((float) $max),
         step: @js((float) $step),
         disabled: @js((bool) $disabled),
-        value: @if ($hasWire)@entangle($wireModel)@else @js((float) $value)@endif,
+        _model: $blatModel(@js((float) $value)),
+        get value() { return this._model.value; },
+        set value(v) { this._model.value = v; },
         dragging: false,
         circ: @js($circ),
         arcLen: @js($arcLen),
         startAngle: -135,
         sweepDeg: 270,
         clamp(v) { return Math.max(this.min, Math.min(this.max, v)) },
-        snap(raw) {
-            const v = this.clamp(Math.round((raw - this.min) / this.step) * this.step + this.min);
-            // guard floating drift from the round
-            return parseFloat(v.toFixed(6));
-        },
+        // Every move goes through $blatNumber so the value stays on the steps the author
+        // declared: `0.1 + 0.1 + 0.1` is 0.30000000000000004, and under wire:model that drift
+        // is written straight into the consumer's property.
+        snap(raw) { return this.clamp(this.$blatNumber.snap(raw, this.step, this.min)); },
         get ratio() { return (this.value - this.min) / (this.max - this.min || 1) },
         get dashOffset() { return this.circ - this.arcLen * this.ratio },
         get angle() { return this.startAngle + this.sweepDeg * this.ratio },
@@ -67,11 +77,11 @@
             // show as integer when step is whole, else trim trailing zeros
             return Number.isInteger(this.step) ? Math.round(this.value) : parseFloat(this.value.toFixed(3));
         },
-        bump(d) { if (this.disabled) return; this.value = this.clamp(this.value + d * this.step) },
+        bump(d) { if (this.disabled) return; this.value = this.clamp(this.$blatNumber.step(this.value, d * this.step, this.step)) },
         page(d) {
             if (this.disabled) return;
             const big = Math.max(this.step, (this.max - this.min) / 10);
-            this.value = this.clamp(this.value + d * big);
+            this.value = this.clamp(this.$blatNumber.step(this.value, d * big, this.step));
         },
         wheel(e) {
             if (this.disabled) return;

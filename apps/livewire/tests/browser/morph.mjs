@@ -312,8 +312,79 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /greenfield', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/greenfield');
 
+    // ------------------------------------------------- issues #22 / #23: the wire:model bridge
+    //
+    // Every check below is about the bound value being ONE value. Under `@entangle` there were
+    // two — an Alpine copy and the Livewire property — kept level by effects, with the component
+    // id frozen into the x-data string at render time. $blatModel keeps none: it reads and writes
+    // the property, resolving the path and the component out of the DOM each time.
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/wire-model`);
+
+    const echo = (name) => page.$eval(`[data-testid=echo-${name}]`, (el) => el.textContent.trim());
+    const prop = (name) => page.evaluate((n) => window.Livewire.all()[0].$wire.$get(n), name);
+    const bump = async (testid, label = 'Increase', times = 1) => {
+        for (let i = 0; i < times; i++) {
+            await page.click(`[data-testid=${testid}] button[aria-label=${label}]`);
+            await page.waitForTimeout(120);
+        }
+    };
+    const flush = async (n) => {
+        await page.click('[data-testid=tick]');
+        await page.waitForFunction((t) => document.querySelector('[data-testid=ticks]')?.textContent === String(t), n);
+        await page.waitForTimeout(200);
+    };
+
+    // Stepping arithmetic: raw += step drifts, and the drift is written into the property.
+    await page.fill('[data-testid=amount] input', '1.1');
+    await page.$eval('[data-testid=amount] input', (el) => el.blur());
+    await page.waitForTimeout(200);
+    await bump('amount', 'Increase', 8);
+
+    await reporter.check('a run of +step lands on the step, not near it', async () =>
+        expect.equal(await page.$eval('[data-testid=amount] input', (el) => el.value), '1.9', '1.1 stepped by 0.1 eight times'));
+
+    await flush(1);
+    await reporter.check('a deferred value rides along with the next request', async () =>
+        expect.equal(await prop('amount'), 1.9, 'the server property after one round trip') ||
+        expect.equal(await echo('amount'), '1.9', 'the server-rendered echo'));
+
+    // .live must commit on its own — no other action to ride along with.
+    await bump('live');
+    await page.waitForTimeout(700);
+    await reporter.check('wire:model.live commits without another request', async () =>
+        expect.equal(await echo('live'), '1.0', 'the server-rendered echo after one click'));
+
+    // The other direction: the server assigns, and every component follows without a re-seed.
+    await page.click('[data-testid=seed]');
+    await page.waitForTimeout(700);
+    await reporter.check('components follow a value the server assigns', async () => {
+        const shown = await page.evaluate(() => ({
+            amount: document.querySelector('[data-testid=amount] input')?.value,
+            agreed: document.querySelector('[data-testid=agreed] [role=checkbox]')?.getAttribute('aria-checked'),
+            tags: [...document.querySelectorAll('[data-testid=tags] [data-slot="tags-input-item"]')].map((e) => e.textContent.trim()).join(','),
+            plan: document.querySelector('[data-testid=plan] [data-slot="select-trigger"]')?.textContent.trim(),
+        }));
+
+        return expect.equal(shown.amount, '12.5', 'number-input after the server assigned 12.5') ||
+            expect.equal(shown.agreed, 'true', 'checkbox after the server assigned true') ||
+            expect.truthy(shown.tags.includes('alpha') && shown.tags.includes('beta'), `tags-input shows "${shown.tags}"`) ||
+            expect.truthy(shown.plan?.includes('Pro'), `select shows "${shown.plan}"`);
+    });
+
+    // …and it is still bound afterwards: a morph must not leave the binding pointing at nothing.
+    await flush(2);
+    await bump('amount');
+    await flush(3);
+    await reporter.check('the binding survives the re-renders in between', async () =>
+        expect.equal(await prop('amount'), 12.6, 'the property after stepping a server-assigned value'));
+
+    await reporter.check('no console errors on /wire-model', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/wire-model');
+
     await page.close();
 }
+
 
 // Standalone entry: this app has one suite, so the runner is the suite.
 const browser = await launch();

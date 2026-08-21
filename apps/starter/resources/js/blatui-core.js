@@ -627,6 +627,76 @@ const calendar = (cfg = {}) => ({
 export { calendar };
 
 // ---------------------------------------------------------------------------
+// Stepping arithmetic — shared by every component that adds a `step` to a value
+// (number-input, slider, knob).
+//
+// `0.1 + 0.1 + 0.1` is 0.30000000000000004 in IEEE 754, so eight clicks of a
+// +0.1 stepper starting at 1.1 land on 1.3666…, not 1.9, and the drift is then
+// written straight into the consumer's Livewire property. Rounding the result
+// back to the precision the inputs actually carry is what keeps a stepper on the
+// values the author declared.
+//
+// The precision is max(step, current) rather than step alone, because a stepper
+// with `step="1"` is still allowed to hold a hand-typed 1.32 — rounding that to
+// the step's precision would silently truncate it to 2 on the next click.
+// ---------------------------------------------------------------------------
+
+/** Decimal places carried by a number, exponent notation (1e-7) included. */
+function decimalsOf(n) {
+    if (n === null || n === undefined || !isFinite(n)) return 0;
+    const s = String(n);
+    const exp = s.indexOf('e-');
+    if (exp !== -1) {
+        const mantissa = s.slice(0, exp);
+        const dot = mantissa.indexOf('.');
+        return Number(s.slice(exp + 2)) + (dot === -1 ? 0 : mantissa.length - dot - 1);
+    }
+    const dot = s.indexOf('.');
+    return dot === -1 ? 0 : s.length - dot - 1;
+}
+
+/** Round to `decimals` places. */
+function roundTo(v, decimals) {
+    if (v === null || v === undefined || !isFinite(v)) return v;
+    // Past 1e15 the scaling itself loses precision, so cap it rather than make things worse.
+    const d = Math.min(Math.max(decimals, 0), 15);
+    const s = String(v);
+    // Shift the decimal point in the exponent rather than by multiplying: `1.005 * 100` is
+    // 100.49999999999999, so the obvious version rounds 1.005 DOWN to 1. Values already in
+    // exponent notation cannot be shifted this way, and are small enough not to need it.
+    if (s.includes('e') || s.includes('E')) {
+        const p = Math.pow(10, d);
+
+        return Math.round(v * p) / p;
+    }
+
+    return Number(`${Math.round(Number(`${s}e${d}`))}e-${d}`);
+}
+
+/** `current + delta`, kept at the precision current and step imply. */
+function stepBy(current, delta, step) {
+    const from = Number(current) || 0;
+    return roundTo(from + delta, Math.max(decimalsOf(step), decimalsOf(from)));
+}
+
+/** Nearest multiple of `step` counted from `origin`, at the step's precision. */
+function snapTo(raw, step, origin = 0) {
+    if (!isFinite(raw) || !step) return raw;
+    return roundTo(Math.round((raw - origin) / step) * step + origin, decimalsOf(step) + decimalsOf(origin));
+}
+
+/**
+ * `$blatNumber` — the stepping helpers above, for a component's x-data:
+ *
+ *     inc() { this.value = $blatNumber.step(this.value, this.step, this.step) }
+ *
+ * Exported as plain functions too, for the engine tests.
+ */
+const blatNumber = { decimals: decimalsOf, round: roundTo, step: stepBy, snap: snapTo };
+
+export { blatNumber, decimalsOf, roundTo, stepBy, snapTo };
+
+// ---------------------------------------------------------------------------
 // Theme export — resolve the CURRENT customization (base color, accent, radius,
 // font, shadow, spacing, tracking) into a COMPLETE, self-contained
 // resources/css/app.css the user can paste as-is.
@@ -1155,6 +1225,83 @@ function blatDialogLayerDirective(el) {
     });
 }
 
+// ---------------------------------------------------------------------------
+// $blatModel — the Livewire bridge behind every component that carries a value.
+//
+// The obvious way to write this is `@entangle`, and that is what BlatUI did. It has three
+// problems, all structural rather than incidental:
+//
+//   1. It keeps a SECOND copy of the value in the component's Alpine data and syncs the two
+//      with effects. Two sources of truth for one field is the shape of every "the input says
+//      10, the property says 0" bug.
+//   2. The Blade directive compiles to `window.Livewire.find('<id>').entangle('price')` — the
+//      component id is baked into the x-data string, and Alpine evaluates x-data exactly once.
+//      Wiring derived from the page has to be re-derived rather than remembered (that is the
+//      rule keepWired() exists for); a frozen component id is the same mistake one layer up.
+//   3. `component.entangle()` is created WITHOUT a cleanup callback (only the `$wire.$entangle`
+//      magic passes one), so the sync effects are never released when the element leaves the
+//      DOM. That is what Livewire's own docs mean by "@entangle … causes issues when removing
+//      DOM elements", and why the directive is deprecated as of Livewire 4.
+//
+// So there is no second copy here. When a consumer passed `wire:model`, the Livewire property
+// IS the state: reads go through `$wire.$get`, writes through `$wire.$set` — deferred by
+// default, immediate for `wire:model.live`, exactly as the modifier asks. Both the property
+// path and the owning component are read back out of the DOM on every access, so a morph that
+// re-points or re-mounts the component is followed instead of missed.
+//
+// Without Livewire — a plain Blade page, or the docs site — there is no `wire:model` attribute,
+// and the same object simply holds the value locally, so a component behaves identically.
+//
+// Usage, in a component's x-data (the Blade bridge renders the data attributes):
+//     _model: $blatModel(@js($default)),
+//     get value() { return this._model.value },
+//     set value(v) { this._model.value = v },
+// ---------------------------------------------------------------------------
+
+/**
+ * The `$wire` of the Livewire component that currently owns `el`, or null outside Livewire.
+ * Also exposed as the `$blatWire` magic, for components that talk to Livewire directly (
+ * file-upload drives its progress bar off `$wire`'s upload API) and must stay inert without it —
+ * Alpine's own `$wire` magic does not exist at all in an app that has no Livewire.
+ */
+function blatWire(el) {
+    if (! window.Livewire || ! el.closest) return null;
+    // Livewire.find() already hands back the component's $wire, and returns undefined for an id
+    // it no longer knows — which is the case worth handling: the component was re-mounted.
+    const root = el.closest('[wire\\:id]');
+
+    return (root && window.Livewire.find(root.getAttribute('wire:id'))) || null;
+}
+
+function blatModelMagic(el) {
+    return (fallback = null) => ({
+        // Where the value lives when nothing is bound. Declared here (rather than captured
+        // in a closure) so Alpine's reactivity covers it and a local component still re-renders.
+        local: fallback,
+
+        get path() { return el.dataset.blatModel || null; },
+
+        get value() {
+            const wire = this.path ? blatWire(el) : null;
+            if (! wire) return this.local;
+            // $get reads Livewire's reactive data, so an effect that reads through here is
+            // re-run when the server sends a new value — no watcher of our own needed.
+            const value = wire.$get(this.path);
+
+            return value === undefined ? this.local : value;
+        },
+
+        set value(next) {
+            const wire = this.path ? blatWire(el) : null;
+            if (! wire) { this.local = next; return; }
+            // Third argument = send it now. `wire:model` is deferred (the value rides along with
+            // the next request), `wire:model.live` commits immediately.
+            wire.$set(this.path, next, el.dataset.blatModelLive === '1');
+        },
+    });
+}
+
+
 // x-blat-field — wires a form field's control to its label/description/error:
 //   aria-describedby ← description + error ids, aria-invalid + data-invalid when
 //   an error is present, and label[for] ← control id when not already set. Radix/
@@ -1390,24 +1537,41 @@ const blatMenubar = () => ({
 // the selected option (or the first); arrow/typeahead navigation is handled by
 // $blatNav/$blatType on the listbox; Enter/Space on a focused option selects and
 // closes, restoring focus to the trigger.
+/** Coerce a select's own initial value to string(s), in place, and hand the holder back. */
+function normaliseSelectValue(model, multiple) {
+    const v = model.value;
+    model.value = multiple
+        ? (Array.isArray(v) ? v.map(String) : v != null && v !== '' ? [String(v)] : [])
+        : (v != null ? String(v) : '');
+
+    return model;
+}
+
 const blatSelect = (config = {}) => ({
     multiple: !!config.multiple,
     open: false,
-    // `entangled` (Livewire wire:model) passes the value through verbatim — coercing it would
-    // sever the two-way binding. Otherwise normalise to string(s) as before.
-    value: config.entangled
-        ? config.value
-        : (config.multiple
-            ? (Array.isArray(config.value)
-                  ? config.value.map(String)
-                  : config.value != null && config.value !== ''
-                    ? [String(config.value)]
-                    : [])
-            : config.value != null
-              ? String(config.value)
-              : ''),
-    label: '',
-    selected: [], // [{ value, label }] — multiple only; seeded by each item + selectOption
+    // The value lives in the caller's model (a $blatModel — bound to wire:model, or holding it
+    // locally when there is none). A wired value passes through verbatim: coercing what the
+    // server sent would fight its own type. A local one is normalised to string(s), as before.
+    _model: config.wired ? config.model : normaliseSelectValue(config.model, !!config.multiple),
+    get value() { return this._model.value; },
+    set value(v) { this._model.value = v; },
+    // value -> label, registered by every <select-item> as it initialises. What the trigger shows
+    // is DERIVED from this and the current value, not written down when the user picks: a value
+    // the server assigns has to move the trigger too, and a `label` remembered at selection time
+    // leaves it reading "Pick a plan" over a plan that is already chosen.
+    _labels: {},
+    get label() {
+        if (this.multiple) return '';
+        const v = this.value;
+
+        return v === null || v === undefined || v === '' ? '' : (this._labels[String(v)] ?? '');
+    },
+    get selected() {
+        const vs = this.multiple && Array.isArray(this.value) ? this.value : [];
+
+        return vs.map((v) => ({ value: String(v), label: this._labels[String(v)] ?? String(v) }));
+    },
     _list: null,
     _trigger: null,
     get _options() {
@@ -1419,7 +1583,11 @@ const blatSelect = (config = {}) => ({
     },
     isSelected(val) {
         val = String(val);
-        return this.multiple ? this.value.includes(val) : this.value === val;
+        // Both sides through String(): a wire:model'd property arrives with the server's own
+        // type, and a numeric 2 must still match the option that rendered value="2".
+        return this.multiple
+            ? (Array.isArray(this.value) ? this.value : []).map(String).includes(val)
+            : String(this.value ?? '') === val;
     },
     openList() {
         this.open = true;
@@ -1439,37 +1607,26 @@ const blatSelect = (config = {}) => ({
     },
     selectOption(val, lbl) {
         val = String(val);
+        this._labels[val] = lbl;
         if (this.multiple) {
-            const i = this.value.indexOf(val);
-            if (i === -1) {
-                this.value.push(val);
-                if (!this.selected.some((s) => s.value === val)) this.selected.push({ value: val, label: lbl });
-            } else {
-                this.value.splice(i, 1);
-                const j = this.selected.findIndex((s) => s.value === val);
-                if (j !== -1) this.selected.splice(j, 1);
-            }
+            // Assign rather than push/splice: `value` may BE the bound Livewire property, and a
+            // mutation nobody assigned is a change wire:model.live never hears about.
+            const current = (Array.isArray(this.value) ? this.value : []).map(String);
+            this.value = current.includes(val) ? current.filter((v) => v !== val) : [...current, val];
+
             return; // keep the list open for further picks
         }
         this.value = val;
-        this.label = lbl;
         this.close();
     },
-    // Each <select-item> calls this on init so pre-selected chips/labels resolve their text.
+    // Each <select-item> calls this on init, so the trigger can name a value that was already
+    // set — by the server, by a morph, or by the page's initial render.
     seedSelected(val, lbl) {
-        val = String(val);
-        if (this.multiple) {
-            if (this.isSelected(val) && !this.selected.some((s) => s.value === val)) this.selected.push({ value: val, label: lbl });
-        } else if (this.value === val) {
-            this.label = lbl;
-        }
+        this._labels[String(val)] = lbl;
     },
     remove(val) {
         val = String(val);
-        const i = this.value.indexOf(val);
-        if (i !== -1) this.value.splice(i, 1);
-        const j = this.selected.findIndex((s) => s.value === val);
-        if (j !== -1) this.selected.splice(j, 1);
+        this.value = (Array.isArray(this.value) ? this.value : []).map(String).filter((v) => v !== val);
     },
 });
 
@@ -1545,7 +1702,11 @@ const blatListbox = (config = {}) => ({
     // until the user actually types, so opening a field with a value shows siblings.
     filtering: false,
     multiple: !!config.multiple,
-    value: config.value ?? (config.multiple ? [] : ''),
+    // The value lives in the caller's model — a $blatModel bound to wire:model, or the same
+    // object holding it locally when there is none. One source of truth either way.
+    _model: config.model ?? { value: config.value ?? (config.multiple ? [] : '') },
+    get value() { const v = this._model.value; return v ?? (this.multiple ? [] : ''); },
+    set value(v) { this._model.value = v; },
     activeValue: null,
     options: config.options || [],
     // Seed the query: input/single starts showing the selected label.
@@ -1609,8 +1770,10 @@ const blatListbox = (config = {}) => ({
     selectActive() { if (this.activeValue != null) this.select(this.activeValue); },
     select(v) {
         if (this.multiple) {
-            const i = this.value.indexOf(v);
-            if (i === -1) this.value.push(v); else this.value.splice(i, 1);
+            // Assign rather than push/splice: `value` may BE the bound Livewire property, and a
+            // mutation nobody assigned is a change wire:model.live never hears about.
+            const current = this.value;
+            this.value = current.includes(v) ? current.filter((x) => x !== v) : [...current, v];
             if (this.trigger === 'input') {
                 this.query = '';
                 this.filtering = false;
@@ -1628,9 +1791,9 @@ const blatListbox = (config = {}) => ({
         this.close();
         this.query = '';
     },
-    remove(v) { const i = this.value.indexOf(v); if (i !== -1) this.value.splice(i, 1); },
+    remove(v) { this.value = this.value.filter((x) => x !== v); },
     // Input trigger: Backspace on an empty query pops the last chip.
-    backspace() { if (this.multiple && this.query === '' && this.value.length) this.value.splice(this.value.length - 1, 1); },
+    backspace() { if (this.multiple && this.query === '' && this.value.length) this.value = this.value.slice(0, -1); },
 });
 
 // ---------------------------------------------------------------------------
@@ -1663,6 +1826,9 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.directive('blat-anchor', blatAnchorDirective);
     Alpine.directive('blat-dialog-layer', blatDialogLayerDirective);
     Alpine.directive('blat-field', blatFieldDirective);
+    Alpine.magic('blatModel', blatModelMagic);
+    Alpine.magic('blatWire', blatWire);
+    Alpine.magic('blatNumber', () => blatNumber);
     Alpine.magic('blatNav', blatNavMagic);
     Alpine.magic('blatType', blatTypeMagic);
 }

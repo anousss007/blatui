@@ -9,11 +9,17 @@
 ])
 
 @php
-    // Livewire bridge — native checkbox binds wire:model on the real <input>; the custom
-    // (Alpine) checkbox entangles its `checked` state instead. No-op without Livewire.
+    // Livewire bridge — a native checkbox binds wire:model on the real <input>; the custom (Alpine)
+    // one binds its `checked` state through $blatModel instead (see blatui-core.js), with the
+    // property path travelling as a data attribute so a morph can re-point it. No-op without Livewire.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
-    if (! $native && $hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+    if (! $native && $hasWire) {
+        $attributes = $attributes->whereDoesntStartWith('wire:model')->merge(array_filter([
+            'data-blat-model' => $wireModel->value(),
+            'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+        ]));
+    }
 @endphp
 
 @if ($native)
@@ -35,7 +41,7 @@
         type="button"
         role="checkbox"
         @if ($id) id="{{ $id }}" @endif
-        x-data="{ checked: @if ($hasWire)@entangle($wireModel)@else @js((bool) $checked)@endif, indeterminate: @js((bool) $indeterminate) }"
+        x-data="{ _model: $blatModel(@js((bool) $checked)), get checked() { return this._model.value; }, set checked(v) { this._model.value = v; }, indeterminate: @js((bool) $indeterminate) }"
         :data-state="indeterminate ? 'indeterminate' : (checked ? 'checked' : 'unchecked')"
         :aria-checked="indeterminate ? 'mixed' : checked.toString()"
         @click="indeterminate ? (indeterminate = false, checked = true) : (checked = !checked)"

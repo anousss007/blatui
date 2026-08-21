@@ -49,11 +49,18 @@
     $sizeCls = $sizes[$size] ?? $sizes['default'];
     $minH = ['sm' => 'min-h-8', 'default' => 'min-h-9', 'lg' => 'min-h-10'][$size] ?? 'min-h-9';
 
-    // Livewire bridge — entangle the listbox value with a consumer's wire:model when present.
+    // Livewire bridge — bind the listbox value to a consumer's wire:model when present, through
+    // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
+    // re-point it.
     // No-op (and stripped) without Livewire. blatListbox uses config.value verbatim (no coercion).
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
-    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+    if ($hasWire) {
+        $attributes = $attributes->whereDoesntStartWith('wire:model')->merge(array_filter([
+            'data-blat-model' => $wireModel->value(),
+            'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+        ]));
+    }
 @endphp
 
 <div
@@ -61,7 +68,7 @@
     x-data="blatListbox({
         trigger: @js($trigger),
         multiple: @js((bool) $multiple),
-        value: @if ($hasWire)@entangle($wireModel)@else @js($initialValue)@endif,
+        model: $blatModel(@js($initialValue)),
         query: @js($initialQuery),
         options: @js($opts),
     })"

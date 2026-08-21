@@ -73,11 +73,22 @@
     }
     $hasPresets = count($presetList) > 0;
 
-    // Livewire bridge — entangle the single-date value with a consumer's wire:model when present.
-    // No-op (and stripped) without Livewire. Range mode keeps its from/to hidden inputs.
+    // Livewire bridge — bind the single-date value to a consumer's wire:model when present, via
+    // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
+    // re-point it. No-op (and stripped) without Livewire. Range mode keeps its from/to hidden inputs.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
-    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+    if ($hasWire) {
+        $attributes = $attributes->whereDoesntStartWith('wire:model');
+        // Range mode carries its own pair of hidden inputs and is not bound through $blatModel, so the
+        // data attribute — which is what turns the binding on — is only rendered for a single value.
+        if (! $isRange) {
+            $attributes = $attributes->merge(array_filter([
+                'data-blat-model' => $wireModel->value(),
+                'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+            ]));
+        }
+    }
 @endphp
 
 <div
@@ -85,7 +96,9 @@
     x-data="{
         open: false,
         mode: @js($mode),
-        value: @if ($hasWire && ! $isRange)@entangle($wireModel)@else @js($isRange ? null : $value)@endif,
+        _model: $blatModel(@js($isRange ? null : $value)),
+        get value() { return this._model.value; },
+        set value(v) { this._model.value = v; },
         from: @js($fromDate), to: @js($toDate),
         minNights: @js($minNights !== null ? (int) $minNights : null),
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),

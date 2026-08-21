@@ -7,6 +7,7 @@ use App\Livewire\FieldValidation;
 use App\Livewire\Greenfield;
 use App\Livewire\LabelWiring;
 use App\Livewire\NativeDialog;
+use App\Livewire\WireModel;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,3 +22,4 @@ Route::get('/label-wiring', LabelWiring::class);
 Route::get('/native-dialog', NativeDialog::class);
 Route::get('/data-table', DataTable::class);
 Route::get('/greenfield', Greenfield::class);
+Route::get('/wire-model', WireModel::class);

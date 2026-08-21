@@ -36,16 +36,26 @@
     $attributes = $attributes->except(['aria-label', 'aria-labelledby']);
     $inputLabel = $ariaLabel ?? $name;
 
-    // Livewire bridge — entangle Alpine state with a consumer's wire:model when present.
+    // Livewire bridge — bind to a consumer's wire:model when present. The property path travels
+    // as a data attribute instead of being baked into x-data (which Alpine evaluates once), so a
+    // morph that re-points or re-mounts the component is followed. $blatModel reads and writes
+    // the Livewire property directly — see the bridge in blatui-core.js.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
-    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+    if ($hasWire) {
+        $attributes = $attributes->whereDoesntStartWith('wire:model')->merge(array_filter([
+            'data-blat-model' => $wireModel->value(),
+            'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+        ]));
+    }
 @endphp
 
 <div
     data-slot="number-input"
     x-data="{
-        value: @if ($hasWire)@entangle($wireModel)@else @js($value === null || $value === '' ? null : (float) $value)@endif,
+        _model: $blatModel(@js($value === null || $value === '' ? null : (float) $value)),
+        get value() { return this._model.value; },
+        set value(v) { this._model.value = v; },
         min: @js($min === null ? null : (float) $min),
         max: @js($max === null ? null : (float) $max),
         step: @js((float) $step),
@@ -56,13 +66,16 @@
             if (this.max !== null && v > this.max) v = this.max;
             return v;
         },
+        // Stepping goes through $blatNumber so eight clicks of +0.1 from 1.1 land on 1.9 rather
+        // than 1.3666…, and so a hand-typed 1.32 stepped by 1 becomes 2.32 rather than 2 — the
+        // precision that survives is the one the value and the step imply, not the step alone.
         inc() {
             if (this.disabled || this.atMax) return;
-            this.value = this.clamp((this.value ?? this.min ?? 0) + this.step);
+            this.value = this.clamp(this.$blatNumber.step(this.value ?? this.min ?? 0, this.step, this.step));
         },
         dec() {
             if (this.disabled || this.atMin) return;
-            this.value = this.clamp((this.value ?? this.max ?? 0) - this.step);
+            this.value = this.clamp(this.$blatNumber.step(this.value ?? this.max ?? 0, -this.step, this.step));
         },
         onInput(e) {
             const raw = e.target.value;

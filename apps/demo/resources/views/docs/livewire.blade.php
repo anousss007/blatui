@@ -37,8 +37,15 @@
             Drop <code>wire:model</code> onto any form control exactly like a native input. Native fields
             (<code>input</code>, <code>textarea</code>, native <code>select</code>) bind directly; the rich
             Alpine widgets (custom <code>select</code>, combobox, switch, slider, rating, color/date/time
-            pickers, tags, OTP, knob…) <strong>entangle</strong> their internal state with your Livewire
-            property — so server and client stay in sync both ways.
+            pickers, tags, OTP, knob…) read and write <strong>your Livewire property itself</strong> — they
+            keep no second copy of the value, so server and client cannot disagree.
+        </p>
+        <p class="text-muted-foreground mb-4">
+            They deliberately do <em>not</em> use <code>@verbatim@entangle@endverbatim</code>, which Livewire 4
+            deprecates: it duplicates the value, bakes the component id into an <code>x-data</code> that Alpine
+            only ever evaluates once, and leaks its sync when the element is removed. The bound property path
+            travels as a <code>data-blat-model</code> attribute instead, so a re-render that re-points or
+            re-mounts the component is followed rather than missed.
         </p>
 
         <x-code-block label="app/Livewire/ProfileForm.php" icon="file-code">use Livewire\Component;
@@ -122,7 +129,15 @@ class ProfileForm extends Component
             The <code>file-upload</code> component forwards <code>wire:model</code> onto its real
             <code>&lt;input type="file"&gt;</code>, so Livewire's
             <a href="https://livewire.laravel.com/docs/uploads" target="_blank" rel="noopener" class="text-primary underline underline-offset-4">temporary file uploads</a>
-            work out of the box (use the <code>WithFileUploads</code> trait).
+            work out of the box (use the <code>WithFileUploads</code> trait). Dropped files go through the
+            same input, so drag-and-drop uploads too.
+        </p>
+        <p class="text-muted-foreground mb-4">
+            The per-file progress bar is Livewire's own upload progress — it appears only when there is an
+            upload behind it, tracks the bytes actually sent, and turns into an error message if the upload
+            fails. Without a <code>wire:model</code> the component is a plain file field: it lists what you
+            picked and draws no bar, because nothing is being uploaded. Removing a row withdraws the
+            temporary upload server-side, not just the row.
         </p>
         <x-code-block label="Blade" icon="code">&lt;x-ui.file-upload wire:model="avatar" accept="image/*" /&gt;</x-code-block>
 

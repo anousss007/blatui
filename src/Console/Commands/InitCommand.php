@@ -34,8 +34,15 @@ class InitCommand extends Command
         }
 
         // --- npm Alpine plugins ---
+        // Livewire ships Alpine inside its own bundle and starts it, so a Livewire app needs the
+        // PLUGINS but must not install `alpinejs` — a second copy is the duplicate-Alpine trap,
+        // and reporting it as missing sent correctly-wired apps chasing a package they should not
+        // have (issue #22). Only the runtime itself is Livewire's to provide; every plugin below
+        // is still a build dependency of blatui-core.js.
         $pkgJsonPath = base_path('package.json');
         $pkgJson = is_file($pkgJsonPath) ? file_get_contents($pkgJsonPath) : '';
+        $usesLivewire = str_contains($composer, 'livewire/livewire');
+
         foreach ([
             'alpinejs' => 'the Alpine.js runtime',
             '@alpinejs/anchor' => 'positioning for popovers/menus',
@@ -45,6 +52,9 @@ class InitCommand extends Command
         ] as $package => $why) {
             if (str_contains($pkgJson, '"'.$package.'"')) {
                 $this->components->twoColumnDetail($package, '<fg=green>installed</>');
+            } elseif ($package === 'alpinejs' && $usesLivewire) {
+                $this->components->twoColumnDetail('alpinejs <fg=gray>(bundled and started by Livewire)</>', '<fg=green>provided</>');
+                $this->line('    <fg=gray>don\'t install it separately — two Alpines on one page is its own bug</>');
             } else {
                 $ok = false;
                 $this->components->twoColumnDetail($package." <fg=gray>({$why})</>", '<fg=red>missing</>');
@@ -111,6 +121,13 @@ class InitCommand extends Command
 
         if ($importsBootstrap || $registersEngine) {
             $this->components->twoColumnDetail('BlatUI engine (resources/js/app.js)', '<fg=green>wired</>');
+            // blatui.js is the greenfield bootstrap: it imports `alpinejs` so it can start one.
+            // Under Livewire that import is dead weight in the bundle — and the npm package the
+            // check above just said you do not need. Registering onto Livewire's Alpine is the
+            // wiring that app wants.
+            if ($usesLivewire && $importsBootstrap && ! $registersEngine) {
+                $this->line('    <fg=gray>Livewire app: prefer </><fg=yellow>import { registerBlatUI } from "./blatui-core.js"</><fg=gray> on </><fg=yellow>alpine:init</><fg=gray> — blatui.js bundles an Alpine that Livewire already provides</>');
+            }
         } elseif ($blatuiJsExists && $hasOwnAlpine) {
             $ok = false;
             $this->components->twoColumnDetail('BlatUI engine <fg=gray>(you already run Alpine)</>', '<fg=red>not registered</>');

@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.27.0] - 2026-08-21
+
+### Fixed
+- **Every component bound with `wire:model` kept a second copy of your value** (#22). The bridge was
+  `@entangle`, which Livewire 4 deprecates, and the shape of it was wrong in three ways at once: it
+  stores the value twice — once in the Livewire property, once in the component's Alpine data — and
+  keeps the two level with effects; the Blade directive compiles to
+  `window.Livewire.find('<component-id>').entangle('price')`, freezing the component id into an
+  `x-data` that Alpine evaluates exactly once; and `component.entangle()` is created *without* a
+  cleanup callback, so the sync is never released when the element leaves the DOM (that is what
+  Livewire's own docs mean by "causes issues when removing DOM elements"). All eighteen components
+  that bind a value — `number-input`, `select`, `combobox`, `checkbox`, `switch`, `toggle`,
+  `toggle-group`, `radio-group`, `rating`, `slider`, `knob`, `tags-input`, `input-otp`, `editable`,
+  `time-field`, `date-picker`, `datetime-picker`, `color-picker`, `markdown-editor` — now go through
+  a `$blatModel` bridge in the engine instead. There is no second copy: reads are `$wire.$get`,
+  writes are `$wire.$set` (deferred by default, immediate for `.live`), and both the property path
+  and the owning component are re-derived from the DOM on every access, so a re-render that
+  re-points or re-mounts the component is followed rather than missed. The path travels as a
+  `data-blat-model` attribute, which the server re-renders — the same rule `keepWired()` exists for.
+  Without Livewire nothing changes: the identical object simply holds the value locally.
+- **A stepper walked off the values it was given** (#22). `number-input`, `slider` and `knob` added
+  the raw step, and `0.1 + 0.1 + 0.1` is `0.30000000000000004` — so eight clicks of `+0.1` from
+  `1.1` landed on `1.3666666666666667` instead of `1.9`, and under `wire:model` that drift was
+  written straight into your Livewire property. Stepping now rounds to the precision the value and
+  the step imply — `max`, not the step alone, so a hand-typed `1.32` stepped by `1` becomes `2.32`
+  rather than being truncated to `2`. The arithmetic lives in one place (`$blatNumber` in
+  `blatui-core.js`) with unit tests, rather than three copies in three `x-data` blocks.
+- **`file-upload`'s progress bar was an animation, not a report** (#23). It was a `setInterval`
+  adding `Math.random() * 18 + 4` every 250ms, so it always reached 100% in about a second — whether
+  the upload had finished, was still going, or had failed. It now runs off Livewire's own
+  `livewire-upload-progress` / `-finish` / `-error` / `-cancel` events, so the bar tracks the bytes
+  actually sent (verified against a throttled 6 MB upload: 8% → 16% → 24% …), a failed upload turns
+  the row into an error message instead of a full bar, and a field with no `wire:model` draws no bar
+  at all, because nothing is being uploaded.
+- **A dropped file was never uploaded** — `file-upload`'s drop handler pushed the file into its own
+  Alpine list and stopped there, so the real `<input type=file>` never received it: no `change`, no
+  Livewire upload, and nothing for a plain `<form>` to submit. The file only *looked* selected. Drops
+  now go through the input, so drag-and-drop uploads exactly like the picker does.
+- **`file-upload` stacked rows a single-file field could not hold**, and removing a row removed only
+  the row. A single field now replaces its selection the way the native input it wraps does, and
+  removing a row withdraws the temporary upload server-side (or takes the file back off the native
+  input when there is no `wire:model`), so the list and what will be submitted cannot disagree.
+- **A `select` whose value the server assigned kept showing its placeholder.** The trigger's text
+  was written down when the user picked an option, so a value arriving from Livewire — or from any
+  re-render — never moved it. It is derived from the current value now, the same way `combobox`
+  already did it, and the multi-select chips with it.
+- **`blatui:init` told a correctly wired Livewire app that Alpine was missing** (#22). It looked for
+  the `alpinejs` npm package and, not finding it, failed the whole run and printed
+  `npm install -D alpinejs` — advice that risks a second Alpine on the page, and which BlatUI's own
+  get-started page tells you *not* to follow. It now detects `livewire/livewire` in `composer.json`
+  and reports the runtime as provided; the Alpine plugins are still required, because those are
+  build dependencies of `blatui-core.js` and Livewire does not ship them. A Livewire app importing
+  the greenfield `blatui.js` is pointed at the `blatui-core.js` + `alpine:init` wiring instead.
+
 ## [1.26.1] - 2026-08-20
 
 ### Fixed
@@ -1153,7 +1207,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.26.1...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.27.0...HEAD
+[1.27.0]: https://github.com/anousss007/blatui/compare/v1.26.1...v1.27.0
 [1.26.1]: https://github.com/anousss007/blatui/compare/v1.26.0...v1.26.1
 [1.26.0]: https://github.com/anousss007/blatui/compare/v1.25.1...v1.26.0
 [1.25.1]: https://github.com/anousss007/blatui/compare/v1.25.0...v1.25.1

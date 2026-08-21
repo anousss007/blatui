@@ -69,11 +69,23 @@
 
     $triggerCls = 'border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-start text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20';
 
-    // Livewire bridge — entangle the single combined date+time value with wire:model (single mode).
+    // Livewire bridge — bind the single combined date+time value to wire:model (single mode) via
+    // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
+    // re-point it.
     // No-op (and stripped) without Livewire. Range mode keeps its from/to hidden inputs.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
-    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+    if ($hasWire) {
+        $attributes = $attributes->whereDoesntStartWith('wire:model');
+        // Range mode carries its own pair of hidden inputs and is not bound through $blatModel, so the
+        // data attribute — which is what turns the binding on — is only rendered for a single value.
+        if (! $isRange) {
+            $attributes = $attributes->merge(array_filter([
+                'data-blat-model' => $wireModel->value(),
+                'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+            ]));
+        }
+    }
 @endphp
 
 <div
@@ -91,7 +103,9 @@
         minNights: @js($minNights !== null ? (int) $minNights : null),
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),
 @if ($hasWire && ! $isRange)
-        model: @entangle($wireModel),
+        _model: $blatModel(null),
+        get model() { return this._model.value; },
+        set model(v) { this._model.value = v; },
         init() {
             if (this.model) { const p = String(this.model).replace(' ', 'T').split('T'); this.date = p[0] || null; this.time = p[1] || null; }
             const push = () => { this.model = this.combined(this.date, this.time); };

@@ -21,6 +21,11 @@ return [
             'description' => 'The native accept filter (e.g. "image/*,.pdf"). Also shown in the dropzone hint line.',
         ],
         [
+            'name' => 'wire:model',
+            'type' => 'string',
+            'description' => 'Bind to a Livewire property (with the WithFileUploads trait). Livewire uploads the selection — picked or dropped — and the per-file bar reports its real progress, turning into an error message if the upload fails. Without it nothing is uploading, so no bar is drawn and the files ride along with the surrounding form.',
+        ],
+        [
             'name' => 'maxSizeLabel',
             'type' => 'string',
             'description' => 'A human-readable size hint (e.g. "Up to 10MB") shown in the dropzone. Display only — not enforced.',
@@ -45,7 +50,7 @@ return [
         ],
         [
             'name' => 'remove(index)',
-            'description' => 'Remove the file at the given index from the list and revoke its preview URL.',
+            'description' => 'Remove the file at the given index: drops the row, revokes its preview URL, withdraws the temporary Livewire upload (or takes the file back off the native input when there is no wire:model).',
         ],
     ],
 ];
