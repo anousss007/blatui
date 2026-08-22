@@ -14,6 +14,41 @@ export const SHOTS = new URL('../shots/', import.meta.url).pathname;
 const IGNORED_ERRORS = [/favicon/i];
 
 /**
+ * A run must not depend on anything outside this repository.
+ *
+ * The demo's own content embeds third-party media — 289 picsum placeholders, a handful of
+ * Unsplash photos, webfonts on two template pages — which is fine for a docs site and fatal for a
+ * test: whether those hosts answer, and how fast, differs between a laptop and a CI runner. It
+ * cost a red build on `blocks/login-04` when Unsplash dropped a connection, which said nothing
+ * about the component and everything about someone else's network.
+ *
+ * So nothing leaves the machine. Cross-origin requests are answered here, identically every time,
+ * instead of being aborted — an aborted request logs `Failed to load resource` to the console, and
+ * a console error is exactly what the pages sweep is watching for. The visual and layout suites
+ * register their own stricter blocker afterwards (pinRendering), and Playwright runs the
+ * last-registered route first, so their behaviour — and the visual baseline — is untouched.
+ */
+const PIXEL = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+
+async function serveNothingExternal(page) {
+    await page.route('**/*', (route) => {
+        const url = route.request().url();
+        if (url.startsWith(ownOrigin) || url.startsWith('data:') || url.startsWith('blob:')) {
+            return route.continue();
+        }
+
+        const type = route.request().resourceType();
+        if (type === 'image') return route.fulfill({ status: 200, contentType: 'image/png', body: PIXEL });
+
+        return route.fulfill({
+            status: 200,
+            contentType: type === 'stylesheet' ? 'text/css' : type === 'script' ? 'text/javascript' : 'text/plain',
+            body: '',
+        });
+    });
+}
+
+/**
  * Only our own assets count. A few docs examples embed third-party media (a sample mp3, an
  * avatar from github.com) and whether that host answers says nothing about the component —
  * making the suite fail on someone else's uptime would train everyone to ignore it.
@@ -71,11 +106,22 @@ export async function newPage(browser, { width = 1280, height = 900 } = {}) {
         permissions: ['clipboard-read', 'clipboard-write'],
     });
     page.blatErrors = [];
+    await serveNothingExternal(page);
 
     const record = (text) => {
         if (!IGNORED_ERRORS.some((re) => re.test(text))) page.blatErrors.push(text);
     };
-    page.on('console', (m) => m.type() === 'error' && record(m.text()));
+    // Same rule as the requestfailed listener below, which has always had it: a third-party host
+    // failing says nothing about the component. It reaches the console as well as the request
+    // channel, and only one of the two was filtered — so a dropped connection to someone else's
+    // CDN failed the run through the door nobody had closed. The message text carries no URL;
+    // the location does, and for a resource failure it is the resource that failed.
+    page.on('console', (m) => {
+        if (m.type() !== 'error') return;
+        const from = m.location()?.url || '';
+        if (from && !isOurs(from)) return;
+        record(m.text());
+    });
     page.on('pageerror', (e) => record(`uncaught: ${e.message}`));
     page.on('requestfailed', (r) => isOurs(r.url()) && record(`request failed: ${r.url()} (${r.failure()?.errorText})`));
 
