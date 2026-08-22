@@ -73,21 +73,18 @@
     }
     $hasPresets = count($presetList) > 0;
 
-    // Livewire bridge — bind the single-date value to a consumer's wire:model when present, via
-    // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
-    // re-point it. No-op (and stripped) without Livewire. Range mode keeps its from/to hidden inputs.
+    // Livewire bridge — bind to a consumer's wire:model when present, via $blatModel
+    // (blatui-core.js): the property path travels as a data attribute so a morph can re-point it.
+    // The bound value is whatever the `value` prop already takes for this mode — "Y-m-d" for a
+    // single date, ['from' => …, 'to' => …] for a range — so `:value="$x" wire:model="x"`
+    // round-trips. No-op (and stripped) without Livewire; the hidden inputs are unaffected.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
     if ($hasWire) {
-        $attributes = $attributes->whereDoesntStartWith('wire:model');
-        // Range mode carries its own pair of hidden inputs and is not bound through $blatModel, so the
-        // data attribute — which is what turns the binding on — is only rendered for a single value.
-        if (! $isRange) {
-            $attributes = $attributes->merge(array_filter([
-                'data-blat-model' => $wireModel->value(),
-                'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
-            ]));
-        }
+        $attributes = $attributes->whereDoesntStartWith('wire:model')->merge(array_filter([
+            'data-blat-model' => $wireModel->value(),
+            'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+        ]));
     }
 @endphp
 
@@ -96,10 +93,40 @@
     x-data="{
         open: false,
         mode: @js($mode),
-        _model: $blatModel(@js($isRange ? null : $value)),
+        _model: $blatModel(@js($isRange ? ['from' => $fromDate, 'to' => $toDate] : $value)),
         get value() { return this._model.value; },
         set value(v) { this._model.value = v; },
-        from: @js($fromDate), to: @js($toDate),
+        // The two ends of a range are the two halves of ONE bound value, so they are read from it
+        // and written as a pair: one assignment per user action, and never a moment where the
+        // property holds one end from before the pick and the other from after.
+        get from() { return this._model.value?.from ?? null; },
+        set from(v) { this.setRange(v, this.to); },
+        get to() { return this._model.value?.to ?? null; },
+        set to(v) { this.setRange(this.from, v); },
+        setRange(from, to) {
+            from = from ?? null;
+            to = to ?? null;
+            const now = this._model.value;
+            // Writing an unchanged range would commit a request for nothing — and, because the
+            // calendar is re-seeded from this value below, would bounce between the two forever.
+            if (now && now.from === from && now.to === to) return;
+            this._model.value = { from, to };
+        },
+        init() {
+            // A value assigned anywhere but here — the server, a morph, another component — has to
+            // reach the calendar as well. The popover is teleported and wire:ignore'd, so nothing
+            // else ever re-seeds it, and it would keep highlighting the days it opened with.
+            this.$watch('_model.value', () => this.repaintCalendar());
+        },
+        repaintCalendar() {
+            const cal = this.$refs.cal && this.$refs.cal.querySelector('[data-slot=calendar]');
+            if (! cal) return;
+            if (this.mode === 'range') {
+                cal.dispatchEvent(new CustomEvent('calendar:set-range', { detail: { from: this.from, to: this.to }, bubbles: false }));
+            } else {
+                cal.dispatchEvent(new CustomEvent('calendar:set', { detail: this.value || null, bubbles: false }));
+            }
+        },
         minNights: @js($minNights !== null ? (int) $minNights : null),
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),
         minDate: @js($min), maxDate: @js($max),
@@ -224,7 +251,7 @@
              `calendar:updated` reports every change with its source, so we can mirror the state
              on a seed but only auto-close on a real user pick. --}}
         @calendar:updated="mode === 'range'
-            ? (from = $event.detail.value.from, to = $event.detail.value.to, ($event.detail.source === 'select' && from && to && !invalid) && (open = false))
+            ? (setRange($event.detail.value.from, $event.detail.value.to), ($event.detail.source === 'select' && from && to && !invalid) && (open = false))
             : (value = $event.detail.value, $event.detail.source === 'select' && (open = false))"
         x-trap="open"
         :id="$id('blat-datepicker')"

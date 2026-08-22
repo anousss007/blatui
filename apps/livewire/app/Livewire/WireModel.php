@@ -19,6 +19,9 @@ use Livewire\WithFileUploads;
  * the DOM on every access. That is only provable here — apps/demo has no Livewire runtime, so
  * the entire wired branch of every one of these components renders there and never runs.
  *
+ * The range half is issue #24: mode="range" rendered its from/to form fields and nothing else,
+ * so the one mode a Livewire date filter actually wants could not be bound at all.
+ *
  * The file half is issue #23: the per-file progress bar was a setInterval animating to 100% in
  * about a second, unconnected to the upload. Now it is Livewire's own upload progress.
  */
@@ -38,6 +41,10 @@ class WireModel extends Component
 
     public int $ticks = 0;
 
+    public array $stay = ['from' => '', 'to' => ''];   // date-picker, mode=range
+
+    public array $price = [20, 80];                    // slider, range
+
     public $upload;
 
     /** Assign from the server, to prove the components follow the property back. */
@@ -47,6 +54,8 @@ class WireModel extends Component
         $this->agreed = true;
         $this->tags = ['alpha', 'beta'];
         $this->plan = 'Pro';
+        $this->stay = ['from' => '2026-03-12', 'to' => '2026-03-16'];
+        $this->price = [40, 60];
     }
 
     public function tick(): void

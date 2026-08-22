@@ -36,6 +36,17 @@
         </div>
         <p class="text-sm">plan: <span data-testid="echo-plan">{{ $plan }}</span></p>
 
+        {{-- A range binds as one value in the shape its `value` prop already takes. --}}
+        <div data-testid="stay">
+            <x-ui.date-picker mode="range" wire:model="stay" :value="$stay" default-month="2026-03-01" />
+        </div>
+        <p class="text-sm">stay: <span data-testid="echo-stay">{{ json_encode($stay) }}</span></p>
+
+        <div data-testid="price">
+            <x-ui.slider range wire:model="price" :value="$price" />
+        </div>
+        <p class="text-sm">price: <span data-testid="echo-price">{{ json_encode($price) }}</span></p>
+
         <div data-testid="upload">
             <x-ui.file-upload wire:model="upload" />
         </div>

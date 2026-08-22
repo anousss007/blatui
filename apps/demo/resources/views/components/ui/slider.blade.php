@@ -36,22 +36,18 @@
     $thumbCls = 'border-primary bg-background ring-ring/50 absolute block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden'
         .($vertical ? ' left-1/2 -translate-x-1/2 translate-y-1/2' : ' top-1/2 -translate-x-1/2 -translate-y-1/2');
 
-    // Livewire bridge — bind the single-value slider to a consumer's wire:model when present, via
-    // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
-    // re-point it.
-    // No-op (and stripped) without Livewire. Range mode keeps its min/max hidden inputs.
+    // Livewire bridge — bind to a consumer's wire:model when present, via $blatModel
+    // (blatui-core.js): the property path travels as a data attribute so a morph can re-point it.
+    // The bound value is whatever the `value` prop already takes for this mode — a number for a
+    // single slider, `[low, high]` for a range — so `:value="$x" wire:model="x"` round-trips.
+    // No-op (and stripped) without Livewire; the min/max hidden inputs are unaffected either way.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
     if ($hasWire) {
-        $attributes = $attributes->whereDoesntStartWith('wire:model');
-        // Range mode carries its own pair of hidden inputs and is not bound through $blatModel, so the
-        // data attribute — which is what turns the binding on — is only rendered for a single value.
-        if (! $range) {
-            $attributes = $attributes->merge(array_filter([
-                'data-blat-model' => $wireModel->value(),
-                'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
-            ]));
-        }
+        $attributes = $attributes->whereDoesntStartWith('wire:model')->merge(array_filter([
+            'data-blat-model' => $wireModel->value(),
+            'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+        ]));
     }
 @endphp
 
@@ -67,11 +63,21 @@
         disabled: {{ $disabled ? 'true' : 'false' }},
         range: {{ $range ? 'true' : 'false' }},
         vertical: {{ $vertical ? 'true' : 'false' }},
-        _model: $blatModel({{ $range ? 0 : $value }}),
+        _model: $blatModel(@js($range ? [(float) $low, (float) $high] : (float) $value)),
         get value() { return this._model.value; },
-        set value(v) { this._model.value = v; },
-        low: {{ $range ? $low : 0 }},
-        high: {{ $range ? $high : 0 }},
+        set value(v) { this._put(v); },
+        // In range mode the two handles are the two halves of ONE bound value (`[low, high]`,
+        // the shape the `value` prop already takes), so they are read from it and written as a
+        // pair — never a moment where the property holds one handle from before the drag and
+        // one from after.
+        get low() { return this.range ? (this._model.value?.[0] ?? this.min) : 0; },
+        set low(v) { this._put([v, this.high]); },
+        get high() { return this.range ? (this._model.value?.[1] ?? this.max) : 0; },
+        set high(v) { this._put([this.low, v]); },
+        // Mid-drag the value still moves — the property is never out of step with the thumb —
+        // but the request is withheld until pointerup, or a `.live` slider would fire one per
+        // pointermove event.
+        _put(next) { this.dragging ? this._model.write(next) : (this._model.value = next); },
         dragging: false,
         active: null,
         pct(v) { return ((v - this.min) / (this.max - this.min)) * 100 },
@@ -108,7 +114,7 @@
             if (this.active === 'low') this.low = this.clamp(v, this.min, this.high);
             else this.high = this.clamp(v, this.low, this.max);
         },
-        stop() { this.dragging = false; this.active = null; },
+        stop() { if (! this.dragging) return; this.dragging = false; this.active = null; this._model.commit(); },
         bump(d) { if (this.disabled) return; this.value = this.clamp(this.$blatNumber.step(this.value, d * this.step, this.step), this.min, this.max); },
         bumpLow(d) { if (this.disabled) return; this.low = this.clamp(this.$blatNumber.step(this.low, d * this.step, this.step), this.min, this.high); },
         bumpHigh(d) { if (this.disabled) return; this.high = this.clamp(this.$blatNumber.step(this.high, d * this.step, this.step), this.low, this.max); },

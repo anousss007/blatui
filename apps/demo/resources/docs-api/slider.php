@@ -5,6 +5,11 @@
 return [
     'props' => [
         [
+            'name' => 'wire:model',
+            'type' => 'string',
+            'description' => 'Bind to a Livewire property: the number in single mode, [low, high] with range — the same shape the value prop takes. Dragging commits once, when the drag ends, so a .live slider does not fire a request per pointer move.',
+        ],
+        [
             'name' => 'name',
             'type' => 'string',
             'description' => 'Form field name. Single mode submits one hidden input; range mode submits "{name}[min]" and "{name}[max]".',

@@ -53,12 +53,26 @@
         secStep: {{ max(1, (int) $secondStep) }},
         h: null, m: null, s: 0,
         init() {
-            if (this.value) {
-                const p = String(this.value).split(':').map(Number);
-                this.h = Number.isFinite(p[0]) ? p[0] : null;
-                this.m = Number.isFinite(p[1]) ? p[1] : null;
-                this.s = Number.isFinite(p[2]) ? p[2] : 0;
-            }
+            this.readValue();
+            // The hours/minutes/seconds the dropdowns show are a decomposition of `value`, so they
+            // have to be recomposed whenever it changes from outside — a Livewire property the
+            // server just assigned, or a parent pushing one in below. Seeding them once at init is
+            // only correct on a page where the value never changes underneath.
+            this.$watch('value', () => this.readValue());
+            // `time:set` is how a container drives this field, mirroring the calendar's own
+            // calendar:set hook. Dispatched on this root, never bubbled, so one field on a page
+            // full of them can be addressed on its own.
+            this._onSet = (e) => { this.value = e.detail ?? null; };
+            this.$root.addEventListener('time:set', this._onSet);
+        },
+        destroy() {
+            if (this._onSet) this.$root.removeEventListener('time:set', this._onSet);
+        },
+        readValue() {
+            const p = String(this.value ?? '').split(':').map(Number);
+            this.h = Number.isFinite(p[0]) ? p[0] : null;
+            this.m = Number.isFinite(p[1]) ? p[1] : null;
+            this.s = Number.isFinite(p[2]) ? p[2] : 0;
         },
         get cyc() {
             if (this.cycle !== 'auto') return this.cycle;

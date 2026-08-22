@@ -152,9 +152,22 @@ class ProfileForm extends Component
             @endforeach
         </div>
         <p class="text-muted-foreground mb-4 text-sm">
-            Note: <code>slider</code>, <code>date-picker</code> and <code>datetime-picker</code> bind a single
-            value in their default (single) mode; their range modes submit via standard
-            <code>name[...]</code> form fields.
+            Range modes bind too, to the same shape the component's <code>value</code> prop already takes —
+            so <code>:value="$x" wire:model="x"</code> round-trips:
+        </p>
+        <x-code-block label="Blade" icon="code">{{-- ['from' =&gt; 'Y-m-d', 'to' =&gt; 'Y-m-d'] --}}
+&lt;x-ui.date-picker mode="range" wire:model="stay" :value="$stay" /&gt;
+
+{{-- ['from' =&gt; 'Y-m-d\TH:i', 'to' =&gt; 'Y-m-d\TH:i'] --}}
+&lt;x-ui.datetime-picker mode="range" wire:model="slot" :value="$slot" /&gt;
+
+{{-- [low, high] --}}
+&lt;x-ui.slider range wire:model="price" :value="$price" /&gt;</x-code-block>
+        <p class="text-muted-foreground mb-4 text-sm">
+            A range reports what the user has actually picked, so an in-progress one arrives with
+            <code>to</code> still null — check it before filtering on the pair. The
+            <code>name[...]</code> form fields keep working alongside, unchanged. Dragging a
+            <code>.live</code> slider sends one request when the drag ends, not one per pointer move.
         </p>
 
         {{-- positioning --}}

@@ -5,6 +5,11 @@
 return [
     'props' => [
         [
+            'name' => 'wire:model',
+            'type' => 'string',
+            'description' => 'Bind to a Livewire property. Single mode binds the "Y-m-d" string; range mode binds [\'from\' => …, \'to\' => …] — the same shape the value prop takes, with \'to\' still null until the second date is picked. The name[from]/name[to] form fields are unaffected.',
+        ],
+        [
             'name' => 'mode',
             'type' => 'string',
             'default' => "'single'",

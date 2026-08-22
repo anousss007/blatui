@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.28.0] - 2026-08-22
+
+### Added
+- **`wire:model` on the range modes** of `date-picker`, `datetime-picker` and `slider` (#24). Only
+  their single modes bound; a range rendered its `name[from]`/`name[to]` form fields and stopped
+  there, so the one mode a Livewire date filter actually wants had no way to reach a property — and
+  that is the mode 12 of the shipped calendar blocks use. A range binds as **one value in the shape
+  the component's `value` prop already takes**, so `:value="$x" wire:model="x"` round-trips:
+  `['from' => 'Y-m-d', 'to' => 'Y-m-d']` for `date-picker`, the same of combined
+  `'Y-m-d\TH:i'` strings for `datetime-picker`, and `[low, high]` for a range `slider`. The two ends
+  are halves of that one value rather than fields of their own, so a pick writes the pair once —
+  the property is never holding one end from before the pick and the other from after. An
+  in-progress range reports itself honestly, with `to` still `null`, rather than withholding the
+  value until it is complete and leaving the property disagreeing with what the user can see. The
+  `name[...]` form fields are untouched, and a component with no `wire:model` behaves exactly as
+  before.
+
+### Fixed
+- **A `.live` slider fired a request per pointer move.** Committing every write meant a drag sent
+  one update per frame. The value now moves throughout the drag — nothing is held back locally, so
+  the property never disagrees with the thumb — while the request waits for the drag to end:
+  measured at **1 request for an 11-step drag**, where every step used to be one. The engine gained
+  the write-without-committing this needs (`$blatModel.write()` / `.commit()`).
+- **A date or time assigned by the server never reached the popover.** The popover is teleported and
+  `wire:ignore`d, so nothing re-seeds it: the trigger label followed the new value while the
+  calendar kept highlighting the days it opened with, and the time dropdowns kept their old time. A
+  value that changes from anywhere but the popover is now pushed back into both, through the
+  calendar's existing `calendar:set`/`calendar:set-range` hooks and a matching `time:set` on
+  `time-field`. `datetime-picker` never had a `$refs` handle on its calendar at all, so its half of
+  this had never worked.
+- **`time-field` decomposed its value once, at init.** The hours/minutes/seconds the dropdowns show
+  are a decomposition of `value`, and they were computed a single time — so a `wire:model`'d time
+  field showed a stale time whenever the server assigned one. They are recomposed whenever the value
+  changes.
+- **`datetime-picker` kept a copy of its own bound value.** Single mode seeded `date`/`time` from the
+  property at init and pushed back through watchers, which is the two-sources-of-truth shape 1.27.0
+  removed everywhere else — and it meant a server-assigned datetime never reached the fields. All
+  four parts (`date`, `time`, `from`/`timeFrom`, `to`/`timeTo`) are now views over the one bound
+  value. A time picked before its date still survives: it waits in a staging field until the value
+  can hold it.
+
 ## [1.27.0] - 2026-08-21
 
 ### Fixed
@@ -1207,7 +1248,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.27.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.28.0...HEAD
+[1.28.0]: https://github.com/anousss007/blatui/compare/v1.27.0...v1.28.0
 [1.27.0]: https://github.com/anousss007/blatui/compare/v1.26.1...v1.27.0
 [1.26.1]: https://github.com/anousss007/blatui/compare/v1.26.0...v1.26.1
 [1.26.0]: https://github.com/anousss007/blatui/compare/v1.25.1...v1.26.0

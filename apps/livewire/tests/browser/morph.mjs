@@ -379,6 +379,53 @@ export async function run({ browser, reporter }) {
     await reporter.check('the binding survives the re-renders in between', async () =>
         expect.equal(await prop('amount'), 12.6, 'the property after stepping a server-assigned value'));
 
+    // ------------------------------------------------------------------ issue #24: range modes
+    //
+    // `mode="range"` bound nothing at all: it rendered its from/to form fields and stopped, so
+    // the one mode a Livewire date filter actually wants had no way to reach a property. A range
+    // is one value in two halves, so it binds as one value — and reports the half-picked state
+    // rather than hiding it, or the property and what the user sees would disagree.
+    await page.click('[data-testid=stay] button');
+    await page.waitForSelector('[role=gridcell] button', { state: 'visible', timeout: 5000 });
+    await page.click('[role=gridcell] button:has-text("4"):visible');
+    await page.waitForTimeout(200);
+
+    await reporter.check('a half-picked range reports what was picked', async () =>
+        expect.equal(JSON.stringify(await prop('stay')), '{"from":"2026-03-04","to":null}', 'the property after one end'));
+
+    await page.click('[role=gridcell] button:has-text("9"):visible');
+    await page.waitForTimeout(300);
+    await flush(4);
+    await reporter.check('a completed range rides along with the next request', async () =>
+        expect.equal(await echo('stay'), '{"from":"2026-03-04","to":"2026-03-09"}', 'the server-rendered echo'));
+
+    // The popover is teleported and wire:ignore'd, so a value the server assigns reaches it only
+    // if the picker pushes it back in. Without that the calendar keeps highlighting what it opened
+    // with, and the trigger and the calendar disagree.
+    await page.click('[data-testid=seed]');
+    await page.waitForTimeout(700);
+    await page.click('[data-testid=stay] button');
+    await page.waitForTimeout(400);
+    await reporter.check('the calendar repaints to a server-assigned range', async () => {
+        const marked = await page.$$eval('[data-range-start], [data-range-end]', (els) =>
+            els.filter((e) => e.offsetParent !== null).map((e) => e.textContent.trim()));
+
+        // 12–16, which the clicks above never touched: a calendar still showing 4–9 would
+        // otherwise pass this on what the user picked rather than on what the server assigned.
+        return expect.truthy(marked.includes('12') && marked.includes('16'), `calendar shows [${marked.join(', ')}]`);
+    });
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(200);
+
+    await reporter.check('a range slider binds both handles', async () => {
+        await page.focus('[data-testid=price] [role=slider][aria-label$="minimum"]');
+        await page.keyboard.press('ArrowRight');
+        await page.waitForTimeout(150);
+        await flush(5);
+
+        return expect.equal(JSON.stringify(await prop('price')), '[41,60]', 'the property after one step of the low handle');
+    });
+
     await reporter.check('no console errors on /wire-model', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/wire-model');
 

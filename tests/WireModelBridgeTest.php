@@ -85,6 +85,42 @@ class WireModelBridgeTest extends TestCase
         $this->assertStringContainsString('x-on:livewire-upload-error', $source);
     }
 
+    /**
+     * A component with more than one mode has to bind in all of them. `mode="range"` used to
+     * render its from/to form fields and nothing else, so the one mode a Livewire date filter
+     * wants could not reach a property at all (#24). The tell is a data attribute rendered only
+     * on one branch: the binding is what that attribute turns on.
+     */
+    public function test_range_modes_render_the_binding_too(): void
+    {
+        foreach (['date-picker', 'datetime-picker', 'slider'] as $component) {
+            $source = (string) file_get_contents(dirname(__DIR__)."/stubs/ui/{$component}.blade.php");
+
+            $this->assertStringContainsString('data-blat-model', $source, "{$component} does not bind at all");
+            $this->assertSame(
+                1,
+                substr_count($source, "'data-blat-model' =>"),
+                "{$component} renders the binding on only some of its modes"
+            );
+        }
+    }
+
+    /**
+     * A slider writes on every pointermove. Committing each one would make a `.live` slider fire
+     * a request per frame of a drag, so the value moves throughout and the request waits for the
+     * drag to end — which only works if the engine offers a write that does not commit.
+     */
+    public function test_the_engine_can_write_without_committing(): void
+    {
+        $engine = (string) file_get_contents(dirname(__DIR__).'/stubs/foundations/blatui-core.js');
+        $slider = (string) file_get_contents(dirname(__DIR__).'/stubs/ui/slider.blade.php');
+
+        $this->assertStringContainsString('write(next)', $engine);
+        $this->assertStringContainsString('commit()', $engine);
+        $this->assertStringContainsString('_model.write(', $slider);
+        $this->assertStringContainsString('_model.commit()', $slider);
+    }
+
     /** @return list<string> */
     private function componentStubs(): array
     {

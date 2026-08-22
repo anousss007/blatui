@@ -69,23 +69,26 @@
 
     $triggerCls = 'border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-start text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20';
 
-    // Livewire bridge — bind the single combined date+time value to wire:model (single mode) via
-    // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
-    // re-point it.
-    // No-op (and stripped) without Livewire. Range mode keeps its from/to hidden inputs.
+    // Livewire bridge — bind to a consumer's wire:model when present, via $blatModel
+    // (blatui-core.js): the property path travels as a data attribute so a morph can re-point it.
+    // The bound value is whatever the `value` prop already takes for this mode — a combined
+    // "Y-m-d\TH:i" for a single date+time, ['from' => …, 'to' => …] of the same for a range — so
+    // `:value="$x" wire:model="x"` round-trips. No-op (and stripped) without Livewire.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
     if ($hasWire) {
-        $attributes = $attributes->whereDoesntStartWith('wire:model');
-        // Range mode carries its own pair of hidden inputs and is not bound through $blatModel, so the
-        // data attribute — which is what turns the binding on — is only rendered for a single value.
-        if (! $isRange) {
-            $attributes = $attributes->merge(array_filter([
-                'data-blat-model' => $wireModel->value(),
-                'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
-            ]));
-        }
+        $attributes = $attributes->whereDoesntStartWith('wire:model')->merge(array_filter([
+            'data-blat-model' => $wireModel->value(),
+            'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+        ]));
     }
+
+    // What the binding holds before the user touches anything: the same shape the `value` prop
+    // takes, rebuilt from the parts parsed above so both paths agree.
+    $combine = fn ($d, $t) => $d ? $d.'T'.($t ?: '00:00') : '';
+    $modelInit = $isRange
+        ? ['from' => $combine($fromDate, $fromTime), 'to' => $combine($toDate, $toTime)]
+        : $combine($initDate, $initTime);
 @endphp
 
 <div
@@ -95,24 +98,43 @@
         mode: @js($mode),
         cycle: @js($hourCycle),
         seconds: @js((bool) $seconds),
-        date: @js($initDate), time: @js($initTime),
-        from: @js($fromDate), timeFrom: @js($fromTime),
-        to: @js($toDate), timeTo: @js($toTime),
         minDate: @js($minDate), minTime: @js($minTime),
         maxDate: @js($maxDate), maxTime: @js($maxTime),
         minNights: @js($minNights !== null ? (int) $minNights : null),
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),
-@if ($hasWire && ! $isRange)
-        _model: $blatModel(null),
+
+        // A date and a time are the two halves of one value ('Y-m-d\TH:i'), and a range is two of
+        // those. All four fields are therefore VIEWS over the bound value rather than copies of
+        // it: assigning any of them rewrites the value, and a value assigned from anywhere else —
+        // the server, a morph — is visible in all of them immediately, with nothing to re-seed.
+        _model: $blatModel(@js($modelInit)),
         get model() { return this._model.value; },
         set model(v) { this._model.value = v; },
-        init() {
-            if (this.model) { const p = String(this.model).replace(' ', 'T').split('T'); this.date = p[0] || null; this.time = p[1] || null; }
-            const push = () => { this.model = this.combined(this.date, this.time); };
-            this.$watch('date', push);
-            this.$watch('time', push);
+        _split(v) {
+            if (! v) return { date: null, time: null };
+            const p = String(v).replace(' ', 'T').split('T');
+
+            return { date: p[0] || null, time: p[1] || null };
         },
-@endif
+        // A time picked before its date has nowhere to live in the value yet ('' carries no time),
+        // so it waits here until a date arrives. Never a competing copy: the moment the value can
+        // hold the time, the value is what every read returns.
+        _pendingTime: null, _pendingFrom: null, _pendingTo: null,
+
+        get date() { return this._split(this.model).date; },
+        set date(v) { this.model = this.combined(v, this.time); },
+        get time() { return this._split(this.model).time ?? this._pendingTime; },
+        set time(v) { this._pendingTime = v; this.model = this.combined(this.date, v); },
+
+        get from() { return this._split(this.model?.from).date; },
+        set from(v) { this.setRange(this.combined(v, this.timeFrom), this.model?.to); },
+        get timeFrom() { return this._split(this.model?.from).time ?? this._pendingFrom; },
+        set timeFrom(v) { this._pendingFrom = v; this.setRange(this.combined(this.from, v), this.model?.to); },
+        get to() { return this._split(this.model?.to).date; },
+        set to(v) { this.setRange(this.model?.from, this.combined(v, this.timeTo)); },
+        get timeTo() { return this._split(this.model?.to).time ?? this._pendingTo; },
+        set timeTo(v) { this._pendingTo = v; this.setRange(this.model?.from, this.combined(this.to, v)); },
+
         onTime(d) {
             if (this.mode === 'range') {
                 if (d.part === 'to') this.timeTo = d.value; else this.timeFrom = d.value;
@@ -120,6 +142,39 @@
                 this.time = d.value;
             }
         },
+        setRange(from, to) {
+            from = from ?? '';
+            to = to ?? '';
+            const now = this.model;
+            // Writing an unchanged range would commit a request for nothing — and, because the
+            // calendar is re-seeded from this value below, would bounce between the two forever.
+            if (now && now.from === from && now.to === to) return;
+            this.model = { from, to };
+        },
+        init() {
+            // A value assigned anywhere but here has to reach the calendar as well. The popover is
+            // teleported and wire:ignore'd, so nothing else ever re-seeds it, and it would keep
+            // highlighting the days it opened with.
+            this.$watch('_model.value', () => this.repaintCalendar());
+        },
+        repaintCalendar() {
+            const cal = this.$refs.cal && this.$refs.cal.querySelector('[data-slot=calendar]');
+            // Each ref is a wrapper with no x-data of its own (a ref on the component root would
+            // register into ITS scope, not ours), so the field is reached by its data-slot.
+            const push = (ref, v) => {
+                const field = ref && ref.querySelector('[data-slot=time-field]');
+                if (field) field.dispatchEvent(new CustomEvent('time:set', { detail: v ?? null, bubbles: false }));
+            };
+            if (this.mode === 'range') {
+                if (cal) cal.dispatchEvent(new CustomEvent('calendar:set-range', { detail: { from: this.from, to: this.to }, bubbles: false }));
+                push(this.$refs.tFrom, this.timeFrom);
+                push(this.$refs.tTo, this.timeTo);
+            } else {
+                if (cal) cal.dispatchEvent(new CustomEvent('calendar:set', { detail: this.date || null, bubbles: false }));
+                push(this.$refs.tOne, this.time);
+            }
+        },
+
         combined(d, t) { return d ? d + 'T' + (t || '00:00') : ''; },
         ms(d, t) { return d ? new Date(d + 'T' + (t || '00:00')).getTime() : null; },
         get loMs() { return this.minDate ? this.ms(this.minDate, this.minTime || '00:00') : null; },
@@ -207,7 +262,7 @@
              `calendar:updated` covers programmatic seeds too, so the label/hidden inputs stay
              in step when the calendar is driven from outside. --}}
         @calendar:updated="mode === 'range'
-            ? (from = $event.detail.value.from, to = $event.detail.value.to)
+            ? setRange(combined($event.detail.value.from, timeFrom), combined($event.detail.value.to, timeTo))
             : (date = $event.detail.value)"
         @time-change="onTime($event.detail)"
         x-trap="open"
@@ -220,6 +275,10 @@
         x-transition:enter-start="opacity-0 scale-95"
         x-transition:enter-end="opacity-100 scale-100"
     >
+        {{-- `contents` so this wrapper is purely a handle for $refs and changes no layout. The ref
+             cannot go on the calendar itself: an x-ref on an element that owns an x-data registers
+             into THAT scope, not this one. --}}
+        <div x-ref="cal" class="contents">
         <x-ui.calendar
             :mode="$mode"
             :value="$isRange ? $calRange : $initDate"
@@ -233,19 +292,20 @@
             :out-of-range="$outOfRange"
             class="rounded-none border-0"
         />
+        </div>
 
         <div class="flex flex-col gap-3 border-t p-3">
             @if ($isRange)
-                <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center justify-between gap-3" x-ref="tFrom">
                     <span class="text-sm font-medium">Start</span>
                     <x-ui.time-field part="from" :value="$fromTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
                 </div>
-                <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center justify-between gap-3" x-ref="tTo">
                     <span class="text-sm font-medium">End</span>
                     <x-ui.time-field part="to" :value="$toTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
                 </div>
             @else
-                <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center justify-between gap-3" x-ref="tOne">
                     <span class="text-sm font-medium">Time</span>
                     <x-ui.time-field :value="$initTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
                 </div>

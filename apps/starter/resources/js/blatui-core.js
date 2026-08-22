@@ -1292,11 +1292,28 @@ function blatModelMagic(el) {
         },
 
         set value(next) {
+            this.write(next);
+            this.commit();
+        },
+
+        /**
+         * Update the value without sending anything. The Livewire property still moves — Alpine
+         * and the server read the same object — so nothing goes out of step; only the request is
+         * withheld. A slider drag is what this exists for: sixty writes a second must not be
+         * sixty requests, and holding the value locally until pointerup would mean the property
+         * disagreed with the thumb for the length of the drag.
+         */
+        write(next) {
             const wire = this.path ? blatWire(el) : null;
             if (! wire) { this.local = next; return; }
-            // Third argument = send it now. `wire:model` is deferred (the value rides along with
-            // the next request), `wire:model.live` commits immediately.
-            wire.$set(this.path, next, el.dataset.blatModelLive === '1');
+            wire.$set(this.path, next, false);
+        },
+
+        /** Send what is there — if this binding asked to be live. Deferred bindings ride along
+         *  with the next request, so for them this is deliberately a no-op. */
+        commit() {
+            const wire = this.path && el.dataset.blatModelLive === '1' ? blatWire(el) : null;
+            if (wire) wire.$set(this.path, wire.$get(this.path), true);
         },
     });
 }
