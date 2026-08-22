@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`wire:model` on the range modes** of `date-picker`, `datetime-picker` and `slider` (#24). Only
   their single modes bound; a range rendered its `name[from]`/`name[to]` form fields and stopped
   there, so the one mode a Livewire date filter actually wants had no way to reach a property — and
-  that is the mode 12 of the shipped calendar blocks use. A range binds as **one value in the shape
+  that is the mode 11 of the shipped calendar blocks use. A range binds as **one value in the shape
   the component's `value` prop already takes**, so `:value="$x" wire:model="x"` round-trips:
   `['from' => 'Y-m-d', 'to' => 'Y-m-d']` for `date-picker`, the same of combined
   `'Y-m-d\TH:i'` strings for `datetime-picker`, and `[low, high]` for a range `slider`. The two ends
