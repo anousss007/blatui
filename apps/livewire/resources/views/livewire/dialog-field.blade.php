@@ -16,6 +16,12 @@
                     <x-ui.field-error :messages="$errors->get('name')" />
                 </x-ui.field>
 
+                {{-- Bound from inside the dialog: Alpine teleports this content to <body>, so the
+                     control has no wire:id ancestor in the DOM at all (#25). --}}
+                <div data-testid="choice" class="mt-4">
+                    <x-ui.select wire:model.live="choice" :options="['a' => 'Alfa', 'b' => 'Beta', 'c' => 'Gamma']" />
+                </div>
+
                 <x-ui.button type="submit" class="mt-4" data-testid="submit">Save</x-ui.button>
             </form>
         </x-ui.dialog-content>

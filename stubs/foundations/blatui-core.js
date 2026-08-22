@@ -1259,16 +1259,37 @@ function blatDialogLayerDirective(el) {
 // ---------------------------------------------------------------------------
 
 /**
+ * `closest`, climbing THROUGH a teleport rather than stopping at it.
+ *
+ * A dialog, sheet, drawer or popover renders its content inside `<template x-teleport="body">`, so
+ * at runtime that content is a child of <body> and a plain closest() from a control inside it
+ * finds no Livewire root at all. The control is a child of <body> in the DOM and a child of the
+ * component in the markup, and for "who owns this value" the markup is the truth: a bound control
+ * in a dialog otherwise runs in local-only mode, silently losing its prefill and every write
+ * (issue #25). Alpine has the same problem to solve for its own scopes and solves it the same way
+ * — `_x_teleportBack` is the link it leaves from teleported content back to its template.
+ */
+function blatClosest(el, selector) {
+    let node = el;
+    while (node) {
+        if (node.matches && node.matches(selector)) return node;
+        node = node._x_teleportBack || node.parentElement;
+    }
+
+    return null;
+}
+
+/**
  * The `$wire` of the Livewire component that currently owns `el`, or null outside Livewire.
  * Also exposed as the `$blatWire` magic, for components that talk to Livewire directly (
  * file-upload drives its progress bar off `$wire`'s upload API) and must stay inert without it —
  * Alpine's own `$wire` magic does not exist at all in an app that has no Livewire.
  */
 function blatWire(el) {
-    if (! window.Livewire || ! el.closest) return null;
+    if (! window.Livewire) return null;
     // Livewire.find() already hands back the component's $wire, and returns undefined for an id
     // it no longer knows — which is the case worth handling: the component was re-mounted.
-    const root = el.closest('[wire\\:id]');
+    const root = blatClosest(el, '[wire\\:id]');
 
     return (root && window.Livewire.find(root.getAttribute('wire:id'))) || null;
 }

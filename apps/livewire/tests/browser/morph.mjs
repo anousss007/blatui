@@ -115,6 +115,30 @@ export async function run({ browser, reporter }) {
     const dlg = await readField(page, 'field-name');
     await reporter.check('field inside a dialog is wired after a morph', async () =>
         expect.equal(dlg.invalid, 'true', 'data-invalid') || expect.equal(dlg.ariaInvalid, 'true', 'aria-invalid'));
+    // ------------------------------------------------------------- issue #25: bound, and teleported
+    //
+    // A dialog renders its content inside <template x-teleport="body">, so a control in there has
+    // no wire:id ancestor in the DOM. Resolving the owning component with a plain closest() found
+    // nothing and the bridge fell back to local-only state: the control moved on screen, the
+    // property never did, and the prefill never arrived either. Silent, both directions.
+    const dialogChoice = () => page.evaluate(() => window.Livewire.all()[0].$wire.$get('choice'));
+
+    await reporter.check('a bound control inside a dialog prefills from the property', async () => {
+        const shown = await page.$eval('[data-testid=choice] [data-slot="select-trigger"]', (el) => el.textContent.trim());
+
+        return expect.truthy(shown.includes('Beta'), `the trigger reads "${shown}" for a property holding 'b'`);
+    });
+
+    await page.click('[data-testid=choice] [data-slot="select-trigger"]');
+    await page.waitForSelector('[role=option]', { state: 'visible', timeout: 5000 });
+    for (const opt of await page.$$('[role=option]')) {
+        if ((await opt.textContent()).trim() === 'Gamma') { await opt.click(); break; }
+    }
+    await page.waitForTimeout(700);
+
+    await reporter.check('a bound control inside a dialog writes to the property', async () =>
+        expect.equal(await dialogChoice(), 'c', 'the property after picking Gamma inside the dialog'));
+
     await reporter.check('no console errors on /dialog-field', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/dialog-field');
 

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.28.1] - 2026-08-22
+
+### Fixed
+- **A `wire:model`'d control inside a dialog, sheet, drawer or popover silently stopped talking to
+  Livewire** (#25). Those containers render their content inside `<template x-teleport="body">`, so
+  at runtime the control is a child of `<body>` and has no `wire:id` ancestor in the DOM at all. The
+  bridge resolved its owning component with a plain `closest('[wire\:id]')`, found nothing, and fell
+  back to local-only state — the control moved on screen while the property never did, and a value
+  the property already held never reached it either. No error, in either direction. It resolves the
+  component through the teleport now, following the same `_x_teleportBack` link Alpine itself uses
+  to resolve scopes across one. Reproduced and fixed for a dialog, a sheet **and** a popover — the
+  report named the dialog, but every container that teleports its slot was affected, which is all
+  of them.
+
+  This one was ours: `@entangle` baked the component id into the `x-data` at render time, which is
+  precisely why it survived being teleported, and 1.27.0 traded that for a lookup that did not.
+  Deriving the fact rather than remembering it is still right — the fix is to derive it through the
+  boundary, not to go back to remembering.
+
 ## [1.28.0] - 2026-08-22
 
 ### Added
@@ -1248,7 +1267,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.28.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.28.1...HEAD
+[1.28.1]: https://github.com/anousss007/blatui/compare/v1.28.0...v1.28.1
 [1.28.0]: https://github.com/anousss007/blatui/compare/v1.27.0...v1.28.0
 [1.27.0]: https://github.com/anousss007/blatui/compare/v1.26.1...v1.27.0
 [1.26.1]: https://github.com/anousss007/blatui/compare/v1.26.0...v1.26.1

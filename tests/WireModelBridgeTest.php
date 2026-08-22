@@ -121,6 +121,25 @@ class WireModelBridgeTest extends TestCase
         $this->assertStringContainsString('_model.commit()', $slider);
     }
 
+    /**
+     * A dialog, sheet, drawer or popover renders its content inside `<template x-teleport="body">`,
+     * so a bound control in there has no wire:id ancestor in the DOM at all. Resolving the owning
+     * component with a plain closest() found nothing and the bridge fell back to local-only state,
+     * losing the prefill and every write, silently (#25). The climb has to follow the link Alpine
+     * leaves from teleported content back to its template.
+     */
+    public function test_the_bridge_resolves_its_component_through_a_teleport(): void
+    {
+        $engine = (string) file_get_contents(dirname(__DIR__).'/stubs/foundations/blatui-core.js');
+
+        $this->assertStringContainsString('_x_teleportBack', $engine);
+        $this->assertMatchesRegularExpression(
+            '/function blatWire\(el\)\s*\{(?:(?!\n\}).)*blatClosest\(/s',
+            $engine,
+            'blatWire must climb through teleports, not stop at the first DOM boundary'
+        );
+    }
+
     /** @return list<string> */
     private function componentStubs(): array
     {
