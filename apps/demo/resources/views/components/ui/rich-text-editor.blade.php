@@ -9,8 +9,6 @@
     // execCommand is deprecated but remains universally supported across every browser
     // and is the standard dependency-free way to build a WYSIWYG. The toolbar maps each
     // button to a command; `block` actions use formatBlock (H1/H2/paragraph).
-    $editorId = $id ?: 'rte-' . \Illuminate\Support\Str::random(8);
-    $labelId = $editorId . '-label';
 
     // Toolbar definition. `cmd` runs execCommand; `block` runs formatBlock with a tag;
     // `link` and `clear` are special-cased in the Alpine handlers. `state` is the
@@ -137,8 +135,11 @@
         contenteditable="true"
         role="textbox"
         aria-multiline="true"
-        aria-labelledby="{{ $labelId }}"
-        id="{{ $editorId }}"
+        {{-- The name is carried on the element rather than by an id pair: an id this component
+             generated would be a new morph key on every render, and Livewire would replace the
+             box the user is writing in. A consumer's own id is stable, so it still lands. #27 --}}
+        aria-label="{{ $placeholder }}"
+        @if ($id) id="{{ $id }}" @endif
         data-placeholder="{{ $placeholder }}"
         dir="auto"
         @input="sync()"
@@ -147,9 +148,6 @@
         @focus="refresh()"
         class="min-h-40 w-full max-w-none px-3 py-3 text-sm leading-7 outline-none empty:before:text-muted-foreground empty:before:pointer-events-none empty:before:content-[attr(data-placeholder)] [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h1]:mb-2 [&_h1]:text-2xl [&_h1]:font-semibold [&_h2]:mb-2 [&_h2]:text-xl [&_h2]:font-semibold [&_li]:mt-1 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:ps-6 [&_p]:my-2 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:ps-6"
     >{!! $value !!}</div>
-
-    {{-- Accessible name for the textbox; visually hidden (it duplicates the placeholder intent). --}}
-    <span id="{{ $labelId }}" class="sr-only">{{ $placeholder }}</span>
 
     @if ($name || $hasWire)
         <textarea x-ref="input" @if ($name) name="{{ $name }}" @endif {{ $wireAttrs }} class="hidden" aria-hidden="true" tabindex="-1">{!! $value !!}</textarea>

@@ -51,5 +51,11 @@
             <x-ui.file-upload wire:model="upload" />
         </div>
         <p class="text-sm">upload: <span data-testid="echo-upload">{{ $upload ? $upload->getClientOriginalName() : 'null' }}</span></p>
+
+        {{-- The same field with an id of its own: a consumer's id is theirs, and still lands on
+             the input the label/for of a surrounding form would point at. Issue #27. --}}
+        <div data-testid="upload-keyed">
+            <x-ui.file-upload id="chosen-upload" />
+        </div>
     </div>
 </div>

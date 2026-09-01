@@ -22,7 +22,6 @@
         return ['value' => (string) $m, 'label' => (string) $m, 'avatar' => null, 'sub' => null];
     })->values();
 
-    $fieldId = $id ?? 'blat-mention-'.\Illuminate\Support\Str::random(6);
     // Initial value drives the textarea contents; supports a prefilled value via the `value` attribute.
     $initial = (string) ($attributes->get('value') ?? $slot ?? '');
     $attributes = $attributes->except('value');
@@ -110,7 +109,10 @@
     <span class="contents" data-slot="mention-input-field">
     <x-ui.textarea
         x-ref="field"
-        :id="$fieldId"
+        {{-- An id only if the consumer asked for one: a generated one is a fresh morph key
+             on every render, and Livewire swaps the field out from under whoever is typing in
+             it. Nothing here referenced it. Issue #27. --}}
+        :id="$id"
         :name="$name"
         :rows="(int) $rows"
         :placeholder="$placeholder"

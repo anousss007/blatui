@@ -8,8 +8,15 @@
 ])
 
 @php
-    // A stable id so the dropzone region can reference the hidden <input> for assistive tech.
-    $fieldId = $id ?: 'file-upload-' . \Illuminate\Support\Str::random(6);
+    // The <input> carries an id only when the consumer asked for one — never a generated one.
+    // Livewire's morph keys an element by wire:id, then wire:key, then plain id, so an id that
+    // is re-rolled on every render makes the old and new input look like different elements:
+    // morphdom swaps the node instead of patching it. Livewire drives uploads FROM this input
+    // and dispatches livewire-upload-finish on the node it captured, so a swap mid-upload fires
+    // that event at a node already off the document — the bar reaches 100% and stays there for
+    // good. With no id at all both sides key on "", the input is patched, and the upload it is
+    // running survives every re-render. Issue #27; the generated id it replaces was referenced
+    // by nothing anyway.
     // Default hint line — accepted types and/or a max-size label, when provided.
     $hintBits = array_filter([
         $accept ? trim($accept) : null,
@@ -176,7 +183,7 @@
     <input
         x-ref="input"
         type="file"
-        id="{{ $fieldId }}"
+        @if ($id) id="{{ $id }}" @endif
         @if ($name) name="{{ $name }}{{ $multiple ? '[]' : '' }}" @endif
         @if ($accept) accept="{{ $accept }}" @endif
         @if ($multiple) multiple @endif

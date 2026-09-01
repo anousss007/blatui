@@ -33,9 +33,6 @@
 ])
 
 @php
-    $uid = $id ?: 'blat-md-'.\Illuminate\Support\Str::random(6);
-    $textareaId = $uid.'-textarea';
-
     // Livewire bridge — bind the markdown `source` to a consumer's wire:model when present, through
     // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
     // re-point it.
@@ -214,6 +211,11 @@
 <div
     data-slot="markdown-editor"
     x-data="blatMarkdownEditor($blatModel(@js((string) $value)))"
+    {{-- The tab/panel idrefs come from Alpine rather than from the server. An id generated per
+         render is a new morph key every render, so Livewire replaced the tabs and the textarea
+         on any re-render — taking the caret and the focus with them. Alpine's $id() is scoped to
+         this x-id, and Livewire's morph carries a bound id across, so these hold still. #27 --}}
+    x-id="['blat-md-tab', 'blat-md-panel']"
     {{ $attributes->twMerge('border-input bg-background flex w-full flex-col overflow-hidden rounded-md border shadow-xs') }}
 >
     {{-- Toolbar + tab switch --}}
@@ -251,8 +253,8 @@
                 role="tab"
                 :aria-selected="view === 'write'"
                 :tabindex="view === 'write' ? 0 : -1"
-                aria-controls="{{ $uid }}-panel-write"
-                id="{{ $uid }}-tab-write"
+                :aria-controls="$id('blat-md-panel', 'write')"
+                :id="$id('blat-md-tab', 'write')"
                 @click="view = 'write'"
                 @keydown.arrow-right.prevent="view = 'preview'; $nextTick(() => $refs.tabPreview.focus())"
                 @keydown.arrow-left.prevent="view = 'write'; $nextTick(() => $refs.tabWrite.focus())"
@@ -267,8 +269,8 @@
                 role="tab"
                 :aria-selected="view === 'preview'"
                 :tabindex="view === 'preview' ? 0 : -1"
-                aria-controls="{{ $uid }}-panel-preview"
-                id="{{ $uid }}-tab-preview"
+                :aria-controls="$id('blat-md-panel', 'preview')"
+                :id="$id('blat-md-tab', 'preview')"
                 @click="view = 'preview'"
                 @keydown.arrow-right.prevent="view = 'preview'; $nextTick(() => $refs.tabPreview.focus())"
                 @keydown.arrow-left.prevent="view = 'write'; $nextTick(() => $refs.tabWrite.focus())"
@@ -282,12 +284,11 @@
     </div>
 
     {{-- Write panel --}}
-    <div role="tabpanel" id="{{ $uid }}-panel-write" aria-labelledby="{{ $uid }}-tab-write" x-show="view === 'write'">
-        <label for="{{ $textareaId }}" class="sr-only">Markdown source</label>
+    <div role="tabpanel" :id="$id('blat-md-panel', 'write')" :aria-labelledby="$id('blat-md-tab', 'write')" x-show="view === 'write'">
         <textarea
             x-ref="textarea"
             x-model="source"
-            id="{{ $textareaId }}"
+            @if ($id) id="{{ $id }}" @endif
             @if ($name) name="{{ $name }}" @endif
             rows="{{ (int) $rows }}"
             placeholder="{{ $placeholder }}"
@@ -299,8 +300,8 @@
     {{-- Preview panel --}}
     <div
         role="tabpanel"
-        id="{{ $uid }}-panel-preview"
-        aria-labelledby="{{ $uid }}-tab-preview"
+        :id="$id('blat-md-panel', 'preview')"
+        :aria-labelledby="$id('blat-md-tab', 'preview')"
         x-show="view === 'preview'"
         x-cloak
         class="text-foreground min-h-32 px-4 py-3 text-sm break-words [&_ol]:my-3 [&_pre]:my-3 [&_ul]:my-3"
