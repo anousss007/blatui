@@ -450,6 +450,35 @@ export async function run({ browser, reporter }) {
         return expect.equal(JSON.stringify(await prop('price')), '[41,60]', 'the property after one step of the low handle');
     });
 
+    // ------------------------------------------------ the editor's content is the editor's own
+    //
+    // A contenteditable's value is its children, and its children are server-rendered — so every
+    // re-render used to patch them back to whatever the page loaded with, deleting what had been
+    // written since without a word. The morph is kept out of that subtree now, which means the
+    // value the server assigns can no longer arrive through the morph either: it comes through an
+    // effect reading the bound property instead. Both directions have to hold, or the fix has
+    // just traded a component that loses your writing for one that ignores the server.
+    const story = () => page.$eval('[data-testid=story] [contenteditable]', (el) => el.innerHTML);
+
+    // Typed over whatever the checks above left in it, so this does not depend on their order.
+    await page.click('[data-testid=story] [contenteditable]');
+    await page.keyboard.press('Control+A');
+    await page.keyboard.type('typed by the user');
+    const written = await story();
+
+    await flush(6);
+
+    await reporter.check('a re-render does not take back what was typed into the editor', async () =>
+        expect.truthy(written.includes('typed by the user'), `the editor held "${written}" before the round trip`) ||
+        expect.equal(await story(), written, 'the editor after a round trip') ||
+        expect.equal(await prop('story'), written, 'the property it rode along with'));
+
+    await page.click('[data-testid=seed]');
+    await page.waitForTimeout(700);
+
+    await reporter.check('a value the server assigns still repaints the editor', async () =>
+        expect.equal(await story(), '<p>from the server</p>', 'the editor after the server assigned'));
+
     // ------------------------------------------------------------ issue #27: the upload's own id
     //
     // Livewire drives the upload FROM the <input type=file>, and dispatches
@@ -528,12 +557,6 @@ export async function run({ browser, reporter }) {
     });
 
     // What the swap actually cost. A field the user is typing in is the whole point of the fix.
-    //
-    // rich-text-editor's TEXT is not asserted, and that is not an oversight: keeping its node is
-    // all this fix does for it. Its content is server-rendered children, so a morph patches them
-    // back to the value the page loaded with whether or not the node itself survived — a separate
-    // defect, and one whose fix (wire:ignore plus a repaint when the property changes) is a
-    // decision about who owns the editor's content, not about ids.
     await reporter.check('a field survives a re-render with its text and its focus', async () => {
         const typed = {};
 
@@ -556,7 +579,8 @@ export async function run({ browser, reporter }) {
             }, { testid, selector });
         }
 
-        return expect.equal(typed['mention-input'].text, 'hi there', 'mention-input value') ||
+        return expect.equal(typed['rich-text-editor'].text, 'half a sentence', 'rich-text-editor content') ||
+            expect.equal(typed['mention-input'].text, 'hi there', 'mention-input value') ||
             expect.equal(typed['markdown-editor'].text, '# draft', 'markdown-editor value') ||
             expect.truthy(
                 Object.values(typed).every((t) => t.focused),

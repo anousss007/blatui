@@ -29,23 +29,44 @@
         ['key' => 'clear',         'icon' => 'remove-formatting', 'label' => 'Clear formatting', 'clear' => true,    'state' => null],
     ];
 
-    // Livewire bridge — forward a consumer's wire:model onto the hidden mirror <textarea>.
-    // Inert without Livewire (an empty attribute bag renders nothing).
-    $wireAttrs = $attributes->whereStartsWith('wire:model');
-    $hasWire = filled($wireAttrs->getAttributes());
-    $attributes = $attributes->whereDoesntStartWith('wire:model');
+    // Livewire bridge — the editor's HTML binds through $blatModel (blatui-core.js) rather than
+    // through a wire:model forwarded onto the mirror <textarea>. The property path travels as a
+    // data attribute, so a morph that re-points the component is followed rather than missed, and
+    // reading the value inside an effect subscribes that effect to it: that is what lets a value
+    // the server assigns repaint an editor the morph is no longer allowed to touch.
+    $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
+    $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
+    if ($hasWire) {
+        $attributes = $attributes->whereDoesntStartWith('wire:model')->merge(array_filter([
+            'data-blat-model' => $wireModel->value(),
+            'data-blat-model-live' => $wireModel->hasModifier('live') ? '1' : null,
+        ]));
+    }
 @endphp
 
 <div
     data-slot="rich-text-editor"
     x-data="{
         active: {},
+        _model: $blatModel(@js((string) $value)),
+        get value() { return this._model.value },
+        set value(v) { this._model.value = v },
+
+        // The editor's HTML is the value. It goes to the bound property, and to the mirror
+        // <textarea> when there is one, so a plain <form> submits what is on screen.
         sync() {
-            if (this.$refs.input) {
-                this.$refs.input.value = this.$refs.editor.innerHTML;
-                // Notify Livewire (wire:model on the mirror) that the value changed.
-                this.$refs.input.dispatchEvent(new Event('input', { bubbles: true }));
-            }
+            const html = this.$refs.editor.innerHTML;
+            this.value = html;
+            if (this.$refs.input) this.$refs.input.value = html;
+        },
+
+        // Repaint from a value that did not come from the keyboard — a server assignment, or a
+        // property the component was re-pointed at. Reading `value` is what subscribes the
+        // x-effect calling this; the guard is what keeps it from rewriting (and so collapsing
+        // the caret in) the very HTML the user just typed.
+        repaint(el) {
+            const next = this.value ?? '';
+            if (next !== el.innerHTML) el.innerHTML = next;
         },
         run(cmd) {
             this.$refs.editor.focus();
@@ -84,7 +105,11 @@
             this.active = next;
         },
         init() {
-            this.sync();
+            // Seed the <form> mirror, but do NOT write the property: a deferred $set that nothing
+            // ever commits leaves the binding marked dirty client-side, and Livewire then holds
+            // back every value the server assigns to it for the life of the page. The editor and
+            // the property already agree at this point — both are the value that was rendered.
+            if (this.$refs.input) this.$refs.input.value = this.$refs.editor.innerHTML;
             this._onSel = () => this.refresh();
             document.addEventListener('selectionchange', this._onSel);
         },
@@ -133,6 +158,14 @@
         x-ref="editor"
         data-slot="rich-text-editor-content"
         contenteditable="true"
+        {{-- The content belongs to the browser once the user starts typing, so the morph is not
+             allowed into this subtree: its children are server-rendered, and a re-render would
+             otherwise patch them back to the value the page loaded with — silently deleting
+             whatever had been written since. `.children` keeps the element itself morphing, so
+             only the content is held back. What the server assigns still arrives, through the
+             effect below rather than through the morph. --}}
+        wire:ignore.children
+        x-effect="repaint($el)"
         role="textbox"
         aria-multiline="true"
         {{-- The name is carried on the element rather than by an id pair: an id this component
@@ -149,7 +182,9 @@
         class="min-h-40 w-full max-w-none px-3 py-3 text-sm leading-7 outline-none empty:before:text-muted-foreground empty:before:pointer-events-none empty:before:content-[attr(data-placeholder)] [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h1]:mb-2 [&_h1]:text-2xl [&_h1]:font-semibold [&_h2]:mb-2 [&_h2]:text-xl [&_h2]:font-semibold [&_li]:mt-1 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:ps-6 [&_p]:my-2 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:ps-6"
     >{!! $value !!}</div>
 
-    @if ($name || $hasWire)
-        <textarea x-ref="input" @if ($name) name="{{ $name }}" @endif {{ $wireAttrs }} class="hidden" aria-hidden="true" tabindex="-1">{!! $value !!}</textarea>
+    {{-- Mirror for a plain <form>: it carries the name and the value, nothing else. The Livewire
+         binding no longer rides on it. --}}
+    @if ($name)
+        <textarea x-ref="input" name="{{ $name }}" class="hidden" aria-hidden="true" tabindex="-1">{!! $value !!}</textarea>
     @endif
 </div>
