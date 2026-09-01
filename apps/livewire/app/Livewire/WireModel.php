@@ -47,6 +47,8 @@ class WireModel extends Component
 
     public $upload;
 
+    public string $story = '';           // rich-text-editor, deferred
+
     /** Assign from the server, to prove the components follow the property back. */
     public function seed(): void
     {
@@ -56,6 +58,7 @@ class WireModel extends Component
         $this->plan = 'Pro';
         $this->stay = ['from' => '2026-03-12', 'to' => '2026-03-16'];
         $this->price = [40, 60];
+        $this->story = '<p>from the server</p>';
     }
 
     public function tick(): void

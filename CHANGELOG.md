@@ -53,11 +53,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `segmented-control`/`variant-selector` now sits inside its `<label>`, so the styled element is
   the `<span>` within it — custom CSS reaching for that element by tag needs the span.
 
-  Known and **not** fixed here: `rich-text-editor`'s *content* is still patched back to the value
-  the page loaded with, because the editor's HTML is server-rendered children — a morph rewrites
-  them whether or not the node itself survives. Keeping it needs `wire:ignore` plus a repaint when
-  the bound property changes, which is a decision about who owns the editor's content rather than
-  an id fix, so it is left for its own change.
+- **`rich-text-editor` lost what you had written on any re-render.** Its content is its children,
+  and its children are server-rendered — so a morph patched them back to the value the page loaded
+  with, deleting everything typed since, with no error and nothing in the console. Surviving the
+  morph key (above) kept the *element*; this keeps what is in it. Found while fixing #27, and
+  separate from it: the id was never what wiped the text.
+
+  The morph is now kept out of that subtree (`wire:ignore.children` — the element itself still
+  morphs, only its content is held back), which means a value the server assigns can no longer
+  arrive through the morph either. So it arrives properly instead: the editor binds through
+  `$blatModel` like every other value-bearing component, and an `x-effect` reading that property
+  repaints the editor when the value changes to something other than what is already on screen —
+  the guard is what keeps it from rewriting, and so collapsing the caret into, the HTML the user is
+  in the middle of typing. A server assignment reaching the editor is new; before this it only ever
+  happened as a side effect of the same morph that was destroying the user's writing.
+
+  One trap worth naming: the editor used to write the property from `init()`. A deferred `$set`
+  that nothing ever commits leaves the binding marked dirty client-side, and Livewire then holds
+  back **every** value the server assigns to that property for the life of the page. It does not
+  write on init any more — at that point the editor and the property already hold the same thing,
+  because both are what was rendered.
+
+  The `name` mirror `<textarea>` is untouched and still submits with a plain `<form>`; without
+  Livewire the component behaves exactly as it did.
 
 ## [1.28.1] - 2026-08-22
 
