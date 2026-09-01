@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **A `file-upload` with no `id` of its own never left "uploading"** (#27). The progress bar reached
+  100% and stopped there for good: the thumbnail and filename never replaced the loading state, no
+  error was shown, and nothing in the console said anything — while server-side the upload had in
+  fact completed and the property held the temporary file. The `<input type="file">` carried a
+  generated id, re-rolled on every render. Livewire keys a morph on `wire:id`, then `wire:key`, then
+  the element's plain id, so the old and the new input read as *different elements* and morphdom
+  swapped the node instead of patching it — during the commit Livewire makes as part of its own
+  upload protocol. Livewire dispatches `livewire-upload-finish` on the input it captured when the
+  upload started, which by then was off the document, so the event never bubbled to the listeners on
+  the component root that move a row to `ready`. Passing `id` by hand was the workaround; it is not
+  needed now, and an id a consumer does pass still lands on the input.
+
+- **…and the same defect in eight more components**, found while fixing #27 and reproduced the same
+  way. Any component that generated its own id was replaced by every re-render, not just the one
+  that made it visible. Measured against a real Livewire runtime: `mention-input` lost the text
+  being typed into it, `rich-text-editor`, `markdown-editor`, `color-picker`, `segmented-control`
+  and `variant-selector` lost focus and caret, and `command-group` and `kanban` churned a node for
+  no reason. None of it announced itself — a re-render the user never asked for simply took the
+  field out from under them.
+
+  An id is now either **the consumer's**, which is stable by construction, or **Alpine's `$id()`**,
+  which Livewire's morph deliberately carries across a re-render (`seedingMatchingId`). Never the
+  server's:
+  - `mention-input`, `rich-text-editor`, `color-picker`, `file-upload` and `markdown-editor` render
+    an `id` only when they are given one. Where that id was the anchor of a `<label for>` or an
+    `aria-labelledby` to an `sr-only` node, the name now rides on the element as `aria-label` — the
+    same accessible name, one fewer node, and no idref to dangle.
+  - `segmented-control` and `variant-selector` put the radio **inside** its `<label>`. Pairing by
+    nesting needs no id at all and still works with no JS; the label is `display: contents`, so the
+    styled segment sits exactly where it did and stays the peer input's own sibling.
+  - `markdown-editor`'s tab/panel wiring and `kanban`'s hint idref come from Alpine's `$id()`, which
+    is scoped to the component and survives the morph.
+  - A generated *name* is untouched: `name` is not a morph key, and a radio group with no form name
+    of its own still needs one no other instance shares.
+
+  `tests/MorphStabilityTest.php` fails the build if any component renders an id it generated, and
+  `apps/livewire`'s `/generated-ids` route holds the behaviour under a real re-render: no
+  id-bearing element is replaced, and a field keeps its text and its focus.
+
+  Two shape changes worth knowing about, neither of which any *generated* id could have been
+  relied on for: `markdown-editor` puts an `id` you pass on the textarea itself rather than
+  prefixing it (`id="notes"` is now the textarea, not `notes-textarea`), and the radio in
+  `segmented-control`/`variant-selector` now sits inside its `<label>`, so the styled element is
+  the `<span>` within it — custom CSS reaching for that element by tag needs the span.
+
+  Known and **not** fixed here: `rich-text-editor`'s *content* is still patched back to the value
+  the page loaded with, because the editor's HTML is server-rendered children — a morph rewrites
+  them whether or not the node itself survives. Keeping it needs `wire:ignore` plus a repaint when
+  the bound property changes, which is a decision about who owns the editor's content rather than
+  an id fix, so it is left for its own change.
+
 ## [1.28.1] - 2026-08-22
 
 ### Fixed

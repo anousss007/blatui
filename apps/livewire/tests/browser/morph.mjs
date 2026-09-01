@@ -450,8 +450,134 @@ export async function run({ browser, reporter }) {
         return expect.equal(JSON.stringify(await prop('price')), '[41,60]', 'the property after one step of the low handle');
     });
 
+    // ------------------------------------------------------------ issue #27: the upload's own id
+    //
+    // Livewire drives the upload FROM the <input type=file>, and dispatches
+    // livewire-upload-finish on the node it captured when the upload started. That node has to
+    // still be in the document when it lands, or the event never bubbles to the listeners on the
+    // component root and the row never leaves 'uploading'. It was not: the input carried a
+    // generated id, re-rolled on every render, and Livewire's morph keys on `el.id` when there
+    // is no wire:key — so the commit Livewire makes as part of its OWN upload protocol saw a
+    // different key and swapped the input out from under the upload in flight.
+    //
+    // The property below resolving is what makes this worth asserting: the upload itself always
+    // worked. Only the browser was left saying otherwise, permanently.
+    await reporter.check('an upload with no id of its own reaches ready', async () => {
+        await page.setInputFiles('[data-testid=upload] input[type=file]', {
+            name: 'note.txt',
+            mimeType: 'text/plain',
+            buffer: Buffer.from('blatui'),
+        });
+
+        try {
+            await page.waitForSelector('[data-testid=upload] [data-slot="file-upload-item"][data-status=ready]', { timeout: 8000 });
+        } catch {
+            const status = await page
+                .$eval('[data-testid=upload] [data-slot="file-upload-item"]', (el) => el.dataset.status)
+                .catch(() => 'no row');
+
+            return `the row is "${status}" — stored server-side as ${JSON.stringify(await prop('upload'))}`;
+        }
+
+        return expect.truthy(await prop('upload'), 'the temporary upload on the server');
+    });
+
+    // The other half of the same fix: an id the consumer passes is theirs, and stays on the input.
+    await reporter.check('an id the consumer passes is still rendered', async () =>
+        expect.equal(await page.$eval('[data-testid=upload-keyed] input[type=file]', (el) => el.id), 'chosen-upload', 'the id prop on the input'));
+
     await reporter.check('no console errors on /wire-model', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/wire-model');
+
+    // --------------------------------------------------- issue #27: ids a component made up itself
+    //
+    // The morph key an element is compared on is wire:id, then wire:key, then its plain id. Nine
+    // components generated that id with Str::random, so every re-render produced a new key for the
+    // same element and morphdom replaced the node rather than patching it. The two assertions below
+    // are the two halves of what that cost: the node's identity, and the state only that node held.
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/generated-ids`);
+
+    const tick = async (n) => {
+        // Fired from JS, not by clicking: a click would move focus by itself, and focus is one of
+        // the things being measured.
+        await page.evaluate(() => window.Livewire.all()[0].$wire.tick());
+        await page.waitForFunction((t) => document.querySelector('[data-testid=ticks]')?.textContent === String(t), n);
+        await page.waitForTimeout(300);
+    };
+
+    // Mark every element carrying an id with an expando, which only survives on the same node.
+    await page.evaluate(() => {
+        window.__marked = [];
+        document.querySelectorAll('[data-testid] [id]').forEach((el, i) => {
+            el.__probe = i;
+            window.__marked.push({ i, id: el.id, owner: el.closest('[data-testid]').dataset.testid });
+        });
+    });
+    await tick(1);
+
+    await reporter.check('a re-render replaces no element that carries an id', async () => {
+        const replaced = await page.evaluate(() => {
+            const alive = new Set();
+            document.querySelectorAll('*').forEach((el) => el.__probe !== undefined && alive.add(el.__probe));
+
+            return window.__marked.filter((m) => !alive.has(m.i)).map((m) => `${m.owner} (#${m.id})`);
+        });
+
+        return expect.empty(replaced, 'elements swapped out by the morph');
+    });
+
+    // What the swap actually cost. A field the user is typing in is the whole point of the fix.
+    //
+    // rich-text-editor's TEXT is not asserted, and that is not an oversight: keeping its node is
+    // all this fix does for it. Its content is server-rendered children, so a morph patches them
+    // back to the value the page loaded with whether or not the node itself survived — a separate
+    // defect, and one whose fix (wire:ignore plus a repaint when the property changes) is a
+    // decision about who owns the editor's content, not about ids.
+    await reporter.check('a field survives a re-render with its text and its focus', async () => {
+        const typed = {};
+
+        for (const [testid, selector, text] of [
+            ['rich-text-editor', '[contenteditable]', 'half a sentence'],
+            ['mention-input', 'textarea', 'hi there'],
+            ['markdown-editor', 'textarea', '# draft'],
+        ]) {
+            await page.click(`[data-testid=${testid}] ${selector}`);
+            await page.keyboard.type(text);
+            await tick(Object.keys(typed).length + 2);
+
+            typed[testid] = await page.evaluate(({ testid: id, selector: sel }) => {
+                const el = document.querySelector(`[data-testid=${id}] ${sel}`);
+
+                return {
+                    text: (el.value ?? el.textContent).trim(),
+                    focused: document.activeElement === el,
+                };
+            }, { testid, selector });
+        }
+
+        return expect.equal(typed['mention-input'].text, 'hi there', 'mention-input value') ||
+            expect.equal(typed['markdown-editor'].text, '# draft', 'markdown-editor value') ||
+            expect.truthy(
+                Object.values(typed).every((t) => t.focused),
+                `focus was lost by: ${Object.entries(typed).filter(([, t]) => !t.focused).map(([k]) => k).join(', ')}`,
+            );
+    });
+
+    // The wiring those ids used to carry still resolves — a name read off a dangling idref is
+    // worse than the swap it replaced.
+    await reporter.check('every idref still points at something', async () => {
+        const dangling = await page.$$eval('[data-testid] [aria-labelledby], [data-testid] [aria-controls], [data-testid] [aria-describedby], [data-testid] label[for]', (els) =>
+            els.flatMap((el) => ['aria-labelledby', 'aria-controls', 'aria-describedby', 'for']
+                .flatMap((attr) => (el.getAttribute(attr) || '').split(/\s+/).filter(Boolean))
+                .filter((id) => !document.getElementById(id))
+                .map((id) => `${el.closest('[data-testid]').dataset.testid}: ${id}`)));
+
+        return expect.empty(dangling, 'idrefs pointing at nothing');
+    });
+
+    await reporter.check('no console errors on /generated-ids', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/generated-ids');
 
     await page.close();
 }

@@ -19,8 +19,6 @@
             })->all(),
         ];
     })->all();
-
-    $hintId = 'kanban-hint-'.\Illuminate\Support\Str::random(6);
 @endphp
 
 <div
@@ -59,9 +57,13 @@
     tabindex="0"
     role="group"
     aria-label="Kanban board"
-    aria-describedby="{{ $hintId }}"
+    {{-- The idref comes from Alpine, not the server: an id generated per render is a fresh
+         morph key per render, and Livewire replaces the element rather than patching it. The
+         hint describes a drag interaction that only exists with Alpine anyway. #27 --}}
+    x-id="['kanban-hint']"
+    :aria-describedby="$id('kanban-hint')"
 >
-    <p id="{{ $hintId }}" class="sr-only">
+    <p :id="$id('kanban-hint')" class="sr-only">
         Drag a card with the mouse to move it between columns. Each card is a focusable item within its column.
     </p>
 

@@ -24,8 +24,6 @@
     // A stable name keeps the radios in one native group — that gives roving focus and
     // arrow-key navigation for free, and lets the selection submit with a form.
     $groupName = $name ?? ('segmented-control-' . \Illuminate\Support\Str::random(6));
-    // A unique base so every radio/label `for` pairing is collision-free across instances.
-    $uid = 'segmented-control-' . \Illuminate\Support\Str::random(8);
 
     $tracks = [
         'sm' => 'h-8 p-0.5 text-xs',
@@ -57,38 +55,44 @@
     @foreach ($items as $i => $item)
         @php
             $checked = $value !== null && (string) $value === $item['value'];
-            $inputId = $uid . '-' . $i;
         @endphp
         {{-- Wrapper flexes each segment to equal width and scopes the peer input to its own label. --}}
         <span data-slot="segmented-control-item" data-value="{{ $item['value'] }}" class="relative inline-flex min-w-0 flex-1 shrink-0">
-            {{-- Visually-hidden real radio: native group semantics, keyboard, and form submission. --}}
-            <input
-                type="radio"
-                id="{{ $inputId }}"
-                name="{{ $groupName }}"
-                value="{{ $item['value'] }}"
-                class="peer sr-only"
-                @checked($checked)
-                @disabled($disabled)
-                {{ $wireAttrs }}
-            >
-            {{-- The styled segment. peer-checked gives the raised/filled active look (more than colour). --}}
-            <label
-                for="{{ $inputId }}"
-                @class([
-                    'inline-flex w-full min-w-0 items-center justify-center whitespace-nowrap rounded-md font-medium text-muted-foreground transition-[color,box-shadow] outline-none',
-                    'peer-checked:bg-background peer-checked:text-foreground peer-checked:shadow-sm',
-                    'peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50',
-                    '[&_svg]:pointer-events-none [&_svg]:shrink-0',
-                    $segment,
-                    'cursor-pointer hover:text-foreground' => ! $disabled,
-                    'cursor-not-allowed' => $disabled,
-                ])
-            >
-                @if ($item['icon'])
-                    <x-dynamic-component :component="'lucide-' . $item['icon']" aria-hidden="true" />
-                @endif
-                <span>{{ $item['label'] }}</span>
+            {{-- The radio sits INSIDE its label, which is what pairs the two. A `for`/`id` pair
+                 needs an id, and an id this component generated would be a fresh morph key on
+                 every render: Livewire keys on `el.id` absent a wire:key, so it replaced the
+                 segment rather than patching it, and the arrow keys lost the group the user was
+                 moving through. Nesting needs no id, and still pairs with no JS at all. #27
+                 The label is `display: contents`, so the styled span sits exactly where the
+                 label used to and stays the peer input's own sibling. --}}
+            <label class="contents">
+                {{-- Visually-hidden real radio: native group semantics, keyboard, and form submission. --}}
+                <input
+                    type="radio"
+                    name="{{ $groupName }}"
+                    value="{{ $item['value'] }}"
+                    class="peer sr-only"
+                    @checked($checked)
+                    @disabled($disabled)
+                    {{ $wireAttrs }}
+                >
+                {{-- The styled segment. peer-checked gives the raised/filled active look (more than colour). --}}
+                <span
+                    @class([
+                        'inline-flex w-full min-w-0 items-center justify-center whitespace-nowrap rounded-md font-medium text-muted-foreground transition-[color,box-shadow] outline-none',
+                        'peer-checked:bg-background peer-checked:text-foreground peer-checked:shadow-sm',
+                        'peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50',
+                        '[&_svg]:pointer-events-none [&_svg]:shrink-0',
+                        $segment,
+                        'cursor-pointer hover:text-foreground' => ! $disabled,
+                        'cursor-not-allowed' => $disabled,
+                    ])
+                >
+                    @if ($item['icon'])
+                        <x-dynamic-component :component="'lucide-' . $item['icon']" aria-hidden="true" />
+                    @endif
+                    <span>{{ $item['label'] }}</span>
+                </span>
             </label>
         </span>
     @endforeach

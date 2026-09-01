@@ -37,9 +37,6 @@
         '#ec4899', // pink
         '#111827', // near-black
     ];
-
-    // Stable id so the sr-only <label> can target the hex <input>.
-    $fieldId = $id ?: 'color-picker-'.\Illuminate\Support\Str::random(6);
 @endphp
 
 <div
@@ -205,11 +202,13 @@
                 />
             </div>
 
-            {{-- Hex text input with sr-only label. --}}
+            {{-- Hex text input. Its name rides on the element rather than on a <label for>: the id
+                 that pair needed was generated per render, which is a new morph key every time, and
+                 Livewire replaced the field mid-keystroke. A consumer's own id still lands. #27 --}}
             <div class="flex flex-col gap-1.5">
-                <label for="{{ $fieldId }}" class="sr-only">Hex colour value</label>
                 <input
-                    id="{{ $fieldId }}"
+                    @if ($id) id="{{ $id }}" @endif
+                    aria-label="{{ __('Hex colour value') }}"
                     type="text"
                     inputmode="text"
                     autocomplete="off"
