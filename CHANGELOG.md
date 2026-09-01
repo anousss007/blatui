@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.29.0] - 2026-09-02
+
 ### Fixed
 - **A `file-upload` with no `id` of its own never left "uploading"** (#27). The progress bar reached
   100% and stopped there for good: the thumbnail and filename never replaced the loading state, no
@@ -1337,7 +1339,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.28.1...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.29.0...HEAD
+[1.29.0]: https://github.com/anousss007/blatui/compare/v1.28.1...v1.29.0
 [1.28.1]: https://github.com/anousss007/blatui/compare/v1.28.0...v1.28.1
 [1.28.0]: https://github.com/anousss007/blatui/compare/v1.27.0...v1.28.0
 [1.27.0]: https://github.com/anousss007/blatui/compare/v1.26.1...v1.27.0
