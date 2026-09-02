@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.30.0] - 2026-09-02
+
+### Added
+- **`file-upload` can be handed the file the record already has** (#29), through a new `value` prop:
+  a URL, a list of URLs, or maps with `url`/`name`/`size`/`image`. Each becomes an ordinary row —
+  the same thumbnail, the same name and size, the same remove button — so an edit form no longer
+  has to rebuild that preview by hand outside the component, which is what every consumer with a
+  saved avatar, logo or attachment was doing. It is the field's *current value*, which is the one
+  thing a file input could not express: `wire:model` carries the upload in flight, never the one
+  that finished last week.
+
+  Removing such a row dispatches **`file-remove`** (`{ url, name }`) instead of withdrawing an
+  upload. The component can take back a temporary file it uploaded itself; a file that was already
+  saved belongs to the consumer's record, and saying it went is the most it can honestly do.
+
+### Fixed
+- **A `file-upload` kept showing the previous record's file** (#29). Reuse one across two openings
+  of the same modal — create a record, save, open the form again — and the thumbnail from the first
+  was still sitting there, with the bound property back to `null` on the server. Surviving the morph
+  (#27) is what made this reachable: the component is *patched* now rather than replaced, so its
+  list is never rebuilt, and nothing was listening for the server letting the file go. It was the
+  only value-bearing component in the library keeping a private copy of state the server owns —
+  every other one reads its value through `$blatModel`, and a re-render brings the server's answer
+  back down. `file-upload` now does too: an `x-effect` reads the bound property, and a finished
+  upload the property no longer names loses its row. Rows still uploading, rows that failed, and
+  files that came from `value` are left alone. The dynamic `wire:key` people were using to force a
+  fresh mount on every opening is no longer needed.
+
+
 ## [1.29.0] - 2026-09-02
 
 ### Fixed
@@ -1339,7 +1368,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.29.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.30.0...HEAD
+[1.30.0]: https://github.com/anousss007/blatui/compare/v1.29.0...v1.30.0
 [1.29.0]: https://github.com/anousss007/blatui/compare/v1.28.1...v1.29.0
 [1.28.1]: https://github.com/anousss007/blatui/compare/v1.28.0...v1.28.1
 [1.28.0]: https://github.com/anousss007/blatui/compare/v1.27.0...v1.28.0

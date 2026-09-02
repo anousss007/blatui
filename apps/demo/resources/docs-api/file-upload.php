@@ -31,6 +31,11 @@ return [
             'description' => 'A human-readable size hint (e.g. "Up to 10MB") shown in the dropzone. Display only — not enforced.',
         ],
         [
+            'name' => 'value',
+            'type' => 'string|array',
+            'description' => 'The file(s) the field already holds — what an edit form has saved against the record. A URL, a list of URLs, or maps with url/name/size/image. Each becomes an ordinary row with the same thumbnail and the same remove button, so the preview does not have to be rebuilt outside the component. Removing one dispatches file-remove; the component cannot delete a file it did not upload.',
+        ],
+        [
             'name' => 'disabled',
             'type' => 'bool',
             'default' => 'false',
@@ -39,7 +44,7 @@ return [
         [
             'name' => 'id',
             'type' => 'string',
-            'description' => 'Id for the hidden file input. A random id is generated when omitted.',
+            'description' => 'Id for the hidden file input. None is generated when omitted — a per-render id would be a per-render morph key, and Livewire would replace the input mid-upload.',
         ],
     ],
 
@@ -50,7 +55,16 @@ return [
         ],
         [
             'name' => 'remove(index)',
-            'description' => 'Remove the file at the given index: drops the row, revokes its preview URL, withdraws the temporary Livewire upload (or takes the file back off the native input when there is no wire:model).',
+            'description' => 'Remove the file at the given index: drops the row, revokes its preview URL, withdraws the temporary Livewire upload (or takes the file back off the native input when there is no wire:model). A row that came from value is only announced — see file-remove.',
+        ],
+    ],
+
+    'events' => [
+        [
+            'name' => 'file-remove',
+            'direction' => 'out',
+            'detail' => '{ url, name }',
+            'description' => 'A row that came from value was removed. The file is already saved and is not the component\'s to delete, so this is how it says so — listen for it to clear the column on your record.',
         ],
     ],
 ];

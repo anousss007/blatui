@@ -245,6 +245,30 @@ const CHECKS = {
         });
     },
 
+    // The value prop is the only way a row exists before the user has picked anything, and it
+    // is what an edit form leans on. Removing one has to take the row off AND say so — the file
+    // is already saved, so the component cannot withdraw it the way it withdraws an upload. #29
+    async 'file-upload'(page, { reporter, at }) {
+        await reporter.check(`file-upload: a preloaded file is a row you can remove ${at}`, async () => {
+            const rows = page.locator('[data-slot="file-upload-item"][data-existing]');
+            await rows.first().scrollIntoViewIfNeeded();
+            const before = await rows.count();
+
+            const heard = await page.evaluate(() => new Promise((resolve) => {
+                document.addEventListener('file-remove', (e) => resolve(e.detail?.name ?? null), { once: true });
+                setTimeout(() => resolve(false), 2000);
+                document.querySelector('[data-slot="file-upload-item"][data-existing] button').click();
+            }));
+            await page.waitForTimeout(200);
+
+            return (
+                expect.truthy(before > 0, 'no preloaded row on the page') ??
+                expect.truthy(heard, 'no file-remove event reached the page') ??
+                expect.equal(await rows.count(), before - 1, 'preloaded rows after removing one')
+            );
+        });
+    },
+
     async carousel(page, { reporter, at }) {
         await reporter.check(`carousel: next moves the slides ${at}`, async () => {
             // Assert on where the slide actually is, not on how the component moves it.

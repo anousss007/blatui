@@ -98,6 +98,33 @@ class ComponentRenderTest extends TestCase
         $this->assertStringContainsString('text-primary', $html);
     }
 
+    /** The value prop normalises to one shape, whatever it was given. #29 */
+    public function test_file_upload_value_seeds_the_existing_files(): void
+    {
+        $html = $this->render('<x-ui.file-upload :value="\'/logos/acme.png\'" />');
+        $this->assertStringContainsString('data-blat-value="', $html);
+        $this->assertStringContainsString('acme.png', $html);
+        $this->assertStringContainsString('&quot;image&quot;:true', $html);
+    }
+
+    public function test_file_upload_value_accepts_a_map_and_a_list(): void
+    {
+        $html = $this->render(
+            '<x-ui.file-upload :value="[[\'url\' => \'/a/contract.pdf\', \'name\' => \'Contract\', \'size\' => 1024]]" />'
+        );
+        $this->assertStringContainsString('&quot;name&quot;:&quot;Contract&quot;', $html);
+        $this->assertStringContainsString('&quot;size&quot;:1024', $html);
+        // A pdf is not drawn as a thumbnail.
+        $this->assertStringContainsString('&quot;image&quot;:false', $html);
+    }
+
+    public function test_file_upload_without_value_carries_no_seed(): void
+    {
+        $html = $this->render('<x-ui.file-upload />');
+        // The attribute, not the mention of it in the x-data comment above it.
+        $this->assertStringNotContainsString('data-blat-value="', $html);
+    }
+
     public function test_rating_renders_hidden_input(): void
     {
         $html = $this->render('<x-ui.rating name="r" :value="3" />');

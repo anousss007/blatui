@@ -24,6 +24,11 @@ use Livewire\WithFileUploads;
  *
  * The file half is issue #23: the per-file progress bar was a setInterval animating to 100% in
  * about a second, unconnected to the upload. Now it is Livewire's own upload progress.
+ *
+ * The file half again, as issue #29: since the component survives the morph (#27) rather than
+ * being replaced by it, its list survives too — including across a reset. A modal reused to
+ * create a second record came up showing the first record's thumbnail, with the property back to
+ * null on the server. clearUpload() below is that reset, and the component now follows it.
  */
 class WireModel extends Component
 {
@@ -46,6 +51,12 @@ class WireModel extends Component
     public array $price = [20, 80];                    // slider, range
 
     public $upload;
+
+    /** The reset a form does after saving — the property the field is bound to goes back to null. */
+    public function clearUpload(): void
+    {
+        $this->upload = null;
+    }
 
     public string $story = '';           // rich-text-editor, deferred
 

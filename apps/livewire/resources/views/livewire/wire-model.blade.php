@@ -4,6 +4,7 @@
     <div class="mt-6 flex gap-3">
         <x-ui.button wire:click="tick" data-testid="tick">Re-render</x-ui.button>
         <x-ui.button wire:click="seed" variant="outline" data-testid="seed">Set from the server</x-ui.button>
+        <x-ui.button wire:click="clearUpload" variant="outline" data-testid="clear-upload">Reset the upload</x-ui.button>
     </div>
     <p class="text-muted-foreground mt-2 text-sm">ticks: <span data-testid="ticks">{{ $ticks }}</span></p>
 
@@ -63,6 +64,18 @@
              the input the label/for of a surrounding form would point at. Issue #27. --}}
         <div data-testid="upload-keyed">
             <x-ui.file-upload id="chosen-upload" />
+        </div>
+
+        {{-- A file the record already holds. The data: URI keeps the thumbnail off the network —
+             a 404 here would be a console error, and this page asserts there are none. #29 --}}
+        <div data-testid="upload-existing" x-data="{ removed: '' }" x-on:file-remove="removed = $event.detail.name">
+            <x-ui.file-upload :value="[[
+                'url' => 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\'%3E%3C/svg%3E',
+                'name' => 'saved-logo.svg',
+                'size' => 1240,
+                'image' => true,
+            ]]" />
+            <p class="text-sm">removed: <span data-testid="echo-removed" x-text="removed"></span></p>
         </div>
     </div>
 </div>

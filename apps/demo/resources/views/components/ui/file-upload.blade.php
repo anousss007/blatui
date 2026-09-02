@@ -3,6 +3,7 @@
     'multiple' => false,
     'accept' => null,
     'maxSizeLabel' => null,
+    'value' => null,
     'id' => null,
     'disabled' => false,
 ])
@@ -24,17 +25,48 @@
     ]);
     $hint = $hintBits ? implode(' · ', $hintBits) : null;
 
+    // What the field ALREADY holds — the file saved against the record being edited, which the
+    // component has no other way of knowing about: wire:model carries the upload in progress,
+    // never the one that finished three days ago. Accepts a URL, a list of URLs, or maps with
+    // name/size/image, and each one becomes an ordinary row: same thumbnail, same remove button.
+    // Without this an edit form has to rebuild that row by hand, outside the component. #29
+    $given = is_array($value)
+        ? (array_key_exists('url', $value) ? [$value] : $value)
+        : (($value === null || $value === '') ? [] : [$value]);
+
+    $initial = [];
+    foreach ($given as $item) {
+        $item = is_array($item) ? $item : ['url' => $item];
+        $url = trim((string) ($item['url'] ?? ''));
+        if ($url === '') {
+            continue;
+        }
+        $path = parse_url($url, PHP_URL_PATH) ?: $url;
+        $initial[] = [
+            'url' => $url,
+            'name' => (string) ($item['name'] ?? (basename($path) ?: $url)),
+            'size' => isset($item['size']) ? (int) $item['size'] : null,
+            // Whether to draw it as a thumbnail. Guessed from the extension, because a URL is
+            // all we are given; pass 'image' in the map to say so outright.
+            'image' => (bool) ($item['image'] ?? preg_match('/\.(avif|gif|jpe?g|png|svg|webp)(\?|#|$)/i', $url)),
+        ];
+    }
+
     // Livewire bridge — a consumer's wire:model rides on the real <input type=file>, which is
     // Livewire's upload target: it uploads the selection itself and reports what is actually
     // happening by dispatching livewire-upload-{start,progress,finish,error,cancel} from that
     // input. Those events are what drives the progress bar below. The property name travels as
-    // a data attribute too, so removing a row can withdraw the upload server-side.
+    // a data attribute too, so removing a row can withdraw the upload server-side — and so the
+    // effect below can READ the property and follow it back down when the server clears it.
     // Inert without Livewire: an empty bag renders nothing and this is a plain form field.
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
     $wireAttrs = $attributes->whereStartsWith('wire:model');
     $attributes = $attributes->whereDoesntStartWith('wire:model');
     if ($hasWire) { $attributes = $attributes->merge(['data-blat-model' => $wireModel->value()]); }
+    // Read off the attribute rather than baked into x-data, which Alpine evaluates exactly once:
+    // a modal reused for a second record renders a different value, and the list has to follow.
+    if ($initial) { $attributes = $attributes->merge(['data-blat-value' => json_encode($initial, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]); }
 @endphp
 
 <div
@@ -45,6 +77,16 @@
         seq: 0,
         disabled: @js((bool) $disabled),
         multiple: @js((bool) $multiple),
+
+        // The bound property, read through the same bridge every other value-bearing component
+        // uses. Nothing is written through it — withdraw() still talks to $wire directly — but
+        // reading it inside an effect subscribes that effect to it, which is the whole point:
+        // the server clearing the property is a fact this component had no way of hearing.
+        _model: $blatModel(null),
+
+        // The data-blat-value we last seeded the existing rows from, so a re-render that hands
+        // over the same value does not rebuild rows the user may have removed since.
+        seedKey: null,
 
         // Is anything actually going to upload these? Read back off the input rather than
         // remembered, for the same reason the bound property is: a morph can add or remove the
@@ -74,13 +116,18 @@
                 name: file.name,
                 size: file.size,
                 type: file.type,
+                image: !!(file.type && file.type.startsWith('image/')),
                 url: file.type && file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+                // Only a URL this component minted may be revoked; an existing file's URL
+                // belongs to the page and has to outlive the row.
+                blob: !!(file.type && file.type.startsWith('image/')),
                 progress: 0,
                 // Nothing is in flight when there is no upload target — the file is simply
                 // selected, and will travel with the surrounding <form>.
                 status: this.uploads ? 'uploading' : 'ready',
                 error: null,
                 tmp: null,
+                existing: false,
             }));
             // A single-file field holds one selection: the new pick replaces the old one, the
             // way the native input it wraps does.
@@ -118,9 +165,21 @@
         remove(index) {
             const entry = this.files[index];
             if (!entry) return;
-            if (entry.url) URL.revokeObjectURL(entry.url);
+            if (entry.blob) URL.revokeObjectURL(entry.url);
             this.files.splice(index, 1);
-            this.withdraw(entry);
+            if (entry.existing) this.announce(entry);
+            else this.withdraw(entry);
+        },
+
+        // A file that was already saved when the page rendered is not this component's to
+        // delete: there is no temporary upload to withdraw and nothing on the native input.
+        // Saying it went is the most it can do — the record the file hangs off is the
+        // consumer's. Dispatched from $root so it still bubbles once the row is gone.
+        announce(entry) {
+            this.$root.dispatchEvent(new CustomEvent('file-remove', {
+                bubbles: true,
+                detail: { url: entry.url, name: entry.name },
+            }));
         },
 
         // Removing a row has to remove the file, not just its row: server-side it is already
@@ -135,7 +194,10 @@
             this.syncInput();
         },
         clearAll() {
-            this.files.forEach((entry) => entry.url && URL.revokeObjectURL(entry.url));
+            this.files.forEach((entry) => {
+                if (entry.existing) this.announce(entry);
+                if (entry.blob) URL.revokeObjectURL(entry.url);
+            });
             this.files = [];
         },
         // Keep the native input's FileList equal to what the list shows, so a <form> submits
@@ -145,6 +207,67 @@
             const dt = new DataTransfer();
             this.files.forEach((entry) => entry.file && dt.items.add(entry.file));
             this.$refs.input.files = dt.files;
+        },
+
+        // ---- what the SERVER says this field holds ----
+        // Reading the property here is what subscribes the x-effect below to it. The work is
+        // deferred to a microtask so that writing `files` is not itself a dependency of the
+        // effect doing the writing.
+        sync() {
+            const held = this._model.value;
+            const seed = this.$root.dataset.blatValue || '';
+            queueMicrotask(() => this.reconcile(seed, held));
+        },
+
+        reconcile(seed, held) {
+            if (seed !== this.seedKey) { this.seedKey = seed; this.hydrate(seed); }
+            if (!this.uploads) return;
+
+            // The temporary uploads the property still names. Livewire tags them
+            // (`livewire-file:foo.png`); rows remember the bare filename, so the tag comes off.
+            const list = Array.isArray(held) ? held : (held === null || held === undefined ? [] : [held]);
+            const names = list
+                .map((v) => (typeof v === 'string' ? v.replace(/^livewire-files?:/, '') : null))
+                .filter(Boolean);
+            const empty = !list.length || (list.length === 1 && list[0] === '');
+
+            // Anything else in there — a stored path the consumer swapped in, say — is not ours
+            // to interpret, and a row is better kept than wrongly dropped.
+            if (!empty && !names.length) return;
+
+            // A finished upload the property no longer names is a file the server has let go:
+            // the form was reset, or the modal reopened for the next record. Since #27 this
+            // component is patched rather than replaced, so nothing else would clear the row.
+            // Rows still uploading, rows that failed, and existing files are all left alone.
+            this.files = this.files.filter((entry) => {
+                if (entry.existing || entry.status !== 'ready' || entry.tmp === null) return true;
+                if (names.includes(entry.tmp)) return true;
+                if (entry.blob) URL.revokeObjectURL(entry.url);
+                return false;
+            });
+        },
+
+        // Rebuild the rows for the already-saved files. What the user picked in this session is
+        // theirs and stays; only the server-rendered half is replaced.
+        hydrate(seed) {
+            let items = [];
+            try { items = seed ? JSON.parse(seed) : []; } catch (e) { items = []; }
+            this.files = this.files.filter((entry) => !entry.existing);
+            this.files.unshift(...items.map((item) => ({
+                id: ++this.seq,
+                file: null,
+                name: item.name,
+                size: item.size,
+                type: null,
+                image: !!item.image,
+                url: item.url,
+                blob: false,
+                progress: 100,
+                status: 'ready',
+                error: null,
+                tmp: null,
+                existing: true,
+            })));
         },
 
         onChange(event) {
@@ -168,9 +291,11 @@
             this.$refs.input.click();
         },
         destroy() {
-            this.files.forEach((f) => f.url && URL.revokeObjectURL(f.url));
+            this.files.forEach((f) => f.blob && URL.revokeObjectURL(f.url));
         },
     }"
+    {{-- Seeds the existing rows, and follows the bound property when the server clears it. --}}
+    x-effect="sync()"
     {{-- Livewire's own upload events, bubbling up from the <input> it drives. Spelled x-on:
          rather than @, because Blade reads `@livewire-…` as the @livewire directive. --}}
     x-on:livewire-upload-progress="onProgress($event)"
@@ -228,13 +353,14 @@
             <li
                 data-slot="file-upload-item"
                 :data-status="file.status"
+                :data-existing="file.existing || null"
                 class="bg-card flex items-center gap-3 rounded-lg border p-2.5 shadow-xs"
             >
                 {{-- Thumbnail for images, generic icon otherwise. --}}
-                <template x-if="file.url">
+                <template x-if="file.url && file.image">
                     <img :src="file.url" :alt="file.name" class="size-10 shrink-0 rounded-md object-cover" />
                 </template>
-                <template x-if="!file.url">
+                <template x-if="!(file.url && file.image)">
                     <span class="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-md">
                         <x-lucide-file class="size-5" aria-hidden="true" />
                     </span>
@@ -243,11 +369,13 @@
                 <div class="flex min-w-0 flex-1 flex-col gap-1">
                     <div class="flex items-center justify-between gap-2">
                         <span class="text-foreground truncate text-sm font-medium" x-text="file.name"></span>
-                        <span class="text-muted-foreground shrink-0 text-xs tabular-nums" x-text="formatBytes(file.size)"></span>
+                        {{-- An already-saved file arrives as a URL; its size is only known if
+                             the consumer passed one, and "0 B" would be a lie. --}}
+                        <span x-show="file.size" class="text-muted-foreground shrink-0 text-xs tabular-nums" x-text="formatBytes(file.size)"></span>
                     </div>
                     {{-- Per-file progress — the width is Livewire's own upload progress, so the bar
                          only exists when there is an upload for it to report. --}}
-                    <template x-if="uploads && file.status !== 'error'">
+                    <template x-if="uploads && !file.existing && file.status !== 'error'">
                         <div
                             class="bg-muted h-1.5 w-full overflow-hidden rounded-full"
                             role="progressbar"

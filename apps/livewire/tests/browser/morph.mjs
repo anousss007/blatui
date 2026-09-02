@@ -515,6 +515,47 @@ export async function run({ browser, reporter }) {
     await reporter.check('an id the consumer passes is still rendered', async () =>
         expect.equal(await page.$eval('[data-testid=upload-keyed] input[type=file]', (el) => el.id), 'chosen-upload', 'the id prop on the input'));
 
+    // ------------------------------------------- issue #29: the row a reset was supposed to take
+    //
+    // Surviving the morph (#27) is what made this reachable: the component is patched now, so its
+    // list is never rebuilt, and nothing was listening for the server letting the file go. A modal
+    // reused to create a second record came up still showing the first one's thumbnail — with the
+    // property back to null underneath it. The row now follows the property it claims to show.
+    await reporter.check('a reset on the server takes the finished upload off the list', async () => {
+        await page.click('[data-testid=clear-upload]');
+        await page.waitForFunction(
+            () => document.querySelector('[data-testid=echo-upload]')?.textContent.trim() === 'null',
+            null,
+            { timeout: 5000 },
+        );
+        await page.waitForTimeout(400);
+
+        const rows = await page.$$eval('[data-testid=upload] [data-slot="file-upload-item"]', (els) => els.length);
+
+        return expect.equal(rows, 0, 'rows left after the property went back to null');
+    });
+
+    // The other half of #29: a file the record already holds is a row like any other, and the one
+    // thing the component cannot do to it is delete it — so removing it says so instead.
+    await reporter.check('a file the server preloaded renders as a row', async () =>
+        expect.equal(
+            await page.$eval('[data-testid=upload-existing] [data-slot="file-upload-item"][data-existing]', (el) =>
+                el.querySelector('img')?.getAttribute('alt')),
+            'saved-logo.svg',
+            'the preloaded row',
+        ));
+
+    await reporter.check('removing a preloaded file announces it rather than withdrawing it', async () => {
+        await page.click('[data-testid=upload-existing] [data-slot="file-upload-item"] button');
+        await page.waitForTimeout(250);
+
+        return expect.equal(
+            await page.$eval('[data-testid=echo-removed]', (el) => el.textContent.trim()),
+            'saved-logo.svg',
+            'the file-remove detail the consumer heard',
+        );
+    });
+
     await reporter.check('no console errors on /wire-model', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/wire-model');
 
