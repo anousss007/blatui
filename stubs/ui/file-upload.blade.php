@@ -88,6 +88,23 @@
         // over the same value does not rebuild rows the user may have removed since.
         seedKey: null,
 
+        init() {
+            // The seed is a server-rendered ATTRIBUTE, and an attribute is not a reactive
+            // dependency: the x-effect below re-runs when the bound PROPERTY moves, which in an
+            // edit form is precisely the thing that never moves — the upload property is null
+            // before the dialog opens and null after. And a dialog is teleported and shown
+            // rather than unmounted, so it is the same Alpine component for every record and
+            // nothing re-evaluates when the server sends the next one's file. The field then
+            // shows a file belonging to a record nobody is editing any more. Issue #30.
+            //
+            // Same reasoning as keepWired() in blatui-core.js, and a MutationObserver for the
+            // same reason: wiring derived from the DOM has to be re-derived when the DOM
+            // changes, and only the observer sees that under Livewire, Turbo or a bare
+            // replaceWith. reconcile() is idempotent, so seeing our own writes costs a no-op.
+            this._seedWatch = new MutationObserver(() => this.pull());
+            this._seedWatch.observe(this.$root, { attributes: true, attributeFilter: ['data-blat-value'] });
+        },
+
         // Is anything actually going to upload these? Read back off the input rather than
         // remembered, for the same reason the bound property is: a morph can add or remove the
         // wire:model, and a bar that animates for an upload nobody started is the bug this
@@ -219,6 +236,11 @@
             queueMicrotask(() => this.reconcile(seed, held));
         },
 
+        /** Both doors at once, for a caller that is not an effect and needs no subscription. */
+        pull() {
+            this.reconcile(this.$root.dataset.blatValue || '', this._model.value);
+        },
+
         reconcile(seed, held) {
             if (seed !== this.seedKey) { this.seedKey = seed; this.hydrate(seed); }
             if (!this.uploads) return;
@@ -291,6 +313,7 @@
             this.$refs.input.click();
         },
         destroy() {
+            this._seedWatch?.disconnect();
             this.files.forEach((f) => f.blob && URL.revokeObjectURL(f.url));
         },
     }"

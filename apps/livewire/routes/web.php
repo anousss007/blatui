@@ -3,6 +3,7 @@
 use App\Livewire\DataTable;
 use App\Livewire\DialogField;
 use App\Livewire\DialogPopover;
+use App\Livewire\DialogValue;
 use App\Livewire\FieldValidation;
 use App\Livewire\GeneratedIds;
 use App\Livewire\Greenfield;
@@ -19,6 +20,7 @@ Route::get('/', fn () => redirect('/field'));
 Route::get('/field', FieldValidation::class);
 Route::get('/dialog-field', DialogField::class);
 Route::get('/dialog-popover', DialogPopover::class);
+Route::get('/dialog-value', DialogValue::class);
 Route::get('/label-wiring', LabelWiring::class);
 Route::get('/native-dialog', NativeDialog::class);
 Route::get('/data-table', DataTable::class);

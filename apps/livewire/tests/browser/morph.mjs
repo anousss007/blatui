@@ -559,6 +559,50 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /wire-model', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/wire-model');
 
+    // ------------------------------------- issue #30: a dialog reused for the next record
+    //
+    // <x-ui.dialog> teleports its content to <body> and shows it, so it never unmounts: the same
+    // Alpine component serves every record. The seed arrives as a server-rendered attribute, and
+    // an attribute is not a reactive dependency — the effect added for #29 subscribes to the
+    // BOUND PROPERTY, which on an edit form is exactly what never moves. So the first open showed
+    // nothing, and the second showed the first record's file, while data-blat-value on the root
+    // carried the right URL the whole time.
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/dialog-value`);
+
+    const shownLogo = () => page.$eval(
+        '[data-testid=logo] [data-slot="file-upload-item"][data-existing] img',
+        (el) => el.getAttribute('alt'),
+    ).catch(() => null);
+
+    const openFor = async (record) => {
+        await page.click(`[data-testid=edit-${record}]`);
+        await page.waitForFunction(
+            (r) => document.querySelector('[data-testid=echo-record]')?.textContent.trim() === r,
+            record,
+            { timeout: 5000 },
+        );
+        await page.waitForSelector('[data-testid=logo]', { state: 'visible', timeout: 5000 });
+        await page.waitForTimeout(400);
+    };
+
+    // Step 1 of the report: the file is there on the FIRST open, with nothing else touched.
+    await openFor('a');
+    await reporter.check('a record\'s file is on screen the first time the dialog opens', async () =>
+        expect.equal(await shownLogo(), 'logo-a.svg', 'the row after opening for A'));
+
+    // Step 3: the dialog is closed and reopened for a different record. The bound property is
+    // null on both sides of that, so only the seed says anything changed.
+    await page.click('[data-testid=close]');
+    await page.waitForTimeout(300);
+    await openFor('b');
+
+    await reporter.check('reopening for another record shows that record\'s file', async () =>
+        expect.equal(await shownLogo(), 'logo-b.svg', 'the row after reopening for B'));
+
+    await reporter.check('no console errors on /dialog-value', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/dialog-value');
+
     // --------------------------------------------------- issue #27: ids a component made up itself
     //
     // The morph key an element is compared on is wire:id, then wire:key, then its plain id. Nine

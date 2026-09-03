@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.30.1] - 2026-09-03
+
+### Fixed
+- **`file-upload`'s `value` preview did not follow a dialog reused for the next record** (#30), and
+  often never appeared at all. Open an edit dialog for a record with a saved file and the dropzone
+  came up empty; touch some unrelated control and the file appeared; close, open it for a *different*
+  record, and the first record's file was still sitting there. The DOM was right the whole time —
+  `data-blat-value` carried the correct URL at every step — and only Alpine's state was stale.
+
+  The effect added in 1.30.0 subscribes to the **bound property**, and an edit form is exactly the
+  case where that property never moves: the upload is `null` before the dialog opens and `null`
+  after. So the one signal the component was listening for was the one signal that never fired,
+  and whether it happened to re-run at all came down to whether some other commit touched the same
+  Livewire data — which is why an unrelated switch appeared to fix it. `<x-ui.dialog>` teleports
+  its content and *shows* it rather than unmounting it, so there is no re-mount to fall back on
+  either: it is the same Alpine component for every record the dialog is ever opened for.
+
+  The seed is a server-rendered attribute, and an attribute is not a reactive dependency. It is now
+  watched with a `MutationObserver`, for the reason `keepWired()` already gives in `blatui-core.js`:
+  wiring derived from the DOM has to be re-derived when the DOM changes, and under Livewire — or
+  Turbo, or a bare `replaceWith` — the observer is the only thing that sees it. The effect on the
+  bound property stays, and still drives the 1.30.0 reset behaviour; the two funnel through the
+  same idempotent reconcile, so they cannot disagree.
+
 ## [1.30.0] - 2026-09-02
 
 ### Added
@@ -1368,7 +1392,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.30.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.30.1...HEAD
+[1.30.1]: https://github.com/anousss007/blatui/compare/v1.30.0...v1.30.1
 [1.30.0]: https://github.com/anousss007/blatui/compare/v1.29.0...v1.30.0
 [1.29.0]: https://github.com/anousss007/blatui/compare/v1.28.1...v1.29.0
 [1.28.1]: https://github.com/anousss007/blatui/compare/v1.28.0...v1.28.1
