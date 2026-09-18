@@ -14,7 +14,7 @@ return [
             'container', 'stack', 'card', 'bento-grid', 'page-header', 'aspect-ratio', 'separator', 'scroll-area', 'resizable', 'sidebar', 'accent', 'visually-hidden',
         ],
         'Data Display' => [
-            'avatar', 'avatar-group', 'presence', 'badge', 'table', 'comparison-table', 'data-table', 'server-table', 'tree-table', 'description-list', 'carousel', 'masonry', 'comparison-slider', 'chart', 'sparkline', 'stat', 'meter', 'heatmap', 'gantt', 'scheduler', 'org-chart', 'icon', 'item',
+            'avatar', 'avatar-group', 'presence', 'badge', 'table', 'comparison-table', 'data-table', 'server-table', 'tree-table', 'server-tree-table', 'description-list', 'carousel', 'masonry', 'comparison-slider', 'chart', 'sparkline', 'stat', 'meter', 'heatmap', 'gantt', 'scheduler', 'org-chart', 'icon', 'item',
             'kbd', 'marquee', 'typewriter', 'text-reveal', 'quote', 'progress', 'countdown', 'timeline', 'kanban', 'tree', 'json-viewer', 'diff-viewer', 'skeleton', 'code-block', 'typography',
         ],
         'AI' => [
@@ -201,6 +201,7 @@ return [
         'diff-viewer' => 'A line-based text diff with inline or side-by-side views and add/remove tinting.',
         'kanban' => 'A drag-and-drop board of columns whose cards can be moved between them.',
         'tree-table' => 'A table whose rows expand to reveal nested child rows.',
+        'server-tree-table' => 'A server-rendered, Livewire-first tree table: nested rows from your query, expand and collapse without a request, row actions, and drag-and-drop or keyboard reordering that persists with one call.',
 
         'product-card' => 'An e-commerce product card with image, badge, rating, price and an add-to-cart action.',
         'price' => 'A formatted product price with optional struck-through compare-at and a discount badge.',
@@ -240,6 +241,9 @@ return [
         'calendar' => [
             'Since <strong>1.20</strong>, an incoming <code>calendar:set</code> / <code>calendar:set-range</code> / <code>calendar:today</code> <strong>no longer emits <code>calendar-change</code></strong>. That event now means "the user picked a day" and nothing else, so <em>close the popover when the selection is complete</em> can be written literally — a calendar that seeds itself on open no longer closes on the click that opened it. To observe programmatic changes too, listen for <code>calendar:updated</code> (<code>{ id, mode, value, source }</code>) and branch on <code>source</code>. Any re-entrancy flag you were carrying can go.',
             'Driving a calendar from outside? Prefer <code>x-model</code> (the root exposes <code>x-modelable="value"</code>) over re-seeding it on every open, and give each instance a <code>calendar-id</code> so a <code>window</code>-level <code>calendar:*</code> event can target one calendar instead of every calendar on the page.',
+        ],
+        'server-tree-table' => [
+            'Reordering sends <strong>one</strong> call when a row is dropped: <code>reorderMethod($parentId, $ids, $movedId)</code>, where <code>$ids</code> are the new parent\'s children in their new order. Treat all three as untrusted input: check that every id belongs to the user\'s tenant, that the parent does, and that the parent is not the moved row or one of its descendants. Then save. The rows move in the browser straight away, and the next render puts them back if <code>save</code> refused.',
         ],
         'number-input' => [
             'Building a cart or product <strong>quantity stepper</strong>? Use <code>number-input</code> with <code>:min="1"</code> and a compact <code>size="sm"</code> — see the <em>Quantity selector</em> example below. (A separate <code>quantity-selector</code> component was removed in favour of this; it was the same control with different defaults.)',
@@ -353,6 +357,61 @@ DECL,
 />
 TAG,
             'note' => 'Rows render server-side, so wire:click actions carry the real primary key and sorting/search/pagination run in your query — not client-side.',
+        ],
+        'server-tree-table' => [
+            'decl' => <<<'DECL'
+public array $expanded = [];
+
+    #[\Livewire\Attributes\Computed]
+    public function categories()
+    {
+        // Flat rows, one query: the component builds the tree from parent_id.
+        return \App\Models\Category::query()
+            ->withCount('products')
+            ->orderBy('position')
+            ->get();
+    }
+
+    public function reorderCategories(?int $parentId, array $ids, int $movedId): void
+    {
+        $this->authorize('reorder', \App\Models\Category::class);
+
+        $scope = \App\Models\Category::query()->where('company_id', auth()->user()->company_id);
+        $ids = array_map('intval', $ids);
+
+        // Every id, and the parent, must be ours.
+        abort_unless($scope->clone()->whereKey($ids)->count() === count($ids), 403);
+        abort_unless($parentId === null || $scope->clone()->whereKey($parentId)->exists(), 403);
+
+        // No cycles: the new parent may not be the moved row or anything under it.
+        for ($p = $parentId; $p !== null; $p = $scope->clone()->whereKey($p)->value('parent_id')) {
+            abort_if($p === $movedId, 422);
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($scope, $ids, $parentId) {
+            foreach ($ids as $position => $id) {
+                $scope->clone()->whereKey($id)->update(['parent_id' => $parentId, 'position' => $position]);
+            }
+        });
+    }
+DECL,
+            'tag' => <<<'TAG'
+<x-ui.server-tree-table
+    :rows="$this->categories"
+    parent-key="parent_id"
+    :columns="[
+        ['key' => 'name', 'label' => 'Category'],
+        ['key' => 'products_count', 'label' => 'Products', 'align' => 'right'],
+    ]"
+    expanded-model="expanded"
+    reorder-method="reorderCategories"
+    reparent
+    :actions="[
+        ['label' => 'Edit', 'icon' => 'pencil', 'method' => 'edit'],
+    ]"
+/>
+TAG,
+            'note' => 'Expanding a branch never makes a request; expanded-model only records which branches are open, and rides along with the next one. Reordering makes exactly one request per drop.',
         ],
     ],
 ];

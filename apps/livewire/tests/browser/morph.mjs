@@ -621,6 +621,97 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /number-form', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/number-form');
 
+    // ------------------------------------------------------ issue #32: server-tree-table
+    //
+    // The rows are the server's and are re-rendered by every request; the browser owns only
+    // which branches are open, which row has focus, and where a dragged row lands. A move is
+    // shown at once and sent as ONE call on drop — and the next render has the last word,
+    // whether the server saved it or refused it.
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/tree-table`);
+
+    const TREE = '[data-testid=tree]';
+    let posts = 0;
+    page.on('request', (r) => r.method() === 'POST' && posts++);
+    const treeEcho = (testid) => page.$eval(`[data-testid=${testid}]`, (el) => el.textContent.trim());
+    const shownRows = async () => {
+        await page.waitForTimeout(150);
+
+        return page.$$eval(`${TREE} tbody tr[data-tree-key]`, (rows) =>
+            rows.filter((r) => r.offsetParent).map((r) => `${r.dataset.treeKey}<${r.dataset.treeParent || '-'}>`).join(' '));
+    };
+    const settleTree = () => page.waitForTimeout(700);
+    const dragOnto = async (key, target, fraction) => {
+        const handle = await page.locator(`${TREE} tr[data-tree-key="${key}"] [data-slot=server-tree-table-handle]`).boundingBox();
+        const box = await page.locator(`${TREE} tr[data-tree-key="${target}"]`).boundingBox();
+        await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+        await page.mouse.down();
+        await page.mouse.move(handle.x + 5, box.y + box.height * fraction, { steps: 10 });
+        await page.mouse.up();
+    };
+
+    let sent = posts;
+    await page.click(`${TREE} tr[data-tree-key="1"] [data-slot=server-tree-table-toggle]`);
+    await reporter.check('opening a branch shows its children without a request', async () =>
+        expect.equal(await shownRows(), '1<-> 2<1> 3<1> 4<1> 5<-> 8<->', 'visible rows') ||
+        expect.equal(posts - sent, 0, 'requests'));
+
+    await page.click('[data-testid=tick]');
+    await page.waitForFunction(() => document.querySelector('[data-testid=ticks]')?.textContent === '1');
+    await page.waitForTimeout(200);
+    await reporter.check('an open branch survives a re-render, and expanded-model records it', async () =>
+        expect.equal(await shownRows(), '1<-> 2<1> 3<1> 4<1> 5<-> 8<->', 'visible rows after a re-render') ||
+        expect.equal(await treeEcho('echo-expanded'), '["1"]', 'the bound property'));
+
+    // Keyboard: Space picks the row up, the arrows move it, Space drops it.
+    await page.$$eval(`${TREE} tbody tr[data-tree-key]`, (rows) => rows.forEach((r) => (r.__probe = true)));
+    sent = posts;
+    await page.locator(`${TREE} tr[data-tree-key="4"]`).focus();
+    for (const key of ['Space', 'ArrowUp', 'ArrowUp', 'Space']) await page.keyboard.press(key);
+    await settleTree();
+    await reporter.check('a keyboard move is one request, saved, and keeps the row and its focus', async () => {
+        const kept = await page.$$eval(`${TREE} tbody tr[data-tree-key]`, (rows) => rows.every((r) => r.__probe));
+        const focused = await page.evaluate(() => document.activeElement?.dataset?.treeKey ?? null);
+
+        return expect.equal(posts - sent, 1, 'requests for one move') ||
+            expect.equal(await treeEcho('stored'), '1<->0 5<->1 8<->2 4<1>0 2<1>1 3<1>2 6<5>0 7<5>1', 'what the server stored') ||
+            expect.truthy(kept, 'the morph replaced rows instead of patching them') ||
+            expect.equal(focused, '4', 'the focused row after the server answered');
+    });
+
+    // Pointer, with reparent: the middle of a row drops INTO it.
+    await page.click(`${TREE} tr[data-tree-key="5"] [data-slot=server-tree-table-toggle]`);
+    await page.waitForTimeout(150);
+    sent = posts;
+    await dragOnto(7, 1, 0.5);
+    await settleTree();
+    await reporter.check('dragging a row onto another moves it under that parent, in one request', async () =>
+        expect.equal(posts - sent, 1, 'requests for one drag') ||
+        expect.equal(await treeEcho('stored'), '1<->0 5<->1 8<->2 4<1>0 2<1>1 3<1>2 7<1>3 6<5>0', 'what the server stored') ||
+        expect.equal(await shownRows(), '1<-> 4<1> 2<1> 3<1> 7<1> 5<-> 6<5> 8<->', 'visible rows'));
+
+    // The server refuses: the next render puts the row back, with no rollback code in the browser.
+    await dragOnto(2, 8, 0.5);
+    await settleTree();
+    await reporter.check('a move the server refuses is put back by the next render', async () =>
+        expect.equal(await treeEcho('refused'), 'locked', 'the refusal') ||
+        expect.equal(await shownRows(), '1<-> 4<1> 2<1> 3<1> 7<1> 5<-> 6<5> 8<->', 'visible rows after the refusal'));
+
+    // Removing the focused row must not leave the table without a tab stop.
+    await page.locator(`${TREE} tr[data-tree-key="3"]`).focus();
+    await page.click(`${TREE} tr[data-tree-key="3"] button[aria-label=Delete]`);
+    await settleTree();
+    await reporter.check('deleting the focused row hands the tab stop to the first row', async () =>
+        expect.equal((await page.$$eval(`${TREE} tr[tabindex="0"]`, (rows) => rows.map((r) => r.dataset.treeKey))).join(','), '1', 'rows with tabindex=0'));
+
+    await page.fill(`${TREE} input[type=search]`, 'sneak');
+    await page.waitForTimeout(1200);
+    await reporter.check('a search result is shown even when its branch is closed', async () =>
+        expect.equal(await shownRows(), '6<->', 'visible rows while searching'));
+
+    await reporter.check('no console errors on /tree-table', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/tree-table');
+
     // ------------------------------------- issue #30: a dialog reused for the next record
     //
     // <x-ui.dialog> teleports its content to <body> and shows it, so it never unmounts: the same

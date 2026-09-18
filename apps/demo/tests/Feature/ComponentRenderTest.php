@@ -508,4 +508,55 @@ class ComponentRenderTest extends TestCase
         $this->assertStringContainsString('x-teleport="body"', $this->render('<x-ui.datetime-picker name="dt" />'));
         $this->assertStringContainsString('x-teleport="body"', $this->render('<x-ui.combobox name="c" :options="[\'a\',\'b\']" />'));
     }
+
+    /** The rows of a server-tree-table as rendered: key<parent>depth, in document order. */
+    private function treeRows(string $html): string
+    {
+        preg_match_all('/data-tree-key="([^"]*)"\s+data-tree-parent="([^"]*)"\s+data-tree-depth="(\d+)"/', $html, $m, PREG_SET_ORDER);
+
+        return implode(' ', array_map(fn ($r) => $r[1].'<'.($r[2] === '' ? '-' : $r[2]).'>'.$r[3], $m));
+    }
+
+    public function test_server_tree_table_draws_flat_rows_in_pre_order(): void
+    {
+        $html = Blade::render('<x-ui.server-tree-table parent-key="parent_id" :columns="[[\'key\' => \'name\']]" :rows="$rows" />', ['rows' => [
+            ['id' => 3, 'parent_id' => 1, 'name' => 'Shirts'],
+            ['id' => 1, 'parent_id' => null, 'name' => 'Clothing'],
+            ['id' => 2, 'parent_id' => null, 'name' => 'Footwear'],
+            ['id' => 4, 'parent_id' => 3, 'name' => 'Linen'],
+        ]]);
+
+        // A parent, then its whole subtree, then the next root — the order a table draws.
+        $this->assertSame('1<->0 3<1>1 4<3>2 2<->0', $this->treeRows($html));
+        $this->assertStringContainsString('wire:key="tree-row-4"', $html);
+        $this->assertStringContainsString('aria-level="3"', $html);
+    }
+
+    public function test_server_tree_table_draws_a_row_whose_parent_is_missing_as_a_root(): void
+    {
+        // What a search result or one page of a paginator looks like: the parent was filtered out.
+        $html = Blade::render('<x-ui.server-tree-table parent-key="parent_id" :columns="[[\'key\' => \'name\']]" :rows="$rows" />', ['rows' => [
+            ['id' => 7, 'parent_id' => 99, 'name' => 'Sneakers'],
+        ]]);
+
+        $this->assertSame('7<->0', $this->treeRows($html));
+    }
+
+    public function test_server_tree_table_survives_a_row_listed_as_its_own_descendant(): void
+    {
+        $a = ['id' => 1, 'name' => 'A', 'children' => []];
+        $a['children'][] = ['id' => 2, 'name' => 'B', 'children' => [['id' => 1, 'name' => 'A again']]];
+
+        $html = Blade::render('<x-ui.server-tree-table :columns="[[\'key\' => \'name\']]" :rows="$rows" />', ['rows' => [$a]]);
+
+        $this->assertSame('1<->0 2<1>1', $this->treeRows($html));
+    }
+
+    public function test_server_tree_table_only_renders_handles_when_reorderable(): void
+    {
+        $rows = [['id' => 1, 'name' => 'A']];
+
+        $this->assertStringNotContainsString('server-tree-table-handle', Blade::render('<x-ui.server-tree-table :columns="[[\'key\' => \'name\']]" :rows="$rows" />', ['rows' => $rows]));
+        $this->assertStringContainsString('server-tree-table-handle', Blade::render('<x-ui.server-tree-table reorder-method="reorder" :columns="[[\'key\' => \'name\']]" :rows="$rows" />', ['rows' => $rows]));
+    }
 }

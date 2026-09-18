@@ -68,6 +68,7 @@ if you don't have it.
 | `/native-dialog` | a popover inside a real `<dialog>`, which must share the browser's top layer |
 | `/generated-ids` | components that named their own elements, and lost them to the morph key |
 | `/number-form` | a `number-input` emptied mid-edit under `.live`, bound to a non-nullable `float` on a Form object — issue #31 |
+| `/tree-table` | `server-tree-table` rows moved in the browser, then re-rendered by a server that saves, or refuses, the move — issue #32 |
 
 Every check asserts computed state after a real server round-trip. The suite fails on the
 pre-fix engine — that is the bar for adding one here.

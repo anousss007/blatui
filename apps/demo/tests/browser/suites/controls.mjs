@@ -251,6 +251,33 @@ const CHECKS = {
         });
     },
 
+    // Expanding is Alpine showing rows that are already there; a keyboard move reports one
+    // payload on drop — the same one reorder-method receives under Livewire. #32
+    async 'server-tree-table'(page, { reporter, at }) {
+        await reporter.check(`server-tree-table: a branch opens, and a keyboard move reports its payload ${at}`, async () => {
+            const tree = page.locator('[data-slot="server-tree-table"]').filter({ has: page.locator('[data-slot="server-tree-table-handle"]') }).first();
+            await tree.scrollIntoViewIfNeeded();
+            const shown = () => tree.locator('tbody tr[data-tree-key]').evaluateAll((rows) => rows.filter((r) => r.offsetParent).length);
+            const before = await shown();
+
+            await tree.locator('tr[data-tree-key="5"] [data-slot="server-tree-table-toggle"]').click();
+            await page.waitForTimeout(150);
+            const afterCollapse = await shown();
+
+            const heard = page.evaluate(() => new Promise((resolve) => {
+                document.addEventListener('tree-reorder', (e) => resolve(e.detail), { once: true });
+                setTimeout(() => resolve(null), 2000);
+            }));
+            await tree.locator('tr[data-tree-key="4"]').focus();
+            for (const key of ['Space', 'ArrowUp', 'Space']) await page.keyboard.press(key);
+            const detail = await heard;
+
+            return expect.equal(afterCollapse, before - 2, 'rows shown after closing a branch with two children') ||
+                expect.equal(JSON.stringify(detail && { parent: detail.parent, ids: detail.ids, moved: detail.moved }), '{"parent":1,"ids":[2,4,3],"moved":4}', 'the tree-reorder payload') ||
+                expect.empty(page.blatErrors, 'console errors');
+        });
+    },
+
     async 'tags-input'(page, { reporter, at }) {
         await reporter.check(`tags-input: Enter adds a tag ${at}`, async () => {
             const field = page.locator('[data-slot="tags-input"] input').first();

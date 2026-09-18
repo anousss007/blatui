@@ -233,6 +233,10 @@ const calendar = (cfg = {}) => ({
     rangeTo: null,
     hover: null,
     focusedDate: null,
+    // Declared so they are this calendar's own: Alpine writes a property no scope owns to the
+    // OUTERMOST scope, and two calendars under one x-data would share one root and one set of hooks.
+    _hooks: null,
+    _rootEl: null,
 
     init() {
         this.startMonth = cfg.startMonth ? _parse(cfg.startMonth) : null;
@@ -1340,6 +1344,395 @@ function blatModelMagic(el) {
 }
 
 
+// ---------------------------------------------------------------------------
+// blatTreeGrid — the browser half of <x-ui.server-tree-table>.
+//
+// The rows are the server's: rendered by Blade in pre-order (a parent, then its subtree), keyed
+// with wire:key, and re-rendered by every Livewire request. This component never builds a row.
+// It owns only what the server has no business deciding: which branches are open, which row
+// has focus, and where a row being dragged would land.
+//
+// Reordering moves the rows in the DOM straight away, so the table shows the result while the
+// request is in flight, and sends ONE call when the row is dropped: `method(parentId, ids,
+// movedId)`, where `ids` are the new parent's children in their new order. The server then
+// re-renders. If it saved the order, that render matches what is on screen and the morph has
+// nothing to do. If it refused, the render still has the old order and the morph puts the rows
+// back by their keys. Either way the server has the last word, without a rollback path here.
+//
+// Everything a row needs to know about where it sits is read from the DOM at evaluation time
+// (data-tree-parent), never baked into its directives. A reparented row keeps the x-show it was
+// rendered with, so a baked ancestor list would go on describing where it USED to be. A
+// MutationObserver bumps `version` whenever the rows change, which is what re-runs the bindings.
+// ---------------------------------------------------------------------------
+
+/** End (exclusive) of the subtree that starts at `i` in a pre-order list. */
+function treeBlockEnd(rows, i) {
+    let j = i + 1;
+    while (j < rows.length && rows[j].depth > rows[i].depth) j++;
+
+    return j;
+}
+
+/**
+ * Move `moved` (with its whole subtree) `before`, `after` or `inside` (as the last child)
+ * `target`, in a pre-order list of { key, parent, depth }. Returns the new list, or null when
+ * the move is impossible — onto itself, or into its own subtree, which would be a cycle.
+ */
+function treeMove(rows, moved, target, where) {
+    const from = rows.findIndex((r) => r.key === moved);
+    if (from === -1 || moved === target) return null;
+    const end = treeBlockEnd(rows, from);
+    const at = rows.findIndex((r) => r.key === target);
+    if (at === -1 || (at > from && at < end)) return null;
+
+    const block = rows.slice(from, end);
+    const rest = [...rows.slice(0, from), ...rows.slice(end)];
+    const t = rest.findIndex((r) => r.key === target);
+    const anchor = rest[t];
+    const parent = where === 'inside' ? anchor.key : anchor.parent;
+    const delta = (where === 'inside' ? anchor.depth + 1 : anchor.depth) - block[0].depth;
+    const index = where === 'before' ? t : treeBlockEnd(rest, t);
+    const placed = block.map((r, i) => ({ ...r, depth: r.depth + delta, parent: i === 0 ? parent : r.parent }));
+
+    return [...rest.slice(0, index), ...placed, ...rest.slice(index)];
+}
+
+/** The keys under `parent`, in order. */
+function treeSiblings(rows, parent) {
+    return rows.filter((r) => r.parent === parent).map((r) => r.key);
+}
+
+/** A key as the server sent it: an integer primary key goes back as a number, anything else
+ *  (a UUID, a slug) as the string it was. */
+function treeCastKey(key) {
+    if (key === null || key === undefined || key === '') return null;
+
+    return /^-?\d{1,15}$/.test(key) ? Number(key) : key;
+}
+
+export { treeMove, treeSiblings, treeCastKey };
+
+const blatTreeGrid = (config = {}) => ({
+    method: config.method || null,
+    reparent: !! config.reparent,
+    reorderable: !! config.reorderable,
+    labels: config.labels || {},
+    version: 0,
+    focusKey: null,
+    grabbed: null,     // keyboard reorder in progress: { key, snapshot }
+    dragging: null,    // pointer reorder in progress: { key, target, where }
+    announcement: '',
+    // Declared, not just assigned in init(): Alpine writes a property no scope owns to the
+    // OUTERMOST scope, so every tree on a page inside an x-data would share one open state.
+    _open: null,
+    _observer: null,
+
+    init() {
+        // The open branches live in a bound Livewire array when `expanded-model` is given, and
+        // locally otherwise. The bridge makes both the same object.
+        this._open = this.$blatModel((config.expanded || []).map(String));
+        this._observer = new MutationObserver(() => this.version++);
+        this._observer.observe(this.$refs.body, { childList: true });
+        this._observer.observe(this.$root, { attributes: true, subtree: true, attributeFilter: ['data-tree-parent', 'data-expand-all'] });
+    },
+
+    destroy() {
+        this._observer?.disconnect();
+    },
+
+    // ---- reading the rows --------------------------------------------------------------------
+
+    rowEls() {
+        return [...this.$refs.body.children].filter((el) => el.dataset.treeKey !== undefined);
+    },
+
+    rows() {
+        return this.rowEls().map((el) => ({
+            key: el.dataset.treeKey,
+            parent: el.dataset.treeParent || null,
+            depth: Number(el.dataset.treeDepth) || 0,
+            el,
+        }));
+    },
+
+    rowEl(key) {
+        return this.rowEls().find((el) => el.dataset.treeKey === key) || null;
+    },
+
+    // ---- open / closed -----------------------------------------------------------------------
+
+    isOpen(key) {
+        return (this._open.value || []).map(String).includes(String(key));
+    },
+
+    setOpen(key, open) {
+        const keys = (this._open.value || []).map(String).filter((k) => k !== String(key));
+        this._open.value = open ? [...keys, String(key)] : keys;
+    },
+
+    toggle(key) {
+        this.setOpen(key, ! this.isOpen(key));
+    },
+
+    /** Shown when every ancestor is open, walked through data-tree-parent at call time. */
+    shown(el) {
+        this.version;
+        if (this.$root.dataset.expandAll === '1') return true;
+        const byKey = new Map(this.rowEls().map((r) => [r.dataset.treeKey, r]));
+        let parent = el.dataset.treeParent;
+        const seen = new Set();
+        while (parent && ! seen.has(parent)) {
+            if (! this.isOpen(parent)) return false;
+            seen.add(parent);
+            parent = byKey.get(parent)?.dataset.treeParent;
+        }
+
+        return true;
+    },
+
+    expandedAttr(el) {
+        this.version;
+        return el.dataset.treeChildren === '1' ? String(this.$root.dataset.expandAll === '1' || this.isOpen(el.dataset.treeKey)) : null;
+    },
+
+    // ---- focus -------------------------------------------------------------------------------
+
+    /** Roving tabindex: the row last focused, or the first row when that one has gone. */
+    tabFor(el) {
+        this.version;
+        const current = this.focusKey !== null && this.rowEl(this.focusKey);
+        if (current) return el === current ? 0 : -1;
+
+        return el === this.rowEls()[0] ? 0 : -1;
+    },
+
+    focusRow(el) {
+        if (! el) return;
+        this.focusKey = el.dataset.treeKey;
+        el.focus();
+    },
+
+    visibleRows() {
+        return this.rowEls().filter((el) => this.shown(el));
+    },
+
+    onKeydown(e) {
+        const row = e.target.closest?.('tr[data-tree-key]');
+        if (! row || e.target !== row) return;
+        if (this.grabbed) return this.onGrabbedKey(e, row);
+
+        const rows = this.visibleRows();
+        const i = rows.indexOf(row);
+        const key = row.dataset.treeKey;
+        const hasChildren = row.dataset.treeChildren === '1';
+
+        switch (e.key) {
+            case 'ArrowDown': this.focusRow(rows[i + 1]); break;
+            case 'ArrowUp': this.focusRow(rows[i - 1]); break;
+            case 'Home': this.focusRow(rows[0]); break;
+            case 'End': this.focusRow(rows[rows.length - 1]); break;
+            case 'ArrowRight':
+                if (hasChildren && ! this.isOpen(key)) this.setOpen(key, true);
+                else if (hasChildren) this.focusRow(rows[i + 1]);
+                break;
+            case 'ArrowLeft':
+                if (hasChildren && this.isOpen(key)) this.setOpen(key, false);
+                else this.focusRow(this.rowEl(row.dataset.treeParent));
+                break;
+            case ' ':
+                if (! this.reorderable) return;
+                this.grabbed = { key, snapshot: this.rows() };
+                row.setAttribute('data-dragging', '');
+                this.say(this.labels.grabbed, row);
+                break;
+            default: return;
+        }
+        e.preventDefault();
+    },
+
+    // ---- keyboard reorder --------------------------------------------------------------------
+
+    onGrabbedKey(e, row) {
+        const rows = this.rows();
+        const me = rows.find((r) => r.key === this.grabbed.key);
+        const siblings = rows.filter((r) => r.parent === me.parent);
+        const at = siblings.findIndex((r) => r.key === me.key);
+        let next = null;
+
+        switch (e.key) {
+            case 'ArrowUp': if (at > 0) next = treeMove(rows, me.key, siblings[at - 1].key, 'before'); break;
+            case 'ArrowDown': if (at < siblings.length - 1) next = treeMove(rows, me.key, siblings[at + 1].key, 'after'); break;
+            case 'ArrowRight':
+                if (this.reparent && at > 0) {
+                    next = treeMove(rows, me.key, siblings[at - 1].key, 'inside');
+                    if (next) this.setOpen(siblings[at - 1].key, true);
+                }
+                break;
+            case 'ArrowLeft': if (this.reparent && me.parent) next = treeMove(rows, me.key, me.parent, 'after'); break;
+            case ' ':
+            case 'Enter': {
+                const { key, snapshot } = this.grabbed;
+                this.grabbed = null;
+                row.removeAttribute('data-dragging');
+                this.commit(key, snapshot);
+                this.say(this.labels.dropped, row);
+                break;
+            }
+            case 'Escape':
+            case 'Tab': {
+                this.apply(this.grabbed.snapshot);
+                this.grabbed = null;
+                row.removeAttribute('data-dragging');
+                this.say(this.labels.cancelled, row);
+                if (e.key === 'Tab') return;
+                break;
+            }
+            default: return;
+        }
+        e.preventDefault();
+        if (next) {
+            this.apply(next);
+            this.focusRow(this.rowEl(me.key));
+            this.say(this.labels.moved, this.rowEl(me.key));
+        }
+    },
+
+    // ---- pointer reorder ---------------------------------------------------------------------
+
+    onHandleDown(e, key) {
+        if (! this.reorderable || (e.pointerType === 'mouse' && e.button !== 0)) return;
+        e.preventDefault();
+        const handle = e.currentTarget;
+        handle.setPointerCapture?.(e.pointerId);
+        this.dragging = { key, target: null, where: null };
+        this.rowEl(key)?.setAttribute('data-dragging', '');
+
+        const move = (ev) => this.onDragMove(ev);
+        const end = (ev) => {
+            handle.removeEventListener('pointermove', move);
+            handle.removeEventListener('pointerup', end);
+            handle.removeEventListener('pointercancel', end);
+            this.onDragEnd(ev.type === 'pointerup');
+        };
+        handle.addEventListener('pointermove', move);
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+    },
+
+    onDragMove(e) {
+        const drag = this.dragging;
+        if (! drag) return;
+        const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('tr[data-tree-key]');
+        let target = null;
+        let where = null;
+
+        if (over && this.$refs.body.contains(over) && over.dataset.treeKey !== drag.key) {
+            const box = over.getBoundingClientRect();
+            const f = (e.clientY - box.top) / (box.height || 1);
+            where = this.reparent && f > 0.25 && f < 0.75 ? 'inside' : (f < 0.5 ? 'before' : 'after');
+            const rows = this.rows();
+            const me = rows.find((r) => r.key === drag.key);
+            const sameParent = (over.dataset.treeParent || null) === me.parent;
+            // Without `reparent` a row stays among its siblings; with it, anywhere but its own subtree.
+            if ((this.reparent || (sameParent && where !== 'inside')) && treeMove(rows, drag.key, over.dataset.treeKey, where)) {
+                target = over;
+            }
+        }
+
+        if (drag.target && (drag.target !== target || drag.where !== where)) drag.target.removeAttribute('data-drop');
+        drag.target = target;
+        drag.where = target ? where : null;
+        if (target) target.setAttribute('data-drop', where);
+    },
+
+    onDragEnd(drop) {
+        const drag = this.dragging;
+        this.dragging = null;
+        if (! drag) return;
+        this.rowEl(drag.key)?.removeAttribute('data-dragging');
+        drag.target?.removeAttribute('data-drop');
+        if (! drop || ! drag.target) return;
+
+        const snapshot = this.rows();
+        const next = treeMove(snapshot, drag.key, drag.target.dataset.treeKey, drag.where);
+        if (! next) return;
+        if (drag.where === 'inside') this.setOpen(drag.target.dataset.treeKey, true);
+        this.apply(next);
+        this.commit(drag.key, snapshot);
+    },
+
+    // ---- applying and sending ----------------------------------------------------------------
+
+    /** Put the rows in `list` order, at their new depth and parent. Provisional: the next
+     *  server render is what settles it.
+     *
+     *  The DOM is left in the shape the server would render, so the morph that follows has
+     *  nothing to move. Two things decide that. The rows are reordered within the span they
+     *  already occupy, never appended: Livewire brackets a loop's output with <!--[if BLOCK]-->
+     *  / <!--[if ENDBLOCK]--> comments, and a row moved past the closing one breaks the block,
+     *  so the morph rebuilds every row. And each row travels with the whitespace in front of
+     *  it: the morph compares text nodes too, and would otherwise shuffle rows back into place
+     *  around them — blurring the focused row in the middle of a keyboard move. */
+    apply(list) {
+        const body = this.$refs.body;
+        const rowEls = this.rowEls();
+        const anchor = rowEls.length ? rowEls[rowEls.length - 1].nextSibling : null;
+        const withLeadingSpace = (el) => {
+            const nodes = [el];
+            for (let n = el.previousSibling; n && n.nodeType === Node.TEXT_NODE && ! n.textContent.trim(); n = n.previousSibling) nodes.unshift(n);
+            return nodes;
+        };
+        const units = list.map((r) => withLeadingSpace(r.el));
+        const focused = document.activeElement;
+        for (const [i, r] of list.entries()) {
+            for (const node of units[i]) body.insertBefore(node, anchor);
+            r.el.dataset.treeParent = r.parent ?? '';
+            r.el.dataset.treeDepth = String(r.depth);
+            r.el.style.setProperty('--depth', String(r.depth));
+            r.el.setAttribute('aria-level', String(r.depth + 1));
+        }
+        if (focused && body.contains(focused)) focused.focus();
+        this.version++;
+    },
+
+    /** One call per completed move — nothing while it is in progress, and nothing for a move
+     *  that ended where it started. */
+    commit(key, before) {
+        const after = this.rows();
+        const was = before.find((r) => r.key === key);
+        const now = after.find((r) => r.key === key);
+        if (! was || ! now) return;
+        const unchanged = was.parent === now.parent &&
+            JSON.stringify(treeSiblings(before, was.parent)) === JSON.stringify(treeSiblings(after, now.parent));
+        if (unchanged) return;
+
+        const detail = {
+            parent: treeCastKey(now.parent),
+            ids: treeSiblings(after, now.parent).map(treeCastKey),
+            moved: treeCastKey(key),
+            from: treeCastKey(was.parent),
+        };
+        this.$dispatch('tree-reorder', detail);
+
+        const wire = this.method ? this.$blatWire : null;
+        if (wire) wire.$call(this.method, detail.parent, detail.ids, detail.moved);
+    },
+
+    say(template, row) {
+        if (! template || ! row) return;
+        const name = row.querySelector('[data-tree-label]')?.textContent.trim() || row.dataset.treeKey;
+        const rows = this.rows();
+        const me = rows.find((r) => r.el === row);
+        const siblings = me ? rows.filter((r) => r.parent === me.parent) : [];
+        this.announcement = template
+            .replace(':name', name)
+            .replace(':position', String(siblings.findIndex((r) => r.el === row) + 1))
+            .replace(':count', String(siblings.length))
+            .replace(':level', String((me?.depth ?? 0) + 1));
+    },
+});
+
+
 // x-blat-field — wires a form field's control to its label/description/error:
 //   aria-describedby ← description + error ids, aria-invalid + data-invalid when
 //   an error is present, and label[for] ← control id when not already set. Radix/
@@ -1859,6 +2252,7 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.data('blatSelect', blatSelect);
     Alpine.data('blatListbox', blatListbox);
     Alpine.data('blatCommand', blatCommand);
+    Alpine.data('blatTreeGrid', blatTreeGrid);
     Alpine.directive('blat-trigger', blatTriggerDirective);
     Alpine.directive('blat-labelledby', blatLabelledByDirective);
     Alpine.directive('blat-anchor', blatAnchorDirective);

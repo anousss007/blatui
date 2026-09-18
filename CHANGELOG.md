@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.32.0] - 2026-09-18
+
+### Added
+- **`server-tree-table`** (#32), a Livewire-first tree table. It sits alongside `tree-table`,
+  which stays the Alpine-first component for local data. The rows are the server's: nested rows
+  (`children`, a Collection or a loaded relation), or flat rows with `parent-key="parent_id"`,
+  the shape one query returns, where a row whose parent is filtered out is drawn as a root. It
+  takes the same `columns`, `actions`, `actionsView`, `cellViews`, sorting, search, page size,
+  `responsive="stack"` and `variant="card"` as `server-table`, and every row carries a stable
+  `wire:key`.
+
+  Expanding is client-side. Every row is rendered and Alpine shows the open branches, so opening
+  one costs no request and survives any re-render. `expanded` sets what starts open,
+  `expand-all` reveals everything (for a search), and `expanded-model` keeps the open keys in a
+  Livewire array property for when the server should know.
+
+  With `reorder-method`, rows get a drag handle and a keyboard alternative (Space to pick up,
+  arrows to move, Space to drop, Escape to cancel), and each completed move is **one** call:
+  `reorderCategories($parentId, $ids, $movedId)`, where `$ids` are the new parent's children in
+  their new order. `reparent` lets a row move under a different parent: drop onto the middle of
+  a row, or press Right/Left while it is picked up. The rows move in the browser straight away
+  and the next render settles them. If the server saved the move, nothing changes; if it
+  refused, the morph puts the rows back by their keys, so the browser needs no rollback path.
+  The table is a `treegrid` with `aria-level`, `aria-expanded`, `aria-posinset`/`aria-setsize`,
+  arrow-key navigation, and an announcement for every keyboard move. A `tree-reorder` event
+  carries the same payload, with or without Livewire.
+
+  Needs the engine from this release: `php artisan vendor:publish --tag=blatui-foundations --force`
+  (`blatui:init` reports it as out of date otherwise).
+
+### Fixed
+- **Two calendars under one `x-data` shared their root element and their event hooks.** Alpine
+  writes a property that no scope declares to the *outermost* scope, and the calendar assigned
+  `_rootEl` and `_hooks` in `init()` without declaring them. On a page wrapped in an `x-data`,
+  every calendar then read the last one's root for its RTL check, and removing one calendar
+  detached another's `calendar:*` listeners. Both are declared now. Found while building the
+  tree table, which had the same mistake.
+
 ## [1.31.0] - 2026-09-18
 
 ### Added
@@ -1417,7 +1455,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.31.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.32.0...HEAD
+[1.32.0]: https://github.com/anousss007/blatui/compare/v1.31.0...v1.32.0
 [1.31.0]: https://github.com/anousss007/blatui/compare/v1.30.1...v1.31.0
 [1.30.1]: https://github.com/anousss007/blatui/compare/v1.30.0...v1.30.1
 [1.30.0]: https://github.com/anousss007/blatui/compare/v1.29.0...v1.30.0
