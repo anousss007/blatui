@@ -12,4 +12,11 @@
         <x-ui.input wire:model="nickname" data-testid="control-auto" />
         <x-ui.field-description>Shown next to your comments.</x-ui.field-description>
     </x-ui.field>
+
+    {{-- The consumer's own id and for, on a combobox bound to Livewire. The id has to land on
+         the focusable trigger and stay there through a re-render. Issue #33. --}}
+    <x-ui.field class="mt-6" data-testid="field-combobox">
+        <x-ui.field-label for="category-root">Category</x-ui.field-label>
+        <x-ui.combobox id="category-root" wire:model="category" :options="['Clothing', 'Footwear']" />
+    </x-ui.field>
 </div>

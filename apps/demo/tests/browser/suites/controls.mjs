@@ -278,6 +278,38 @@ const CHECKS = {
         });
     },
 
+    // A consumer's id lands on the control, so <label for> both names it and focuses it. #33
+    async combobox(page, { reporter, at }) {
+        await reporter.check(`combobox: a label names and focuses the control it points at ${at}`, async () => {
+            const result = {};
+            for (const id of ['category-root', 'framework']) {
+                const label = page.locator(`label[for="${id}"]`);
+                await label.scrollIntoViewIfNeeded();
+                await label.click();
+                await page.keyboard.press('Escape');
+                result[id] = await page.evaluate((i) => {
+                    const el = document.getElementById(i);
+                    // The accessible name, as the label association resolves it.
+                    return { focused: document.activeElement === el, role: el?.getAttribute('role'), labelled: el?.labels?.[0]?.textContent.trim() ?? null };
+                }, id);
+            }
+
+            return expect.equal(JSON.stringify(result['category-root']), '{"focused":true,"role":"combobox","labelled":"Category"}', 'button trigger') ||
+                expect.equal(JSON.stringify(result.framework), '{"focused":true,"role":"combobox","labelled":"Framework"}', 'input trigger');
+        });
+    },
+
+    // Each notification with an href is a link, and so is the footer when view-all-href is set. #34
+    async 'notification-center'(page, { reporter, at }) {
+        await reporter.check(`notification-center: notifications and the footer link where they are told to ${at}`, async () => {
+            await page.waitForSelector('[data-slot="notification-center-panel"] a[href="#notifications"]', { state: 'attached', timeout: 3000 }).catch(() => {});
+            const hrefs = await page.$$eval('[data-slot="notification-center-panel"] a', (links) => links.map((a) => a.getAttribute('href')));
+
+            return expect.equal(hrefs.join(' '), '#post-comments #invoice-1042 #notifications', 'links in the first panel') ||
+                expect.empty(page.blatErrors, 'console errors');
+        });
+    },
+
     async 'tags-input'(page, { reporter, at }) {
         await reporter.check(`tags-input: Enter adds a tag ${at}`, async () => {
             const field = page.locator('[data-slot="tags-input"] input').first();

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.33.0] - 2026-09-18
+
+### Added
+- **`combobox` takes an `id`, and puts it on the control** (#33). The trigger button (or the text
+  field with `trigger="input"`) gets it, so `<label for="{id}">` names the combobox and focuses it
+  on click, the way it does for a native `<select>`. The search field inside the popover gets
+  `{id}-search`. With an `id`, the trigger no longer carries the placeholder as its `aria-label`,
+  which would otherwise override the label's name. Before this, an `id` landed on the wrapper
+  `<div>`, and a label pointing at it reached nothing. That included the docs' own "inline with
+  label" example. Without an `id`, nothing changes and no id is generated on the server (#27).
+- **`notification-center` links** (#34). `view-all-href` sets the footer link, and a notification
+  with an `href` makes its whole row a link, which still marks it read when followed. `navigate`
+  adds `wire:navigate` to all of them, and `view-all-label` changes the footer text. The footer
+  used to be a hard-coded `href="#"`; it is now rendered only when there is somewhere to go.
+
 ## [1.32.0] - 2026-09-18
 
 ### Added
@@ -1455,7 +1470,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.32.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.33.0...HEAD
+[1.33.0]: https://github.com/anousss007/blatui/compare/v1.32.0...v1.33.0
 [1.32.0]: https://github.com/anousss007/blatui/compare/v1.31.0...v1.32.0
 [1.31.0]: https://github.com/anousss007/blatui/compare/v1.30.1...v1.31.0
 [1.30.1]: https://github.com/anousss007/blatui/compare/v1.30.0...v1.30.1

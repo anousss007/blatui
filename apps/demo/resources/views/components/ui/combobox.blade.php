@@ -13,6 +13,7 @@
     'size' => 'default',          // sm | default | lg — input trigger only
     'icon' => null,               // optional leading lucide icon name (input trigger only, e.g. "search")
     'indicator' => 'check',       // check | checkbox | radio — how a selected option is marked in the list
+    'id' => null,                 // lands on the focusable control, so <label for="{id}"> names and focuses it
 ])
 
 @php
@@ -109,6 +110,7 @@
                 </template>
                 <input
                     x-ref="input"
+                    @if ($id) id="{{ $id }}" @endif
                     x-model="query"
                     type="text"
                     role="combobox"
@@ -142,6 +144,7 @@
                 @endif
                 <input
                     x-ref="control"
+                    @if ($id) id="{{ $id }}" @endif
                     x-model="query"
                     type="text"
                     role="combobox"
@@ -172,6 +175,7 @@
         <button
             type="button"
             x-ref="trigger"
+            @if ($id) id="{{ $id }}" @endif
             @click="toggle()"
             @keydown.down.prevent.stop="openList()"
             @keydown.up.prevent.stop="openList()"
@@ -179,7 +183,7 @@
             @keydown.space.prevent.stop="openList()"
             role="combobox"
             aria-haspopup="listbox"
-            aria-label="{{ $placeholder }}"
+            @unless ($id) aria-label="{{ $placeholder }}" @endunless
             :aria-expanded="open"
             :aria-controls="$id('blat-combobox-list')"
             @disabled($disabled)
@@ -240,6 +244,7 @@
                 <x-lucide-search class="size-4 shrink-0 opacity-50" aria-hidden="true" />
                 <input
                     x-ref="search"
+                    @if ($id) id="{{ $id }}-search" @endif
                     x-model="query"
                     type="text"
                     role="combobox"

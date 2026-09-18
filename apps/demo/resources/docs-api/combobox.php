@@ -88,6 +88,11 @@ return [
             'default' => "'w-[200px]'",
             'description' => 'Tailwind width class for the trigger; the popover matches the trigger\'s width.',
         ],
+        [
+            'name' => 'id',
+            'type' => 'string',
+            'description' => 'Set on the focusable control: the trigger button, or the text field with trigger="input". A <label for="{id}"> then names it and focuses it on click, as with a native select. The search field inside the popover gets {id}-search.',
+        ],
     ],
 
     'shapes' => [

@@ -18,6 +18,8 @@ class LabelWiring extends Component
 {
     public int $ticks = 0;
 
+    public string $category = '';   // combobox with a consumer id, #33
+
     public string $nickname = '';
 
     public function tick(): void

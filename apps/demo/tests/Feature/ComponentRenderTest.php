@@ -559,4 +559,33 @@ class ComponentRenderTest extends TestCase
         $this->assertStringNotContainsString('server-tree-table-handle', Blade::render('<x-ui.server-tree-table :columns="[[\'key\' => \'name\']]" :rows="$rows" />', ['rows' => $rows]));
         $this->assertStringContainsString('server-tree-table-handle', Blade::render('<x-ui.server-tree-table reorder-method="reorder" :columns="[[\'key\' => \'name\']]" :rows="$rows" />', ['rows' => $rows]));
     }
+
+    public function test_combobox_id_lands_on_the_control_a_label_points_at(): void
+    {
+        $button = $this->render('<x-ui.combobox id="category" :options="[\'a\']" />');
+        $this->assertMatchesRegularExpression('/<button[^>]*\sid="category"[^>]*role="combobox"/s', $button);
+        $this->assertStringContainsString('id="category-search"', $button);
+        // The label names it now; a placeholder aria-label would override that name.
+        $this->assertDoesNotMatchRegularExpression('/<button[^>]*\sid="category"[^>]*aria-label=/s', $button);
+        $this->assertStringNotContainsString('data-slot="combobox" id="category"', $button);
+
+        $input = $this->render('<x-ui.combobox id="framework" trigger="input" :options="[\'a\']" />');
+        $this->assertMatchesRegularExpression('/<input[^>]*\sid="framework"[^>]*role="combobox"/s', $input);
+
+        // No id: nothing generated on the server (a per-render id is a per-render morph key, #27).
+        $this->assertStringNotContainsString(' id="', $this->render('<x-ui.combobox :options="[\'a\']" />'));
+    }
+
+    public function test_notification_center_links_where_it_is_told_to(): void
+    {
+        $html = $this->render('<x-ui.notification-center view-all-href="/notifications" navigate :notifications="[[\'title\' => \'Paid\', \'time\' => \'now\', \'href\' => \'/invoices/7\'], [\'title\' => \'Plain\', \'time\' => \'now\']]" />');
+        $this->assertMatchesRegularExpression('#<a href="/invoices/7"\s+wire:navigate#', $html);
+        $this->assertMatchesRegularExpression('#href="/notifications"\s+wire:navigate#', $html);
+        $this->assertSame(2, preg_match_all('/<a\s/', $html));
+
+        // Without view-all-href there is no footer link: a link to "#" is a tab stop that does nothing.
+        $bare = $this->render('<x-ui.notification-center :notifications="[[\'title\' => \'Plain\', \'time\' => \'now\']]" />');
+        $this->assertSame(0, preg_match_all('/<a\s/', $bare));
+        $this->assertStringNotContainsString('wire:navigate', $bare);
+    }
 }

@@ -161,6 +161,20 @@ export async function run({ browser, reporter }) {
         expect.truthy(after.labelTargetsControl, 'label[for] stopped resolving to the control after 2 re-renders'));
     await reporter.check('description idref survives re-renders', async () =>
         expect.equal(after.describedby.join(','), 'field-description', 'aria-describedby after 2 re-renders'));
+    // #33: the consumer's id is on the combobox's trigger, so their <label for> reaches it.
+    await reporter.check('a combobox id stays on the control its label points at', async () => {
+        const wired = await page.evaluate(() => {
+            const control = document.getElementById('category-root');
+            return { role: control?.getAttribute('role'), label: control?.labels?.[0]?.textContent.trim() ?? null };
+        });
+        await page.click('[data-testid=field-combobox] label');
+        const focused = await page.evaluate(() => document.activeElement?.id);
+        await page.keyboard.press('Escape');
+
+        return expect.equal(JSON.stringify(wired), '{"role":"combobox","label":"Category"}', 'the control the label resolves to, after the re-renders') ||
+            expect.equal(focused, 'category-root', 'focus after clicking the label');
+    });
+
     await reporter.check('no console errors on /label-wiring', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/label-wiring');
 

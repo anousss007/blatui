@@ -17,6 +17,23 @@ return [
             'default' => 'false',
             'description' => 'Whether the panel starts open on load. Intended for demos so the inbox is visible; leave false in production so the page is not covered.',
         ],
+        [
+            'name' => 'viewAllHref',
+            'type' => 'string',
+            'description' => 'URL for the "View all notifications" footer link, e.g. route(\'notifications.index\'). The footer is only rendered when this is set.',
+        ],
+        [
+            'name' => 'viewAllLabel',
+            'type' => 'string',
+            'default' => "__('View all notifications')",
+            'description' => 'Text of the footer link.',
+        ],
+        [
+            'name' => 'navigate',
+            'type' => 'bool',
+            'default' => 'false',
+            'description' => 'Add wire:navigate to the footer link and to every notification link, for Livewire\'s SPA-style navigation.',
+        ],
     ],
 
     'shapes' => [
@@ -54,6 +71,11 @@ return [
                     'name' => 'avatar',
                     'type' => 'string',
                     'description' => 'An image URL shown as a round leading avatar. Takes precedence over icon.',
+                ],
+                [
+                    'name' => 'href',
+                    'type' => 'string',
+                    'description' => 'Makes the whole row a link to what the notification is about. Following it still marks the notification read.',
                 ],
             ],
         ],

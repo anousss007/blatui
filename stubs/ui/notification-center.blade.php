@@ -1,6 +1,9 @@
 @props([
-    'notifications' => [],  // [['title','body'?,'time','read'?,'icon'?,'avatar'?], ...]
+    'notifications' => [],  // [['title','body'?,'time','read'?,'icon'?,'avatar'?,'href'?], ...]
     'open' => false,        // demo/initial open state — defaults the panel open so reviewers see it
+    'viewAllHref' => null,  // where "View all notifications" goes; no href, no footer link
+    'viewAllLabel' => null, // defaults to __('View all notifications')
+    'navigate' => false,    // add wire:navigate to the links, for a Livewire SPA-style visit
 ])
 
 @php
@@ -16,7 +19,10 @@
         'read' => (bool) ($n['read'] ?? false),
         'icon' => isset($n['icon']) && $n['icon'] !== '' ? (string) $n['icon'] : null,
         'avatar' => $n['avatar'] ?? null,
+        'href' => isset($n['href']) && $n['href'] !== '' ? (string) $n['href'] : null,
     ])->all();
+
+    $viewAllLabel ??= __('View all notifications');
 
     // Alpine only tracks read-state; titles/bodies/times/icons are baked into the DOM.
     $readState = collect($feed)->map(fn ($n) => ['read' => $n['read']])->all();
@@ -123,8 +129,16 @@
                     <li
                         @click="markRead({{ $note['id'] }})"
                         :class="items[{{ $note['id'] }}].read ? 'hover:bg-accent/50' : 'bg-muted/60 hover:bg-muted'"
-                        class="relative flex cursor-pointer items-start gap-3 px-4 py-3 ps-5 transition-colors"
+                        class="relative cursor-pointer transition-colors"
                     >
+                        {{-- A notification with an href is a link to what it is about: the whole row
+                             is the target, and following it still marks it read (the click bubbles). --}}
+                        @if ($note['href'])
+                            <a href="{{ $note['href'] }}" @if ($navigate) wire:navigate @endif
+                                class="flex items-start gap-3 px-4 py-3 ps-5 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:ring-inset">
+                        @else
+                            <div class="flex items-start gap-3 px-4 py-3 ps-5">
+                        @endif
                         {{-- Unread accent bar at the inline-start edge (RTL-safe). --}}
                         <span
                             x-show="! items[{{ $note['id'] }}].read"
@@ -157,20 +171,28 @@
                             aria-label="Unread"
                             class="bg-primary mt-1.5 size-2 shrink-0 rounded-full"
                         ></span>
+                        @if ($note['href'])
+                            </a>
+                        @else
+                            </div>
+                        @endif
                     </li>
                 @endforeach
             </ul>
+        @endif
 
-            {{-- Footer --}}
+            {{-- Footer: only with somewhere to go. A link to "#" is a tab stop that does nothing. --}}
+            @if ($viewAllHref)
             <div class="shrink-0 border-t p-2">
                 <a
-                    href="#"
+                    href="{{ $viewAllHref }}"
+                    @if ($navigate) wire:navigate @endif
                     class="text-foreground hover:bg-accent hover:text-accent-foreground flex w-full items-center justify-center rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 >
-                    View all notifications
+                    {{ $viewAllLabel }}
                 </a>
             </div>
-        @endif
+            @endif
     </div>
     </template>
 </div>
