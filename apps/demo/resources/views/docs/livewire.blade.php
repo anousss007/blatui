@@ -110,6 +110,97 @@ class ProfileForm extends Component
     @verbatim@enderror@endverbatim
 &lt;/x-ui.field&gt;</x-code-block>
 
+        {{-- numbers --}}
+        <h2 id="numbers" class="mt-16 mb-2 scroll-mt-20 text-2xl font-bold tracking-tight">Numbers &amp; typed properties</h2>
+        <p class="text-muted-foreground mb-4">
+            <code>number-input</code> only ever sends a number. While the field has focus, what's in it is a
+            draft: typing over a price passes through an empty field, and that is not reported as a value.
+            On blur the field settles. An emptied field becomes <code>null</code>, so it has to be bound to a
+            nullable property, the same as a native <code>&lt;input wire:model&gt;</code>. Livewire leaves a
+            non-nullable typed property uninitialized when it receives <code>null</code>.
+        </p>
+        <p class="text-muted-foreground mb-4">
+            So pick one of two shapes. If the field may be left empty and a rule should reject it, make the
+            property nullable. If it must always hold a number, keep it non-nullable and pass
+            <code>:nullable="false"</code>: an emptied field goes back to the value it held.
+            <code>decimals</code> fixes what the field shows (<code>1.90</code>, not <code>1.9</code>) and rounds
+            what it sends. The property stays a number, and trailing zeroes are presentation only. A comma
+            is accepted as the decimal separator.
+        </p>
+        <x-code-block label="app/Livewire/Forms/VariantForm.php" icon="file-code">use Livewire\Attributes\Validate;
+use Livewire\Form;
+
+class VariantForm extends Form
+{
+    // May be emptied; `required` is what rejects it.
+    #[Validate('required|numeric|min:0')]
+    public ?float $listPrice = null;
+
+    // Never empty: the field reverts instead of sending null.
+    #[Validate('numeric|min:0')]
+    public float $salePrice = 0.0;
+}</x-code-block>
+        <x-code-block label="Blade" icon="code">&lt;x-ui.number-input wire:model="variantForm.listPrice" :min="0" :decimals="2" /&gt;
+
+&lt;x-ui.number-input wire:model.live="variantForm.salePrice"
+    :min="0" :step="0.1" :decimals="2" :nullable="false" /&gt;</x-code-block>
+        <p class="text-muted-foreground mb-4">
+            For money you total on the server, store integer cents or a <code>decimal</code> column, and
+            round there as well. <code>decimals</code> keeps the browser from sending
+            <code>25.499999999999996</code>, but the server should still own the arithmetic.
+        </p>
+
+        {{-- client-side --}}
+        <h2 id="client-side" class="mt-16 mb-2 scroll-mt-20 text-2xl font-bold tracking-tight">Work in the browser, decide on the server</h2>
+        <p class="text-muted-foreground mb-4">
+            A bound component writes into Livewire's copy of your data as the user edits, including under a
+            deferred <code>wire:model</code>. <code>$wire</code> is reactive, so anything derived from it
+            updates in the browser immediately and sends no request of its own. Don't mirror the values into
+            Alpine state with watchers. Read <code>$wire</code> directly.
+        </p>
+        <x-code-block label="Blade" icon="code">&lt;x-ui.number-input wire:model="variantForm.lastPurchaseCost" :decimals="2" :nullable="false" /&gt;
+&lt;x-ui.number-input wire:model="variantForm.salePrice" :decimals="2" :nullable="false" /&gt;
+
+&lt;p x-data&gt;
+    Profit:
+    &lt;span x-text="((+$wire.variantForm.salePrice || 0) - (+$wire.variantForm.lastPurchaseCost || 0)).toFixed(2)"&gt;&lt;/span&gt;
+&lt;/p&gt;</x-code-block>
+        <p class="text-muted-foreground mb-4">
+            Write the same way. <code>$wire.$set('variantForm.sku', value, false)</code> changes the property
+            without a request, and the value goes with the next one, so a "Generate" button can fill a field
+            with no round trip. Put helpers you reuse, like slugs or SKUs, in an ES module and register them
+            once where you register BlatUI. That's an <code>Alpine.magic</code> for a function you call from
+            templates, or <code>Alpine.data</code> for a component with state. Avoid hanging them on
+            <code>window</code>, where nothing says who owns the name or when it was defined.
+        </p>
+        <x-code-block label="resources/js/product-form.js" icon="file-code">export const slug = (value) =&gt; String(value ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+export const sku = (value) =&gt; String(value ?? '').toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-+|-+$/g, '');</x-code-block>
+        <x-code-block label="resources/js/app.js" icon="file-code">import { slug, sku } from './product-form';
+
+document.addEventListener('alpine:init', () =&gt; {
+    window.Alpine.magic('slug', () =&gt; slug);
+    window.Alpine.magic('sku', () =&gt; sku);
+});</x-code-block>
+        <x-code-block label="Blade" icon="code">&lt;x-ui.input wire:model="variantForm.name"
+    x-on:input="$wire.$set('variantForm.slug', $slug($event.target.value), false)" /&gt;
+
+&lt;x-ui.input-group-button type="button"
+    x-on:click="$wire.$set('variantForm.sku', $sku($wire.variantForm.name), false)"&gt;
+    Generate SKU
+&lt;/x-ui.input-group-button&gt;</x-code-block>
+        <p class="text-muted-foreground mb-4">
+            None of this makes the browser an authority. What it computes is a suggestion that arrives with
+            the next request. Uniqueness (<code>Rule::unique()</code> scoped to the tenant), authorization,
+            ownership and every rule still run in <code>save()</code>. Validate derived values like a slug or
+            SKU as untrusted input, the same as anything else the user sent.
+        </p>
+
         {{-- loading --}}
         <h2 id="loading" class="mt-16 mb-2 scroll-mt-20 text-2xl font-bold tracking-tight">Loading states</h2>
         <p class="text-muted-foreground mb-4">

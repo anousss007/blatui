@@ -229,6 +229,26 @@ const CHECKS = {
 
             return expect.truthy((await input.inputValue()) !== before, `the value stayed at ${before}`) ?? expect.empty(page.blatErrors, 'console errors');
         });
+
+        // What the field shows is not what it holds: 1.90 at two decimals, a comma read as the
+        // separator, and a field declared never-empty going back rather than settling on nothing. #31
+        await reporter.check(`number-input: decimals and a never-empty field ${at}`, async () => {
+            const input = page.locator('[data-slot="number-input"] input[name="price"]');
+            await input.scrollIntoViewIfNeeded();
+            const shown = await input.inputValue();
+
+            await input.fill('');
+            await input.blur();
+            const reverted = await input.inputValue();
+
+            await input.fill('2,5');
+            await input.blur();
+            const typed = await input.inputValue();
+
+            return expect.equal(shown, '1.90', 'the initial value at two decimals') ||
+                expect.equal(reverted, '1.90', 'an emptied never-empty field after blur') ||
+                expect.equal(typed, '2.50', '"2,5" after blur');
+        });
     },
 
     async 'tags-input'(page, { reporter, at }) {

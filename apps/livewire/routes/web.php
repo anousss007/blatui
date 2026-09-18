@@ -9,6 +9,7 @@ use App\Livewire\GeneratedIds;
 use App\Livewire\Greenfield;
 use App\Livewire\LabelWiring;
 use App\Livewire\NativeDialog;
+use App\Livewire\NumberForm;
 use App\Livewire\WireModel;
 use Illuminate\Support\Facades\Route;
 
@@ -27,3 +28,4 @@ Route::get('/data-table', DataTable::class);
 Route::get('/greenfield', Greenfield::class);
 Route::get('/generated-ids', GeneratedIds::class);
 Route::get('/wire-model', WireModel::class);
+Route::get('/number-form', NumberForm::class);

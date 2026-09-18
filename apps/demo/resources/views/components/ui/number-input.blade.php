@@ -4,6 +4,8 @@
     'min' => null,
     'max' => null,
     'step' => 1,
+    'decimals' => null,
+    'nullable' => true,
     'size' => 'default',
     'disabled' => false,
     'id' => null,
@@ -60,6 +62,8 @@
         max: @js($max === null ? null : (float) $max),
         step: @js((float) $step),
         disabled: @js((bool) $disabled),
+        decimals: @js($decimals === null || $decimals === '' ? null : max(0, min(15, (int) $decimals))),
+        nullable: @js((bool) $nullable),
         clamp(v) {
             if (v === null || isNaN(v)) return v;
             if (this.min !== null && v < this.min) v = this.min;
@@ -71,24 +75,54 @@
         // precision that survives is the one the value and the step imply, not the step alone.
         inc() {
             if (this.disabled || this.atMax) return;
-            this.value = this.clamp(this.$blatNumber.step(this.value ?? this.min ?? 0, this.step, this.step));
+            this.draft = null;
+            this.value = this.clamp(this.snapped(this.$blatNumber.step(this.value ?? this.min ?? 0, this.step, this.step)));
         },
         dec() {
             if (this.disabled || this.atMin) return;
-            this.value = this.clamp(this.$blatNumber.step(this.value ?? this.max ?? 0, -this.step, this.step));
+            this.draft = null;
+            this.value = this.clamp(this.snapped(this.$blatNumber.step(this.value ?? this.max ?? 0, -this.step, this.step)));
         },
+        snapped(v) { return this.decimals === null ? v : this.$blatNumber.round(v, this.decimals); },
+        // What the field shows. While it has focus that is the text as typed — a draft that is
+        // never reformatted under the caret, so 1.90 stays 1.90 and an empty field stays empty
+        // instead of being reported as a value. Otherwise it is the value, at `decimals` places.
+        draft: null,
+        get text() { return this.draft ?? this.format(this.value); },
+        format(v) {
+            if (v === null || v === undefined || v === '' || !isFinite(v)) return '';
+            return this.decimals === null ? String(v) : Number(v).toFixed(this.decimals);
+        },
+        // A comma is accepted as the decimal separator: inputmode=decimal puts one on the keypad
+        // in most of the locales that write numbers that way.
+        parse(raw) {
+            const s = String(raw).trim().replace(',', '.');
+            if (s === '' || !/^[-+]?(\d+\.?\d*|\.\d+)$/.test(s)) return null;
+            const n = Number(s);
+            return this.decimals === null ? n : this.$blatNumber.round(n, this.decimals);
+        },
+        onFocus(e) { this.draft = e.target.value; },
+        // Only a number is ever written while typing. An empty field, or a half-typed '-', is a
+        // draft on the way to one — selecting 25.50 and typing 30 passes through an empty field,
+        // and sending that as null is what unset a non-nullable property under wire:model.live
+        // (issue #31). What the field ends up holding is decided on blur.
         onInput(e) {
-            const raw = e.target.value;
-            this.value = raw === '' ? null : parseFloat(raw);
+            this.draft = e.target.value;
+            const n = this.parse(this.draft);
+            if (n !== null && n !== this.value) this.value = n;
         },
         onBlur(e) {
-            if (this.value === null || isNaN(this.value)) {
-                this.value = null;
-                e.target.value = '';
-                return;
-            }
-            this.value = this.clamp(this.value);
-            e.target.value = this.value;
+            const raw = this.draft ?? e.target.value;
+            this.draft = null;
+            const n = this.parse(raw);
+            // Emptied on purpose: null, so a `required` rule has something to reject — unless the
+            // field was declared never-empty, in which case it goes back to what it held. Text that
+            // is not a number at all goes back too. Nothing is written that is already there, so a
+            // blur that changed nothing sends nothing under .live.
+            const next = n !== null ? this.clamp(n)
+                : (String(raw).trim() === '' && this.nullable ? null : this.value);
+            if (next !== this.value) this.value = next;
+            e.target.value = this.text;
         },
         get atMin() { return this.value !== null && this.min !== null && this.value <= this.min; },
         get atMax() { return this.value !== null && this.max !== null && this.value >= this.max; },
@@ -121,7 +155,8 @@
         @if ($id) id="{{ $id }}" @endif
         @if ($placeholder) placeholder="{{ $placeholder }}" @endif
         @disabled($disabled)
-        :value="value"
+        :value="text"
+        @focus="onFocus($event)"
         @input="onInput($event)"
         @blur="onBlur($event)"
         :aria-valuenow="value"

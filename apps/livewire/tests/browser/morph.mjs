@@ -559,6 +559,68 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /wire-model', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/wire-model');
 
+    // --------------------------------------------------------- issue #31: number-input on a Form
+    //
+    // Selecting a price and typing over it passes through an empty field. That was sent as null the
+    // moment it happened; Livewire leaves a non-nullable typed property uninitialized on null, and
+    // the next render read it and threw. An empty field is a draft now, and only blur settles it.
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/number-form`);
+
+    const numberValue = (testid) => page.$eval(`[data-testid=${testid}] input`, (el) => el.value);
+    const numberEcho = (testid) => page.$eval(`[data-testid=${testid}]`, (el) => el.textContent.trim());
+    const failed = [];
+    page.on('response', (r) => r.status() >= 500 && failed.push(`${r.status()} ${r.url()}`));
+
+    await page.click('[data-testid=sale] input');
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('25.50');
+    await page.waitForTimeout(500);
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('Backspace');
+    await page.waitForTimeout(500);
+
+    await reporter.check('an emptied live field sends nothing while it has focus', async () =>
+        expect.empty(failed, 'failed requests') ||
+        expect.equal(await numberEcho('echo-sale'), '25.5', 'the non-nullable property while the field is empty') ||
+        expect.equal(await numberValue('sale'), '', 'the field, which the user emptied, while it still has focus'));
+
+    await page.keyboard.press('Tab');
+    await page.waitForTimeout(500);
+    await reporter.check('a never-empty field goes back on blur, at its decimals', async () =>
+        expect.equal(await numberValue('sale'), '25.50', 'the field after blur') ||
+        expect.equal(await numberEcho('echo-sale'), '25.5', 'the property after blur'));
+
+    // The deferred cost has to be visible to the browser before any request carries it.
+    await page.click('[data-testid=cost] input');
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('1,9');
+    await page.waitForTimeout(300);
+    await reporter.check('a value derived from $wire follows a deferred field with no request', async () =>
+        expect.equal(await numberEcho('profit'), '23.60', 'profit = 25.50 − 1.9'));
+    await page.keyboard.press('Tab');
+
+    // The nullable half: emptying it is a real null, and `required` is what rejects it.
+    await page.click('[data-testid=list] input');
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Tab');
+    await page.click('[data-testid=save]');
+    await page.waitForSelector('[data-testid=list] [data-slot="field-error"]');
+    await reporter.check('an emptied nullable field reaches the server as null', async () =>
+        expect.equal(await numberEcho('echo-list'), 'NULL', 'the nullable property') ||
+        expect.equal(await numberEcho('saved'), 'no', 'save() after a failed required rule'));
+
+    await page.click('[data-testid=tick]');
+    await page.waitForFunction(() => document.querySelector('[data-testid=ticks]')?.textContent === '1');
+    await page.waitForTimeout(200);
+    await reporter.check('the formatting survives a re-render', async () =>
+        expect.equal(await numberValue('cost'), '1.90', 'cost') ||
+        expect.equal(await numberValue('sale'), '25.50', 'sale price'));
+
+    await reporter.check('no console errors on /number-form', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/number-form');
+
     // ------------------------------------- issue #30: a dialog reused for the next record
     //
     // <x-ui.dialog> teleports its content to <body> and shows it, so it never unmounts: the same

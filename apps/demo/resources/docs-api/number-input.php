@@ -32,6 +32,17 @@ return [
             'description' => 'Amount each increase/decrease button adds or subtracts.',
         ],
         [
+            'name' => 'decimals',
+            'type' => 'int',
+            'description' => 'Fixed decimal places. The field shows the value at this precision (1.90, not 1.9) and rounds what it sends. The bound value stays a number, so trailing zeroes are presentation only.',
+        ],
+        [
+            'name' => 'nullable',
+            'type' => 'bool',
+            'default' => 'true',
+            'description' => 'Whether an emptied field is committed as null on blur. Pass false for a field backed by a non-nullable property: the field then reverts to its previous value. Either way nothing is sent while the field is empty mid-edit.',
+        ],
+        [
             'name' => 'size',
             'type' => 'string',
             'default' => "'default'",

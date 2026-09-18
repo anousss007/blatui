@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.31.0] - 2026-09-18
+
+### Added
+- **`number-input` takes `decimals`** (#31). The field shows the value at that many places, so a
+  price reads `1.90` rather than `1.9`, and what it sends is rounded to the same precision. The
+  bound value stays a number: trailing zeroes are presentation, and the server never receives a
+  string it has to cast back. A comma is accepted as the decimal separator, which is what
+  `inputmode="decimal"` offers on the keypad in most of the locales that write numbers that way.
+- **`number-input` takes `nullable`** (default `true`). Pass `:nullable="false"` for a field backed
+  by a non-nullable property: an emptied field then goes back to the value it held on blur instead
+  of committing `null`.
+
+### Fixed
+- **Emptying a `number-input` bound with `wire:model.live` could break the next render** (#31).
+  Select a price and type over it, and the field is empty for a moment on the way. The component
+  wrote that `null` into the property on the keystroke that emptied it, and `.live` sent it
+  straight away. Livewire leaves a non-nullable typed property *uninitialized* when it receives
+  `null`, so the next render threw "must not be accessed before initialization".
+
+  The field's text is now a draft while it has focus. Only a parseable number is written as the
+  user types; an empty field, or a half-typed `-`, sends nothing; and the draft is never reformatted
+  under the caret. On blur the field settles: a number is clamped and committed, and an emptied field
+  commits `null` (so a `required` rule has something to reject) or, with `:nullable="false"`, goes
+  back. A blur that changes nothing sends nothing under `.live`.
+
 ## [1.30.1] - 2026-09-03
 
 ### Fixed
@@ -1392,7 +1417,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.30.1...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.31.0...HEAD
+[1.31.0]: https://github.com/anousss007/blatui/compare/v1.30.1...v1.31.0
 [1.30.1]: https://github.com/anousss007/blatui/compare/v1.30.0...v1.30.1
 [1.30.0]: https://github.com/anousss007/blatui/compare/v1.29.0...v1.30.0
 [1.29.0]: https://github.com/anousss007/blatui/compare/v1.28.1...v1.29.0
