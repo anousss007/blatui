@@ -4,10 +4,11 @@
     'value' => '',
     'disabled' => false,
     'alphanumeric' => false,
-    'ariaLabel' => 'One-time password',
+    'ariaLabel' => null,
 ])
 
 @php
+    $ariaLabel ??= __('One-time password');
     $inputmode = $alphanumeric ? 'text' : 'numeric';
     $pattern = $alphanumeric ? '[a-zA-Z0-9]*' : '[0-9]*';
 

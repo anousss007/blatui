@@ -27,12 +27,14 @@
 @props([
     'name' => null,
     'value' => '',
-    'placeholder' => 'Write markdown…',
+    'placeholder' => null,
     'rows' => 8,
     'id' => null,
 ])
 
 @php
+    $placeholder ??= __('Write markdown…');
+
     // Livewire bridge — bind the markdown `source` to a consumer's wire:model when present, through
     // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
     // re-point it.
@@ -93,7 +95,7 @@
                     const ta = this.textarea;
                     const start = ta.selectionStart;
                     const end = ta.selectionEnd;
-                    const sel = this.source.slice(start, end) || 'text';
+                    const sel = this.source.slice(start, end) || @js(__('text'));
                     const snippet = '[' + sel + '](url)';
                     this.source = this.source.slice(0, start) + snippet + this.source.slice(end);
                     this.$nextTick(() => {
@@ -201,7 +203,7 @@
                     }
 
                     closeList();
-                    return html.join('') || '<p class="text-muted-foreground italic">Nothing to preview yet.</p>';
+                    return html.join('') || '<p class="text-muted-foreground italic">' + @js(e(__('Nothing to preview yet.'))) + '</p>';
                 },
             }));
         });
@@ -221,33 +223,33 @@
     {{-- Toolbar + tab switch --}}
     <div class="bg-muted/40 flex flex-wrap items-center gap-1 border-b p-1.5">
         {{-- Formatting tools --}}
-        <div class="flex items-center gap-0.5" role="group" aria-label="Formatting">
-            <button type="button" aria-label="Bold" @click="bold()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+        <div class="flex items-center gap-0.5" role="group" aria-label="{{ __('Formatting') }}">
+            <button type="button" aria-label="{{ __('Bold') }}" @click="bold()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
                 <x-lucide-bold class="size-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Italic" @click="italic()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button type="button" aria-label="{{ __('Italic') }}" @click="italic()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
                 <x-lucide-italic class="size-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Inline code" @click="code()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button type="button" aria-label="{{ __('Inline code') }}" @click="code()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
                 <x-lucide-code class="size-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Insert link" @click="insertLink()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button type="button" aria-label="{{ __('Insert link') }}" @click="insertLink()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
                 <x-lucide-link class="size-4" aria-hidden="true" />
             </button>
             <span class="bg-border mx-0.5 h-5 w-px" aria-hidden="true"></span>
-            <button type="button" aria-label="Bulleted list" @click="ul()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button type="button" aria-label="{{ __('Bulleted list') }}" @click="ul()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
                 <x-lucide-list class="size-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Numbered list" @click="ol()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button type="button" aria-label="{{ __('Numbered list') }}" @click="ol()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
                 <x-lucide-list-ordered class="size-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Blockquote" @click="quote()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button type="button" aria-label="{{ __('Blockquote') }}" @click="quote()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
                 <x-lucide-quote class="size-4" aria-hidden="true" />
             </button>
         </div>
 
         {{-- Write / Preview tabs --}}
-        <div role="tablist" aria-label="Editor view" class="bg-muted text-muted-foreground ms-auto inline-flex h-8 items-center justify-center rounded-md p-0.5">
+        <div role="tablist" aria-label="{{ __('Editor view') }}" class="bg-muted text-muted-foreground ms-auto inline-flex h-8 items-center justify-center rounded-md p-0.5">
             <button
                 type="button"
                 role="tab"
@@ -262,7 +264,7 @@
                 class="focus-visible:ring-ring/50 inline-flex h-7 items-center justify-center rounded-sm px-3 text-sm font-medium outline-none transition-all focus-visible:ring-[3px]"
                 :class="view === 'write' ? 'bg-background text-foreground shadow-xs' : 'hover:text-foreground'"
             >
-                Write
+                {{ __('Write') }}
             </button>
             <button
                 type="button"
@@ -278,7 +280,7 @@
                 class="focus-visible:ring-ring/50 inline-flex h-7 items-center justify-center rounded-sm px-3 text-sm font-medium outline-none transition-all focus-visible:ring-[3px]"
                 :class="view === 'preview' ? 'bg-background text-foreground shadow-xs' : 'hover:text-foreground'"
             >
-                Preview
+                {{ __('Preview') }}
             </button>
         </div>
     </div>
@@ -292,7 +294,7 @@
             @if ($name) name="{{ $name }}" @endif
             rows="{{ (int) $rows }}"
             placeholder="{{ $placeholder }}"
-            aria-label="Markdown source"
+            aria-label="{{ __('Markdown source') }}"
             class="placeholder:text-muted-foreground focus-visible:ring-ring/50 block w-full resize-y border-0 bg-transparent px-3 py-2.5 font-mono text-sm leading-6 outline-none focus-visible:ring-2 focus-visible:ring-inset"
         ></textarea>
     </div>

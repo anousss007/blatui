@@ -155,7 +155,7 @@ return [
         [
             'name' => 'emptyText',
             'type' => 'string',
-            'default' => "'No results.'",
+            'default' => "__('No results.')",
             'description' => 'Shown when there are no rows.',
         ],
     ],

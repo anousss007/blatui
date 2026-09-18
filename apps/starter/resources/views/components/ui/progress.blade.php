@@ -1,7 +1,7 @@
 @props([
     'value' => 0,
     'indeterminate' => false,
-    'ariaLabel' => 'Progress',
+    'ariaLabel' => null,
     'circular' => false,   // true → render a circular ring instead of a linear bar
     'size' => 64,          // circular only: diameter in px
     'thickness' => 6,      // circular only: ring stroke width in px
@@ -9,6 +9,7 @@
 ])
 
 @php
+    $ariaLabel ??= __('Progress');
     $pct = max(0.0, min(100.0, (float) $value));
 @endphp
 

@@ -113,7 +113,7 @@
     }
 
     $gutter = ['eq' => ' ', 'del' => '−', 'add' => '+'];
-    $srPrefix = ['del' => 'Removed: ', 'add' => 'Added: '];
+    $srPrefix = ['del' => __('Removed:').' ', 'add' => __('Added:').' '];
 
     $lineBg = [
         'eq' => '',
@@ -141,13 +141,13 @@
     @if ($mode === 'split')
         <div data-slot="diff-viewer-scroll" tabindex="0" class="overflow-x-auto outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:ring-inset">
             <table dir="ltr" class="w-full border-collapse text-start tabular-nums">
-                <caption class="sr-only">Side-by-side diff{{ $filename ? ' of '.$filename : '' }}: original on the left, changed on the right.</caption>
+                <caption class="sr-only">{{ $filename ? __('Side-by-side diff of :filename: original on the left, changed on the right.', ['filename' => $filename]) : __('Side-by-side diff: original on the left, changed on the right.') }}</caption>
                 <thead class="sr-only">
                     <tr>
-                        <th scope="col">Original line number</th>
-                        <th scope="col">Original line</th>
-                        <th scope="col">Changed line number</th>
-                        <th scope="col">Changed line</th>
+                        <th scope="col">{{ __('Original line number') }}</th>
+                        <th scope="col">{{ __('Original line') }}</th>
+                        <th scope="col">{{ __('Changed line number') }}</th>
+                        <th scope="col">{{ __('Changed line') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -173,12 +173,12 @@
     @else
         <div data-slot="diff-viewer-scroll" tabindex="0" class="overflow-x-auto outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:ring-inset">
             <table dir="ltr" class="w-full border-collapse text-start tabular-nums">
-                <caption class="sr-only">Inline diff{{ $filename ? ' of '.$filename : '' }}: removed lines are marked with a minus, added lines with a plus.</caption>
+                <caption class="sr-only">{{ $filename ? __('Inline diff of :filename: removed lines are marked with a minus, added lines with a plus.', ['filename' => $filename]) : __('Inline diff: removed lines are marked with a minus, added lines with a plus.') }}</caption>
                 <thead class="sr-only">
                     <tr>
-                        <th scope="col">Original line number</th>
-                        <th scope="col">Changed line number</th>
-                        <th scope="col">Line</th>
+                        <th scope="col">{{ __('Original line number') }}</th>
+                        <th scope="col">{{ __('Changed line number') }}</th>
+                        <th scope="col">{{ __('Line') }}</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -74,7 +74,7 @@
                     class="ring-offset-background focus:ring-ring absolute top-4 end-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none"
                 >
                     <x-lucide-x class="size-4" aria-hidden="true" />
-                    <span class="sr-only">Close</span>
+                    <span class="sr-only">{{ __('Close') }}</span>
                 </button>
             @endif
         </div>

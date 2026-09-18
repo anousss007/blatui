@@ -5,10 +5,11 @@
     'showChecklist' => true,
     'minLength' => 8,
     'size' => 'default',
-    'label' => 'Password',
+    'label' => null,
 ])
 
 @php
+    $label ??= __('Password');
     $fieldId = $id ?: $name;
 
     // Field styling lifted from input.blade.php so the password field matches the design system.
@@ -39,7 +40,7 @@
             return (this.hasLength ? 1 : 0) + (this.hasCase ? 1 : 0) + (this.hasDigit ? 1 : 0) + (this.hasSymbol ? 1 : 0);
         },
         get label() {
-            return ['', 'Weak', 'Fair', 'Good', 'Strong'][this.score] || '';
+            return ['', @js(__('Weak')), @js(__('Fair')), @js(__('Good')), @js(__('Strong'))][this.score] || '';
         },
         segmentColor(i) {
             if (i > this.score) return 'bg-muted';
@@ -67,8 +68,8 @@
         <button
             type="button"
             @click="show = !show"
-            aria-label="Show password"
-            x-bind:aria-label="show ? 'Hide password' : 'Show password'"
+            aria-label="{{ __('Show password') }}"
+            x-bind:aria-label="show ? @js(__('Hide password')) : @js(__('Show password'))"
             x-bind:aria-pressed="show"
             class="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex items-center rounded-md px-3 outline-none transition-colors focus-visible:ring-[3px]"
         >
@@ -102,7 +103,7 @@
         aria-live="polite"
     >
         <template x-if="password.length > 0">
-            <span><span class="sr-only">Password strength: </span><span class="text-foreground font-medium" x-text="label"></span></span>
+            <span><span class="sr-only">{{ __('Password strength:') }} </span><span class="text-foreground font-medium" x-text="label"></span></span>
         </template>
     </p>
 
@@ -110,21 +111,21 @@
         <ul data-slot="password-strength-checklist" class="space-y-1 text-xs">
             @php
                 $rules = [
-                    ['key' => 'hasLength', 'text' => "At least {$minLength} characters"],
-                    ['key' => 'hasCase', 'text' => 'Upper & lowercase letters'],
-                    ['key' => 'hasDigit', 'text' => 'A number'],
-                    ['key' => 'hasSymbol', 'text' => 'A symbol'],
+                    ['key' => 'hasLength', 'text' => __('At least :count characters', ['count' => $minLength])],
+                    ['key' => 'hasCase', 'text' => __('Upper & lowercase letters')],
+                    ['key' => 'hasDigit', 'text' => __('A number')],
+                    ['key' => 'hasSymbol', 'text' => __('A symbol')],
                 ];
             @endphp
             @foreach ($rules as $rule)
                 <li class="flex items-center gap-2" :class="{{ $rule['key'] }} ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'">
                     <span x-show="{{ $rule['key'] }}">
                         <x-lucide-check class="size-3.5 shrink-0" aria-hidden="true" />
-                        <span class="sr-only">Met:</span>
+                        <span class="sr-only">{{ __('Met:') }}</span>
                     </span>
                     <span x-show="! {{ $rule['key'] }}">
                         <x-lucide-x class="size-3.5 shrink-0" aria-hidden="true" />
-                        <span class="sr-only">Not met:</span>
+                        <span class="sr-only">{{ __('Not met:') }}</span>
                     </span>
                     <span>{{ $rule['text'] }}</span>
                 </li>

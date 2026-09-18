@@ -92,7 +92,7 @@
     </style>
 @endonce
 
-<div data-slot="org-chart" tabindex="0" role="group" aria-label="Organisation chart" {{ $attributes->twMerge('text-foreground focus-visible:ring-ring/50 w-full overflow-x-auto p-1 outline-none focus-visible:ring-[3px]') }}>
+<div data-slot="org-chart" tabindex="0" role="group" aria-label="{{ __('Organisation chart') }}" {{ $attributes->twMerge('text-foreground focus-visible:ring-ring/50 w-full overflow-x-auto p-1 outline-none focus-visible:ring-[3px]') }}>
     @if (!empty($tree))
         <ul class="m-0 list-none p-0">
             @include('components.ui.org-chart-node', ['node' => $tree])

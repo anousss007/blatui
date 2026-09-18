@@ -1,6 +1,6 @@
 <nav
     role="navigation"
-    aria-label="pagination"
+    aria-label="{{ __('Pagination') }}"
     data-slot="pagination"
     {{ $attributes->twMerge('mx-auto flex w-full justify-center') }}
 >

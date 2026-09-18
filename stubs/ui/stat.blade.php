@@ -29,7 +29,7 @@
         'neutral' => 'text-muted-foreground',
     ][$t];
 
-    $trendWord = ['up' => 'Increase', 'down' => 'Decrease', 'neutral' => 'No change'][$t];
+    $trendWord = ['up' => __('Increase'), 'down' => __('Decrease'), 'neutral' => __('No change')][$t];
 
     $hasSeries = is_array($series) && count($series) > 0;
 @endphp
@@ -63,7 +63,7 @@
                 :width="80"
                 :height="28"
                 :class="$trendColor.' mt-0.5 shrink-0'"
-                :ariaLabel="($label ? $label.' ' : '').'trend'"
+                :ariaLabel="$label ? __(':label trend', ['label' => $label]) : __('trend')"
             />
         @elseif (isset($trailing))
             <div class="mt-0.5 shrink-0">{{ $trailing }}</div>

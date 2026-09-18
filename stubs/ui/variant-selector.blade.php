@@ -3,11 +3,13 @@
     'options' => [],
     'value' => null,
     'type' => 'pill',          // pill | color
-    'label' => 'Variant',
+    'label' => null,
     'disabled' => false,
 ])
 
 @php
+    $label ??= __('Variant');
+
     // Normalise options into a uniform shape: ['value', 'label', 'color', 'disabled'].
     $normalized = [];
     foreach ($options as $option) {

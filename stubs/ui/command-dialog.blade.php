@@ -1,7 +1,12 @@
 @props([
-    'title' => 'Command Palette',
-    'description' => 'Search for a command to run...',
+    'title' => null,
+    'description' => null,
 ])
+
+@php
+    $title ??= __('Command Palette');
+    $description ??= __('Search for a command to run...');
+@endphp
 
 <div data-slot="command-dialog" x-data="{ open: false }" x-id="['blat-command-dialog']" {{ $attributes }}>
     @isset($trigger)

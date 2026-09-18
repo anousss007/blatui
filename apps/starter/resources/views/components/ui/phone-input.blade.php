@@ -3,28 +3,30 @@
     'id' => null,
     'value' => '',          // phone number (national part)
     'country' => 'US',      // default ISO country code
-    'placeholder' => 'Phone number',
+    'placeholder' => null,
 ])
 
 @php
+    $placeholder ??= __('Phone number');
+
     // A curated set of common countries (flag emoji + dial code). Extend as needed.
     $countries = [
-        ['code' => 'US', 'name' => 'United States', 'dial' => '+1', 'flag' => '🇺🇸'],
-        ['code' => 'GB', 'name' => 'United Kingdom', 'dial' => '+44', 'flag' => '🇬🇧'],
-        ['code' => 'CA', 'name' => 'Canada', 'dial' => '+1', 'flag' => '🇨🇦'],
-        ['code' => 'AU', 'name' => 'Australia', 'dial' => '+61', 'flag' => '🇦🇺'],
-        ['code' => 'FR', 'name' => 'France', 'dial' => '+33', 'flag' => '🇫🇷'],
-        ['code' => 'DE', 'name' => 'Germany', 'dial' => '+49', 'flag' => '🇩🇪'],
-        ['code' => 'ES', 'name' => 'Spain', 'dial' => '+34', 'flag' => '🇪🇸'],
-        ['code' => 'IT', 'name' => 'Italy', 'dial' => '+39', 'flag' => '🇮🇹'],
-        ['code' => 'NL', 'name' => 'Netherlands', 'dial' => '+31', 'flag' => '🇳🇱'],
-        ['code' => 'BE', 'name' => 'Belgium', 'dial' => '+32', 'flag' => '🇧🇪'],
-        ['code' => 'IN', 'name' => 'India', 'dial' => '+91', 'flag' => '🇮🇳'],
-        ['code' => 'JP', 'name' => 'Japan', 'dial' => '+81', 'flag' => '🇯🇵'],
-        ['code' => 'BR', 'name' => 'Brazil', 'dial' => '+55', 'flag' => '🇧🇷'],
-        ['code' => 'MX', 'name' => 'Mexico', 'dial' => '+52', 'flag' => '🇲🇽'],
-        ['code' => 'MA', 'name' => 'Morocco', 'dial' => '+212', 'flag' => '🇲🇦'],
-        ['code' => 'AE', 'name' => 'United Arab Emirates', 'dial' => '+971', 'flag' => '🇦🇪'],
+        ['code' => 'US', 'name' => __('United States'), 'dial' => '+1', 'flag' => '🇺🇸'],
+        ['code' => 'GB', 'name' => __('United Kingdom'), 'dial' => '+44', 'flag' => '🇬🇧'],
+        ['code' => 'CA', 'name' => __('Canada'), 'dial' => '+1', 'flag' => '🇨🇦'],
+        ['code' => 'AU', 'name' => __('Australia'), 'dial' => '+61', 'flag' => '🇦🇺'],
+        ['code' => 'FR', 'name' => __('France'), 'dial' => '+33', 'flag' => '🇫🇷'],
+        ['code' => 'DE', 'name' => __('Germany'), 'dial' => '+49', 'flag' => '🇩🇪'],
+        ['code' => 'ES', 'name' => __('Spain'), 'dial' => '+34', 'flag' => '🇪🇸'],
+        ['code' => 'IT', 'name' => __('Italy'), 'dial' => '+39', 'flag' => '🇮🇹'],
+        ['code' => 'NL', 'name' => __('Netherlands'), 'dial' => '+31', 'flag' => '🇳🇱'],
+        ['code' => 'BE', 'name' => __('Belgium'), 'dial' => '+32', 'flag' => '🇧🇪'],
+        ['code' => 'IN', 'name' => __('India'), 'dial' => '+91', 'flag' => '🇮🇳'],
+        ['code' => 'JP', 'name' => __('Japan'), 'dial' => '+81', 'flag' => '🇯🇵'],
+        ['code' => 'BR', 'name' => __('Brazil'), 'dial' => '+55', 'flag' => '🇧🇷'],
+        ['code' => 'MX', 'name' => __('Mexico'), 'dial' => '+52', 'flag' => '🇲🇽'],
+        ['code' => 'MA', 'name' => __('Morocco'), 'dial' => '+212', 'flag' => '🇲🇦'],
+        ['code' => 'AE', 'name' => __('United Arab Emirates'), 'dial' => '+971', 'flag' => '🇦🇪'],
     ];
 
     // Livewire bridge — forward a consumer's wire:model onto the native tel <input>.
@@ -59,7 +61,7 @@
         type="button"
         @click="open = !open"
         :aria-expanded="open"
-        aria-label="Select country"
+        aria-label="{{ __('Select country') }}"
         class="border-input dark:bg-input/30 inline-flex h-9 shrink-0 items-center gap-1.5 rounded-l-md border border-r-0 bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:z-10 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
     >
         <span class="text-base leading-none" x-text="selected.flag"></span>
@@ -88,10 +90,10 @@
     >
         <div class="flex h-9 items-center gap-2 border-b px-3">
             <x-lucide-search class="size-4 shrink-0 opacity-50" aria-hidden="true" />
-            <input x-model="query" x-init="$watch('open', v => v && $nextTick(() => $el.focus()))" type="text" placeholder="Search country..." class="placeholder:text-muted-foreground w-full bg-transparent text-sm outline-none" />
+            <input x-model="query" x-init="$watch('open', v => v && $nextTick(() => $el.focus()))" type="text" placeholder="{{ __('Search country...') }}" class="placeholder:text-muted-foreground w-full bg-transparent text-sm outline-none" />
         </div>
         <div class="max-h-60 overflow-y-auto p-1">
-            <p x-show="visible.length === 0" class="py-6 text-center text-sm">No country found.</p>
+            <p x-show="visible.length === 0" class="py-6 text-center text-sm">{{ __('No country found.') }}</p>
             <template x-for="c in visible" :key="c.code">
                 <button
                     type="button"

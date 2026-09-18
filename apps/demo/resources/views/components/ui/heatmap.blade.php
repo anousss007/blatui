@@ -77,17 +77,17 @@
         $columns[$col][$row] = $cell;
     }
 
-    $weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    $shownLabels = [1 => 'Mon', 3 => 'Wed', 5 => 'Fri']; // row index => label
+    $weekdayLabels = [__('Mon'), __('Tue'), __('Wed'), __('Thu'), __('Fri'), __('Sat'), __('Sun')];
+    $shownLabels = [1 => __('Mon'), 3 => __('Wed'), 5 => __('Fri')]; // row index => label
 
     $total = array_sum($counts);
-    $summary = count($cells).' days, '.$total.' total, peak '.$maxCount;
+    $summary = __(':days days, :total total, peak :peak', ['days' => count($cells), 'total' => $total, 'peak' => $maxCount]);
 @endphp
 
 <div
     data-slot="heatmap"
     role="group"
-    aria-label="Activity heatmap: {{ $summary }}"
+    aria-label="{{ __('Activity heatmap: :summary', ['summary' => $summary]) }}"
     {{ $attributes->twMerge('text-muted-foreground inline-flex flex-col gap-2 text-xs') }}
 >
     <div class="flex gap-2">
@@ -107,7 +107,7 @@
                             $count = $cell['count'] ?? null;
                             $lvl = $count === null ? 0 : $levelOf($count);
                             $when = ($cell['date'] ?? null) ?: $weekdayLabels[$r];
-                            $label = $count === null ? '' : $count.' on '.$when;
+                            $label = $count === null ? '' : __(':count on :when', ['count' => $count, 'when' => $when]);
                         @endphp
                         @if ($cell === null)
                             <div class="size-3 rounded-sm" aria-hidden="true"></div>
@@ -126,10 +126,10 @@
 
     {{-- Legend --}}
     <div class="flex items-center gap-1 self-end">
-        <span>Less</span>
+        <span>{{ __('Less') }}</span>
         @for ($l = 0; $l <= 4; $l++)
             <span @class(['size-3 rounded-sm', $cellClasses[$l]]) aria-hidden="true"></span>
         @endfor
-        <span>More</span>
+        <span>{{ __('More') }}</span>
     </div>
 </div>

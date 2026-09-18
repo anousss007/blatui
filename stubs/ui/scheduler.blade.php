@@ -4,10 +4,11 @@
     'startHour' => 8,       // first hour shown in the gutter (0–24)
     'endHour' => 18,        // last hour shown in the gutter (0–24)
     'view' => 'week',       // 'week' | 'day'
-    'label' => 'Schedule',  // accessible name for the grid region
+    'label' => null,        // accessible name for the grid region
 ])
 
 @php
+    $label ??= __('Schedule');
     $startHour = max(0, min(24, (int) $startHour));
     $endHour   = max($startHour + 1, min(24, (int) $endHour));
     $hours     = range($startHour, $endHour);
@@ -19,9 +20,9 @@
     if (is_array($days) && count($days)) {
         $columns = array_values($days);
     } elseif ($view === 'day') {
-        $columns = ['Day'];
+        $columns = [__('Day')];
     } else {
-        $columns = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        $columns = [__('Mon'), __('Tue'), __('Wed'), __('Thu'), __('Fri'), __('Sat'), __('Sun')];
     }
     $colCount = count($columns);
 
@@ -38,7 +39,7 @@
         $hh = (int) floor($h);
         $mm = (int) round(($h - $hh) * 60);
         if ($mm === 60) { $hh++; $mm = 0; }
-        $period = $hh >= 12 ? 'PM' : 'AM';
+        $period = $hh >= 12 ? __('PM') : __('AM');
         $h12 = $hh % 12 === 0 ? 12 : $hh % 12;
         return $mm === 0 ? "{$h12} {$period}" : sprintf('%d:%02d %s', $h12, $mm, $period);
     };
@@ -89,7 +90,7 @@
             'col'     => $colOf($ev['day'] ?? 0),
             'top'     => ($cs - $startHour) * $rowRem,
             'height'  => ($ce - $cs) * $rowRem,
-            'title'   => (string) ($ev['title'] ?? 'Event'),
+            'title'   => (string) ($ev['title'] ?? __('Event')),
             'range'   => $fmt($s) . ' – ' . $fmt($e),
             'tone'    => isset($ev['color'], $tones[$ev['color']]) ? $tones[$ev['color']] : null,
         ];
@@ -111,7 +112,7 @@
         {{-- Header row: empty gutter cell + one labelled cell per column. --}}
         <div class="bg-muted/40 flex border-b">
             <div class="text-muted-foreground w-14 shrink-0 border-e px-2 py-2 text-end text-[11px] font-medium">
-                <span class="sr-only">Time</span>
+                <span class="sr-only">{{ __('Time') }}</span>
             </div>
             @foreach ($columns as $col)
                 <div class="text-foreground flex-1 px-2 py-2 text-center text-sm font-semibold">
@@ -124,7 +125,7 @@
         <div
             tabindex="0"
             class="focus-visible:ring-ring/50 max-h-[28rem] overflow-y-auto outline-none focus-visible:ring-2 focus-visible:ring-inset"
-            aria-label="{{ $label }} grid, scrollable"
+            aria-label="{{ __(':label grid, scrollable', ['label' => $label]) }}"
         >
             <div class="flex" style="height: {{ $bodyRem }}rem;">
                 {{-- Left hour gutter: one label per hour boundary. --}}
@@ -185,7 +186,7 @@
                             >
                                 <p class="truncate text-xs font-semibold leading-tight">{{ $ev['title'] }}</p>
                                 <p class="truncate text-[11px] leading-tight opacity-80">{{ $ev['range'] }}</p>
-                                <span class="sr-only">from {{ $ev['range'] }}</span>
+                                <span class="sr-only">{{ __('from :range', ['range' => $ev['range']]) }}</span>
                             </div>
                         @endforeach
                     </div>

@@ -61,7 +61,7 @@
                 x-data="{ active: false }"
                 @click="active = !active"
                 :aria-pressed="active.toString()"
-                aria-label="Add to wishlist"
+                aria-label="{{ __('Add to wishlist') }}"
                 class="bg-background/80 text-foreground hover:bg-background absolute end-2 top-2 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border shadow-sm backdrop-blur transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
             >
                 <x-lucide-heart class="size-4 transition-colors" x-bind:class="active ? 'fill-red-500 text-red-500' : 'fill-none'" aria-hidden="true" />
@@ -85,7 +85,7 @@
 
         @if ($rating !== null)
             <div class="flex items-center gap-2 text-sm">
-                <x-ui.rating :value="$rating" readonly size="sm" :name="'Rated '.$rating.' out of 5'" />
+                <x-ui.rating :value="$rating" readonly size="sm" :name="__('Rated :rating out of 5', ['rating' => $rating])" />
                 @if ($reviews !== null)
                     <span class="text-muted-foreground">({{ $reviews }})</span>
                 @endif
@@ -104,7 +104,7 @@
                 {{ $slot }}
             @else
                 <x-ui.button class="w-full">
-                    <x-lucide-shopping-cart aria-hidden="true" /> Add to cart
+                    <x-lucide-shopping-cart aria-hidden="true" /> {{ __('Add to cart') }}
                 </x-ui.button>
             @endif
         </div>

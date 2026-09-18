@@ -18,7 +18,7 @@ return [
         [
             'name' => 'placeholder',
             'type' => 'string',
-            'default' => "'Add tag…'",
+            'default' => "__('Add tag…')",
             'description' => 'Placeholder text shown in the text field while it is empty.',
         ],
         [

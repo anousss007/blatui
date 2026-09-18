@@ -22,7 +22,7 @@
 <button
     data-slot="back-to-top"
     type="button"
-    aria-label="Back to top"
+    aria-label="{{ __('Back to top') }}"
     x-data="{
         shown: @js((bool) $demo),
         demo: @js((bool) $demo),

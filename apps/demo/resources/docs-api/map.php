@@ -23,7 +23,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'Location'",
+            'default' => "__('Location')",
             'description' => 'Human-readable name of the place. Used in the iframe title and the "View larger map" link.',
         ],
         [

@@ -20,9 +20,9 @@
     // Optional cookie categories. "necessary" is always on and locked; the rest default off
     // (GDPR: no pre-ticked non-essential categories). Each: key => [label, locked, default].
     $categories = [
-        'necessary'  => ['label' => 'Strictly necessary', 'locked' => true,  'default' => true],
-        'analytics'  => ['label' => 'Analytics',          'locked' => false, 'default' => false],
-        'marketing'  => ['label' => 'Marketing',          'locked' => false, 'default' => false],
+        'necessary'  => ['label' => __('Strictly necessary'), 'locked' => true,  'default' => true],
+        'analytics'  => ['label' => __('Analytics'), 'locked' => false, 'default' => false],
+        'marketing'  => ['label' => __('Marketing'), 'locked' => false, 'default' => false],
     ];
 
     // Fixed placement (skipped entirely in demo mode, which renders in-flow).
@@ -82,7 +82,7 @@
     x-show="show"
     x-cloak
     role="region"
-    aria-label="Cookie consent"
+    aria-label="{{ __('Cookie consent') }}"
     {{ $attributes->twMerge('bg-card text-card-foreground rounded-xl border p-4 shadow-lg sm:p-5 '.$place) }}
 >
     <div class="flex flex-col gap-3">
@@ -91,12 +91,12 @@
                 <x-lucide-cookie class="size-5" />
             </span>
             <div class="space-y-1 text-sm">
-                <p class="font-medium">We value your privacy</p>
+                <p class="font-medium">{{ __('We value your privacy') }}</p>
                 <p class="text-muted-foreground">
                     {{ $slot->isEmpty()
-                        ? 'We use cookies to enhance your experience, analyze traffic, and personalize content. You can accept all, reject non-essential, or manage your preferences.'
+                        ? __('We use cookies to enhance your experience, analyze traffic, and personalize content. You can accept all, reject non-essential, or manage your preferences.')
                         : $slot }}
-                    <a href="#" class="text-foreground font-medium underline underline-offset-2 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] rounded-sm">Cookie policy</a>
+                    <a href="#" class="text-foreground font-medium underline underline-offset-2 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] rounded-sm">{{ __('Cookie policy') }}</a>
                 </p>
             </div>
         </div>
@@ -108,7 +108,7 @@
                         <label for="cc-{{ $key }}" class="text-sm @if ($cat['locked']) text-muted-foreground @endif">
                             {{ $cat['label'] }}
                             @if ($cat['locked'])
-                                <span class="text-muted-foreground/70 text-xs">(always on)</span>
+                                <span class="text-muted-foreground/70 text-xs">{{ __('(always on)') }}</span>
                             @endif
                         </label>
                         <button
@@ -117,7 +117,7 @@
                             role="switch"
                             @if ($cat['locked'])
                                 aria-checked="true"
-                                aria-label="{{ $cat['label'] }} (required, always on)"
+                                aria-label="{{ __(':label (required, always on)', ['label' => $cat['label']]) }}"
                                 disabled
                                 data-state="checked"
                             @else
@@ -145,26 +145,26 @@
                     x-show="!customizing"
                     @click="customizing = true"
                     class="text-sm font-medium underline-offset-4 outline-none transition-colors hover:underline focus-visible:ring-ring/50 focus-visible:ring-[3px] rounded-md px-2 py-1 sm:me-auto"
-                >Customize</button>
+                >{{ __('Customize') }}</button>
                 <button
                     type="button"
                     x-show="customizing"
                     x-cloak
                     @click="savePrefs()"
                     class="border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium outline-none transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] sm:me-auto"
-                >Save preferences</button>
+                >{{ __('Save preferences') }}</button>
             @endif
 
             <button
                 type="button"
                 @click="reject()"
                 class="border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium outline-none transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-            >Reject</button>
+            >{{ __('Reject') }}</button>
             <button
                 type="button"
                 @click="acceptAll()"
                 class="bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium outline-none transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-            >Accept all</button>
+            >{{ __('Accept all') }}</button>
         </div>
     </div>
 </div>

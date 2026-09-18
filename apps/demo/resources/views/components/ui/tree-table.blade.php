@@ -97,10 +97,10 @@
 >
     @if ($copyable)
         <div class="flex justify-end border-b px-2 py-1.5">
-            <x-ui.button type="button" variant="ghost" size="sm" class="gap-1.5" @click="copyTree()" aria-label="Copy tree as markdown">
+            <x-ui.button type="button" variant="ghost" size="sm" class="gap-1.5" @click="copyTree()" aria-label="{{ __('Copy tree as markdown') }}">
                 <x-lucide-copy class="size-3.5" x-show="!copied" />
                 <x-lucide-check class="size-3.5 text-emerald-500" x-show="copied" x-cloak />
-                <span x-text="copied ? 'Copied' : 'Copy tree'"></span>
+                <span x-text="copied ? @js(__('Copied')) : @js(__('Copy tree'))"></span>
             </x-ui.button>
         </div>
     @endif

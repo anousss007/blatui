@@ -3,12 +3,13 @@
     'value' => '',
     'as' => 'input',          // 'input' (single line) or 'textarea' (multi-line)
     'placeholder' => null,
-    'label' => 'value',       // accessible label, e.g. "Edit {label}"
+    'label' => null,          // accessible label, e.g. "Edit {label}"
     'size' => 'default',
     'id' => null,
 ])
 
 @php
+    $label ??= __('value');
     $isTextarea = $as === 'textarea';
 
     // Field sizing mirrors the input/textarea components so the swap is seamless.
@@ -80,7 +81,7 @@
         type="button"
         x-show="!editing"
         @click="edit()"
-        aria-label="{{ 'Edit ' . $label }}"
+        aria-label="{{ __('Edit :label', ['label' => $label]) }}"
         @class([
             'group hover:bg-muted text-foreground focus-visible:ring-ring/50 inline-flex w-full items-center justify-between gap-2 rounded-md border border-transparent text-start outline-none transition-colors focus-visible:ring-[3px]',
             $displaySize,
@@ -106,20 +107,20 @@
                 <button
                     type="button"
                     @click="cancel()"
-                    aria-label="Cancel"
+                    aria-label="{{ __('Cancel') }}"
                     class="border-input bg-background hover:bg-muted text-foreground focus-visible:ring-ring/50 inline-flex h-8 items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-medium shadow-xs outline-none transition-colors focus-visible:ring-[3px]"
                 >
                     <x-lucide-x class="size-4" aria-hidden="true" />
-                    <span>Cancel</span>
+                    <span>{{ __('Cancel') }}</span>
                 </button>
                 <button
                     type="button"
                     @click="save()"
-                    aria-label="Save"
+                    aria-label="{{ __('Save') }}"
                     class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/50 inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium shadow-xs outline-none transition-colors focus-visible:ring-[3px]"
                 >
                     <x-lucide-check class="size-4" aria-hidden="true" />
-                    <span>Save</span>
+                    <span>{{ __('Save') }}</span>
                 </button>
             </div>
         </div>

@@ -39,12 +39,12 @@
 
     @if ($onSale)
         <s @class([$compareCls, 'text-muted-foreground'])>
-            <span class="sr-only">was </span>{{ $fmt($compareAt) }}
+            <span class="sr-only">{{ __('was') }} </span>{{ $fmt($compareAt) }}
         </s>
 
         @if ($showDiscount && $discount > 0)
             <x-ui.badge tone="success" variant="soft" size="sm">
-                <span class="sr-only">save </span>-{{ $discount }}%
+                <span class="sr-only">{{ __('save') }} </span>-{{ $discount }}%
             </x-ui.badge>
         @endif
     @endif

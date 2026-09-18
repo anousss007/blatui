@@ -24,21 +24,21 @@
     // Row actions, custom cells — the same shape as server-table.
     'actions' => [],
     'actionsView' => null,
-    'actionsLabel' => 'Actions',
+    'actionsLabel' => null,
     'actionsMode' => 'inline',
     'cellViews' => [],
 
     // Toolbar — search bound to a Livewire property, a page-size select, and a slot for the rest.
     'searchable' => false,
     'searchModel' => 'search',
-    'searchPlaceholder' => 'Search...',
+    'searchPlaceholder' => null,
     'perPageModel' => 'perPage',
     'perPageOptions' => [],
-    'perPageLabel' => 'Rows per page',
+    'perPageLabel' => null,
 
     'caption' => null,
     'captionVisible' => false,
-    'emptyText' => 'No results.',
+    'emptyText' => null,
     'emptyIcon' => 'search-x',
     'responsive' => 'scroll', // 'scroll' | 'stack' (cards on mobile, table from md:)
     'variant' => 'default',   // 'default' | 'card'
@@ -47,6 +47,11 @@
 
 @php
     use Illuminate\Contracts\Pagination\Paginator as PaginatorContract;
+
+    $actionsLabel ??= __('Actions');
+    $searchPlaceholder ??= __('Search...');
+    $perPageLabel ??= __('Rows per page');
+    $emptyText ??= __('No results.');
 
     $cols = collect($columns)->map(fn ($c) => [
         'key' => $c['key'] ?? '',
@@ -377,7 +382,7 @@
                                                 :class="$action['class'] ?? null"
                                                 :wire:click="$wireClick"
                                                 :wire:confirm="$wireConfirm"
-                                                :aria-label="$action['label'] ?? 'Action'"
+                                                :aria-label="$action['label'] ?? __('Action')"
                                             >
                                                 @isset($action['icon'])
                                                     <x-dynamic-component :component="'lucide-'.$action['icon']" class="size-4" aria-hidden="true" />

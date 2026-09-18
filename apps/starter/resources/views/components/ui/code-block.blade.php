@@ -14,13 +14,13 @@
             <span data-slot="code-block-filename" class="flex items-center gap-2 font-mono text-xs text-zinc-400">
                 <x-lucide-file class="size-3.5" aria-hidden="true" /> {{ $filename }}
             </span>
-            <button type="button" @click="copy()" data-slot="code-block-copy" aria-label="Copy code" class="text-zinc-400 transition-colors hover:text-zinc-100">
+            <button type="button" @click="copy()" data-slot="code-block-copy" aria-label="{{ __('Copy code') }}" class="text-zinc-400 transition-colors hover:text-zinc-100">
                 <x-lucide-copy class="size-3.5" x-show="!copied" />
                 <x-lucide-check class="size-3.5 text-emerald-400" x-show="copied" x-cloak />
             </button>
         </div>
     @else
-        <button type="button" @click="copy()" data-slot="code-block-copy" aria-label="Copy code" class="absolute end-2 top-2 z-10 rounded-md p-1.5 text-zinc-400 opacity-0 transition-all hover:bg-white/10 hover:text-zinc-100 focus-visible:opacity-100 group-hover/code-block:opacity-100">
+        <button type="button" @click="copy()" data-slot="code-block-copy" aria-label="{{ __('Copy code') }}" class="absolute end-2 top-2 z-10 rounded-md p-1.5 text-zinc-400 opacity-0 transition-all hover:bg-white/10 hover:text-zinc-100 focus-visible:opacity-100 group-hover/code-block:opacity-100">
             <x-lucide-copy class="size-3.5" x-show="!copied" />
             <x-lucide-check class="size-3.5 text-emerald-400" x-show="copied" x-cloak />
         </button>

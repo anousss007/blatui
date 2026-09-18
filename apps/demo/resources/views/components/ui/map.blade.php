@@ -13,13 +13,15 @@
     'lat' => null,
     'lon' => null,
     'zoom' => 14,
-    'label' => 'Location',
+    'label' => null,
     'marker' => true,
     'height' => 320,
     'ratio' => null,
 ])
 
 @php
+    $label ??= __('Location');
+
     // Sensible default: Brussels, Belgium.
     $lat = $lat === null ? 50.8467 : (float) $lat;
     $lon = $lon === null ? 4.3499 : (float) $lon;
@@ -55,7 +57,7 @@
 <div data-slot="map" {{ $attributes->twMerge('w-full') }}>
     <div class="bg-muted relative w-full overflow-hidden rounded-xl border" style="{{ $frameStyle }}">
         <iframe
-            title="Map of {{ $label }}"
+            title="{{ __('Map of :label', ['label' => $label]) }}"
             src="{{ $embed }}"
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
@@ -69,8 +71,8 @@
         rel="noopener noreferrer"
         class="text-muted-foreground hover:text-foreground mt-2 inline-flex items-center gap-1 text-xs underline-offset-4 hover:underline"
     >
-        <span>View larger map</span>
+        <span>{{ __('View larger map') }}</span>
         <x-lucide-external-link class="size-3 shrink-0 rtl:-scale-x-100" aria-hidden="true" />
-        <span class="sr-only">(opens openstreetmap.org in a new tab)</span>
+        <span class="sr-only">{{ __('(opens openstreetmap.org in a new tab)') }}</span>
     </a>
 </div>

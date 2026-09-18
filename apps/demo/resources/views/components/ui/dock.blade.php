@@ -34,7 +34,7 @@
 
 <nav
     data-slot="dock"
-    aria-label="Dock"
+    aria-label="{{ __('Dock') }}"
     x-data="{
         mouseX: null,
         peak: @js($peak),

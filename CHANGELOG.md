@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.34.0] - 2026-09-18
+
+### Changed
+- **Every string a component shows or announces is translatable** (#35). Visible text, `aria-label`s,
+  placeholders, screen-reader text, empty states and live-region announcements in 99 components
+  now go through `__()`, including the ones built inside Alpine expressions (`Copied`,
+  `Show password`, `Notifications, :count unread`…). The keys are the English text, so an app
+  translates them with Laravel's JSON translation files (`lang/es.json`), and the English output
+  is unchanged. Sentences that carry a value use a placeholder (`Remove :name`,
+  `:selected of :total row(s) selected.`) rather than being glued together, so a language can move
+  the value. Singular and plural stay separate keys, as the English already split them.
+
+  Props whose default was an English label (`emptyText`, `placeholder`, `searchPlaceholder`,
+  `actionsLabel`, `label`…) now default to `null` and resolve to the translated string. Passing
+  your own value works as before.
+
+  A test now fails when a component hard-codes an English string, so new components stay
+  translatable. The earlier migration had covered only pagination, sidebar, calendar and combobox.
+
 ## [1.33.0] - 2026-09-18
 
 ### Added
@@ -1470,7 +1489,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.33.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.34.0...HEAD
+[1.34.0]: https://github.com/anousss007/blatui/compare/v1.33.0...v1.34.0
 [1.33.0]: https://github.com/anousss007/blatui/compare/v1.32.0...v1.33.0
 [1.32.0]: https://github.com/anousss007/blatui/compare/v1.31.0...v1.32.0
 [1.31.0]: https://github.com/anousss007/blatui/compare/v1.30.1...v1.31.0

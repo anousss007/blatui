@@ -43,7 +43,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'Value'",
+            'default' => "__('Value')",
             'description' => 'Accessible label for the slider.',
         ],
         [

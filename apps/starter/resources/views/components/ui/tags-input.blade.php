@@ -1,13 +1,15 @@
 @props([
     'name' => null,
     'value' => [],
-    'placeholder' => 'Add tag…',
+    'placeholder' => null,
     'max' => null,
     'disabled' => false,
     'id' => null,
 ])
 
 @php
+    $placeholder ??= __('Add tag…');
+
     // Livewire bridge — bind Alpine state to a consumer's wire:model when present. The property
     // path travels as a data attribute rather than baked into x-data (which Alpine evaluates once),
     // so a morph that re-points or re-mounts the component is followed. $blatModel reads and writes
@@ -70,7 +72,7 @@
                 type="button"
                 x-show="!disabled"
                 @click.stop="remove(i)"
-                :aria-label="'Remove ' + tag"
+                :aria-label="@js(__('Remove :label')).replace(':label', tag)"
                 class="hover:text-secondary-foreground/70 -me-0.5 inline-flex cursor-pointer items-center rounded-sm outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
             >
                 <x-lucide-x class="size-3.5" aria-hidden="true" />

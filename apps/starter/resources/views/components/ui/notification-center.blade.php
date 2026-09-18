@@ -2,7 +2,7 @@
     'notifications' => [],  // [['title','body'?,'time','read'?,'icon'?,'avatar'?,'href'?], ...]
     'open' => false,        // demo/initial open state — defaults the panel open so reviewers see it
     'viewAllHref' => null,  // where "View all notifications" goes; no href, no footer link
-    'viewAllLabel' => null, // defaults to __('View all notifications')
+    'viewAllLabel' => null, // the translated "View all notifications" by default
     'navigate' => false,    // add wire:navigate to the links, for a Livewire SPA-style visit
 ])
 
@@ -57,7 +57,7 @@
         aria-haspopup="dialog"
         :aria-expanded="open"
         :aria-controls="$id('blat-notification-center')"
-        :aria-label="(unread === 0 ? 'Notifications, no unread' : unread === 1 ? 'Notifications, 1 unread' : 'Notifications, ' + unread + ' unread')"
+        :aria-label="(unread === 0 ? @js(__('Notifications, no unread')) : unread === 1 ? @js(__('Notifications, 1 unread')) : @js(__('Notifications, :count unread')).replace(':count', unread))"
         class="text-foreground hover:bg-accent hover:text-accent-foreground relative inline-flex size-9 items-center justify-center rounded-md outline-none transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
     >
         <x-lucide-bell class="size-5" aria-hidden="true" />
@@ -97,16 +97,16 @@
     >
         {{-- Header --}}
         <div class="flex items-center justify-between gap-2 border-b px-4 py-3">
-            <h2 :id="$id('blat-notification-title')" class="text-sm font-semibold">Notifications</h2>
+            <h2 :id="$id('blat-notification-title')" class="text-sm font-semibold">{{ __('Notifications') }}</h2>
             <button
                 type="button"
                 @click="markAllRead()"
                 :disabled="unread === 0"
-                aria-label="Mark all notifications as read"
+                aria-label="{{ __('Mark all notifications as read') }}"
                 class="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 rounded-md text-xs font-medium outline-none transition-colors not-disabled:cursor-pointer focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:opacity-50 [&_svg]:size-3.5"
             >
                 <x-lucide-check-check aria-hidden="true" />
-                Mark all read
+                {{ __('Mark all read') }}
             </button>
         </div>
 
@@ -117,8 +117,8 @@
                     <x-lucide-bell-off class="size-6" aria-hidden="true" />
                 </span>
                 <div class="space-y-1">
-                    <p class="text-foreground text-sm font-medium">You're all caught up</p>
-                    <p class="text-muted-foreground text-xs">No notifications right now.</p>
+                    <p class="text-foreground text-sm font-medium">{{ __("You're all caught up") }}</p>
+                    <p class="text-muted-foreground text-xs">{{ __('No notifications right now.') }}</p>
                 </div>
             </div>
         @else
@@ -168,7 +168,7 @@
                         <span
                             x-show="! items[{{ $note['id'] }}].read"
                             role="img"
-                            aria-label="Unread"
+                            aria-label="{{ __('Unread') }}"
                             class="bg-primary mt-1.5 size-2 shrink-0 rounded-full"
                         ></span>
                         @if ($note['href'])

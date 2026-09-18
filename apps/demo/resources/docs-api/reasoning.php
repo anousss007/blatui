@@ -13,7 +13,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'Reasoning'",
+            'default' => "__('Reasoning')",
             'description' => 'Text shown on the toggle button. Ignored when a duration is set.',
         ],
         [

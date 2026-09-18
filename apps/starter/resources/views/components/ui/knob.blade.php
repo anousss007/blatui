@@ -13,11 +13,13 @@
     'max' => 100,
     'step' => 1,
     'size' => 'default',
-    'label' => 'Value',
+    'label' => null,
     'disabled' => false,
 ])
 
 @php
+    $label ??= __('Value');
+
     $dims = [
         'sm' => ['box' => 'size-16', 'text' => 'text-sm'],
         'default' => ['box' => 'size-24', 'text' => 'text-base'],

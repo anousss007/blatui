@@ -3,11 +3,11 @@
     'rows' => [],         // [['name'=>'…','email'=>'…'], ...]
     'searchable' => true,
     'searchKey' => null,  // column key to search; defaults to all column keys
-    'searchPlaceholder' => 'Search...',
+    'searchPlaceholder' => null,
     'selectable' => true,
     'pageSize' => 5,
     'rowKey' => 'id',     // row-data key used for stable :keys and passed to the actions slot (item.r[rowKey])
-    'actionsLabel' => 'Actions',   // header label for the row-actions column (kept sr-only)
+    'actionsLabel' => null,        // header label for the row-actions column (kept sr-only)
     'stickyActions' => false,      // freeze the actions column to the right edge on horizontal scroll
 ])
 
@@ -21,6 +21,9 @@
 --}}
 
 @php
+    $searchPlaceholder ??= __('Search...');
+    $actionsLabel ??= __('Actions');
+
     $cols = collect($columns)->map(fn ($c) => [
         'key' => $c['key'] ?? '',
         'label' => $c['label'] ?? ucfirst($c['key'] ?? ''),
@@ -84,8 +87,8 @@
                 <tr class="hover:bg-muted/50 border-b transition-colors">
                     @if ($selectable)
                         <th scope="col" class="h-10 w-10 px-2 text-start align-middle">
-                            <span class="sr-only">Select</span>
-                            <button type="button" role="checkbox" aria-label="Select all rows" @click="toggleAll()" :aria-checked="allPageSelected" :data-state="allPageSelected ? 'checked' : 'unchecked'"
+                            <span class="sr-only">{{ __('Select') }}</span>
+                            <button type="button" role="checkbox" aria-label="{{ __('Select all rows') }}" @click="toggleAll()" :aria-checked="allPageSelected" :data-state="allPageSelected ? 'checked' : 'unchecked'"
                                 class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]">
                                 <x-lucide-check class="size-3.5" x-show="allPageSelected" x-cloak aria-hidden="true" />
                             </button>
@@ -123,7 +126,7 @@
                     <tr class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors" :data-state="selected.includes(item.i) ? 'selected' : null">
                         @if ($selectable)
                             <td class="w-10 px-2 align-middle">
-                                <button type="button" role="checkbox" aria-label="Select row" @click="toggleRow(item.i)" :aria-checked="selected.includes(item.i)" :data-state="selected.includes(item.i) ? 'checked' : 'unchecked'"
+                                <button type="button" role="checkbox" aria-label="{{ __('Select row') }}" @click="toggleRow(item.i)" :aria-checked="selected.includes(item.i)" :data-state="selected.includes(item.i) ? 'checked' : 'unchecked'"
                                     class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]">
                                     <x-lucide-check class="size-3.5" x-show="selected.includes(item.i)" x-cloak aria-hidden="true" />
                                 </button>
@@ -143,7 +146,7 @@
                     </tr>
                 </template>
                 <tr x-show="paged.length === 0">
-                    <td colspan="{{ $cols->count() + ($selectable ? 1 : 0) + (isset($actions) ? 1 : 0) }}" class="text-muted-foreground h-24 text-center align-middle">No results.</td>
+                    <td colspan="{{ $cols->count() + ($selectable ? 1 : 0) + (isset($actions) ? 1 : 0) }}" class="text-muted-foreground h-24 text-center align-middle">{{ __('No results.') }}</td>
                 </tr>
             </tbody>
         </table>
@@ -152,15 +155,15 @@
     <div class="flex items-center justify-between gap-4 pt-4">
         <p class="text-muted-foreground text-sm">
             @if ($selectable)
-                <span x-text="selected.length"></span> of <span x-text="rows.length"></span> row(s) selected.
+                <span x-text="@js(__(':selected of :total row(s) selected.')).replace(':selected', selected.length).replace(':total', rows.length)"></span>
             @else
-                <span x-text="sorted.length"></span> result(s).
+                <span x-text="@js(__(':count result(s).')).replace(':count', sorted.length)"></span>
             @endif
         </p>
         <div class="flex items-center gap-2">
-            <span class="text-sm font-medium">Page <span x-text="page"></span> of <span x-text="pageCount"></span></span>
-            <x-ui.button variant="outline" size="sm" x-bind:disabled="page === 1" @click="prev()">Previous</x-ui.button>
-            <x-ui.button variant="outline" size="sm" x-bind:disabled="page === pageCount" @click="next()">Next</x-ui.button>
+            <span class="text-sm font-medium" x-text="@js(__('Page :page of :pages')).replace(':pages', pageCount).replace(':page', page)"></span>
+            <x-ui.button variant="outline" size="sm" x-bind:disabled="page === 1" @click="prev()">{{ __('Previous') }}</x-ui.button>
+            <x-ui.button variant="outline" size="sm" x-bind:disabled="page === pageCount" @click="next()">{{ __('Next') }}</x-ui.button>
         </div>
     </div>
 </div>

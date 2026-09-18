@@ -9,7 +9,7 @@
 <div
     data-slot="carousel"
     role="region"
-    aria-roledescription="carousel"
+    aria-roledescription="{{ __('carousel') }}"
     x-data="{
         index: 0,
         count: 0,

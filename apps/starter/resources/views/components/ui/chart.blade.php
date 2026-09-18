@@ -6,10 +6,12 @@
     'config' => [],
     'labels' => [],
     'height' => 250,
-    'label' => 'Chart',
+    'label' => null,
 ])
 
 @php
+    $label ??= __('Chart');
+
     // shadcn-style config: ['key' => ['label' => '...', 'color' => 'var(--chart-1)']]
     // Derive the colors array + the --color-<key> CSS vars used by labels/legends.
     $resolvedColors = $colors;

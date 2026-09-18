@@ -7,7 +7,7 @@ return [
         [
             'name' => 'placeholder',
             'type' => 'string',
-            'default' => "'Type a command or search...'",
+            'default' => "__('Type a command or search...')",
             'description' => 'Set on <x-ui.command-input>. Placeholder text and accessible label for the search field.',
         ],
         [

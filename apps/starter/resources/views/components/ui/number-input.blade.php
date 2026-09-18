@@ -133,7 +133,7 @@
     {{-- Decrease: sits at the inline-start; border-e divides it from the field --}}
     <button
         type="button"
-        aria-label="Decrease"
+        aria-label="{{ __('Decrease') }}"
         @click="dec()"
         :disabled="disabled || atMin"
         @class([
@@ -150,7 +150,7 @@
         role="spinbutton"
         @if ($ariaLabelledby) aria-labelledby="{{ $ariaLabelledby }}"
         @elseif ($inputLabel) aria-label="{{ $inputLabel }}"
-        @else aria-label="Number" @endif
+        @else aria-label="{{ __('Number') }}" @endif
         @if ($name) name="{{ $name }}" @endif
         @if ($id) id="{{ $id }}" @endif
         @if ($placeholder) placeholder="{{ $placeholder }}" @endif
@@ -171,7 +171,7 @@
     {{-- Increase: sits at the inline-end; border-s divides it from the field --}}
     <button
         type="button"
-        aria-label="Increase"
+        aria-label="{{ __('Increase') }}"
         @click="inc()"
         :disabled="disabled || atMax"
         @class([

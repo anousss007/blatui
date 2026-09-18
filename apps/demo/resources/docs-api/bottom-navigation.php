@@ -7,7 +7,7 @@ return [
         [
             'name' => 'ariaLabel',
             'type' => 'string',
-            'default' => "'Bottom navigation'",
+            'default' => "__('Bottom navigation')",
             'description' => 'Accessible name for the <nav> landmark wrapping the tab bar.',
         ],
     ],

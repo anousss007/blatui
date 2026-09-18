@@ -1,6 +1,10 @@
 @props([
-    'ariaLabel' => 'Bottom navigation',
+    'ariaLabel' => null,
 ])
+
+@php
+    $ariaLabel ??= __('Bottom navigation');
+@endphp
 
 {{--
     A mobile bottom tab bar. A <nav> landmark holding a flex row of equal-width

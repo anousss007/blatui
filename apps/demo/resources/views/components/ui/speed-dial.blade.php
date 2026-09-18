@@ -3,10 +3,12 @@
     'direction' => 'up',        // 'up' | 'down' — which way the actions stack from the FAB
     'open' => false,            // start expanded (handy for previews / always-open dials)
     'icon' => 'plus',           // lucide icon for the main FAB (rotates ~45deg when open)
-    'label' => 'Open actions',  // accessible label for the main FAB
+    'label' => null,            // accessible label for the main FAB
 ])
 
 @php
+    $label ??= __('Open actions');
+
     // Stack actions above (up) or below (down) the FAB. `flex-col-reverse` keeps the
     // first action nearest the FAB when going up; the label pill sits inline-start of
     // each action (justify-end), which is RTL-safe via logical `end`/`start` utilities.
@@ -55,7 +57,7 @@
                 @else
                     type="button"
                 @endif
-                aria-label="{{ $action['label'] ?? 'Action '.($i + 1) }}"
+                aria-label="{{ $action['label'] ?? __('Action :number', ['number' => $i + 1]) }}"
                 :tabindex="open ? 0 : -1"
                 @click="close()"
                 x-show="open"

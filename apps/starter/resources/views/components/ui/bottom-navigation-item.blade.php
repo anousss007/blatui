@@ -38,7 +38,7 @@
 
             @if ($hasDot)
                 <span class="bg-destructive absolute end-0 top-0 size-2 -translate-y-1/2 translate-x-1/2 rounded-full ring-2 ring-background rtl:-translate-x-1/2"></span>
-                <span class="sr-only">(new)</span>
+                <span class="sr-only">{{ __('(new)') }}</span>
             @elseif ($hasCount)
                 <span class="bg-destructive text-destructive-foreground absolute end-0 top-0 inline-flex h-4 min-w-4 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full px-1 text-[0.625rem] font-medium leading-none ring-2 ring-background rtl:-translate-x-1/2">{{ $badge }}</span>
             @endif

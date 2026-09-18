@@ -2,13 +2,15 @@
     'name' => null,
     'mentions' => [],
     'trigger' => '@',
-    'placeholder' => 'Type @ to mention…',
+    'placeholder' => null,
     'rows' => 3,
     'disabled' => false,
     'id' => null,
 ])
 
 @php
+    $placeholder ??= __('Type @ to mention…');
+
     // Normalise mentions → [value, label, avatar?, sub?]. Accepts plain strings or assoc arrays.
     $items = collect($mentions)->map(function ($m) {
         if (is_array($m)) {

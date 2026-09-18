@@ -19,7 +19,7 @@ return [
         [
             'name' => 'ariaLabel',
             'type' => 'string',
-            'default' => "'Progress'",
+            'default' => "__('Progress')",
             'description' => 'Accessible name for the progressbar role.',
         ],
         [

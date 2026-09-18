@@ -36,7 +36,7 @@ return [
         [
             'name' => 'ariaLabel',
             'type' => 'string',
-            'default' => "'One-time password'",
+            'default' => "__('One-time password')",
             'description' => 'Accessible label announced for the code field.',
         ],
     ],

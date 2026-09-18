@@ -7,13 +7,13 @@ return [
         [
             'name' => 'label',
             'type' => 'string|bool',
-            'default' => "'Add to cart'",
+            'default' => "__('Add to cart')",
             'description' => 'The idle button text. Pass false for an icon-only button (combine with an aria-label and size="icon"). The default slot, when filled, overrides this.',
         ],
         [
             'name' => 'addedLabel',
             'type' => 'string',
-            'default' => "'Added'",
+            'default' => "__('Added')",
             'description' => 'The text shown briefly in the success state after the item is added.',
         ],
         [

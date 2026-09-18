@@ -66,7 +66,7 @@
             'bg-muted text-foreground rounded-es-sm' => ! $isUser,
         ])>
             @if ($typing)
-                <span class="flex items-center gap-1 py-1" role="status" aria-label="{{ $name ? $name . ' is typing' : 'Typing' }}">
+                <span class="flex items-center gap-1 py-1" role="status" aria-label="{{ $name ? __(':name is typing', ['name' => $name]) : __('Typing') }}">
                     <span class="size-2 animate-bounce rounded-full bg-current opacity-60 [animation-delay:-0.3s]" aria-hidden="true"></span>
                     <span class="size-2 animate-bounce rounded-full bg-current opacity-60 [animation-delay:-0.15s]" aria-hidden="true"></span>
                     <span class="size-2 animate-bounce rounded-full bg-current opacity-60" aria-hidden="true"></span>

@@ -12,7 +12,7 @@
 <ul
     data-slot="tree"
     role="tree"
-    aria-label="{{ $attributes->get('aria-label', 'Tree') }}"
+    aria-label="{{ $attributes->get('aria-label', __('Tree')) }}"
     x-data="{
         focusables() {
             return [...$el.querySelectorAll('[role=treeitem]')].filter(el => el.offsetParent !== null);

@@ -6,6 +6,6 @@
     :component="'lucide-' . $icon"
     data-slot="spinner"
     role="status"
-    aria-label="Loading"
+    aria-label="{{ __('Loading') }}"
     {{ $attributes->twMerge('size-4 animate-spin') }}
 />

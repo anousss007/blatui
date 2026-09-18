@@ -49,7 +49,7 @@
     >
         @if ($src)<source src="{{ $src }}" />@endif
         {{ $slot }}
-        Your browser does not support the video tag.
+        {{ __('Your browser does not support the video tag.') }}
     </video>
 
     @unless ($autoplay)
@@ -58,7 +58,7 @@
             x-show="! started"
             x-transition.opacity
             @click="$refs.player.play()"
-            aria-label="Play video"
+            aria-label="{{ __('Play video') }}"
             class="absolute inset-0 grid place-items-center bg-black/20 outline-none transition-colors hover:bg-black/30 focus-visible:bg-black/30"
         >
             <span class="grid size-16 place-items-center rounded-full bg-white/90 text-black shadow-lg transition-transform group-hover:scale-105">

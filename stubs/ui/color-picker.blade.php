@@ -172,7 +172,7 @@
             x-transition:leave-end="opacity-0 -translate-y-1"
         @endif
         role="dialog"
-        aria-label="Choose colour"
+        aria-label="{{ __('Choose colour') }}"
         @class([
             'bg-popover text-popover-foreground border-border z-50 w-64 rounded-lg border p-4 shadow-md',
             'absolute start-0 top-full mt-2' => ! $inline,
@@ -196,7 +196,7 @@
                     step="1"
                     :value="hue"
                     @input="setHue($event.target.value)"
-                    aria-label="Hue"
+                    aria-label="{{ __('Hue') }}"
                     class="focus-visible:ring-ring h-3 w-full cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-2"
                     style="background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);"
                 />
@@ -224,7 +224,7 @@
             </div>
 
             {{-- Preset swatch grid. --}}
-            <div class="grid grid-cols-5 gap-2" role="group" aria-label="Preset colours">
+            <div class="grid grid-cols-5 gap-2" role="group" aria-label="{{ __('Preset colours') }}">
                 <template x-for="c in swatches" :key="c">
                     <button
                         type="button"

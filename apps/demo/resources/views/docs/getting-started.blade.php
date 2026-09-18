@@ -233,6 +233,21 @@ php artisan blatui:update button card --force</x-code-block>
                 </div>
             </div>
 
+            {{-- Localization --}}
+            <div class="mt-10 border-t pt-10">
+                <h2 id="localization" class="mb-2 scroll-mt-20 text-2xl font-bold tracking-tight">Localization</h2>
+                <p class="text-muted-foreground mb-5 text-sm">Every string a component shows or announces (button text, <code class="bg-muted rounded px-1 text-xs">aria-label</code>s, placeholders, empty states, screen-reader text) goes through Laravel&rsquo;s <code class="bg-muted rounded px-1 text-xs">__()</code>, with the English text as the key. Translate them in a JSON file per locale. Strings that carry a value use a placeholder, so the value can move.</p>
+                <x-code-block label="lang/es.json" icon="file-code">{
+    "Search...": "Buscar...",
+    "No results.": "Sin resultados.",
+    "Mark all read": "Marcar todo como leído",
+    "You're all caught up": "Todo al día",
+    "Remove :name": "Quitar :name",
+    ":selected of :total row(s) selected.": ":selected de :total fila(s) seleccionadas."
+}</x-code-block>
+                <p class="text-muted-foreground mt-4 text-sm">A key with no translation falls back to the English, so you can translate as you go. Any label you pass as a prop (<code class="bg-muted rounded px-1 text-xs">placeholder</code>, <code class="bg-muted rounded px-1 text-xs">empty-text</code>, <code class="bg-muted rounded px-1 text-xs">label</code>…) is used as given.</p>
+            </div>
+
             {{-- Server-rendered forms & foundations utilities --}}
             <div class="mt-10 border-t pt-10">
                 <h2 id="server-forms" class="mb-2 scroll-mt-20 text-2xl font-bold tracking-tight">Server-rendered forms &amp; the foundations utilities</h2>

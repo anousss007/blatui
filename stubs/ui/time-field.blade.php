@@ -112,7 +112,7 @@
         {{-- Native, fully-accessible dropdowns (same pattern as the calendar's month/year). --}}
         {{-- 24h hours --}}
         <div class="relative" x-show="cyc !== '12'">
-            <select aria-label="Hour" @if ($disabled) disabled @endif class="{{ $selCls }}" @change="setH($event.target.value)">
+            <select aria-label="{{ __('Hour') }}" @if ($disabled) disabled @endif class="{{ $selCls }}" @change="setH($event.target.value)">
                 <option value="" :selected="h === null" disabled hidden>--</option>
                 <template x-for="o in hourOpts" :key="o">
                     <option :value="o" :selected="h === o" x-text="pad(o)"></option>
@@ -123,7 +123,7 @@
 
         {{-- 12h hours --}}
         <div class="relative" x-show="cyc === '12'">
-            <select aria-label="Hour" @if ($disabled) disabled @endif class="{{ $selCls }}" @change="setH12($event.target.value)">
+            <select aria-label="{{ __('Hour') }}" @if ($disabled) disabled @endif class="{{ $selCls }}" @change="setH12($event.target.value)">
                 <option value="" :selected="h === null" disabled hidden>--</option>
                 <template x-for="o in hourOpts" :key="o">
                     <option :value="o" :selected="hour12 === o" x-text="pad(o)"></option>
@@ -136,7 +136,7 @@
 
         {{-- minutes --}}
         <div class="relative">
-            <select aria-label="Minute" @if ($disabled) disabled @endif class="{{ $selCls }}" @change="setM($event.target.value)">
+            <select aria-label="{{ __('Minute') }}" @if ($disabled) disabled @endif class="{{ $selCls }}" @change="setM($event.target.value)">
                 <option value="" :selected="m === null" disabled hidden>--</option>
                 <template x-for="o in minOpts" :key="o">
                     <option :value="o" :selected="m === o" x-text="pad(o)"></option>
@@ -148,7 +148,7 @@
         @if ($seconds)
             <span class="text-muted-foreground">:</span>
             <div class="relative">
-                <select aria-label="Second" @if ($disabled) disabled @endif class="{{ $selCls }}" @change="setS($event.target.value)">
+                <select aria-label="{{ __('Second') }}" @if ($disabled) disabled @endif class="{{ $selCls }}" @change="setS($event.target.value)">
                     <option value="" :selected="h === null" disabled hidden>--</option>
                     <template x-for="o in secOpts" :key="o">
                         <option :value="o" :selected="s === o" x-text="pad(o)"></option>
@@ -160,9 +160,9 @@
 
         {{-- AM / PM --}}
         <div class="relative" x-show="cyc === '12'">
-            <select aria-label="AM or PM" @if ($disabled) disabled @endif class="{{ $selCls }}" @change="setPeriod($event.target.value)">
-                <option value="AM" :selected="period === 'AM'">AM</option>
-                <option value="PM" :selected="period === 'PM'">PM</option>
+            <select aria-label="{{ __('AM or PM') }}" @if ($disabled) disabled @endif class="{{ $selCls }}" @change="setPeriod($event.target.value)">
+                <option value="AM" :selected="period === 'AM'">{{ __('AM') }}</option>
+                <option value="PM" :selected="period === 'PM'">{{ __('PM') }}</option>
             </select>
             <x-lucide-chevron-down class="pointer-events-none absolute end-2 top-1/2 size-3.5 -translate-y-1/2 opacity-50" aria-hidden="true" />
         </div>

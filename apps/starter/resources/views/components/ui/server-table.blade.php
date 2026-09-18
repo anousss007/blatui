@@ -12,7 +12,7 @@
     // carrying the real primary key, e.g. wire:click="edit(5)". See the shape in docs-api/server-table.php.
     'actions' => [],
     'actionsView' => null,  // escape hatch: a Blade view included per row with $row in scope (fully custom markup)
-    'actionsLabel' => 'Actions',
+    'actionsLabel' => null,
     'actionsMode' => 'inline', // 'inline' (buttons) | 'dropdown' (overflow menu)
     'stickyActions' => false,  // freeze the actions column to the right edge during horizontal scroll
 
@@ -26,14 +26,14 @@
     // Search — an input above the table bound to a Livewire property.
     'searchable' => false,
     'searchModel' => 'search',
-    'searchPlaceholder' => 'Search...',
+    'searchPlaceholder' => null,
 
     // Page size — a select in the toolbar bound to a Livewire property. Reset the paginator in
     // the host when it changes (updatedPerPage() => $this->resetPage()), or page 5 of 10-per-page
     // can land you past the end of the same result set at 50.
     'perPageModel' => 'perPage',
     'perPageOptions' => [],     // e.g. [10, 25, 50] or [10 => '10 per page', ...]. Empty = no select.
-    'perPageLabel' => 'Rows per page',
+    'perPageLabel' => null,
 
     // Column visibility — a dropdown of checkboxes in the toolbar. Server-side, like everything
     // else here: hidden columns are not rendered at all, so their cells are never built and never
@@ -42,11 +42,11 @@
     'toggleableColumns' => false,
     'visibleColumns' => null,   // array of visible column keys; null = every column is visible
     'toggleColumnMethod' => 'toggleColumn',
-    'columnsLabel' => 'Columns',
+    'columnsLabel' => null,
 
     'caption' => null,          // accessible table caption
     'captionVisible' => false,  // show the caption above the table (default: sr-only)
-    'emptyText' => 'No results.',
+    'emptyText' => null,
     'emptyIcon' => 'search-x',
     'responsive' => 'scroll',   // 'scroll' (horizontal scroll) | 'stack' (cards on mobile, table from md:)
     'variant' => 'default',     // 'default' | 'card'
@@ -55,6 +55,12 @@
 
 @php
     use Illuminate\Contracts\Pagination\Paginator as PaginatorContract;
+
+    $actionsLabel ??= __('Actions');
+    $searchPlaceholder ??= __('Search...');
+    $perPageLabel ??= __('Rows per page');
+    $columnsLabel ??= __('Columns');
+    $emptyText ??= __('No results.');
 
     $allCols = collect($columns)->map(fn ($c) => [
         'key' => $c['key'] ?? '',
@@ -212,8 +218,8 @@
                 <tr class="hover:bg-muted/50 border-b transition-colors">
                     @if ($selectable)
                         <th scope="col" class="h-10 w-10 px-2 text-start align-middle">
-                            <span class="sr-only">Select</span>
-                            <input type="checkbox" aria-label="Select all rows on this page"
+                            <span class="sr-only">{{ __('Select') }}</span>
+                            <input type="checkbox" aria-label="{{ __('Select all rows on this page') }}"
                                 @change="toggleAll($event.target.checked)"
                                 class="border-input text-primary focus-visible:ring-ring/50 size-4 rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]" />
                         </th>
@@ -264,7 +270,7 @@
                                 <input type="checkbox" data-row-select
                                     wire:model.live="{{ $selectModel }}"
                                     value="{{ data_get($row, $rowKey) }}"
-                                    aria-label="Select row"
+                                    aria-label="{{ __('Select row') }}"
                                     class="border-input text-primary focus-visible:ring-ring/50 size-4 rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]" />
                             </td>
                         @endif
@@ -340,7 +346,7 @@
                                                 :class="$action['class'] ?? null"
                                                 :wire:click="$wireClick"
                                                 :wire:confirm="$wireConfirm"
-                                                :aria-label="$action['label'] ?? 'Action'"
+                                                :aria-label="$action['label'] ?? __('Action')"
                                             >
                                                 @isset($action['icon'])
                                                     <x-dynamic-component :component="'lucide-'.$action['icon']" class="size-4" aria-hidden="true" />

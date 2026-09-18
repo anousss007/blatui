@@ -6,7 +6,7 @@
 
 @php
     // Accessible status text announced while busy. The spinner itself is decorative.
-    $label = $message ?? 'Loading…';
+    $label = $message ?? __('Loading…');
 @endphp
 
 <div

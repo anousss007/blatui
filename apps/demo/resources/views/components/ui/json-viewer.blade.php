@@ -34,7 +34,7 @@
             type="button"
             @click="copy()"
             data-slot="json-viewer-copy"
-            aria-label="Copy JSON"
+            aria-label="{{ __('Copy JSON') }}"
             class="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/50 -me-1 inline-flex shrink-0 items-center rounded-md p-1.5 outline-none transition-colors focus-visible:ring-[3px]"
         >
             <x-lucide-copy class="size-3.5" x-show="!copied" />

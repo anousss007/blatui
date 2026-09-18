@@ -18,7 +18,7 @@ return [
         [
             'name' => 'placeholder',
             'type' => 'string',
-            'default' => "'Write markdown…'",
+            'default' => "__('Write markdown…')",
             'description' => 'Placeholder shown in the Write textarea while it is empty.',
         ],
         [

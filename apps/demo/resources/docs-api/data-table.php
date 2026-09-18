@@ -33,7 +33,7 @@ return [
         [
             'name' => 'searchPlaceholder',
             'type' => 'string',
-            'default' => "'Search...'",
+            'default' => "__('Search...')",
             'description' => 'Placeholder text for the search input.',
         ],
         [
@@ -57,7 +57,7 @@ return [
         [
             'name' => 'actionsLabel',
             'type' => 'string',
-            'default' => "'Actions'",
+            'default' => "__('Actions')",
             'description' => 'Accessible header label for the row-actions column. Rendered sr-only so the column reads correctly to screen readers without a visible header.',
         ],
         [

@@ -59,8 +59,8 @@
             <button
                 type="button"
                 @click="show = !show"
-                aria-label="Show password"
-                x-bind:aria-label="show ? 'Hide password' : 'Show password'"
+                aria-label="{{ __('Show password') }}"
+                x-bind:aria-label="show ? @js(__('Hide password')) : @js(__('Show password'))"
                 x-bind:aria-pressed="show"
                 class="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex items-center rounded-md px-3 outline-none transition-colors focus-visible:ring-[3px]"
             >

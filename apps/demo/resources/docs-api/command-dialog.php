@@ -7,13 +7,13 @@ return [
         [
             'name' => 'title',
             'type' => 'string',
-            'default' => "'Command Palette'",
+            'default' => "__('Command Palette')",
             'description' => 'Accessible name for the dialog, rendered visually hidden and used as the dialog\'s aria-labelledby heading.',
         ],
         [
             'name' => 'description',
             'type' => 'string',
-            'default' => "'Search for a command to run...'",
+            'default' => "__('Search for a command to run...')",
             'description' => 'Visually hidden description for the dialog, used as its accessible description.',
         ],
     ],

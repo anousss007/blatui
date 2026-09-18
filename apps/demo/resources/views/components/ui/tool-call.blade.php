@@ -28,10 +28,10 @@
     // Status presentation: icon + human label (never colour alone). Literal class
     // strings so Tailwind's source scanner generates them.
     $statusMeta = [
-        'pending' => ['label' => 'Pending', 'text' => 'text-muted-foreground'],
-        'running' => ['label' => 'Running', 'text' => 'text-foreground'],
-        'success' => ['label' => 'Success', 'text' => 'text-emerald-700 dark:text-emerald-400'],
-        'error' => ['label' => 'Error', 'text' => 'text-destructive'],
+        'pending' => ['label' => __('Pending'), 'text' => 'text-muted-foreground'],
+        'running' => ['label' => __('Running'), 'text' => 'text-foreground'],
+        'success' => ['label' => __('Success'), 'text' => 'text-emerald-700 dark:text-emerald-400'],
+        'error' => ['label' => __('Error'), 'text' => 'text-destructive'],
     ];
     $meta = $statusMeta[$status];
 @endphp
@@ -62,7 +62,7 @@
             @switch($status)
                 @case('running')
                     <x-lucide-loader-circle class="size-3.5 shrink-0 animate-spin" aria-hidden="true" />
-                    <span class="sr-only">Running</span>
+                    <span class="sr-only">{{ __('Running') }}</span>
                     @break
 
                 @case('success')
@@ -99,20 +99,20 @@
         <div class="space-y-4 px-4 py-3">
             @if ($argsText !== null)
                 <div data-slot="tool-call-arguments">
-                    <p class="text-muted-foreground mb-1.5 text-xs font-medium">Arguments</p>
+                    <p class="text-muted-foreground mb-1.5 text-xs font-medium">{{ __('Arguments') }}</p>
                     <pre tabindex="0" class="bg-muted focus-visible:ring-ring/50 overflow-x-auto rounded-md p-3 font-mono text-xs leading-relaxed text-foreground outline-none focus-visible:ring-[3px]"><code>{{ $argsText }}</code></pre>
                 </div>
             @endif
 
             @if ($resultText !== null)
                 <div data-slot="tool-call-result">
-                    <p class="text-muted-foreground mb-1.5 text-xs font-medium">Result</p>
+                    <p class="text-muted-foreground mb-1.5 text-xs font-medium">{{ __('Result') }}</p>
                     <pre tabindex="0" @class(['bg-muted focus-visible:ring-ring/50 overflow-x-auto rounded-md p-3 font-mono text-xs leading-relaxed outline-none focus-visible:ring-[3px]', $status === 'error' ? 'text-destructive' : 'text-foreground'])><code>{{ $resultText }}</code></pre>
                 </div>
             @endif
 
             @if ($argsText === null && $resultText === null)
-                <p class="text-muted-foreground text-xs">No arguments or result.</p>
+                <p class="text-muted-foreground text-xs">{{ __('No arguments or result.') }}</p>
             @endif
         </div>
     </div>

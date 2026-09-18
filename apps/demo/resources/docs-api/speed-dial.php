@@ -34,7 +34,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'Open actions'",
+            'default' => "__('Open actions')",
             'description' => 'Accessible label for the main floating action button.',
         ],
     ],

@@ -51,7 +51,7 @@
             {{-- Collapsed summary --}}
             <span x-show="!open" x-cloak class="text-muted-foreground">
                 …{{ $close }}{{ $comma }}
-                <span class="text-muted-foreground italic">{{ $count }} {{ $isObject ? \Illuminate\Support\Str::plural('key', $count) : \Illuminate\Support\Str::plural('item', $count) }}</span>
+                <span class="text-muted-foreground italic">{{ $count }} {{ $isObject ? ($count === 1 ? __('key') : __('keys')) : ($count === 1 ? __('item') : __('items')) }}</span>
             </span>
         </button>
 

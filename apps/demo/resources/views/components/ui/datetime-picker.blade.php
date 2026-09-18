@@ -64,7 +64,7 @@
     [$minDate, $minTime] = $parseDT($min);
     [$maxDate, $maxTime] = $parseDT($max);
 
-    $placeholder ??= $isRange ? 'Pick a date range' : 'Pick a date & time';
+    $placeholder ??= $isRange ? __('Pick a date range') : __('Pick a date & time');
     $width ??= $isRange ? 'w-[320px]' : 'w-[280px]';
 
     $triggerCls = 'border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-start text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20';
@@ -180,7 +180,6 @@
         get loMs() { return this.minDate ? this.ms(this.minDate, this.minTime || '00:00') : null; },
         get hiMs() { return this.maxDate ? this.ms(this.maxDate, this.maxTime || '23:59:59') : null; },
         nights(a, b) { return (a && b) ? Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000) : null; },
-        plural(n) { return n > 1 ? 's' : ''; },
         fmt(d, t) {
             if (!d) return '';
             const dt = new Date(d + 'T' + (t || '00:00'));
@@ -198,16 +197,16 @@
             if (this.mode === 'range') {
                 const f = this.ms(this.from, this.timeFrom);
                 const t = this.ms(this.to, this.timeTo);
-                if (f !== null && lo !== null && f < lo) e.push('Start is before the earliest allowed date/time.');
-                if (t !== null && hi !== null && t > hi) e.push('End is after the latest allowed date/time.');
-                if (f !== null && t !== null && t < f) e.push('End is before start.');
+                if (f !== null && lo !== null && f < lo) e.push(@js(__('Start is before the earliest allowed date/time.')));
+                if (t !== null && hi !== null && t > hi) e.push(@js(__('End is after the latest allowed date/time.')));
+                if (f !== null && t !== null && t < f) e.push(@js(__('End is before start.')));
                 const n = this.nights(this.from, this.to);
-                if (n !== null && this.minNights !== null && n < this.minNights) e.push('Minimum ' + this.minNights + ' night' + this.plural(this.minNights) + '.');
-                if (n !== null && this.maxNights !== null && n > this.maxNights) e.push('Maximum ' + this.maxNights + ' night' + this.plural(this.maxNights) + '.');
+                if (n !== null && this.minNights !== null && n < this.minNights) e.push((this.minNights > 1 ? @js(__('Minimum :count nights.')) : @js(__('Minimum :count night.'))).replace(':count', this.minNights));
+                if (n !== null && this.maxNights !== null && n > this.maxNights) e.push((this.maxNights > 1 ? @js(__('Maximum :count nights.')) : @js(__('Maximum :count night.'))).replace(':count', this.maxNights));
             } else {
                 const v = this.ms(this.date, this.time);
-                if (v !== null && lo !== null && v < lo) e.push('Before the earliest allowed date/time.');
-                if (v !== null && hi !== null && v > hi) e.push('After the latest allowed date/time.');
+                if (v !== null && lo !== null && v < lo) e.push(@js(__('Before the earliest allowed date/time.')));
+                if (v !== null && hi !== null && v > hi) e.push(@js(__('After the latest allowed date/time.')));
             }
             return e;
         },
@@ -268,7 +267,7 @@
         x-trap="open"
         :id="$id('blat-datetimepicker')"
         role="dialog"
-        aria-label="{{ $isRange ? 'Choose a date and time range' : 'Choose date and time' }}"
+        aria-label="{{ $isRange ? __('Choose a date and time range') : __('Choose date and time') }}"
         tabindex="-1"
         class="bg-popover text-popover-foreground z-50 flex w-auto origin-top flex-col overflow-y-auto overscroll-contain rounded-md border shadow-md"
         x-transition:enter="transition ease-out duration-150"
@@ -297,16 +296,16 @@
         <div class="flex flex-col gap-3 border-t p-3">
             @if ($isRange)
                 <div class="flex items-center justify-between gap-3" x-ref="tFrom">
-                    <span class="text-sm font-medium">Start</span>
+                    <span class="text-sm font-medium">{{ __('Start') }}</span>
                     <x-ui.time-field part="from" :value="$fromTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
                 </div>
                 <div class="flex items-center justify-between gap-3" x-ref="tTo">
-                    <span class="text-sm font-medium">End</span>
+                    <span class="text-sm font-medium">{{ __('End') }}</span>
                     <x-ui.time-field part="to" :value="$toTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
                 </div>
             @else
                 <div class="flex items-center justify-between gap-3" x-ref="tOne">
-                    <span class="text-sm font-medium">Time</span>
+                    <span class="text-sm font-medium">{{ __('Time') }}</span>
                     <x-ui.time-field :value="$initTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
                 </div>
             @endif
@@ -324,7 +323,7 @@
         </div>
 
         <div class="flex justify-end border-t p-3">
-            <x-ui.button type="button" size="sm" ::disabled="invalid" @click="open = false">Done</x-ui.button>
+            <x-ui.button type="button" size="sm" ::disabled="invalid" @click="open = false">{{ __('Done') }}</x-ui.button>
         </div>
     </div>
     </template>

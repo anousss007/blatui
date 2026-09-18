@@ -1,11 +1,13 @@
 @props([
     'name' => null,
     'value' => '',
-    'placeholder' => 'Write something…',
+    'placeholder' => null,
     'id' => null,
 ])
 
 @php
+    $placeholder ??= __('Write something…');
+
     // execCommand is deprecated but remains universally supported across every browser
     // and is the standard dependency-free way to build a WYSIWYG. The toolbar maps each
     // button to a command; `block` actions use formatBlock (H1/H2/paragraph).
@@ -14,19 +16,19 @@
     // `link` and `clear` are special-cased in the Alpine handlers. `state` is the
     // queryCommandState key used to reflect aria-pressed (null = not a toggle).
     $tools = [
-        ['key' => 'bold',          'icon' => 'bold',           'label' => 'Bold',          'cmd' => 'bold',          'state' => 'bold'],
-        ['key' => 'italic',        'icon' => 'italic',         'label' => 'Italic',        'cmd' => 'italic',        'state' => 'italic'],
-        ['key' => 'underline',     'icon' => 'underline',      'label' => 'Underline',     'cmd' => 'underline',     'state' => 'underline'],
-        ['key' => 'strike',        'icon' => 'strikethrough',  'label' => 'Strikethrough', 'cmd' => 'strikeThrough', 'state' => 'strikeThrough'],
+        ['key' => 'bold',          'icon' => 'bold',           'label' => __('Bold'),          'cmd' => 'bold',          'state' => 'bold'],
+        ['key' => 'italic',        'icon' => 'italic',         'label' => __('Italic'),        'cmd' => 'italic',        'state' => 'italic'],
+        ['key' => 'underline',     'icon' => 'underline',      'label' => __('Underline'),     'cmd' => 'underline',     'state' => 'underline'],
+        ['key' => 'strike',        'icon' => 'strikethrough',  'label' => __('Strikethrough'), 'cmd' => 'strikeThrough', 'state' => 'strikeThrough'],
         ['sep' => true],
-        ['key' => 'h1',            'icon' => 'heading-1',      'label' => 'Heading 1',     'block' => 'h1',          'state' => null],
-        ['key' => 'h2',            'icon' => 'heading-2',      'label' => 'Heading 2',     'block' => 'h2',          'state' => null],
+        ['key' => 'h1',            'icon' => 'heading-1',      'label' => __('Heading 1'),     'block' => 'h1',          'state' => null],
+        ['key' => 'h2',            'icon' => 'heading-2',      'label' => __('Heading 2'),     'block' => 'h2',          'state' => null],
         ['sep' => true],
-        ['key' => 'ul',            'icon' => 'list',           'label' => 'Bullet list',   'cmd' => 'insertUnorderedList', 'state' => 'insertUnorderedList'],
-        ['key' => 'ol',            'icon' => 'list-ordered',   'label' => 'Numbered list', 'cmd' => 'insertOrderedList',   'state' => 'insertOrderedList'],
+        ['key' => 'ul',            'icon' => 'list',           'label' => __('Bullet list'),   'cmd' => 'insertUnorderedList', 'state' => 'insertUnorderedList'],
+        ['key' => 'ol',            'icon' => 'list-ordered',   'label' => __('Numbered list'), 'cmd' => 'insertOrderedList',   'state' => 'insertOrderedList'],
         ['sep' => true],
-        ['key' => 'link',          'icon' => 'link',           'label' => 'Insert link',   'link' => true,           'state' => null],
-        ['key' => 'clear',         'icon' => 'remove-formatting', 'label' => 'Clear formatting', 'clear' => true,    'state' => null],
+        ['key' => 'link',          'icon' => 'link',           'label' => __('Insert link'),   'link' => true,           'state' => null],
+        ['key' => 'clear',         'icon' => 'remove-formatting', 'label' => __('Clear formatting'), 'clear' => true,    'state' => null],
     ];
 
     // Livewire bridge — the editor's HTML binds through $blatModel (blatui-core.js) rather than
@@ -82,7 +84,7 @@
         },
         link() {
             this.$refs.editor.focus();
-            const url = window.prompt('Link URL');
+            const url = window.prompt(@js(__('Link URL')));
             if (url) document.execCommand('createLink', false, url);
             this.refresh();
             this.sync();
@@ -121,7 +123,7 @@
 >
     <div
         role="toolbar"
-        aria-label="Formatting"
+        aria-label="{{ __('Formatting') }}"
         data-slot="rich-text-editor-toolbar"
         class="bg-muted/40 flex flex-wrap items-center gap-0.5 border-b p-1"
     >

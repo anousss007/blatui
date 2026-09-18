@@ -95,7 +95,7 @@
     @toast.window="add($event.detail)"
     @toast-update.window="update($event.detail)"
     role="region"
-    aria-label="Notifications"
+    aria-label="{{ __('Notifications') }}"
     tabindex="-1"
     {{ $attributes->twMerge('pointer-events-none fixed z-[100] flex w-full p-4 sm:max-w-[420px] '.$posClass) }}
 >
@@ -139,7 +139,7 @@
                     type="button"
                     @click="remove(t.id)"
                     class="text-foreground/50 hover:text-foreground shrink-0 transition-colors"
-                    aria-label="Close"
+                    aria-label="{{ __('Close') }}"
                 >
                     <x-lucide-x class="size-4" aria-hidden="true" />
                 </button>

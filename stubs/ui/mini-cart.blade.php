@@ -55,7 +55,7 @@
         aria-haspopup="dialog"
         :aria-expanded="open"
         :aria-controls="$id('blat-mini-cart')"
-        :aria-label="(count === 1 ? '1 item in cart' : count + ' items in cart') + ', open cart'"
+        :aria-label="count === 1 ? @js(__('1 item in cart, open cart')) : @js(__(':count items in cart, open cart')).replace(':count', count)"
         class="text-foreground hover:bg-accent hover:text-accent-foreground relative inline-flex size-9 items-center justify-center rounded-md outline-none transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
     >
         <x-lucide-shopping-cart class="size-5" aria-hidden="true" />
@@ -81,7 +81,7 @@
         :id="$id('blat-mini-cart')"
         role="dialog"
         aria-modal="false"
-        :aria-label="(count === 1 ? 'Cart, 1 item' : 'Cart, ' + count + ' items')"
+        :aria-label="(count === 1 ? @js(__('Cart, 1 item')) : @js(__('Cart, :count items')).replace(':count', count))"
         tabindex="-1"
         data-slot="mini-cart-panel"
         :data-state="open ? 'open' : 'closed'"
@@ -95,11 +95,11 @@
     >
         {{-- Header --}}
         <div class="flex items-center justify-between gap-2 border-b px-4 py-3">
-            <h2 class="text-sm font-semibold" x-text="'Cart (' + count + ')'"></h2>
+            <h2 class="text-sm font-semibold" x-text="@js(__('Cart (:count)')).replace(':count', count)"></h2>
             <button
                 type="button"
                 @click="close()"
-                aria-label="Close cart"
+                aria-label="{{ __('Close cart') }}"
                 class="text-muted-foreground hover:bg-accent hover:text-accent-foreground -me-1 inline-flex size-7 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-ring/50 focus-visible:ring-[3px]"
             >
                 <x-lucide-x class="size-4" aria-hidden="true" />
@@ -112,8 +112,8 @@
                 <x-lucide-shopping-cart class="size-6" aria-hidden="true" />
             </span>
             <div class="space-y-1">
-                <p class="text-foreground text-sm font-medium">Your cart is empty</p>
-                <p class="text-muted-foreground text-xs">Add items to get started.</p>
+                <p class="text-foreground text-sm font-medium">{{ __('Your cart is empty') }}</p>
+                <p class="text-muted-foreground text-xs">{{ __('Add items to get started.') }}</p>
             </div>
         </div>
 
@@ -135,14 +135,14 @@
                     <div class="min-w-0 flex-1">
                         <p class="text-foreground truncate text-sm font-medium" x-text="item.name"></p>
                         <p x-show="item.variant" class="text-muted-foreground truncate text-xs" x-text="item.variant"></p>
-                        <p class="text-muted-foreground mt-0.5 text-xs tabular-nums" x-text="money(item.price) + ' each'"></p>
+                        <p class="text-muted-foreground mt-0.5 text-xs tabular-nums" x-text="@js(__(':price each')).replace(':price', money(item.price))"></p>
 
                         {{-- Quantity stepper --}}
-                        <div class="mt-2 inline-flex items-center" role="group" :aria-label="'Quantity for ' + item.name">
+                        <div class="mt-2 inline-flex items-center" role="group" :aria-label="@js(__('Quantity for :name')).replace(':name', item.name)">
                             <button
                                 type="button"
                                 @click="dec(item)"
-                                :aria-label="'Decrease quantity of ' + item.name"
+                                :aria-label="@js(__('Decrease quantity of :name')).replace(':name', item.name)"
                                 class="border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground flex size-6 items-center justify-center rounded-s-md border outline-none transition-colors focus-visible:ring-ring/50 focus-visible:ring-[3px] [&_svg]:size-3"
                             >
                                 <x-lucide-minus aria-hidden="true" />
@@ -150,13 +150,13 @@
                             <span
                                 class="border-input flex h-6 min-w-8 items-center justify-center border-y px-2 text-xs font-medium tabular-nums"
                                 aria-live="polite"
-                                :aria-label="item.qty + ' in cart'"
+                                :aria-label="@js(__(':qty in cart')).replace(':qty', item.qty)"
                                 x-text="item.qty"
                             ></span>
                             <button
                                 type="button"
                                 @click="inc(item)"
-                                :aria-label="'Increase quantity of ' + item.name"
+                                :aria-label="@js(__('Increase quantity of :name')).replace(':name', item.name)"
                                 class="border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground flex size-6 items-center justify-center rounded-e-md border outline-none transition-colors focus-visible:ring-ring/50 focus-visible:ring-[3px] [&_svg]:size-3"
                             >
                                 <x-lucide-plus aria-hidden="true" />
@@ -170,7 +170,7 @@
                         <button
                             type="button"
                             @click="remove(item.id)"
-                            :aria-label="'Remove ' + item.name"
+                            :aria-label="@js(__('Remove :name')).replace(':name', item.name)"
                             class="text-muted-foreground hover:bg-accent hover:text-destructive inline-flex size-6 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-ring/50 focus-visible:ring-[3px] [&_svg]:size-3.5"
                         >
                             <x-lucide-x aria-hidden="true" />
@@ -183,13 +183,13 @@
         {{-- Footer: subtotal + actions (hidden when empty) --}}
         <div x-show="! isEmpty" class="shrink-0 border-t">
             <div class="flex items-center justify-between px-4 pt-3 text-sm">
-                <span class="text-muted-foreground">Subtotal</span>
+                <span class="text-muted-foreground">{{ __('Subtotal') }}</span>
                 <span class="text-foreground font-semibold tabular-nums" x-text="money(subtotal)"></span>
             </div>
-            <p class="text-muted-foreground px-4 pt-1 text-xs">Shipping &amp; taxes calculated at checkout.</p>
+            <p class="text-muted-foreground px-4 pt-1 text-xs">{{ __('Shipping & taxes calculated at checkout.') }}</p>
             <div class="flex flex-col gap-2 p-4">
-                <x-ui.button class="w-full">Checkout</x-ui.button>
-                <x-ui.button href="#" variant="outline" class="w-full">View cart</x-ui.button>
+                <x-ui.button class="w-full">{{ __('Checkout') }}</x-ui.button>
+                <x-ui.button href="#" variant="outline" class="w-full">{{ __('View cart') }}</x-ui.button>
             </div>
         </div>
     </div>

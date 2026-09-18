@@ -41,7 +41,7 @@
         ? (array_filter(['from' => $fromDate, 'to' => $toDate], fn ($x) => $x !== null) ?: null)
         : $value;
 
-    $placeholder ??= $isRange ? 'Pick a date range' : 'Pick a date';
+    $placeholder ??= $isRange ? __('Pick a date range') : __('Pick a date');
     $width ??= $isRange ? 'w-[300px]' : 'w-[240px]';
 
     // weekStart → 0–6 number, so JS presets (thisWeek/lastWeek) honour the same first day.
@@ -188,14 +188,14 @@
             // Out-of-range dates — reachable only when outOfRange='flag' (else they're disabled).
             const lo = this.minDate, hi = this.maxDate;
             if (this.mode === 'range') {
-                if (this.from && lo && this.from < lo) e.push('Start is before the earliest allowed date.');
-                if (this.to && hi && this.to > hi) e.push('End is after the latest allowed date.');
+                if (this.from && lo && this.from < lo) e.push(@js(__('Start is before the earliest allowed date.')));
+                if (this.to && hi && this.to > hi) e.push(@js(__('End is after the latest allowed date.')));
             } else if (this.value) {
-                if (lo && this.value < lo) e.push('Date is before the earliest allowed.');
-                if (hi && this.value > hi) e.push('Date is after the latest allowed.');
+                if (lo && this.value < lo) e.push(@js(__('Date is before the earliest allowed.')));
+                if (hi && this.value > hi) e.push(@js(__('Date is after the latest allowed.')));
             }
-            if (n !== null && this.minNights !== null && n < this.minNights) e.push('Minimum ' + this.minNights + ' night' + (this.minNights > 1 ? 's' : '') + '.');
-            if (n !== null && this.maxNights !== null && n > this.maxNights) e.push('Maximum ' + this.maxNights + ' night' + (this.maxNights > 1 ? 's' : '') + '.');
+            if (n !== null && this.minNights !== null && n < this.minNights) e.push((this.minNights > 1 ? @js(__('Minimum :count nights.')) : @js(__('Minimum :count night.'))).replace(':count', this.minNights));
+            if (n !== null && this.maxNights !== null && n > this.maxNights) e.push((this.maxNights > 1 ? @js(__('Maximum :count nights.')) : @js(__('Maximum :count night.'))).replace(':count', this.maxNights));
             return e;
         },
         get invalid() { return this.errors.length > 0; },
@@ -256,7 +256,7 @@
         x-trap="open"
         :id="$id('blat-datepicker')"
         role="dialog"
-        aria-label="{{ $isRange ? 'Choose a date range' : 'Choose date' }}"
+        aria-label="{{ $isRange ? __('Choose a date range') : __('Choose date') }}"
         tabindex="-1"
         class="bg-popover text-popover-foreground z-50 flex w-auto origin-top flex-col overflow-y-auto overscroll-contain rounded-md border p-0 shadow-md"
         x-transition:enter="transition ease-out duration-150"

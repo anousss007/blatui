@@ -4,10 +4,12 @@
     'height' => 28,
     'area' => true,       // fill the area under the line
     'strokeWidth' => 1.5,
-    'ariaLabel' => 'Trend',
+    'ariaLabel' => null,
 ])
 
 @php
+    $ariaLabel ??= __('Trend');
+
     $vals = array_values(array_map('floatval', (array) $data));
     $n = count($vals);
     $w = (float) $width;

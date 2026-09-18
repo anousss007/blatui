@@ -32,7 +32,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'Variant'",
+            'default' => "__('Variant')",
             'description' => 'The visible group label, which also names the radio group for assistive tech. Pass an empty/false value to hide it.',
         ],
         [

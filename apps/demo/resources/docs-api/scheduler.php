@@ -39,7 +39,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'Schedule'",
+            'default' => "__('Schedule')",
             'description' => 'Accessible name for the scrollable grid region.',
         ],
     ],

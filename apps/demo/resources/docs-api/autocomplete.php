@@ -26,13 +26,13 @@ return [
         [
             'name' => 'placeholder',
             'type' => 'string',
-            'default' => "'Search...'",
+            'default' => "__('Search...')",
             'description' => 'Placeholder for the text input.',
         ],
         [
             'name' => 'empty',
             'type' => 'string',
-            'default' => "'No results found.'",
+            'default' => "__('No results found.')",
             'description' => 'Message shown when the typed query matches no options.',
         ],
         [

@@ -1,14 +1,16 @@
 @props([
-    'label' => 'Add to cart',
-    'addedLabel' => 'Added',
+    'label' => null,
+    'addedLabel' => null,
     'size' => 'default',
     'icon' => 'shopping-cart',  // any lucide icon name for the idle state
 ])
 
 @php
+    $label ??= __('Add to cart');
+    $addedLabel ??= __('Added');
     // Text spoken by the live region. When `label` is hidden (icon-only, `:label="false"`)
     // we fall back to a sensible default so the announcement is never empty/"false".
-    $busyText = $label !== false ? $label : 'Add to cart';
+    $busyText = $label !== false ? $label : __('Add to cart');
     // Pre-encode for the Alpine `x-data` literal — `@js()` does not compile inside a
     // component attribute, so we JSON-encode here and interpolate with `{{ }}` instead.
     $busyJs = \Illuminate\Support\Js::from($busyText);

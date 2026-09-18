@@ -4,7 +4,7 @@
 
 <nav
     data-slot="scrollspy"
-    aria-label="On this page"
+    aria-label="{{ __('On this page') }}"
     x-data="{
         active: null,
         items: @js(array_values($items)),

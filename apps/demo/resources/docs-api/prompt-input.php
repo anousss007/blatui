@@ -7,7 +7,7 @@ return [
         [
             'name' => 'placeholder',
             'type' => 'string',
-            'default' => "'Send a message…'",
+            'default' => "__('Send a message…')",
             'description' => 'Placeholder text shown in the empty textarea.',
         ],
         [

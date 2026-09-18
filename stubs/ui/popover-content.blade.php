@@ -2,10 +2,11 @@
     'align' => 'center',
     'side' => 'bottom',
     'sideOffset' => 4,
-    'label' => 'Popover',
+    'label' => null,
 ])
 
 @php
+    $label ??= __('Popover');
     $placement = $side.($align === 'center' ? '' : '-'.$align);
     $anchorAttr = 'x-blat-anchor.'.$placement.'.offset.'.$sideOffset.'.no-size="$refs.trigger"';
 @endphp

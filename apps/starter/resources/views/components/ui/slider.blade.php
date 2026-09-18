@@ -17,10 +17,12 @@
     'range' => false,
     'orientation' => 'horizontal',
     'disabled' => false,
-    'ariaLabel' => 'Value',
+    'ariaLabel' => null,
 ])
 
 @php
+    $ariaLabel ??= __('Value');
+
     if ($range) {
         $vals = is_array($value) ? array_values($value) : [$min, $max];
         $low = $vals[0] ?? $min;
@@ -133,7 +135,7 @@
             <span data-slot="slider-range" class="bg-primary absolute {{ $vertical ? 'w-full' : 'h-full' }}" :style="fillStyle(lowPercent, highPercent - lowPercent)"></span>
         </span>
         <span
-            data-slot="slider-thumb" role="slider" aria-orientation="{{ $orientation }}" aria-label="{{ $ariaLabel }} minimum"
+            data-slot="slider-thumb" role="slider" aria-orientation="{{ $orientation }}" aria-label="{{ __(':label minimum', ['label' => $ariaLabel]) }}"
             :tabindex="disabled ? -1 : 0" :aria-disabled="disabled" :aria-valuemin="min" :aria-valuemax="high" :aria-valuenow="low"
             @pointerdown.stop="start($event, 'low')"
             @keydown.left.prevent="bumpLow(-1)" @keydown.down.prevent="bumpLow(-1)"
@@ -143,7 +145,7 @@
             class="{{ $thumbCls }}"
         ></span>
         <span
-            data-slot="slider-thumb" role="slider" aria-orientation="{{ $orientation }}" aria-label="{{ $ariaLabel }} maximum"
+            data-slot="slider-thumb" role="slider" aria-orientation="{{ $orientation }}" aria-label="{{ __(':label maximum', ['label' => $ariaLabel]) }}"
             :tabindex="disabled ? -1 : 0" :aria-disabled="disabled" :aria-valuemin="low" :aria-valuemax="max" :aria-valuenow="high"
             @pointerdown.stop="start($event, 'high')"
             @keydown.left.prevent="bumpHigh(-1)" @keydown.down.prevent="bumpHigh(-1)"

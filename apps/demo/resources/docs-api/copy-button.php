@@ -13,7 +13,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'Copy'",
+            'default' => "__('Copy')",
             'description' => 'Accessible label for the button. It becomes "Copied" for 1.5s after a successful copy.',
         ],
     ],

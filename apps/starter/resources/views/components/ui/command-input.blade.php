@@ -1,4 +1,8 @@
-@props(['placeholder' => 'Type a command or search...'])
+@props(['placeholder' => null])
+
+@php
+    $placeholder ??= __('Type a command or search...');
+@endphp
 
 <div data-slot="command-input-wrapper" class="flex h-9 items-center gap-2 border-b px-3">
     <x-lucide-search class="size-4 shrink-0 opacity-50" aria-hidden="true" />

@@ -110,7 +110,7 @@
         class="flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground"
     >
         <x-ui.spinner class="size-4" aria-hidden="true" />
-        <span>Loading more…</span>
+        <span>{{ __('Loading more…') }}</span>
     </div>
 
     {{-- Keyboard / no-JS fallback: a real button that runs the same load path. --}}
@@ -122,7 +122,7 @@
             x-on:click="loadMore()"
             class="focus-visible:ring-ring/50 focus-visible:ring-[3px]"
         >
-            Load more
+            {{ __('Load more') }}
         </x-ui.button>
     </div>
 
@@ -133,6 +133,6 @@
         x-cloak
         class="py-3 text-center text-sm text-muted-foreground"
     >
-        You’ve reached the end.
+        {{ __("You’ve reached the end.") }}
     </div>
 </div>

@@ -1,10 +1,13 @@
 @props([
     'to' => null,        // target date/time — anything Carbon can parse, e.g. "2026-12-31 18:00"
-    'expired' => 'Expired',
-    'labels' => ['days' => 'Days', 'hours' => 'Hrs', 'minutes' => 'Min', 'seconds' => 'Sec'],
+    'expired' => null,
+    'labels' => null,
 ])
 
 @php
+    $expired ??= __('Expired');
+    $labels ??= ['days' => __('Days'), 'hours' => __('Hrs'), 'minutes' => __('Min'), 'seconds' => __('Sec')];
+
     // Resolve the target to a millisecond epoch on the server so the countdown is timezone-safe.
     $targetMs = $to ? \Illuminate\Support\Carbon::parse($to)->getTimestampMs() : null;
 @endphp

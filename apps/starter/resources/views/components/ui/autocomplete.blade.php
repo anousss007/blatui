@@ -11,14 +11,19 @@
     'name' => null,
     'options' => [],
     'value' => '',
-    'placeholder' => 'Search...',
-    'empty' => 'No results found.',
+    'placeholder' => null,
+    'empty' => null,
     'size' => 'default',   // sm | default | lg
     'disabled' => false,
     'multiple' => false,   // true → tag input: selected render as removable chips, list stays open
     'icon' => null,        // optional lucide icon name (e.g. "search") for a leading icon
     'width' => 'w-[260px]',
 ])
+
+@php
+    $placeholder ??= __('Search...');
+    $empty ??= __('No results found.');
+@endphp
 
 <x-ui.combobox
     trigger="input"

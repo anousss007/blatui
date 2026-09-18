@@ -8,7 +8,9 @@
 @php
     // Derive a clean host (domain) from the URL for display, e.g. "example.com".
     $host = $url ? preg_replace('#^www\.#', '', (string) (parse_url($url, PHP_URL_HOST) ?: $url)) : null;
-    $label = trim('Source '.$index.($title ? ': '.$title : ''));
+    $label = trim($title
+        ? __('Source :index: :title', ['index' => $index, 'title' => $title])
+        : __('Source :index', ['index' => $index]));
 @endphp
 
 <span

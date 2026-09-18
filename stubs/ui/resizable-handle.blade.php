@@ -4,7 +4,7 @@
     data-slot="resizable-handle"
     role="separator"
     tabindex="0"
-    aria-label="Resize panel"
+    aria-label="{{ __('Resize panel') }}"
     :aria-orientation="direction === 'horizontal' ? 'vertical' : 'horizontal'"
     aria-valuemin="10"
     aria-valuemax="90"

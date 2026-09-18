@@ -87,7 +87,7 @@
             min="0"
             max="100"
             x-model.number="pos"
-            aria-label="Comparison position"
+            aria-label="{{ __('Comparison position') }}"
             class="absolute inset-0 z-20 size-full cursor-ew-resize appearance-none bg-transparent opacity-0 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
     </div>

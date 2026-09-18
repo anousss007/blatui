@@ -1,12 +1,13 @@
 @props([
     'open' => false,
-    'label' => 'Reasoning',
+    'label' => null,
     'duration' => null,
     'id' => null,
 ])
 
 @php
-    $headerLabel = $duration ? 'Thought for '.$duration : $label;
+    $label ??= __('Reasoning');
+    $headerLabel = $duration ? __('Thought for :duration', ['duration' => $duration]) : $label;
 @endphp
 
 <div

@@ -102,7 +102,7 @@
                 <template x-for="o in selected" :key="o.value">
                     <span class="bg-secondary text-secondary-foreground inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium">
                         <span x-text="o.label"></span>
-                        <span role="button" tabindex="-1" :aria-label="'Remove ' + o.label" @click.stop.prevent="remove(o.value)"
+                        <span role="button" tabindex="-1" :aria-label="@js(__('Remove :label')).replace(':label', o.label)" @click.stop.prevent="remove(o.value)"
                             class="hover:text-foreground/70 inline-flex cursor-pointer items-center rounded-sm outline-none">
                             <x-lucide-x class="size-3" aria-hidden="true" />
                         </span>
@@ -198,7 +198,7 @@
                 <template x-for="o in selected" :key="o.value">
                     <span class="bg-secondary text-secondary-foreground inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium">
                         <span x-text="o.label"></span>
-                        <span role="button" tabindex="-1" :aria-label="'Remove ' + o.label" @click.stop.prevent="remove(o.value)"
+                        <span role="button" tabindex="-1" :aria-label="@js(__('Remove :label')).replace(':label', o.label)" @click.stop.prevent="remove(o.value)"
                             class="hover:text-foreground/70 inline-flex cursor-pointer items-center rounded-sm outline-none">
                             <x-lucide-x class="size-3" aria-hidden="true" />
                         </span>

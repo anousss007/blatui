@@ -114,4 +114,51 @@ class RegistryI18nRtlTest extends TestCase
             }
         }
     }
+
+    /**
+     * Every string a component shows or announces goes through __(), so an app can translate
+     * it with a lang/{locale}.json (issue #35). A source scan rather than a render: most of
+     * these strings sit in branches a default render never takes, or inside Alpine expressions.
+     * Heuristic by design — it looks for English words in the places UI text lives.
+     */
+    public function test_no_component_hardcodes_visible_english(): void
+    {
+        $offenders = [];
+
+        foreach (glob(resource_path('views/components/ui/*.blade.php')) as $file) {
+            $source = preg_replace(['/\{\{--.*?--\}\}/s', '/^\s*\/\/.*$/m'], '', (string) file_get_contents($file));
+            // Already translated: __('Play'), __("You're all caught up").
+            $source = preg_replace('/__\((["\']).*?\1/', '__(', $source);
+
+            $patterns = [
+                // A static attribute that is read out or shown.
+                '/\s(?:aria-label|aria-roledescription|aria-valuetext|placeholder|title|alt)="([A-Za-z][^"{}$@]*[a-z][^"{}$@]*)"/',
+                // A text node between tags.
+                '/>\s*([A-Z][a-z]+(?:[ \'’][A-Za-z]+)*[.…!?]?)\s*</',
+                // An English literal inside an Alpine expression that renders text or a label.
+                '/(?:x-text|:aria-label|:title|:placeholder)="[^"]*\'([A-Z][a-z]+(?: [a-z]+)*)\'[^"]*"/',
+            ];
+
+            foreach ($patterns as $pattern) {
+                preg_match_all($pattern, $source, $m);
+                foreach ($m[1] as $text) {
+                    $offenders[] = basename($file, '.blade.php').': '.$text;
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders, 'wrap these in __() (JSON-string key = the English text)');
+    }
+
+    public function test_a_translated_string_reaches_the_rendered_component(): void
+    {
+        $this->translate("You're all caught up", 'Todo al día', 'es');
+        $this->translate('Mark all read', 'Marcar todo como leído', 'es');
+        app()->setLocale('es');
+
+        $html = $this->render('<x-ui.notification-center :notifications="[]" />');
+
+        $this->assertStringContainsString('Todo al día', $html);
+        $this->assertStringContainsString('Marcar todo como leído', $html);
+    }
 }

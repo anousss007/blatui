@@ -145,13 +145,13 @@
             class="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center"
             aria-hidden="true"
         >
-            <span class="text-muted-foreground mb-2 text-xs">Sign here</span>
+            <span class="text-muted-foreground mb-2 text-xs">{{ __('Sign here') }}</span>
             <span class="bg-border mb-7 h-px w-3/4"></span>
         </div>
 
         <canvas
             x-ref="canvas"
-            aria-label="Signature pad — draw your signature"
+            aria-label="{{ __('Signature pad — draw your signature') }}"
             role="img"
             class="block w-full touch-none"
             :style="`height: ${height}px`"
@@ -166,11 +166,11 @@
     <div class="flex items-center gap-2">
         <x-ui.button type="button" variant="outline" size="sm" x-on:click="undo()" x-bind:disabled="strokes.length === 0">
             <x-lucide-undo-2 aria-hidden="true" />
-            Undo
+            {{ __('Undo') }}
         </x-ui.button>
         <x-ui.button type="button" variant="ghost" size="sm" x-on:click="clear()" x-bind:disabled="!hasInk">
             <x-lucide-eraser aria-hidden="true" />
-            Clear
+            {{ __('Clear') }}
         </x-ui.button>
     </div>
 

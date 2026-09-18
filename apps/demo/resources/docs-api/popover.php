@@ -27,7 +27,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'Popover'",
+            'default' => "__('Popover')",
             'description' => 'Set on <x-ui.popover-content>. Accessible name (aria-label) for the dialog panel.',
         ],
     ],

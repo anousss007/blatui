@@ -48,10 +48,10 @@
 
     // Default human label per status (overridable via `label`).
     $labels = [
-        'online'  => 'Online',
-        'away'    => 'Away',
-        'busy'    => 'Busy',
-        'offline' => 'Offline',
+        'online'  => __('Online'),
+        'away'    => __('Away'),
+        'busy'    => __('Busy'),
+        'offline' => __('Offline'),
     ];
     $text = $label ?? $labels[$status];
 

@@ -13,13 +13,13 @@ return [
         [
             'name' => 'expired',
             'type' => 'string',
-            'default' => "'Expired'",
+            'default' => "__('Expired')",
             'description' => 'Text shown once the target has passed. Overridden by the default slot when one is provided.',
         ],
         [
             'name' => 'labels',
             'type' => 'array',
-            'default' => "['days' => 'Days', 'hours' => 'Hrs', 'minutes' => 'Min', 'seconds' => 'Sec']",
+            'default' => "['days' => __('Days'), 'hours' => __('Hrs'), 'minutes' => __('Min'), 'seconds' => __('Sec')]",
             'description' => 'The unit captions under each number, keyed by days, hours, minutes and seconds.',
         ],
     ],

@@ -4,10 +4,12 @@
     'value' => [],              // seed rows: array of associative arrays keyed by field key
     'min' => 1,                 // minimum number of rows (Remove disabled at this floor)
     'max' => null,              // maximum number of rows (Add disabled at this ceiling); null = unlimited
-    'addLabel' => 'Add row',
+    'addLabel' => null,
 ])
 
 @php
+    $addLabel ??= __('Add row');
+
     // Normalise the field schema. Default to a single text field if none is given.
     $cols = collect($fields)
         ->map(fn ($f) => [
@@ -77,7 +79,7 @@
             this.rows.splice(index, 1);
         },
         rowLabel(index) {
-            return @js($name) + ' row ' + (index + 1);
+            return @js(__(':name row :number')).replace(':name', @js($name)).replace(':number', index + 1);
         },
         fieldId(index, key) {
             // Space-free, unique id so <label for> / aria associations validate.
@@ -140,7 +142,7 @@
                     data-slot="repeater-remove"
                     @click="remove(index)"
                     :disabled="!canRemove"
-                    :aria-label="'Remove ' + rowLabel(index)"
+                    :aria-label="@js(__('Remove :row')).replace(':row', rowLabel(index))"
                     @class([
                         'inline-flex size-9 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground shadow-xs outline-none transition-colors not-disabled:cursor-pointer hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
                         'sm:mb-0' => $multi,

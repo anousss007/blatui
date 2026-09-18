@@ -68,7 +68,7 @@
 
     // Accessible name: prefer the explicit label, then any aria-label passed
     // through attributes, then a generic fallback.
-    $accessibleName = $label ?? $attributes->get('aria-label') ?? 'Meter';
+    $accessibleName = $label ?? $attributes->get('aria-label') ?? __('Meter');
 
     // The visible value text, e.g. "72%" or "7.2 / 10".
     $valueText = rtrim(rtrim(number_format($value, 1, '.', ''), '0'), '.') . ($unit ?? '');

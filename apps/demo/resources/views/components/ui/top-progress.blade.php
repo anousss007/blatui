@@ -84,7 +84,7 @@
     <div
         class="blat-top-progress-bar absolute inset-y-0 start-0 origin-left rounded-e-full transition-[width,opacity] duration-200 ease-out"
         role="progressbar"
-        aria-label="Page loading"
+        aria-label="{{ __('Page loading') }}"
         aria-valuemin="0"
         aria-valuemax="100"
         x-bind:aria-valuenow="active ? Math.round(progress * 100) : null"

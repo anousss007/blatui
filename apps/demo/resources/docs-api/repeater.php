@@ -37,7 +37,7 @@ return [
         [
             'name' => 'addLabel',
             'type' => 'string',
-            'default' => "'Add row'",
+            'default' => "__('Add row')",
             'description' => 'Text on the Add button.',
         ],
     ],

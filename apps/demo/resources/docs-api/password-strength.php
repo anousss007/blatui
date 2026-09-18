@@ -13,7 +13,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'Password'",
+            'default' => "__('Password')",
             'description' => 'Accessible label for the field, rendered visually hidden.',
         ],
         [

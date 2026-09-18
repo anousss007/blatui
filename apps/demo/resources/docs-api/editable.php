@@ -20,7 +20,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'value'",
+            'default' => "__('value')",
             'description' => 'Accessible label used for the editor field and the "Edit {label}" trigger.',
         ],
         [

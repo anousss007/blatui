@@ -65,7 +65,7 @@ return [
         [
             'name' => 'actionsLabel',
             'type' => 'string',
-            'default' => "'Actions'",
+            'default' => "__('Actions')",
             'description' => 'Accessible label for the actions column header (rendered sr-only) and the dropdown trigger.',
         ],
         [
@@ -107,7 +107,7 @@ return [
         [
             'name' => 'searchPlaceholder',
             'type' => 'string',
-            'default' => "'Search...'",
+            'default' => "__('Search...')",
             'description' => 'Placeholder (and accessible label) for the search input.',
         ],
         [
@@ -125,7 +125,7 @@ return [
         [
             'name' => 'perPageLabel',
             'type' => 'string',
-            'default' => "'Rows per page'",
+            'default' => "__('Rows per page')",
             'description' => 'Accessible label for the page-size select.',
         ],
         [
@@ -159,7 +159,7 @@ return [
         [
             'name' => 'emptyText',
             'type' => 'string',
-            'default' => "'No results.'",
+            'default' => "__('No results.')",
             'description' => 'Message shown when rows is empty.',
         ],
         [

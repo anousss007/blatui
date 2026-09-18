@@ -26,7 +26,7 @@ return [
         [
             'name' => 'placeholder',
             'type' => 'string',
-            'default' => "'Type @ to mention…'",
+            'default' => "__('Type @ to mention…')",
             'description' => 'Placeholder text for the textarea while it is empty.',
         ],
         [

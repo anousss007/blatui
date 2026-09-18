@@ -91,7 +91,7 @@
         <button
             type="button"
             @click="toggle()"
-            :aria-label="playing ? 'Pause' : 'Play'"
+            :aria-label="playing ? @js(__('Pause')) : @js(__('Play'))"
             :aria-pressed="playing"
             class="bg-primary text-primary-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-full shadow-xs transition-all outline-none hover:bg-primary/90 focus-visible:ring-ring/50 focus-visible:ring-[3px]"
         >
@@ -106,7 +106,7 @@
             min="0"
             max="100"
             step="0.1"
-            aria-label="Seek"
+            aria-label="{{ __('Seek') }}"
             :value="progress"
             @input="seek($event.target.value)"
             class="bg-muted h-1.5 grow min-w-0 cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] [&::-webkit-slider-thumb]:size-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:size-3.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background"
@@ -118,7 +118,7 @@
         <button
             type="button"
             @click="toggleMute()"
-            :aria-label="muted ? 'Unmute' : 'Mute'"
+            :aria-label="muted ? @js(__('Unmute')) : @js(__('Mute'))"
             :aria-pressed="muted"
             class="text-muted-foreground hover:text-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
         >
@@ -131,7 +131,7 @@
             min="0"
             max="100"
             step="1"
-            aria-label="Volume"
+            aria-label="{{ __('Volume') }}"
             :value="volumePercent"
             @input="setVolume($event.target.value)"
             class="bg-muted hidden h-1.5 w-16 shrink-0 cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] sm:block [&::-webkit-slider-thumb]:size-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:size-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background"

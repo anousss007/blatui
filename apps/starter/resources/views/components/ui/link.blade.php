@@ -21,4 +21,4 @@
     data-slot="link"
     @if ($external) target="_blank" rel="noopener noreferrer" @endif
     {{ $attributes->twMerge($classes) }}
->{{ $slot }}@if ($external)<span class="sr-only"> (opens in new tab)</span>@endif</a>
+>{{ $slot }}@if ($external)<span class="sr-only"> {{ __('(opens in new tab)') }}</span>@endif</a>

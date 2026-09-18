@@ -60,7 +60,7 @@ return [
         [
             'name' => 'ariaLabel',
             'type' => 'string',
-            'default' => "'Value'",
+            'default' => "__('Value')",
             'description' => 'Accessible label for the thumb(s). In range mode it is suffixed with "minimum"/"maximum".',
         ],
     ],

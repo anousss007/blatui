@@ -29,7 +29,7 @@ return [
         [
             'name' => 'placeholder',
             'type' => 'string',
-            'default' => "'Phone number'",
+            'default' => "__('Phone number')",
             'description' => 'Placeholder shown in the number field while empty.',
         ],
     ],

@@ -38,7 +38,7 @@ return [
         [
             'name' => 'ariaLabel',
             'type' => 'string',
-            'default' => "'Trend'",
+            'default' => "__('Trend')",
             'description' => 'Accessible name for the SVG (role="img" aria-label).',
         ],
     ],

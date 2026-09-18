@@ -94,7 +94,7 @@
 >
     <div
         data-slot="gantt-scroll"
-        tabindex="0" role="region" aria-label="Project timeline (scrollable)"
+        tabindex="0" role="region" aria-label="{{ __('Project timeline (scrollable)') }}"
         class="focus-visible:ring-ring/50 w-full overflow-x-auto rounded-[inherit] outline-none focus-visible:ring-[3px]"
     >
         <table
@@ -103,8 +103,11 @@
             style="min-width: calc({{ $labelWidth }} + {{ $timelineMinPx }}px)"
         >
             <caption class="sr-only">
-                Project timeline from {{ $rangeStart->isoFormat('LL') }} to {{ $rangeEnd->isoFormat('LL') }},
-                {{ count($rows) }} {{ \Illuminate\Support\Str::plural('task', count($rows)) }}.
+                {{ __(abs(count($rows)) === 1 ? 'Project timeline from :start to :end, :count task.' : 'Project timeline from :start to :end, :count tasks.', [
+                    'start' => $rangeStart->isoFormat('LL'),
+                    'end' => $rangeEnd->isoFormat('LL'),
+                    'count' => count($rows),
+                ]) }}
             </caption>
 
             <thead>
@@ -113,7 +116,7 @@
                         scope="col"
                         class="bg-muted/40 text-muted-foreground sticky start-0 z-10 px-4 py-2 text-start align-bottom text-xs font-medium"
                         style="width: {{ $labelWidth }}; min-width: {{ $labelWidth }}"
-                    >Task</th>
+                    >{{ __('Task') }}</th>
                     @foreach ($buckets as $b)
                         <th
                             scope="col"
@@ -177,7 +180,7 @@
                                     <span class="absolute top-1/2 -translate-y-1/2 ps-2 text-xs whitespace-nowrap"
                                         style="inset-inline-start: calc({{ $barOffset + $dayPct / 2 }}% )">
                                         <span class="bg-foreground/5 text-foreground/80 rounded px-1 py-0.5">
-                                            {{ $r['name'] }}<span class="sr-only">, milestone on {{ $dateLabel }}</span>
+                                            {{ $r['name'] }}<span class="sr-only">, {{ __('milestone on :date', ['date' => $dateLabel]) }}</span>
                                         </span>
                                     </span>
                                 @else
@@ -191,7 +194,7 @@
                                     >
                                         {{-- Accessible text: the task name (which also shows in the sticky
                                              row header) plus dates / progress, read out as one label. --}}
-                                        <span class="sr-only">{{ $r['name'] }}, {{ $dateLabel }}@if (! is_null($r['progress'])), {{ $r['progress'] }}% complete @endif</span>
+                                        <span class="sr-only">{{ $r['name'] }}, {{ $dateLabel }}@if (! is_null($r['progress'])), {{ __(':progress% complete', ['progress' => $r['progress']]) }} @endif</span>
                                         @if (! is_null($r['progress']))
                                             {{-- dim the part beyond progress with a neutral scrim so the
                                                  filled length conveys progress by position, not colour alone --}}
@@ -211,7 +214,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td class="text-muted-foreground px-4 py-8 text-center" colspan="2">No tasks to display.</td>
+                        <td class="text-muted-foreground px-4 py-8 text-center" colspan="2">{{ __('No tasks to display.') }}</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -221,7 +224,7 @@
     @if ($showToday && count($rows))
         <div data-slot="gantt-legend" class="text-muted-foreground flex items-center gap-1.5 border-t px-4 py-1.5 text-xs">
             <span class="bg-destructive/70 inline-block h-3 w-px" aria-hidden="true"></span>
-            Today · {{ $todayDate->isoFormat('MMM D, YYYY') }}
+            {{ __('Today') }} · {{ $todayDate->isoFormat('MMM D, YYYY') }}
         </div>
     @endif
 </div>

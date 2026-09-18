@@ -56,7 +56,7 @@
     {{ $attributes->twMerge('flex w-full gap-4 overflow-x-auto pb-2') }}
     tabindex="0"
     role="group"
-    aria-label="Kanban board"
+    aria-label="{{ __('Kanban board') }}"
     {{-- The idref comes from Alpine, not the server: an id generated per render is a fresh
          morph key per render, and Livewire replaces the element rather than patching it. The
          hint describes a drag interaction that only exists with Alpine anyway. #27 --}}
@@ -64,7 +64,7 @@
     :aria-describedby="$id('kanban-hint')"
 >
     <p :id="$id('kanban-hint')" class="sr-only">
-        Drag a card with the mouse to move it between columns. Each card is a focusable item within its column.
+        {{ __('Drag a card with the mouse to move it between columns. Each card is a focusable item within its column.') }}
     </p>
 
     <template x-for="col in columns" :key="col.id">
@@ -99,7 +99,7 @@
                         draggable="true"
                         @dragstart="start($event, col.id, card.id)"
                         @dragend="reset()"
-                        :aria-label="card.title + ' — in ' + col.title"
+                        :aria-label="@js(__(':card — in :column')).replace(':card', card.title).replace(':column', col.title)"
                     >
                         <p class="text-sm font-medium" x-text="card.title"></p>
 

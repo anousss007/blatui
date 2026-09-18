@@ -1,6 +1,6 @@
 @props([
     'name' => null,
-    'placeholder' => 'Send a message…',
+    'placeholder' => null,
     'attachable' => false,
     'disabled' => false,
     'id' => null,
@@ -9,10 +9,12 @@
 ])
 
 @php
+    $placeholder ??= __('Send a message…');
+
     // The TEXTAREA is the labelled control, so route an author-supplied aria-label onto it
     // (fallback "Message"). Pull it off the root attribute bag so it doesn't also land on the
     // wrapper div, which would create a duplicate/competing name.
-    $textareaLabel = $attributes->get('aria-label') ?: 'Message';
+    $textareaLabel = $attributes->get('aria-label') ?: __('Message');
     $attributes = $attributes->except('aria-label');
 @endphp
 
@@ -77,7 +79,7 @@
         @if ($attachable)
             <button
                 type="button"
-                aria-label="Attach file"
+                aria-label="{{ __('Attach file') }}"
                 @disabled($disabled)
                 class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-8 shrink-0 items-center justify-center rounded-lg outline-none transition-colors focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -88,12 +90,12 @@
         <div class="flex-1"></div>
 
         <span data-slot="prompt-input-hint" class="text-muted-foreground hidden text-xs select-none sm:inline" aria-hidden="true">
-            <kbd class="font-sans">⌘↵</kbd> to send
+            <kbd class="font-sans">⌘↵</kbd> {{ __('to send') }}
         </span>
 
         <button
             type="button"
-            aria-label="Send"
+            aria-label="{{ __('Send') }}"
             @click="submit()"
             :disabled="disabled || empty"
             class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/50 inline-flex size-8 shrink-0 items-center justify-center rounded-full shadow-xs outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50"

@@ -18,7 +18,7 @@ return [
         [
             'name' => 'placeholder',
             'type' => 'string',
-            'default' => "'Write something…'",
+            'default' => "__('Write something…')",
             'description' => 'Placeholder shown while the editor is empty. Also used as the textbox\'s accessible name.',
         ],
         [

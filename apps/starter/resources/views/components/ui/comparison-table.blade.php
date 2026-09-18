@@ -2,17 +2,18 @@
     'tiers' => [],          // column headers, e.g. ['Hobby', 'Pro', 'Enterprise']
     'rows' => [],           // [['feature' => 'Projects', 'values' => ['3', 'Unlimited', 'Unlimited']], ...]
     'highlight' => null,    // tier name or 0-based index to emphasise
-    'featureLabel' => 'Feature',
+    'featureLabel' => null,
 ])
 
 @php
+    $featureLabel ??= __('Feature');
     $tiers = array_values($tiers);
     $hl = is_int($highlight) ? $highlight : array_search($highlight, $tiers, true);
 @endphp
 
 <div data-slot="comparison-table" {{ $attributes->twMerge('w-full overflow-x-auto rounded-xl border') }}>
     <table class="w-full text-sm">
-        <caption class="sr-only">{{ $featureLabel }} comparison across {{ implode(', ', $tiers) }}</caption>
+        <caption class="sr-only">{{ __(':feature comparison across :tiers', ['feature' => $featureLabel, 'tiers' => implode(', ', $tiers)]) }}</caption>
         <thead>
             <tr class="bg-muted/40 border-b">
                 <th scope="col" class="text-muted-foreground px-4 py-3 text-start font-medium">{{ $featureLabel }}</th>
@@ -34,9 +35,9 @@
                             'bg-muted/30' => $i === $hl,
                         ])>
                             @if ($val === true)
-                                <x-lucide-check class="text-primary mx-auto size-4" aria-label="Included" />
+                                <x-lucide-check class="text-primary mx-auto size-4" aria-label="{{ __('Included') }}" />
                             @elseif ($val === false || $val === null)
-                                <x-lucide-minus class="text-muted-foreground/40 mx-auto size-4" aria-label="Not included" />
+                                <x-lucide-minus class="text-muted-foreground/40 mx-auto size-4" aria-label="{{ __('Not included') }}" />
                             @else
                                 <span class="tabular-nums">{{ $val }}</span>
                             @endif

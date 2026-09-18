@@ -35,7 +35,7 @@
 
 @php
     $eccLevel = in_array(strtoupper((string) $ecc), ['L', 'M', 'Q', 'H'], true) ? strtoupper((string) $ecc) : 'M';
-    $label = $alt !== null ? $alt : ('QR code for ' . $value);
+    $label = $alt !== null ? $alt : __('QR code for :value', ['value' => $value]);
 @endphp
 
 @once

@@ -41,7 +41,7 @@
         @php
             $src = $avatar['src'] ?? null;
             $name = $avatar['name'] ?? null;
-            $label = trim((string) $name) !== '' ? $name : 'User avatar';
+            $label = trim((string) $name) !== '' ? $name : __('User avatar');
         @endphp
         <x-ui.avatar
             role="listitem"
@@ -58,7 +58,7 @@
     @if ($remaining > 0)
         <span
             role="listitem"
-            aria-label="and {{ $remaining }} more"
+            aria-label="{{ __('and :count more', ['count' => $remaining]) }}"
             @class([
                 'relative z-10 flex shrink-0 items-center justify-center rounded-full font-medium',
                 'bg-muted text-foreground',

@@ -418,7 +418,7 @@
                 <button
                     type="button"
                     @click="remove(index)"
-                    :aria-label="`{{ __('Remove') }} ${file.name}`"
+                    :aria-label="@js(__('Remove :name')).replace(':name', file.name)"
                     class="text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-ring/50 flex size-8 shrink-0 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-[3px]"
                 >
                     <x-lucide-x class="size-4" aria-hidden="true" />

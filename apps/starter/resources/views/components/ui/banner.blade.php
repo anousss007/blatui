@@ -32,7 +32,7 @@
     x-show="show"
     x-cloak
     role="region"
-    aria-label="Announcement"
+    aria-label="{{ __('Announcement') }}"
     {{ $attributes->twMerge('relative flex w-full items-center gap-3 border-b px-4 py-2.5 text-sm '.$cls) }}
 >
     <div class="flex flex-1 flex-wrap items-center justify-center gap-x-3 gap-y-1">
@@ -42,7 +42,7 @@
         <button
             type="button"
             @click="dismiss()"
-            aria-label="Dismiss"
+            aria-label="{{ __('Dismiss') }}"
             class="shrink-0 rounded-md p-1 opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-current/40"
         >
             <x-lucide-x class="size-4" aria-hidden="true" />

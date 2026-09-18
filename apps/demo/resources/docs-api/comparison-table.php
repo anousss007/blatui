@@ -27,7 +27,7 @@ return [
         [
             'name' => 'featureLabel',
             'type' => 'string',
-            'default' => "'Feature'",
+            'default' => "__('Feature')",
             'description' => 'The header text for the leftmost (feature name) column.',
         ],
     ],

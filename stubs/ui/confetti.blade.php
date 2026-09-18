@@ -137,7 +137,7 @@
     @if (trim($slot) !== '')
         <span @click="fire()" class="contents">{{ $slot }}</span>
     @else
-        <x-ui.button type="button" @click="fire()">Celebrate &#127881;</x-ui.button>
+        <x-ui.button type="button" @click="fire()">{{ __('Celebrate') }} &#127881;</x-ui.button>
     @endif
 
     {{-- Decorative particle overlay: fixed, full-viewport, never intercepts pointer events. --}}

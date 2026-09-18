@@ -52,7 +52,7 @@ return [
         [
             'name' => 'label',
             'type' => 'string',
-            'default' => "'Chart'",
+            'default' => "__('Chart')",
             'description' => 'Accessible name for the chart container (role="img" aria-label).',
         ],
     ],

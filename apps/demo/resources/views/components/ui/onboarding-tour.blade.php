@@ -179,7 +179,7 @@
             >
                 <div class="flex flex-col gap-1.5">
                     <p class="text-muted-foreground text-xs font-medium" aria-hidden="true">
-                        <span x-text="index + 1"></span> of <span x-text="count"></span>
+                        <span x-text="@js(__(':current of :total')).replace(':current', index + 1).replace(':total', count)"></span>
                     </p>
                     <h2 :id="$id('blat-tour-title')" data-slot="onboarding-tour-title" class="text-sm leading-none font-semibold" x-text="step.title"></h2>
                     <p :id="$id('blat-tour-body')" data-slot="onboarding-tour-body" class="text-muted-foreground text-sm" x-text="step.body"></p>
@@ -201,7 +201,7 @@
                         @click="end()"
                         data-slot="onboarding-tour-skip"
                         class="text-muted-foreground hover:text-foreground inline-flex h-8 items-center rounded-md px-2 text-sm font-medium transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                    >Skip</button>
+                    >{{ __('Skip') }}</button>
 
                     <div class="flex items-center gap-2">
                         <button
@@ -210,15 +210,15 @@
                             @click="back()"
                             data-slot="onboarding-tour-back"
                             class="border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-8 items-center rounded-md border px-3 text-sm font-medium shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                        >Back</button>
+                        >{{ __('Back') }}</button>
                         <button
                             type="button"
                             @click="next()"
                             data-slot="onboarding-tour-next"
                             class="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-8 items-center rounded-md px-3 text-sm font-medium shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                         >
-                            <span x-show="!isLast">Next</span>
-                            <span x-show="isLast">Done</span>
+                            <span x-show="!isLast">{{ __('Next') }}</span>
+                            <span x-show="isLast">{{ __('Done') }}</span>
                         </button>
                     </div>
                 </div>
