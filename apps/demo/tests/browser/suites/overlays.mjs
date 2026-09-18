@@ -71,7 +71,7 @@ export async function run({ browser, reporter, baseUrl, inventory, only, viewpor
     for (const { name, width, height } of viewports) {
         reporter.suite(`overlays @ ${name}px`);
 
-        await inLanes(browser, slugs, { lanes: 4, viewport: { width, height }, each: async (page, slug) => {
+        await inLanes(browser, slugs, { reporter, label: 'overlays', lanes: 4, viewport: { width, height }, each: async (page, slug) => {
         await visit(page, `${baseUrl}/components/${slug}`);
         const slots = await slotsOn(page);
 

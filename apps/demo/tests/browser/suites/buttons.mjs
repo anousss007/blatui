@@ -21,7 +21,7 @@ export async function run({ browser, reporter, baseUrl, inventory, only, viewpor
     for (const { name, width, height } of viewports) {
         reporter.suite(`buttons @ ${name}px`);
 
-        await inLanes(browser, slugs, { lanes: 4, viewport: { width, height }, each: async (page, slug) => {
+        await inLanes(browser, slugs, { reporter, label: 'buttons', lanes: 4, viewport: { width, height }, each: async (page, slug) => {
         const url = `${baseUrl}/components/${slug}`;
         await visit(page, url);
 

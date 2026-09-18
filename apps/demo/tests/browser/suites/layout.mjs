@@ -38,7 +38,7 @@ export async function run({ browser, reporter, baseUrl, inventory, only, viewpor
     for (const { name, width, height } of viewports) {
         reporter.suite(`layout @ ${name}px`);
 
-        await inLanes(browser, slugs, {
+        await inLanes(browser, slugs, { reporter, label: 'layout',
             lanes: 4,
             viewport: { width, height },
             each: async (page, slug) => {

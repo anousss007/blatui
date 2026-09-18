@@ -19,7 +19,7 @@ export async function run({ browser, reporter, baseUrl, inventory, only, viewpor
 
         // Six pages in parallel: the sweep is 220 URLs at every width in the matrix, and a
         // serial run would be slow enough that nobody would keep it in CI.
-        await inLanes(browser, targets, {
+        await inLanes(browser, targets, { reporter, label: 'pages',
             lanes: 6,
             viewport: { width, height },
             each: async (page, target) => {

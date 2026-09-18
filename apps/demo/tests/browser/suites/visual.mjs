@@ -77,7 +77,7 @@ export async function run({ browser, reporter, baseUrl, inventory, only, viewpor
     for (const { name, width, height } of viewports) {
         reporter.suite(`visual @ ${name}px`);
 
-        await inLanes(browser, slugs, {
+        await inLanes(browser, slugs, { reporter, label: 'visual',
             lanes: 4,
             viewport: { width, height },
             each: async (page, slug) => {

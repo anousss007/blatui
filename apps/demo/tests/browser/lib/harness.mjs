@@ -215,13 +215,36 @@ export function createReporter() {
  * them in CI, and a suite nobody runs protects nobody. Each lane owns its page, so error
  * logs never cross.
  */
-export async function inLanes(browser, items, { lanes = 4, viewport, each }) {
+/** How long one item may take before its lane gives up on it. Generous: the slowest suite
+ *  spends ~15s on a component; a hang is minutes. */
+const ITEM_TIMEOUT = 120_000;
+
+export async function inLanes(browser, items, { lanes = 4, viewport, each, reporter = null, label = 'item', timeout = ITEM_TIMEOUT }) {
     const queue = [...items];
 
+    // A watchdog per item. Nothing else here is bounded: page.evaluate() has no timeout, so one
+    // component that never settles used to hold its lane — and the job — until CI's six-hour
+    // limit, with nothing in the log to say which one. Now it is a named failure, the stuck page
+    // is thrown away, and the lane carries on with a fresh one.
     const lane = async () => {
-        const page = await newPage(browser, viewport);
+        let page = await newPage(browser, viewport);
         for (let item = queue.shift(); item !== undefined; item = queue.shift()) {
-            await each(page, item);
+            let timer;
+            const work = each(page, item);
+            const outcome = await Promise.race([
+                work.then(() => 'done'),
+                new Promise((resolve) => { timer = setTimeout(() => resolve('timeout'), timeout); }),
+            ]);
+            clearTimeout(timer);
+            if (outcome !== 'timeout') continue;
+
+            work.catch(() => {}); // it rejects once its page is closed below
+            const name = `${label} ${item} @ ${viewport?.width ?? '?'}px: finished within ${timeout / 1000}s`;
+            const detail = `still running after ${timeout / 1000}s — something on this page never settles`;
+            if (reporter) reporter.fail(name, detail);
+            else throw new Error(`${name}: ${detail}`);
+            await page.close().catch(() => {});
+            page = await newPage(browser, viewport);
         }
         await page.close();
     };
