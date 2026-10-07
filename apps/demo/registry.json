@@ -1147,7 +1147,9 @@
         "files": [
             "json-viewer.blade.php"
         ],
-        "dependencies": [],
+        "dependencies": [
+            "json-viewer-node"
+        ],
         "packages": {
             "composer": [
                 "mallardduck/blade-lucide-icons",
@@ -1606,7 +1608,9 @@
         "files": [
             "org-chart.blade.php"
         ],
-        "dependencies": [],
+        "dependencies": [
+            "org-chart-node"
+        ],
         "packages": {
             "composer": [
                 "gehrisandro/tailwind-merge-laravel"

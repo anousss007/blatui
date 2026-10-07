@@ -1,13 +1,15 @@
 {{--
-    Recursive org-chart node partial. Rendered by org-chart.blade.php and by itself.
+    Recursive org-chart node component. Rendered by org-chart.blade.php and by itself.
 
     $node = ['name' => string, 'title' => ?string, 'avatar' => ?url, 'children' => ?array]
 
     Each node is a single <li> containing a centered card; if it has children they are
-    rendered as a nested <ul> of <li>s (this same partial, @included recursively). The
-    raw ul/li nesting is what the scoped connector CSS in org-chart.blade.php hooks into,
-    so the recursion intentionally uses @include rather than a wrapping Blade component.
+    rendered as a nested <ul> of <li>s (this same component, recursively). An anonymous
+    component adds no wrapper element, so the raw ul/li nesting the scoped connector CSS in
+    org-chart.blade.php hooks into is unchanged. It is a component rather than an @include
+    so Blaze can compile it: a Blaze-compiled file renders nothing through view()/@include.
 --}}
+@props(['node' => []])
 @php
     $name = $node['name'] ?? '';
     $title = $node['title'] ?? null;
@@ -43,7 +45,7 @@
     @if ($hasChildren)
         <ul class="m-0 list-none p-0">
             @foreach ($children as $child)
-                @include('components.ui.org-chart-node', ['node' => $child])
+                <x-ui.org-chart-node :node="$child" />
             @endforeach
         </ul>
     @endif

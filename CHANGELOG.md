@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.35.0] - 2026-10-07
+
+### Added
+- **The components compile with [Blaze](https://github.com/livewire/blaze)** (#38). An app can opt
+  in with `Blaze::optimize()->in(resource_path('views/components/ui'))`. Every docs example
+  renders the same HTML under Blaze as under Blade, the Livewire morph suite passes with it on,
+  and rendering all of the examples takes about half as long. The getting-started page gains a
+  Performance section with the setup and a second tip: memoize the tailwind-merge cache with
+  `Cache::memo()`. Otherwise every `twMerge()` asks the default cache store, which on Redis
+  means a round trip per component.
+
+### Fixed
+- **Three patterns that broke under Blaze**, each now caught by a test:
+  - `::class` on an `<x-lucide-*>` icon reached the page as the literal `::class`, so chevrons in
+    combobox, autocomplete, phone-input, json-viewer and speed-dial stopped rotating. They use
+    `x-bind:class` now (and datetime-picker's `x-bind:disabled`).
+  - `json-viewer-node` and `org-chart-node` recursed through `@include`, and a Blaze-compiled
+    file renders nothing that way: the trees lost every level below the root. They are
+    self-referencing components now. The markup is unchanged.
+  - A `@foreach` written in a PHP comment inside server-table's `@props` made Livewire's
+    morph-aware compiler fail with "Malformed @foreach statement" once Blaze inlined the table.
+- **`blatui:add json-viewer` and `blatui:add org-chart` install their node file.** The registry
+  only follows `<x-ui.*>` tags, so the `@include`d node was never declared as a dependency and a
+  fresh install failed with a missing view.
+
 ## [1.34.0] - 2026-09-18
 
 ### Changed
@@ -1489,7 +1514,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.34.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.35.0...HEAD
+[1.35.0]: https://github.com/anousss007/blatui/compare/v1.34.0...v1.35.0
 [1.34.0]: https://github.com/anousss007/blatui/compare/v1.33.0...v1.34.0
 [1.33.0]: https://github.com/anousss007/blatui/compare/v1.32.0...v1.33.0
 [1.32.0]: https://github.com/anousss007/blatui/compare/v1.31.0...v1.32.0

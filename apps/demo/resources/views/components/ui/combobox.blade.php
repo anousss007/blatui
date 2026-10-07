@@ -133,7 +133,7 @@
                 >
                 <x-lucide-chevron-down
                     class="text-muted-foreground pointer-events-none ms-auto size-4 shrink-0 self-center opacity-50 transition-transform"
-                    ::class="open && 'rotate-180'"
+                    x-bind:class="open && 'rotate-180'"
                     aria-hidden="true"
                 />
             </div>
@@ -166,7 +166,7 @@
                 >
                 <x-lucide-chevron-down
                     class="text-muted-foreground pointer-events-none absolute top-1/2 end-3 size-4 -translate-y-1/2 opacity-50 transition-transform"
-                    ::class="open && 'rotate-180'"
+                    x-bind:class="open && 'rotate-180'"
                     aria-hidden="true"
                 />
             </div>

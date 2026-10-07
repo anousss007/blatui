@@ -1,7 +1,15 @@
 {{--
     Recursive JSON tree node. Rendered server-side for no-flash + a11y.
-    Vars: $value, $depth (int), $expanded (bool), $keyName (string|int|null), $isLast (bool).
+    A component (not an @include) so Blaze can compile the recursion: a Blaze-compiled
+    file renders nothing through view()/@include.
 --}}
+@props([
+    'value' => null,
+    'depth' => 0,
+    'expanded' => true,
+    'keyName' => null,
+    'isLast' => true,
+])
 @php
     $isAssoc = is_array($value) && (array_keys($value) !== range(0, count($value) - 1) || $value === []);
     // Treat associative arrays + empty arrays as objects {}, sequential arrays as [].
@@ -37,7 +45,7 @@
         >
             <x-lucide-chevron-right
                 class="text-muted-foreground size-3 shrink-0 self-center transition-transform"
-                ::class="open && 'rotate-90'"
+                x-bind:class="open && 'rotate-90'"
                 aria-hidden="true"
             />
             @if ($hasKey)
@@ -58,13 +66,13 @@
         {{-- Children --}}
         <div x-show="open" x-cloak>
             @foreach ($value as $childKey => $childValue)
-                @include('components.ui.json-viewer-node', [
-                    'value' => $childValue,
-                    'depth' => $depth + 1,
-                    'expanded' => $expanded,
-                    'keyName' => $childKey,
-                    'isLast' => $loop->last,
-                ])
+                <x-ui.json-viewer-node
+                    :value="$childValue"
+                    :depth="$depth + 1"
+                    :expanded="$expanded"
+                    :key-name="$childKey"
+                    :is-last="$loop->last"
+                />
             @endforeach
             <div class="text-muted-foreground" style="padding-inline-start:{{ $depth * 1 }}rem">{{ $close }}{{ $comma }}</div>
         </div>

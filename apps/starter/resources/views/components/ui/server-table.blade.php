@@ -1,6 +1,6 @@
 @props([
     'columns' => [],        // [['key'=>'name','label'=>'Name','sortable'=>true,'align'=>'left','class'=>'','width'=>null], ...]
-    'rows' => [],           // array | Collection | LengthAwarePaginator — rendered server-side (real @foreach)
+    'rows' => [],           // array | Collection | LengthAwarePaginator — rendered server-side (a real Blade loop)
     'rowKey' => 'id',       // primary-key path read from each row (data_get: works with arrays and Eloquent models)
 
     // Sorting — driven by the host (Livewire). The header buttons call wire:click="{sortMethod}('key')".

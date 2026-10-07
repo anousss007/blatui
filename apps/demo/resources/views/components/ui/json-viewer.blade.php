@@ -47,12 +47,6 @@
 
     {{-- Tree (code is LTR; block layout — indentation comes from padding, not whitespace). --}}
     <div dir="ltr" data-slot="json-viewer-tree" class="overflow-x-auto whitespace-nowrap p-3 leading-relaxed">
-        @include('components.ui.json-viewer-node', [
-            'value' => $jsonValue,
-            'depth' => 0,
-            'expanded' => (bool) $expanded,
-            'keyName' => null,
-            'isLast' => true,
-        ])
+        <x-ui.json-viewer-node :value="$jsonValue" :depth="0" :expanded="(bool) $expanded" />
     </div>
 </div>

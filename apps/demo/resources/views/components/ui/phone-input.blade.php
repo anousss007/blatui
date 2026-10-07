@@ -66,7 +66,7 @@
     >
         <span class="text-base leading-none" x-text="selected.flag"></span>
         <span class="text-muted-foreground" x-text="selected.dial"></span>
-        <x-lucide-chevron-down class="size-4 shrink-0 opacity-50 transition-transform" ::class="open && 'rotate-180'" aria-hidden="true" />
+        <x-lucide-chevron-down class="size-4 shrink-0 opacity-50 transition-transform" x-bind:class="open && 'rotate-180'" aria-hidden="true" />
     </button>
 
     <input

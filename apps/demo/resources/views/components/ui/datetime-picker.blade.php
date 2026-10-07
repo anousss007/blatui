@@ -323,7 +323,7 @@
         </div>
 
         <div class="flex justify-end border-t p-3">
-            <x-ui.button type="button" size="sm" ::disabled="invalid" @click="open = false">{{ __('Done') }}</x-ui.button>
+            <x-ui.button type="button" size="sm" x-bind:disabled="invalid" @click="open = false">{{ __('Done') }}</x-ui.button>
         </div>
     </div>
     </template>

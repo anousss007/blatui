@@ -248,6 +248,48 @@ php artisan blatui:update button card --force</x-code-block>
                 <p class="text-muted-foreground mt-4 text-sm">A key with no translation falls back to the English, so you can translate as you go. Any label you pass as a prop (<code class="bg-muted rounded px-1 text-xs">placeholder</code>, <code class="bg-muted rounded px-1 text-xs">empty-text</code>, <code class="bg-muted rounded px-1 text-xs">label</code>…) is used as given.</p>
             </div>
 
+            {{-- Performance --}}
+            <div class="mt-10 border-t pt-10">
+                <h2 id="performance" class="mb-2 scroll-mt-20 text-2xl font-bold tracking-tight">Performance</h2>
+                <p class="text-muted-foreground mb-5 text-sm">A screen built from BlatUI renders hundreds of anonymous components, and on a busy page Blade's per-component overhead is most of the render time. Two changes cut it down without touching a component.</p>
+
+                <div class="space-y-5">
+                    <div>
+                        <p class="mb-1 text-sm font-medium">Compile the components with Blaze</p>
+                        <p class="text-muted-foreground mb-2 text-sm"><a href="https://github.com/livewire/blaze" class="text-foreground underline underline-offset-4">Blaze</a> compiles anonymous components into plain PHP functions. It works with or without Livewire. Every component in <code class="bg-muted rounded px-1 text-xs">components/ui</code> renders the same HTML under Blaze as under Blade, and the Livewire morph suite passes with it on. Rendering all of the docs examples takes about half as long.</p>
+                        <x-code-block label="Terminal" icon="terminal">composer require livewire/blaze:^1.0</x-code-block>
+                        <x-code-block label="app/Providers/AppServiceProvider.php" icon="file-code" class="mt-2">use Livewire\Blaze\Blaze;
+
+public function boot(): void
+{
+    Blaze::optimize()->in(resource_path('views/components/ui'));
+}</x-code-block>
+                        <p class="text-muted-foreground mt-2 text-sm">Then run <code class="bg-muted rounded px-1 text-xs">php artisan view:clear</code>. Use the default compiler only: the <code class="bg-muted rounded px-1 text-xs">fold</code> and <code class="bg-muted rounded px-1 text-xs">memo</code> strategies bake a component's output in, and many BlatUI components read state at render time.</p>
+                    </div>
+
+                    <div class="bg-muted/40 flex items-start gap-2 rounded-lg border p-3 text-sm">
+                        <x-lucide-info class="text-primary mt-0.5 size-4 shrink-0" />
+                        <span class="text-muted-foreground">Render the components with their tag (<code class="bg-muted rounded px-1 text-xs">&lt;x-ui.card&gt;</code>), never with <code class="bg-muted rounded px-1 text-xs">@@include('components.ui.…')</code> or <code class="bg-muted rounded px-1 text-xs">view()</code>: a file Blaze compiled renders nothing that way. When you edit your copies, keep to Blaze's <a href="https://github.com/livewire/blaze#limitations" class="text-foreground underline underline-offset-4">limitations</a>. Shared view data such as <code class="bg-muted rounded px-1 text-xs">$errors</code> is not injected into a Blaze component, so pass it in as a prop.</span>
+                    </div>
+
+                    <div>
+                        <p class="mb-1 text-sm font-medium">Memoize the tailwind-merge cache</p>
+                        <p class="text-muted-foreground mb-2 text-sm">Every <code class="bg-muted rounded px-1 text-xs">$attributes-&gt;twMerge()</code> looks its result up in your default cache store. On Redis that is a network round trip per component, over a thousand on a large page. A memoized store (Laravel 12.9+) answers repeats from memory for the rest of the request:</p>
+                        <x-code-block label="app/Providers/AppServiceProvider.php" icon="file-code">use Illuminate\Support\Facades\Cache;
+use TailwindMerge\Contracts\TailwindMergeContract;
+use TailwindMerge\TailwindMerge;
+
+public function register(): void
+{
+    $this->app->singleton(TailwindMergeContract::class, fn () => TailwindMerge::factory()
+        ->withConfiguration(config('tailwind-merge', []))
+        ->withCache(Cache::memo())
+        ->make());
+}</x-code-block>
+                    </div>
+                </div>
+            </div>
+
             {{-- Server-rendered forms & foundations utilities --}}
             <div class="mt-10 border-t pt-10">
                 <h2 id="server-forms" class="mb-2 scroll-mt-20 text-2xl font-bold tracking-tight">Server-rendered forms &amp; the foundations utilities</h2>

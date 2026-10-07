@@ -98,7 +98,7 @@
         <x-dynamic-component
             :component="'lucide-'.$icon"
             class="size-6 transition-transform duration-200 ease-out motion-reduce:transition-none"
-            ::class="open ? 'rotate-45' : 'rotate-0'"
+            x-bind:class="open ? 'rotate-45' : 'rotate-0'"
             aria-hidden="true"
         />
     </button>
