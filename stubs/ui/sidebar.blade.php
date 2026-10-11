@@ -1,3 +1,8 @@
+{{-- The provider's state props, so the first paint already shows the state the provider will
+     hold (remembered via `persist`, or `defaultOpen`): without it the panel had no width at
+     all until Alpine booted. --}}
+@aware(['defaultOpen' => true, 'persist' => false])
+
 @props([
     'side' => 'left',
     'variant' => 'sidebar',
@@ -6,6 +11,23 @@
 
 @php
     $isLeft = $side === 'left';
+
+    // Same lookup as sidebar-provider.blade.php — keep the two in step.
+    $cookieName = in_array($persist, [true, 'true'], true) ? 'sidebar_state' : (is_string($persist) && ! in_array($persist, ['', 'false'], true) ? $persist : null);
+    $open = (bool) $defaultOpen;
+    if ($cookieName && preg_match('/(?:^|;\s*)'.preg_quote($cookieName, '/').'=(true|false)(?:;|$)/', (string) request()->header('cookie'), $m)) {
+        $open = $m[1] === 'true';
+    }
+    $gapStyle = $open ? 'width: var(--sidebar-width)' : ($collapsible === 'icon' ? 'width: var(--sidebar-width-icon)' : 'width: 0');
+    $containerStyle = $open
+        ? 'width: var(--sidebar-width)'
+        : ($collapsible === 'icon' ? 'width: var(--sidebar-width-icon)' : 'width: var(--sidebar-width); transform: translateX('.($isLeft ? '-100%' : '100%').')');
+
+    // The collapse animation. Both layers (the in-flow gap and the fixed panel) must run on the
+    // same curve or the content edge and the panel edge drift apart mid-way. An ease-out curve
+    // instead of linear: the motion starts at speed and settles, so it reads as a response to the
+    // click rather than a slide. Override per app with --sidebar-duration / --sidebar-ease.
+    $motion = 'duration-[var(--sidebar-duration,200ms)] ease-[var(--sidebar-ease,cubic-bezier(0.32,0.72,0,1))] motion-reduce:transition-none';
 
     // twMerge() MUTATES the bag it is called on (it offsetSet's the merged class and returns
     // $this). The desktop root and the mobile panel are BOTH rendered, so merging into
@@ -38,6 +60,8 @@
          from its own mobile-breakpoint) then overrides them when the two disagree — which is
          exactly what a breakpoint other than md means. --}}
     :class="{ 'md:hidden!': isMobile }"
+    data-state="{{ $open ? 'expanded' : 'collapsed' }}"
+    data-collapsible="{{ $open ? '' : $collapsible }}"
     :data-state="open ? 'expanded' : 'collapsed'"
     :data-collapsible="open ? '' : @js($collapsible)"
     data-variant="{{ $variant }}"
@@ -46,14 +70,18 @@
 >
     {{-- gap --}}
     <div
-        class="relative bg-transparent transition-[width] duration-200 ease-linear"
+        class="relative bg-transparent transition-[width] {{ $motion }}"
+        style="{{ $gapStyle }}"
         :style="open
             ? 'width: var(--sidebar-width)'
             : (@js($collapsible) === 'icon' ? 'width: var(--sidebar-width-icon)' : 'width: 0')"
     ></div>
     {{-- fixed container --}}
     <div
-        class="fixed inset-y-0 z-10 hidden h-svh transition-[left,right,width,transform] duration-200 ease-linear md:flex {{ $isLeft ? 'left-0' : 'right-0' }}"
+        {{-- Raised while a submenu flyout is open (icon rail), so the flyout clears a sticky
+             page header — it is positioned inside this stacking context. --}}
+        class="fixed inset-y-0 z-10 hidden h-svh transition-[left,right,width,transform] {{ $motion }} has-data-[flyout=open]:z-30 md:flex {{ $isLeft ? 'left-0' : 'right-0' }}"
+        style="{{ $containerStyle }}"
         :style="open
             ? 'width: var(--sidebar-width)'
             : (@js($collapsible) === 'icon'

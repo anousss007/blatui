@@ -27,7 +27,7 @@
 @endphp
 
 <x-layouts.app title="Sidebar 07">
-    <x-ui.sidebar-provider>
+    <x-ui.sidebar-provider persist>
         <x-ui.sidebar collapsible="icon">
             <x-ui.sidebar-header>
                 <x-block.team-switcher :teams="$teams" />

@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.36.0] - 2026-10-11
+
+### Added
+- **The sidebar can remember whether it was collapsed** (#39). `<x-ui.sidebar-provider persist>`
+  keeps the desktop state in a `sidebar_state` cookie (`persist="admin_sidebar"` names it). The
+  server reads the cookie, so the page arrives already collapsed. Nothing expands for a moment
+  first, whether on a reload, a `wire:navigate` visit or a Livewire re-render. The value is read
+  from the raw Cookie header, so `EncryptCookies` needs no exception. It is opt-in, and a provider
+  without it behaves as before.
+- **Submenus are reachable from the icon rail** (#39). Collapsed to icons, an item with a
+  `sidebar-menu-sub` was a dead end, because the sub list was hidden. Clicking its button now
+  opens the list as a flyout beside the rail. Enter and the arrow pointing away from the rail
+  open it too. Up, Down, Home and End move between the links. Escape, or the arrow back toward
+  the rail, closes it and returns focus to the button. A click outside, tabbing away or following
+  a link also closes it. The expanded sidebar is unchanged. This needs `blatui-core.js` from this
+  release (`blatSidebarFlyout`).
+- **Scrollbars follow the theme** (#40). `app.css` gives every scroller a thin scrollbar whose
+  thumb is derived from `--muted-foreground`, so it matches every base colour and dark mode. It
+  is no longer a light bar on a dark panel. `.dark` sets `color-scheme: dark`, so what the browser
+  still draws itself follows too. You can override it per app or per element with
+  `--scrollbar-thumb` / `--scrollbar-track`. Safari gets the same look through
+  `::-webkit-scrollbar`. Existing apps pick it up by updating their foundations `app.css`.
+- **number-input: a cents-style `mask`** (#41). It is opt-in. Digits enter from the right at
+  `decimals` places (2 by default), so typing 190 shows 1.90. Backspace drops a digit, and a
+  pasted "1.9" stays 1.90. The value is written on every keystroke, so a `$watch` on a plain
+  `wire:model` sees each digit.
+- **number-input: a `number-change` event** (#41), fired only by the user's own edits (typing,
+  paste, the steppers, blur) and never by a value written from outside. Two fields derived from
+  each other, such as a price with and without tax, can now update each other from it with no
+  skip flags. See the new "Linked fields" example.
+
+### Changed
+- **The sidebar's collapse animation eases out** (#39) instead of running linear, and you can tune
+  it with `--sidebar-duration` (200ms) and `--sidebar-ease`. With reduced motion it is off. The
+  docked panel is also painted in its real state by the server, where before it had no width
+  until Alpine started.
+
 ## [1.35.0] - 2026-10-07
 
 ### Added
@@ -1514,7 +1551,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.35.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.36.0...HEAD
+[1.36.0]: https://github.com/anousss007/blatui/compare/v1.35.0...v1.36.0
 [1.35.0]: https://github.com/anousss007/blatui/compare/v1.34.0...v1.35.0
 [1.34.0]: https://github.com/anousss007/blatui/compare/v1.33.0...v1.34.0
 [1.33.0]: https://github.com/anousss007/blatui/compare/v1.32.0...v1.33.0

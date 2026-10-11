@@ -4,10 +4,25 @@
                       (767px). Raise it to 1023px to get the drawer on tablets too, where an
                       always-docked rail often costs more room than it earns. A bare number
                       is read as px; anything else is passed to matchMedia as written.
+    persist           Remember the desktop expanded/collapsed state across page loads, in a
+                      cookie (`sidebar_state`, or the name you pass instead of `true`). It is
+                      read on the SERVER, so the first paint is already in the remembered state:
+                      no flash, and a `wire:navigate` visit or a Livewire re-render renders it
+                      right too. The cookie is set by JS and read from the raw Cookie header,
+                      so Laravel's cookie encryption needs no exception for it. Two providers
+                      on one page that both persist want different names.
 --}}
-@props(['defaultOpen' => true, 'mobileBreakpoint' => '767px'])
+@props(['defaultOpen' => true, 'mobileBreakpoint' => '767px', 'persist' => false])
 
 @php
+    // Keep in step with the identical lookup in sidebar.blade.php, which reads these two props
+    // through @aware: the provider owns the state, the sidebar has to paint the same one.
+    $cookieName = in_array($persist, [true, 'true'], true) ? 'sidebar_state' : (is_string($persist) && ! in_array($persist, ['', 'false'], true) ? $persist : null);
+    $open = (bool) $defaultOpen;
+    if ($cookieName && preg_match('/(?:^|;\s*)'.preg_quote($cookieName, '/').'=(true|false)(?:;|$)/', (string) request()->header('cookie'), $m)) {
+        $open = $m[1] === 'true';
+    }
+
     $mobileQuery = '(max-width: '.(is_numeric($mobileBreakpoint) ? $mobileBreakpoint.'px' : $mobileBreakpoint).')';
 
     // Merge our default CSS vars with any style passed by the block (e.g. a custom
@@ -22,7 +37,7 @@
 <div
     data-slot="sidebar-provider"
     x-data="{
-        open: {{ $defaultOpen ? 'true' : 'false' }},
+        open: {{ $open ? 'true' : 'false' }},
         openMobile: false,
         isMobile: false,
         collapsed: false,
@@ -31,6 +46,9 @@
             const mq = window.matchMedia(@js($mobileQuery));
             this.isMobile = mq.matches;
             mq.addEventListener('change', e => this.isMobile = e.matches);
+            @if ($cookieName)
+            this.$watch('open', v => document.cookie = @js($cookieName) + '=' + v + '; path=/; max-age=31536000; SameSite=Lax');
+            @endif
         }
     }"
     {{-- `collapsed` is a plain property kept in sync, deliberately NOT a getter. Alpine

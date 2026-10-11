@@ -94,6 +94,88 @@ async function checksDockedMode(page, reporter, at) {
         );
     });
 
+    // #39: the block persists, so the collapse just made has to survive a reload — and be in
+    // the HTML the server sends, not applied by Alpine after a flash of the expanded panel.
+    await reporter.check(`${at} collapsed: the state survives a reload, painted by the server`, async () => {
+        const served = await page.evaluate(() => fetch(location.href, { credentials: 'same-origin' }).then((r) => r.text()));
+        await visit(page, page.url());
+        const state = await page.evaluate(() => document.querySelector('[data-slot="sidebar"]')?.getAttribute('data-state'));
+
+        return (
+            expect.truthy(served.includes('data-state="collapsed"'), 'the server rendered the sidebar expanded after it was collapsed') ??
+            expect.truthy(state === 'collapsed', `after a reload the sidebar is ${state}`)
+        );
+    });
+
+    // #39: an item with children used to be a dead end in the rail — its sub list is hidden.
+    const SUB_ITEM = '[data-slot="sidebar"] [data-sidebar="menu-item"]:has([data-sidebar="menu-sub"])';
+    await reporter.check(`${at} collapsed: an item with children opens its submenu as a flyout`, async () => {
+        page.blatErrors.length = 0;
+        const button = page.locator(`${SUB_ITEM} [data-sidebar="menu-button"]`).first();
+        await button.scrollIntoViewIfNeeded();
+        await button.click();
+        await page.waitForTimeout(300);
+
+        const result = await page.evaluate((sel) => {
+            const item = document.querySelector(sel);
+            const sub = item.querySelector('[data-sidebar="menu-sub"]');
+            const rail = document.querySelector('[data-sidebar="sidebar"]').getBoundingClientRect();
+            const box = sub.getBoundingClientRect();
+            const links = [...sub.querySelectorAll('[data-sidebar="menu-sub-button"]')].filter((a) => a.getBoundingClientRect().width > 0);
+            const top = document.elementFromPoint(box.left + box.width / 2, box.top + 12);
+
+            return {
+                open: sub.getAttribute('data-flyout'),
+                beside: box.left >= rail.right - 1 || box.right <= rail.left + 1,
+                width: box.width,
+                links: links.length,
+                onTop: !!top && sub.contains(top),
+                focusInside: sub.contains(document.activeElement),
+            };
+        }, SUB_ITEM);
+
+        return (
+            expect.truthy(result.open === 'open', 'clicking the button did not open the flyout') ??
+            expect.truthy(result.beside, 'the flyout overlaps the rail instead of sitting beside it') ??
+            expect.truthy(result.width > 100 && result.links > 0, `the flyout has no visible links: ${JSON.stringify(result)}`) ??
+            expect.truthy(result.onTop, 'something paints over the flyout') ??
+            expect.truthy(result.focusInside, 'focus did not move into the flyout') ??
+            expect.empty(page.blatErrors, 'console errors')
+        );
+    });
+
+    await reporter.check(`${at} collapsed: arrow keys move through the flyout, Escape returns to the button`, async () => {
+        const before = await page.evaluate(() => document.activeElement?.textContent.trim());
+        await page.keyboard.press('ArrowDown');
+        const after = await page.evaluate(() => document.activeElement?.textContent.trim());
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(200);
+        const closed = await page.evaluate((sel) => {
+            const item = document.querySelector(sel);
+
+            return {
+                open: item.querySelector('[data-sidebar="menu-sub"]').getAttribute('data-flyout'),
+                onButton: item.querySelector('[data-sidebar="menu-button"]').contains(document.activeElement),
+            };
+        }, SUB_ITEM);
+
+        return (
+            expect.truthy(before !== after, `ArrowDown did not move focus (stayed on "${before}")`) ??
+            expect.truthy(closed.open === null, 'Escape left the flyout open') ??
+            expect.truthy(closed.onButton, 'Escape did not return focus to the menu button')
+        );
+    });
+
+    await reporter.check(`${at} collapsed: clicking outside closes the flyout`, async () => {
+        await page.locator(`${SUB_ITEM} [data-sidebar="menu-button"]`).first().click();
+        await page.waitForTimeout(200);
+        await page.mouse.click(page.viewportSize().width - 20, page.viewportSize().height - 20);
+        await page.waitForTimeout(200);
+        const open = await page.evaluate((sel) => document.querySelector(sel).querySelector('[data-sidebar="menu-sub"]').getAttribute('data-flyout'), SUB_ITEM);
+
+        return expect.truthy(open === null, 'the flyout stayed open after a click elsewhere');
+    });
+
     await reporter.check(`${at} collapsed: menu buttons still fit inside the rail`, async () =>
         page.evaluate(() => {
             const rail = document.querySelector('[data-sidebar="sidebar"]')?.getBoundingClientRect();

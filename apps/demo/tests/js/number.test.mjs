@@ -72,3 +72,45 @@ test('snap() lands on a multiple of the step, counted from the origin', () => {
     assert.equal(blatNumber.snap(0.24, 0.1, 0.05), 0.25);
     assert.equal(blatNumber.snap(3, 0), 3);            // a zero step is a no-op, not a division
 });
+
+// Cents-style mask (issue #41): the field re-reads its own formatted text after every keystroke,
+// so the helper has to ignore the dot it displays and read only the digits.
+test('cents() enters digits from the right', () => {
+    assert.equal(blatNumber.cents('1', 2), 0.01);
+    assert.equal(blatNumber.cents('19', 2), 0.19);
+    assert.equal(blatNumber.cents('190', 2), 1.9);
+    assert.equal(blatNumber.cents('1900', 2), 19);
+    assert.equal(blatNumber.cents('1009', 2), 10.09);
+    assert.equal(blatNumber.cents('190', 3), 0.19);
+    assert.equal(blatNumber.cents('190', 0), 190);
+});
+
+test('cents() re-reads its own formatted text: a typed digit appends, Backspace drops one', () => {
+    assert.equal(blatNumber.cents('1.901', 2), 19.01);  // "1.90" + "1"
+    assert.equal(blatNumber.cents('1.9', 2), 0.19);     // "1.90" − last digit
+    assert.equal(blatNumber.cents('0.0', 2), 0);        // "0.01" − last digit
+    assert.equal(blatNumber.cents('0.015', 2), 0.15);   // leading zeroes do not stick
+    assert.equal(blatNumber.cents('1.90a', 2), 1.9);    // a stray letter is ignored
+});
+
+test('cents() is null with no digits, and signed only when negatives are allowed', () => {
+    assert.equal(blatNumber.cents('', 2), null);
+    assert.equal(blatNumber.cents('-', 2), null);
+    assert.equal(blatNumber.cents('.', 2), null);
+    assert.equal(blatNumber.cents('-190', 2), -1.9);
+    assert.equal(blatNumber.cents('--190', 2), 1.9);     // a second minus toggles it back
+    assert.equal(blatNumber.cents('-190', 2, false), 1.9);
+    assert.equal(Object.is(blatNumber.cents('-0', 2), -0), false);
+});
+
+test('loose() reads pasted amounts as numbers, not cents', () => {
+    assert.equal(blatNumber.loose('1.9'), 1.9);
+    assert.equal(blatNumber.loose('1,9'), 1.9);
+    assert.equal(blatNumber.loose('1,234.56'), 1234.56);
+    assert.equal(blatNumber.loose('1.234,56'), 1234.56);
+    assert.equal(blatNumber.loose('1,234,567'), 1234567);
+    assert.equal(blatNumber.loose('$ 12.00'), 12);
+    assert.equal(blatNumber.loose('-3.5'), -3.5);
+    assert.equal(blatNumber.loose('abc'), null);
+    assert.equal(blatNumber.loose(''), null);
+});
