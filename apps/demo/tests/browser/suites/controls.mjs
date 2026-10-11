@@ -249,6 +249,48 @@ const CHECKS = {
                 expect.equal(reverted, '1.90', 'an emptied never-empty field after blur') ||
                 expect.equal(typed, '2.50', '"2,5" after blur');
         });
+
+        // Cents mask: digits enter from the right, every keystroke writes the value (so a sibling
+        // deriving from number-change follows each digit), and a pasted "1.9" is not 0.19. #41
+        await reporter.check(`number-input: the cents mask and linked fields ${at}`, async () => {
+            const amount = page.locator('[data-slot="number-input"] input[name="amount"]');
+            await amount.scrollIntoViewIfNeeded();
+            await amount.click();
+            await amount.press('ControlOrMeta+a');
+            await amount.press('Backspace');
+            await amount.pressSequentially('190');
+            const typed = await amount.inputValue();
+            await amount.pressSequentially('0');
+            const more = await amount.inputValue();
+            await amount.press('Backspace');
+            const back = await amount.inputValue();
+
+            await amount.press('ControlOrMeta+a');
+            await amount.evaluate((el) => {
+                const data = new DataTransfer();
+                data.setData('text', '1.9');
+                el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }));
+            });
+            const pasted = await amount.inputValue();
+
+            const net = page.locator('input[name="price_net"]');
+            const gross = page.locator('input[name="price_gross"]');
+            await net.scrollIntoViewIfNeeded();
+            await net.click();
+            await net.press('ControlOrMeta+a');
+            await net.press('Backspace');
+            await net.pressSequentially('2000');
+            const derived = await gross.inputValue();
+            const netAfter = await net.inputValue();
+
+            return expect.equal(typed, '1.90', '"190" typed') ||
+                expect.equal(more, '19.00', '"1900" typed') ||
+                expect.equal(back, '1.90', 'after Backspace') ||
+                expect.equal(pasted, '1.90', '"1.9" pasted') ||
+                expect.equal(derived, '23.60', 'the incl.-tax field while typing 20.00 excl.') ||
+                expect.equal(netAfter, '20.00', 'the excl.-tax field (it must not be rewritten by its sibling)') ||
+                expect.empty(page.blatErrors, 'console errors');
+        });
     },
 
     // Expanding is Alpine showing rows that are already there; a keyboard move reports one

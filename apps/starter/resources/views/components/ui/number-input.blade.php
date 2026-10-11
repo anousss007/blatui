@@ -10,6 +10,7 @@
     'disabled' => false,
     'id' => null,
     'placeholder' => null,
+    'mask' => false,
 ])
 
 @php
@@ -29,6 +30,13 @@
         'lg' => 'w-10 [&_svg]:size-4',
     ];
     $btn = $btnSizes[$size] ?? $btnSizes['default'];
+
+    // Cents-style mask: digits enter from the right, so it needs a fixed number of places.
+    // Without `decimals` it takes the currency default of 2.
+    $mask = (bool) $mask;
+    if ($mask && ($decimals === null || $decimals === '')) {
+        $decimals = 2;
+    }
 
     // The spinbutton (not the wrapper) must carry the accessible name. Route any
     // author-supplied aria-label / aria-labelledby onto the <input>, falling back
@@ -64,6 +72,16 @@
         disabled: @js((bool) $disabled),
         decimals: @js($decimals === null || $decimals === '' ? null : max(0, min(15, (int) $decimals))),
         nullable: @js((bool) $nullable),
+        mask: @js($mask),
+        // Every write the USER causes (typing, paste, a stepper click, the blur commit) goes
+        // through here and announces itself as number-change. A value set from outside (the
+        // server, a sibling field deriving from this one) does not, which is what lets two
+        // fields derive from each other without bouncing a value back and forth.
+        commit(v) {
+            if (v === this.value) return;
+            this.value = v;
+            this.$dispatch('number-change', { value: v });
+        },
         clamp(v) {
             if (v === null || isNaN(v)) return v;
             if (this.min !== null && v < this.min) v = this.min;
@@ -76,12 +94,12 @@
         inc() {
             if (this.disabled || this.atMax) return;
             this.draft = null;
-            this.value = this.clamp(this.snapped(this.$blatNumber.step(this.value ?? this.min ?? 0, this.step, this.step)));
+            this.commit(this.clamp(this.snapped(this.$blatNumber.step(this.value ?? this.min ?? 0, this.step, this.step))));
         },
         dec() {
             if (this.disabled || this.atMin) return;
             this.draft = null;
-            this.value = this.clamp(this.snapped(this.$blatNumber.step(this.value ?? this.max ?? 0, -this.step, this.step)));
+            this.commit(this.clamp(this.snapped(this.$blatNumber.step(this.value ?? this.max ?? 0, -this.step, this.step))));
         },
         snapped(v) { return this.decimals === null ? v : this.$blatNumber.round(v, this.decimals); },
         // What the field shows. While it has focus that is the text as typed — a draft that is
@@ -107,9 +125,51 @@
         // and sending that as null is what unset a non-nullable property under wire:model.live
         // (issue #31). What the field ends up holding is decided on blur.
         onInput(e) {
+            if (this.mask) return this.onMaskInput(e);
             this.draft = e.target.value;
             const n = this.parse(this.draft);
-            if (n !== null && n !== this.value) this.value = n;
+            if (n !== null) this.commit(n);
+        },
+        // Mask: every keystroke re-reads the whole field as cents (190 → 1.90) and writes the
+        // value straight away, like onInput, so a $watch on the bound property sees each digit
+        // without wire:model.live. A digit that would pass `max` is refused rather than clamped,
+        // so the amount never jumps. Deleting down to zero empties the field instead of leaving
+        // a 0.00 that Backspace can never get past; blur then decides what empty means.
+        onMaskInput(e) {
+            const el = e.target;
+            const prev = this.draft ?? this.format(this.value);
+            const n = this.$blatNumber.cents(el.value, this.decimals, this.min === null || this.min < 0);
+            if (n !== null && this.max !== null && n > this.max) {
+                el.value = prev;
+                this.draft = prev;
+                return;
+            }
+            if (n === null || (n === 0 && String(e.inputType || '').startsWith('delete'))) {
+                // A lone minus is a negative amount on its way, when negatives are allowed.
+                const sign = n === null && el.value.trim() === '-' && (this.min === null || this.min < 0);
+                this.draft = sign ? '-' : '';
+                el.value = this.draft;
+                return;
+            }
+            this.draft = this.format(n);
+            el.value = this.draft;
+            el.setSelectionRange?.(el.value.length, el.value.length);
+            this.commit(n);
+        },
+        // Mask: pasted text that carries a separator is an amount already written out (1.9,
+        // 1,234.56), so it is read as a number rather than as cents — 1.9 stays 1.90, it does not
+        // become 0.19. Bare digits fall through and enter like typed ones.
+        onPaste(e) {
+            if (!this.mask) return;
+            const t = e.clipboardData?.getData('text') ?? '';
+            if (!/[.,]/.test(t)) return;
+            e.preventDefault();
+            let n = this.$blatNumber.loose(t);
+            if (n === null) return;
+            n = this.snapped(this.max !== null && n > this.max ? this.max : n);
+            this.draft = this.format(n);
+            e.target.value = this.draft;
+            this.commit(n);
         },
         onBlur(e) {
             const raw = this.draft ?? e.target.value;
@@ -121,7 +181,7 @@
             // blur that changed nothing sends nothing under .live.
             const next = n !== null ? this.clamp(n)
                 : (String(raw).trim() === '' && this.nullable ? null : this.value);
-            if (next !== this.value) this.value = next;
+            this.commit(next);
             e.target.value = this.text;
         },
         get atMin() { return this.value !== null && this.min !== null && this.value <= this.min; },
@@ -146,7 +206,7 @@
 
     <input
         type="text"
-        inputmode="decimal"
+        inputmode="{{ $mask ? 'numeric' : 'decimal' }}"
         role="spinbutton"
         @if ($ariaLabelledby) aria-labelledby="{{ $ariaLabelledby }}"
         @elseif ($inputLabel) aria-label="{{ $inputLabel }}"
@@ -158,6 +218,7 @@
         :value="text"
         @focus="onFocus($event)"
         @input="onInput($event)"
+        @if ($mask) @paste="onPaste($event)" data-mask="cents" @endif
         @blur="onBlur($event)"
         :aria-valuenow="value"
         @if ($min !== null) aria-valuemin="{{ $min }}" @endif

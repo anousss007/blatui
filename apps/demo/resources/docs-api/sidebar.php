@@ -32,6 +32,17 @@ return [
             'description' => 'Since 1.24. Set on <x-ui.sidebar-provider>. Viewport width below which the sidebar becomes an off-canvas drawer instead of collapsing to the icon rail. Raise it to 1023px to get the drawer on tablets too, where an always-docked rail often costs more room than it earns. A bare number is read as px; anything else is passed to matchMedia as written.',
         ],
         [
+            'name' => 'persist',
+            'type' => 'bool|string',
+            'default' => 'false',
+            'description' => 'Since 1.36. Set on <x-ui.sidebar-provider>. Remembers the desktop expanded/collapsed state in a cookie (`sidebar_state`, or the name you pass instead of `true`). The cookie is read on the server, so the first paint is already in the remembered state — no flash on a reload, a wire:navigate visit or a Livewire re-render — and it is read from the raw Cookie header, so it needs no EncryptCookies exception. Give two persisting providers on one page different names.',
+        ],
+        [
+            'name' => 'style',
+            'type' => 'string',
+            'description' => 'Since 1.36. On <x-ui.sidebar-provider>, the expand/collapse animation is tunable with two CSS variables: --sidebar-duration (default 200ms) and --sidebar-ease (default cubic-bezier(0.32, 0.72, 0, 1), an ease-out — it was linear before). Example: style="--sidebar-duration: 300ms". Reduced-motion users get no animation.',
+        ],
+        [
             'name' => 'tooltip',
             'type' => 'string',
             'description' => 'Since 1.23. Set on <x-ui.sidebar-menu-button>. Label shown on hover or focus while the sidebar is collapsed to the icon rail, where the button text is clipped away — opt in per button, as in shadcn/ui. It is a visual affordance only: the label <span> stays in the DOM when collapsed, so the accessible name never depended on it.',
@@ -41,7 +52,7 @@ return [
     'slots' => [
         [
             'name' => 'default',
-            'description' => 'The sidebar contents — typically <x-ui.sidebar-header>, <x-ui.sidebar-content> (with sidebar-group / sidebar-menu items) and <x-ui.sidebar-footer>. The same markup is reused for the desktop panel and the mobile overlay.',
+            'description' => 'The sidebar contents — typically <x-ui.sidebar-header>, <x-ui.sidebar-content> (with sidebar-group / sidebar-menu items) and <x-ui.sidebar-footer>. The same markup is reused for the desktop panel and the mobile overlay. Since 1.36, an item with a <x-ui.sidebar-menu-sub> stays reachable in the icon rail: clicking its button (or Enter, or the arrow pointing away from the rail) opens the sub list as a flyout beside it, with Up/Down/Home/End between the links and Escape back to the button.',
         ],
     ],
 

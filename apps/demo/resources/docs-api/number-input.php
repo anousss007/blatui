@@ -65,5 +65,19 @@ return [
             'type' => 'string',
             'description' => 'Placeholder shown while the field is empty.',
         ],
+        [
+            'name' => 'mask',
+            'type' => 'bool',
+            'default' => 'false',
+            'description' => 'Cents-style currency mask: digits enter from the right at `decimals` places (2 when unset), so typing 190 shows 1.90 and Backspace drops the last digit. Pasted text with a dot or comma is read as a normal number (1.9 stays 1.90). The bound value is written on every keystroke, client side, so a `$watch` on a plain `wire:model` sees each digit. A digit that would pass `max` is refused; `min`, `nullable` and the stepper buttons behave as without the mask.',
+        ],
+    ],
+    'events' => [
+        [
+            'name' => 'number-change',
+            'direction' => 'out',
+            'detail' => '{ value }',
+            'description' => 'The user changed the value: a keystroke that produced a number, a paste, a stepper click, or the commit on blur (value may then be null). A value written from outside, by the server or by another field, never fires it. That is what makes two fields derived from each other (a price with and without tax) safe: derive the other field in this handler and it cannot echo back.',
+        ],
     ],
 ];

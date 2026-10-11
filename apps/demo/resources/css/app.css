@@ -1408,6 +1408,46 @@
     [x-cloak] {
         display: none !important;
     }
+
+    /* Theme-aware scrollbars. The colours are resolved on EVERY element (not once on
+       :root), so a scoped theme or a `.dark` subtree gets its own thumb. Override per
+       app or per element with --scrollbar-thumb / --scrollbar-track; a utility such as
+       [scrollbar-width:none] still wins because utilities sit above this layer.
+       color-scheme makes whatever the browser still draws natively (the scrollbar
+       corner, Safari's track, form-control chrome) follow the theme as well. */
+    :root {
+        color-scheme: light;
+    }
+    .dark {
+        color-scheme: dark;
+    }
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-thumb, color-mix(in oklab, var(--muted-foreground) 45%, transparent))
+            var(--scrollbar-track, transparent);
+    }
+    /* Safari (and Chromium before 121) ignore scrollbar-color; they style the pseudo-
+       elements instead. Gated so engines that DO support the standard keep using it —
+       Chromium switches the pseudo-elements off anyway once scrollbar-color is set. */
+    @supports not (scrollbar-color: auto) {
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track,
+        ::-webkit-scrollbar-corner {
+            background: var(--scrollbar-track, transparent);
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb, color-mix(in oklab, var(--muted-foreground) 45%, transparent));
+            background-clip: content-box;
+            border: 2px solid transparent;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: var(--muted-foreground);
+        }
+    }
 }
 
 /* -------------------------------------------------------------------------- */

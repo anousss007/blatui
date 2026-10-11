@@ -690,15 +690,61 @@ function snapTo(raw, step, origin = 0) {
 }
 
 /**
+ * Cents-style (currency) mask: the digits typed so far, read as an amount whose last
+ * `decimals` digits are the fraction — `190` at 2 decimals is 1.90, `1900` is 19.00. Every
+ * non-digit (the dot the field itself displays, a stray letter) is ignored, which is what
+ * lets the field re-read its own formatted text after each keystroke. An odd number of `-`
+ * makes it negative when `allowNegative`. No digits at all is null: the field is empty.
+ */
+function fromCents(raw, decimals = 2, allowNegative = true) {
+    const s = String(raw ?? '');
+    const digits = s.replace(/\D/g, '');
+    if (digits === '') return null;
+    const d = Math.min(Math.max(decimals ?? 2, 0), 15);
+    // Shift via the exponent, not by dividing: 190 / 100 is fine, but 1009 / 100 is 10.09 only
+    // by luck of the representation. `${digits}e-2` parses exactly to the nearest double.
+    const n = Number(`${digits.replace(/^0+(?=\d)/, '')}e-${d}`);
+    const negative = allowNegative && (s.match(/-/g) || []).length % 2 === 1;
+    return negative && n !== 0 ? -n : n;
+}
+
+/**
+ * A number as people paste it: `1.9`, `1,9`, `1,234.56`, `1.234,56`, `$ 12.00`. When both
+ * separators appear, the last one is the decimal point and the other groups thousands; a
+ * separator repeated on its own (`1,234,567`) groups thousands too; a single one is the
+ * decimal point — the same call the field makes for a typed comma. Null when no digits.
+ */
+function parseLoose(raw) {
+    let s = String(raw ?? '').replace(/[^\d.,-]/g, '');
+    if (!/\d/.test(s)) return null;
+    const negative = s.startsWith('-');
+    s = s.replace(/-/g, '');
+    const lastDot = s.lastIndexOf('.');
+    const lastComma = s.lastIndexOf(',');
+    let dec = null;
+    if (lastDot !== -1 && lastComma !== -1) dec = lastDot > lastComma ? '.' : ',';
+    else if (lastDot !== -1 || lastComma !== -1) {
+        const sep = lastDot !== -1 ? '.' : ',';
+        dec = s.split(sep).length === 2 ? sep : null;
+    }
+    const i = dec === null ? -1 : s.lastIndexOf(dec);
+    const int = (i === -1 ? s : s.slice(0, i)).replace(/[.,]/g, '');
+    const frac = i === -1 ? '' : s.slice(i + 1).replace(/[.,]/g, '');
+    const n = Number(`${int || '0'}${frac ? `.${frac}` : ''}`);
+    if (!isFinite(n)) return null;
+    return negative && n !== 0 ? -n : n;
+}
+
+/**
  * `$blatNumber` — the stepping helpers above, for a component's x-data:
  *
  *     inc() { this.value = $blatNumber.step(this.value, this.step, this.step) }
  *
  * Exported as plain functions too, for the engine tests.
  */
-const blatNumber = { decimals: decimalsOf, round: roundTo, step: stepBy, snap: snapTo };
+const blatNumber = { decimals: decimalsOf, round: roundTo, step: stepBy, snap: snapTo, cents: fromCents, loose: parseLoose };
 
-export { blatNumber, decimalsOf, roundTo, stepBy, snapTo };
+export { blatNumber, decimalsOf, roundTo, stepBy, snapTo, fromCents, parseLoose };
 
 // ---------------------------------------------------------------------------
 // Theme export — resolve the CURRENT customization (base color, accent, radius,
@@ -1090,6 +1136,182 @@ function blatLabelledByDirective(el, { expression }, { evaluate, cleanup }) {
 // render behind the modal (and be inert). Inside the dialog it shares the top layer and stays
 // interactive. With no native <dialog> ancestor it stays in <body> (the teleport default),
 // still escaping any overflow-clipping ancestor. Pure DOM — works in any component's scope.
+// blatSidebarFlyout — a sidebar submenu, reachable from the icon rail (#39).
+//
+// Collapsed to icons, a <x-ui.sidebar-menu-sub> has nowhere to go: the rail is 3rem wide, so
+// the list is hidden and an item with children used to be a dead end. This controller lives on
+// the sub list itself and turns it into a flyout beside its item's button while the rail is
+// collapsed: a click on the button (or Enter / Space / the arrow pointing away from the rail)
+// opens it, focus moves to the first link, Up / Down / Home / End move between links, and
+// Escape or the arrow back toward the rail closes it and returns focus to the button. Clicking
+// outside, tabbing out, or following a link closes it too. Expanded, it does nothing at all:
+// the list renders inline exactly as before.
+//
+// Everything is derived from the DOM at the moment it is needed — is the sidebar collapsed,
+// which button is the item's, which links are enabled — never remembered from init, so a
+// Livewire morph that swaps the button or the links is simply followed (see keepWired()).
+//
+// The click is intercepted in the CAPTURE phase on the menu item, before it reaches the button:
+// the button is usually a collapsible trigger (`open = !open`) or a link, and in the rail
+// neither of those means anything a user can see. Expanded, the click passes straight through.
+//
+// The list is positioned `fixed` with floating-ui, without teleporting it: a fixed box is not
+// clipped by the rail's overflow, and staying in place keeps the consumer's markup (and any
+// Alpine scope it reads) where they wrote it. When an ancestor hides the list — the usual
+// collapsible-content wrapper, closed — that ancestor is shown for as long as the flyout is
+// open and restored exactly afterwards; with the list positioned out of flow it takes no room.
+const blatSidebarFlyout = () => ({
+    // The only property this scope adds, so it cannot shadow an `open` / `close()` the slot
+    // reads from an enclosing scope (a collapsible, a dialog).
+    flyout: false,
+    // Declared, never left to be created on first write: an undeclared property assigned from a
+    // method lands on the OUTERMOST scope of the merged proxy (the sidebar provider), not here.
+    _flyoutCleanup: null,
+
+    init() {
+        const el = this.$el;
+        const item = () => el.closest('[data-sidebar="menu-item"]');
+        const button = () => item()?.querySelector('[data-sidebar="menu-button"]');
+        const inRail = () => !!el.closest('[data-collapsible="icon"]');
+        const links = () =>
+            [...el.querySelectorAll('[data-sidebar="menu-sub-button"]')].filter(
+                (a) => !a.matches(':disabled, [aria-disabled="true"]') && a.getClientRects().length
+            );
+        const side = () => el.closest('[data-side]')?.getAttribute('data-side') || 'left';
+        // The key that points away from the rail into the flyout, and the one back.
+        const outwardKey = () => (side() === 'right' ? 'ArrowLeft' : 'ArrowRight');
+        const inwardKey = () => (side() === 'right' ? 'ArrowRight' : 'ArrowLeft');
+
+        let stopPositioning = null;
+        let revealed = [];
+
+        const reveal = () => {
+            const stop = item();
+            for (let n = el.parentElement; n && n !== stop; n = n.parentElement) {
+                if (getComputedStyle(n).display !== 'none') continue;
+                revealed.push([n, n.style.getPropertyValue('display'), n.style.getPropertyPriority('display')]);
+                n.style.setProperty('display', 'block', 'important');
+            }
+        };
+        const unreveal = () => {
+            revealed.forEach(([n, value, priority]) =>
+                value ? n.style.setProperty('display', value, priority) : n.style.removeProperty('display')
+            );
+            revealed = [];
+        };
+
+        const place = () => {
+            const ref = button();
+            if (!ref) return;
+            const placement = side() === 'right' ? 'left-start' : 'right-start';
+            const update = () =>
+                computePosition(ref, el, {
+                    strategy: 'fixed',
+                    placement,
+                    middleware: [flOffset(8), flip({ padding: 8 }), shift({ padding: 8 })],
+                }).then(({ x, y }) => Object.assign(el.style, { left: `${x}px`, top: `${y}px` }));
+            stopPositioning = autoUpdate(ref, el, update);
+        };
+
+        const show = (focus = 'first') => {
+            if (this.flyout) return;
+            reveal();
+            this.flyout = true;
+            this.$nextTick(() => {
+                place();
+                const list = links();
+                const target = focus === 'last' ? list[list.length - 1] : list[0];
+                target?.focus();
+            });
+        };
+        const hide = (refocus = false) => {
+            if (!this.flyout) return;
+            this.flyout = false;
+            if (stopPositioning) stopPositioning();
+            stopPositioning = null;
+            el.style.removeProperty('left');
+            el.style.removeProperty('top');
+            unreveal();
+            if (refocus) button()?.focus();
+        };
+
+        const onClick = (e) => {
+            const b = button();
+            if (b && b.contains(e.target) && inRail()) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.flyout ? hide() : show();
+            } else if (this.flyout && e.target.closest?.('[data-sidebar="menu-sub-button"]') && el.contains(e.target)) {
+                hide(); // a followed link: wire:navigate keeps the page, the flyout should not stay
+            }
+        };
+        const onKeydown = (e) => {
+            const b = button();
+            if (!inRail()) return;
+            if (b && b.contains(e.target)) {
+                if (e.key === outwardKey() || (e.key === 'ArrowDown' && this.flyout)) {
+                    e.preventDefault();
+                    this.flyout ? links()[0]?.focus() : show();
+                } else if (e.key === 'Escape' && this.flyout) {
+                    e.preventDefault();
+                    hide(true);
+                }
+                return;
+            }
+            if (!this.flyout || !el.contains(e.target)) return;
+            const list = links();
+            const i = list.indexOf(document.activeElement);
+            const move = {
+                ArrowDown: () => list[(i + 1) % list.length],
+                ArrowUp: () => list[(i - 1 + list.length) % list.length],
+                Home: () => list[0],
+                End: () => list[list.length - 1],
+            }[e.key];
+            if (move) {
+                e.preventDefault();
+                move()?.focus();
+            } else if (e.key === 'Escape' || e.key === inwardKey()) {
+                e.preventDefault();
+                e.stopPropagation(); // an enclosing dialog must not close with it
+                hide(true);
+            }
+        };
+        const onOutside = (e) => {
+            if (this.flyout && !item()?.contains(e.target)) hide();
+        };
+        const onFocusOut = (e) => {
+            if (this.flyout && e.relatedTarget && !item()?.contains(e.relatedTarget)) hide();
+        };
+
+        // Listeners go on the item, read back live on each event: if a morph replaces the item,
+        // this list is replaced with it and a fresh controller binds to the new one.
+        const host = item();
+        if (!host) return;
+        host.addEventListener('click', onClick, true);
+        host.addEventListener('keydown', onKeydown);
+        host.addEventListener('focusout', onFocusOut);
+        document.addEventListener('pointerdown', onOutside, true);
+
+        // Expanding the sidebar while the flyout is open puts the list back inline — it must not
+        // stay pinned beside a rail that is gone.
+        const railWatch = new MutationObserver(() => !inRail() && hide());
+        railWatch.observe(el.closest('[data-slot="sidebar"]') || host, { attributes: true, attributeFilter: ['data-collapsible'] });
+
+        this._flyoutCleanup = () => {
+            hide();
+            railWatch.disconnect();
+            host.removeEventListener('click', onClick, true);
+            host.removeEventListener('keydown', onKeydown);
+            host.removeEventListener('focusout', onFocusOut);
+            document.removeEventListener('pointerdown', onOutside, true);
+        };
+    },
+
+    destroy() {
+        this._flyoutCleanup?.();
+    },
+});
+
 // x-blat-anchor — positions a teleported popover at its trigger, like Alpine's x-anchor,
 // but built for popovers that live in a modal's top layer and can be tall:
 //   • strategy: 'fixed' — viewport-relative coords. x-anchor's default 'absolute' strategy
@@ -2253,6 +2475,7 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.data('blatListbox', blatListbox);
     Alpine.data('blatCommand', blatCommand);
     Alpine.data('blatTreeGrid', blatTreeGrid);
+    Alpine.data('blatSidebarFlyout', blatSidebarFlyout);
     Alpine.directive('blat-trigger', blatTriggerDirective);
     Alpine.directive('blat-labelledby', blatLabelledByDirective);
     Alpine.directive('blat-anchor', blatAnchorDirective);
