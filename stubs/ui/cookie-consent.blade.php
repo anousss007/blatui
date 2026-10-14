@@ -20,17 +20,17 @@
     // Optional cookie categories. "necessary" is always on and locked; the rest default off
     // (GDPR: no pre-ticked non-essential categories). Each: key => [label, locked, default].
     $categories = [
-        'necessary'  => ['label' => __('Strictly necessary'), 'locked' => true,  'default' => true],
-        'analytics'  => ['label' => __('Analytics'), 'locked' => false, 'default' => false],
-        'marketing'  => ['label' => __('Marketing'), 'locked' => false, 'default' => false],
+        'necessary' => ['label' => __('Strictly necessary'), 'locked' => true,  'default' => true],
+        'analytics' => ['label' => __('Analytics'), 'locked' => false, 'default' => false],
+        'marketing' => ['label' => __('Marketing'), 'locked' => false, 'default' => false],
     ];
 
     // Fixed placement (skipped entirely in demo mode, which renders in-flow).
     $positions = [
-        'bottom'       => 'fixed inset-x-0 bottom-0 mx-auto mb-4 w-[min(100%-2rem,42rem)]',
+        'bottom' => 'fixed inset-x-0 bottom-0 mx-auto mb-4 w-[min(100%-2rem,42rem)]',
         'bottom-start' => 'fixed bottom-4 start-4 w-[min(100%-2rem,26rem)]',
-        'bottom-end'   => 'fixed bottom-4 end-4 w-[min(100%-2rem,26rem)]',
-        'top'          => 'fixed inset-x-0 top-0 mx-auto mt-4 w-[min(100%-2rem,42rem)]',
+        'bottom-end' => 'fixed bottom-4 end-4 w-[min(100%-2rem,26rem)]',
+        'top' => 'fixed inset-x-0 top-0 mx-auto mt-4 w-[min(100%-2rem,42rem)]',
     ];
     $place = $demo ? 'w-full' : ($positions[$position] ?? $positions['bottom']).' z-50';
 
@@ -56,7 +56,7 @@
             // In demo mode always show and never touch localStorage.
             if (this.demo) { this.show = true; return; }
             try {
-                this.show = !JSON.parse(localStorage.getItem(this.storeKey) || 'null')?.set;
+                this.show = ! JSON.parse(localStorage.getItem(this.storeKey) || 'null')?.set;
             } catch (e) { this.show = true; }
         },
         save(choice) {
@@ -87,16 +87,24 @@
 >
     <div class="flex flex-col gap-3">
         <div class="flex items-start gap-3">
-            <span class="bg-muted text-muted-foreground hidden size-9 shrink-0 items-center justify-center rounded-lg sm:flex" aria-hidden="true">
+            <span
+                class="bg-muted text-muted-foreground hidden size-9 shrink-0 items-center justify-center rounded-lg sm:flex"
+                aria-hidden="true"
+            >
                 <x-lucide-cookie class="size-5" />
             </span>
             <div class="space-y-1 text-sm">
                 <p class="font-medium">{{ __('We value your privacy') }}</p>
                 <p class="text-muted-foreground">
-                    {{ $slot->isEmpty()
+                    {{
+                        $slot->isEmpty()
                         ? __('We use cookies to enhance your experience, analyze traffic, and personalize content. You can accept all, reject non-essential, or manage your preferences.')
-                        : $slot }}
-                    <a href="#" class="text-foreground font-medium underline underline-offset-2 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] rounded-sm">{{ __('Cookie policy') }}</a>
+                        : $slot
+                    }}
+                    <a
+                        href="#"
+                        class="text-foreground focus-visible:ring-ring/50 rounded-sm font-medium underline underline-offset-2 outline-none focus-visible:ring-[3px]"
+                    >{{ __('Cookie policy') }}</a>
                 </p>
             </div>
         </div>
@@ -121,7 +129,7 @@
                                 disabled
                                 data-state="checked"
                             @else
-                                @click="cats['{{ $key }}'] = !cats['{{ $key }}']"
+                                @click="cats['{{ $key }}'] = ! cats['{{ $key }}']"
                                 :aria-checked="cats['{{ $key }}']"
                                 aria-label="{{ $cat['label'] }}"
                                 :data-state="cats['{{ $key }}'] ? 'checked' : 'unchecked'"
@@ -142,29 +150,37 @@
             @if ($customizable)
                 <button
                     type="button"
-                    x-show="!customizing"
+                    x-show="! customizing"
                     @click="customizing = true"
-                    class="text-sm font-medium underline-offset-4 outline-none transition-colors hover:underline focus-visible:ring-ring/50 focus-visible:ring-[3px] rounded-md px-2 py-1 sm:me-auto"
-                >{{ __('Customize') }}</button>
+                    class="focus-visible:ring-ring/50 rounded-md px-2 py-1 text-sm font-medium underline-offset-4 transition-colors outline-none hover:underline focus-visible:ring-[3px] sm:me-auto"
+                >
+                    {{ __('Customize') }}
+                </button>
                 <button
                     type="button"
                     x-show="customizing"
                     x-cloak
                     @click="savePrefs()"
-                    class="border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium outline-none transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] sm:me-auto"
-                >{{ __('Save preferences') }}</button>
+                    class="bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 items-center justify-center rounded-md border px-4 py-2 text-sm font-medium shadow-xs transition-all outline-none focus-visible:ring-[3px] sm:me-auto"
+                >
+                    {{ __('Save preferences') }}
+                </button>
             @endif
 
             <button
                 type="button"
                 @click="reject()"
-                class="border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium outline-none transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-            >{{ __('Reject') }}</button>
+                class="bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 items-center justify-center rounded-md border px-4 py-2 text-sm font-medium shadow-xs transition-all outline-none focus-visible:ring-[3px]"
+            >
+                {{ __('Reject') }}
+            </button>
             <button
                 type="button"
                 @click="acceptAll()"
-                class="bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium outline-none transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-            >{{ __('Accept all') }}</button>
+                class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-xs transition-all outline-none focus-visible:ring-[3px]"
+            >
+                {{ __('Accept all') }}
+            </button>
         </div>
     </div>
 </div>

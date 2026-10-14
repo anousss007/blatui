@@ -10,7 +10,7 @@
         start() { this.dragging = true; document.body.style.userSelect = 'none' },
         stop() { this.dragging = false; document.body.style.userSelect = '' },
         move(e) {
-            if (!this.dragging) return;
+            if (! this.dragging) return;
             const rect = this.$el.getBoundingClientRect();
             let pct = this.direction === 'horizontal'
                 ? (e.clientX - rect.left) / rect.width * 100

@@ -45,14 +45,14 @@
     role="radiogroup"
     @if ($name) aria-label="{{ $name }}" @endif
     @mouseleave="hover = 0"
-    @keydown.arrow-right.prevent="!readonly && set(Math.min(max, value + 1))"
-    @keydown.arrow-up.prevent="!readonly && set(Math.min(max, value + 1))"
-    @keydown.arrow-left.prevent="!readonly && set(Math.max(0, value - 1))"
-    @keydown.arrow-down.prevent="!readonly && set(Math.max(0, value - 1))"
+    @keydown.arrow-right.prevent="! readonly && set(Math.min(max, value + 1))"
+    @keydown.arrow-up.prevent="! readonly && set(Math.min(max, value + 1))"
+    @keydown.arrow-left.prevent="! readonly && set(Math.max(0, value - 1))"
+    @keydown.arrow-down.prevent="! readonly && set(Math.max(0, value - 1))"
     {{ $attributes->twMerge('inline-flex items-center gap-0.5') }}
 >
     @if ($name)
-        <input type="hidden" name="{{ $name }}" :value="value" @if ($id) id="{{ $id }}" @endif>
+        <input type="hidden" name="{{ $name }}" :value="value" @if ($id) id="{{ $id }}" @endif />
     @endif
 
     <template x-for="i in max" :key="i">
@@ -61,15 +61,20 @@
             role="radio"
             :aria-checked="value === i"
             :aria-label="i + ' / ' + max"
-            :tabindex="readonly ? -1 : (i === (value || 1) ? 0 : -1)"
+            :tabindex="readonly ? -1 : i === (value || 1) ? 0 : -1"
             :disabled="readonly"
             @click="set(i)"
-            @mouseenter="!readonly && (hover = i)"
-            @focus="!readonly && (hover = i)"
-            class="rounded-sm outline-none transition-colors not-disabled:cursor-pointer focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+            @mouseenter="! readonly && (hover = i)"
+            @focus="! readonly && (hover = i)"
+            class="focus-visible:ring-ring/50 rounded-sm transition-colors outline-none not-disabled:cursor-pointer focus-visible:ring-[3px]"
             :class="current >= i ? '{{ $color }}' : 'text-muted-foreground/30'"
         >
-            <x-dynamic-component :component="'lucide-'.$icon" class="{{ $star }}" x-bind:class="current >= i ? 'fill-current' : 'fill-none'" aria-hidden="true" />
+            <x-dynamic-component
+                :component="'lucide-'.$icon"
+                class="{{ $star }}"
+                x-bind:class="current >= i ? 'fill-current' : 'fill-none'"
+                aria-hidden="true"
+            />
         </button>
     </template>
 </div>

@@ -10,4 +10,5 @@
     :disabled="$disabled"
     :close-on-select="$closeOnSelect"
     {{ $attributes }}
->{{ $slot }}</x-ui.menu-checkbox-item>
+>
+    {{ $slot }}</x-ui.menu-checkbox-item>

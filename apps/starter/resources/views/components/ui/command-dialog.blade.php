@@ -10,7 +10,9 @@
 
 <div data-slot="command-dialog" x-data="{ open: false }" x-id="['blat-command-dialog']" {{ $attributes }}>
     @isset($trigger)
-        <div @click="open = true" x-blat-trigger="{ haspopup: 'dialog', controls: $id('blat-command-dialog') }">{{ $trigger }}</div>
+        <div @click="open = true" x-blat-trigger="{ haspopup: 'dialog', controls: $id('blat-command-dialog') }">
+            {{ $trigger }}
+        </div>
     @endisset
 
     <template x-teleport="body">

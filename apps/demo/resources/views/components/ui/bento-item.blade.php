@@ -28,7 +28,10 @@
     {{ $attributes->twMerge('bg-card text-card-foreground flex flex-col gap-3 rounded-xl border p-6 transition-colors hover:bg-muted/40 '.$span) }}
 >
     @if ($icon || isset($leading))
-        <span class="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg" aria-hidden="true">
+        <span
+            class="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg"
+            aria-hidden="true"
+        >
             @if (isset($leading))
                 {{ $leading }}
             @else
@@ -38,7 +41,7 @@
     @endif
 
     @if ($title !== null)
-        <h3 class="font-semibold leading-none">{{ $title }}</h3>
+        <h3 class="leading-none font-semibold">{{ $title }}</h3>
     @endif
 
     @if ($description !== null)

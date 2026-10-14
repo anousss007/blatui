@@ -18,7 +18,15 @@
     data-slot="radio-group-item"
     {{ $attributes->twMerge('border-input text-primary dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive aspect-square size-4 shrink-0 rounded-full border shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50') }}
 >
-    <span data-slot="radio-group-indicator" class="relative flex items-center justify-center" x-show="value === @js($value)" x-cloak>
-        <x-lucide-circle aria-hidden="true" class="fill-current absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2" />
+    <span
+        data-slot="radio-group-indicator"
+        class="relative flex items-center justify-center"
+        x-show="value === @js($value)"
+        x-cloak
+    >
+        <x-lucide-circle
+            aria-hidden="true"
+            class="absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-current"
+        />
     </span>
 </button>

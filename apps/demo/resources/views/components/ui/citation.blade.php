@@ -18,8 +18,14 @@
     x-data="{
         open: false,
         t: null,
-        show() { clearTimeout(this.t); this.open = true; },
-        hide() { clearTimeout(this.t); this.t = setTimeout(() => this.open = false, 120); },
+        show() {
+            clearTimeout(this.t);
+            this.open = true;
+        },
+        hide() {
+            clearTimeout(this.t);
+            this.t = setTimeout(() => (this.open = false), 120);
+        },
     }"
     x-id="['blat-citation']"
     @mouseenter="show()"
@@ -33,11 +39,13 @@
         aria-label="{{ $label }}"
         :aria-expanded="open"
         :aria-controls="$id('blat-citation')"
-        @click="open = !open"
+        @click="open = ! open"
         @focus="show()"
         @blur="hide()"
-        class="inline-flex min-w-[1.25em] items-center justify-center rounded-full bg-muted px-[0.4em] py-[0.1em] font-medium text-foreground tabular-nums no-underline outline-none transition-colors hover:bg-muted/70 focus-visible:ring-ring/50 focus-visible:ring-[3px] cursor-pointer"
-    >{{ $index }}</button>
+        class="bg-muted text-foreground hover:bg-muted/70 focus-visible:ring-ring/50 inline-flex min-w-[1.25em] cursor-pointer items-center justify-center rounded-full px-[0.4em] py-[0.1em] font-medium tabular-nums no-underline transition-colors outline-none focus-visible:ring-[3px]"
+    >
+        {{ $index }}
+    </button>
 
     <span
         x-show="open"
@@ -49,10 +57,10 @@
         @mouseleave="hide()"
         @click.outside="open = false"
         x-transition.opacity.duration.150ms
-        class="absolute start-0 top-full z-50 mt-2 block w-72 max-w-[min(20rem,90vw)] rounded-md border bg-popover p-3 text-start text-popover-foreground shadow-md text-sm leading-normal align-baseline"
+        class="bg-popover text-popover-foreground absolute start-0 top-full z-50 mt-2 block w-72 max-w-[min(20rem,90vw)] rounded-md border p-3 text-start align-baseline text-sm leading-normal shadow-md"
     >
         @if ($title)
-            <span class="block font-medium text-popover-foreground">{{ $title }}</span>
+            <span class="text-popover-foreground block font-medium">{{ $title }}</span>
         @endif
 
         @if ($url)
@@ -68,7 +76,7 @@
         @endif
 
         @if ($snippet)
-            <span class="mt-2 block text-xs text-muted-foreground">{{ $snippet }}</span>
+            <span class="text-muted-foreground mt-2 block text-xs">{{ $snippet }}</span>
         @endif
 
         {{ $slot }}

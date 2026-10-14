@@ -37,7 +37,7 @@
             }
         }
         @media (prefers-reduced-motion: reduce) {
-            [data-slot="meteors"] .blat-meteors-layer {
+            [data-slot='meteors'] .blat-meteors-layer {
                 display: none !important;
             }
         }
@@ -69,10 +69,7 @@
     }
 @endphp
 
-<div
-    data-slot="meteors"
-    {{ $attributes->twMerge('relative isolate overflow-hidden') }}
->
+<div data-slot="meteors" {{ $attributes->twMerge('relative isolate overflow-hidden') }}>
     {{-- Decorative meteor layer — purely visual, never announced. --}}
     <div class="blat-meteors-layer pointer-events-none absolute inset-0 -z-10" aria-hidden="true" dir="ltr">
         @foreach ($meteors as $m)

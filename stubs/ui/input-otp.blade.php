@@ -52,6 +52,6 @@
         @if ($name) name="{{ $name }}" @endif
         @if ($disabled) disabled @endif
         class="absolute inset-0 z-10 h-full w-full cursor-default opacity-0 disabled:cursor-not-allowed"
-    >
+    />
     {{ $slot }}
 </div>

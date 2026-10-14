@@ -49,8 +49,8 @@ class MorphStabilityTest extends TestCase
         $stub = (string) file_get_contents(dirname(__DIR__).'/stubs/ui/file-upload.blade.php');
 
         $this->assertStringNotContainsString('Str::random', $stub);
-        $this->assertStringContainsString(
-            '@if ($id) id="{{ $id }}" @endif',
+        $this->assertMatchesRegularExpression(
+            '/@if \(\$id\)\s+id="\{\{ \$id \}\}"\s+@endif/',
             $stub,
             'an id the consumer passes is stable, and still belongs on the input',
         );

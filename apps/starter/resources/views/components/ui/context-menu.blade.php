@@ -1,7 +1,1 @@
-<div
-    data-slot="context-menu"
-    x-data="blatMenu()"
-    {{ $attributes }}
->
-    {{ $slot }}
-</div>
+<div data-slot="context-menu" x-data="blatMenu()" {{ $attributes }}>{{ $slot }}</div>

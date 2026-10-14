@@ -11,6 +11,4 @@
         : 'flex flex-col gap-4';
 @endphp
 
-<dl data-slot="description-list" {{ $attributes->twMerge($classes) }}>
-    {{ $slot }}
-</dl>
+<dl data-slot="description-list" {{ $attributes->twMerge($classes) }}>{{ $slot }}</dl>

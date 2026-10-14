@@ -26,7 +26,9 @@
 @once('blat-presence')
     <style>
         @media (prefers-reduced-motion: reduce) {
-            [data-slot="presence"] .blat-presence-ping { animation: none !important; }
+            [data-slot='presence'] .blat-presence-ping {
+                animation: none !important;
+            }
         }
     </style>
 @endonce
@@ -39,18 +41,18 @@
 
     // Fixed, literal status colours (not interpolated) so the Tailwind scanner emits them.
     $colors = [
-        'online'  => 'bg-emerald-500',
-        'away'    => 'bg-amber-500',
-        'busy'    => 'bg-destructive',
+        'online' => 'bg-emerald-500',
+        'away' => 'bg-amber-500',
+        'busy' => 'bg-destructive',
         'offline' => 'bg-muted-foreground/40',
     ];
     $dotColor = $colors[$status];
 
     // Default human label per status (overridable via `label`).
     $labels = [
-        'online'  => __('Online'),
-        'away'    => __('Away'),
-        'busy'    => __('Busy'),
+        'online' => __('Online'),
+        'away' => __('Away'),
+        'busy' => __('Busy'),
         'offline' => __('Offline'),
     ];
     $text = $label ?? $labels[$status];
@@ -71,17 +73,23 @@
 >
     <span class="relative inline-flex {{ $dotSize }} shrink-0">
         @if ($showPing)
-            <span class="blat-presence-ping absolute inline-flex h-full w-full animate-ping rounded-full {{ $dotColor }} opacity-75" aria-hidden="true"></span>
+            <span
+                class="blat-presence-ping absolute inline-flex h-full w-full animate-ping rounded-full {{ $dotColor }} opacity-75"
+                aria-hidden="true"
+            ></span>
         @endif
-        <span @class([
-            'ring-background relative inline-flex rounded-full ring-2',
-            $dotSize,
-            $dotColor,
-        ]) aria-hidden="true"></span>
+        <span
+            @class([
+                'ring-background relative inline-flex rounded-full ring-2',
+                $dotSize,
+                $dotColor,
+            ])
+            aria-hidden="true"
+        ></span>
     </span>
 
     @if ($showLabel)
-        <span class="text-sm text-foreground">{{ $text }}</span>
+        <span class="text-foreground text-sm">{{ $text }}</span>
     @else
         <span class="sr-only">{{ $text }}</span>
     @endif

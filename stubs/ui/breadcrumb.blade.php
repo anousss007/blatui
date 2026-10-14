@@ -1,3 +1,1 @@
-<nav aria-label="{{ __('breadcrumb') }}" data-slot="breadcrumb" {{ $attributes }}>
-    {{ $slot }}
-</nav>
+<nav aria-label="{{ __('breadcrumb') }}" data-slot="breadcrumb" {{ $attributes }}>{{ $slot }}</nav>

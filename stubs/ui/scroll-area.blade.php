@@ -3,7 +3,7 @@
         data-slot="scroll-area-viewport"
         tabindex="0"
         role="region"
-        class="size-full rounded-[inherit] overflow-auto outline-none transition-[color,box-shadow] focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent]"
+        class="focus-visible:ring-ring/50 size-full [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-auto rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1"
     >
         {{ $slot }}
     </div>

@@ -2,7 +2,10 @@
     data-slot="menubar-sub"
     x-data="blatMenu()"
     x-id="['blat-submenu', 'blat-submenu-trigger']"
-    @mouseenter="open = true; cancelClose()"
+    @mouseenter="
+        open = true;
+        cancelClose();
+    "
     @mouseleave="closeSoon()"
     {{ $attributes->twMerge('relative') }}
 >

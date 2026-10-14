@@ -40,11 +40,11 @@
         // Move the dragged card into the target column (appended at the end).
         drop(toCol) {
             this.overCol = null;
-            if (!this.dragId || this.fromCol === null) return;
+            if (! this.dragId || this.fromCol === null) return;
             if (this.fromCol === toCol) { this.reset(); return; }
             const src = this.columns.find(c => c.id === this.fromCol);
             const dst = this.columns.find(c => c.id === toCol);
-            if (!src || !dst) { this.reset(); return; }
+            if (! src || ! dst) { this.reset(); return; }
             const idx = src.cards.findIndex(c => c.id === this.dragId);
             if (idx === -1) { this.reset(); return; }
             const [card] = src.cards.splice(idx, 1);
@@ -77,7 +77,11 @@
             @drop.prevent="drop(col.id)"
         >
             <header class="flex items-center justify-between gap-2 px-3 py-2.5">
-                <h3 :id="'kbn-' + col.id + '-title'" class="text-foreground text-sm font-semibold" x-text="col.title"></h3>
+                <h3
+                    :id="'kbn-' + col.id + '-title'"
+                    class="text-foreground text-sm font-semibold"
+                    x-text="col.title"
+                ></h3>
                 <span
                     class="bg-muted text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium tabular-nums"
                     x-text="col.cards.length"
@@ -93,7 +97,7 @@
                 <template x-for="card in col.cards" :key="card.id">
                     <li
                         data-slot="kanban-card"
-                        class="bg-card text-card-foreground border rounded-md p-3 shadow-xs transition-shadow focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none"
+                        class="bg-card text-card-foreground focus-visible:ring-ring/50 rounded-md border p-3 shadow-xs transition-shadow focus-visible:ring-[3px] focus-visible:outline-none"
                         :class="dragId === card.id ? 'opacity-50' : 'hover:shadow-sm'"
                         tabindex="0"
                         draggable="true"
@@ -106,7 +110,10 @@
                         <template x-if="card.tags && card.tags.length">
                             <div class="mt-2 flex flex-wrap gap-1">
                                 <template x-for="tag in card.tags" :key="tag">
-                                    <span class="bg-secondary text-secondary-foreground inline-flex items-center rounded-md px-1.5 py-0.5 text-[0.625rem] font-medium" x-text="tag"></span>
+                                    <span
+                                        class="bg-secondary text-secondary-foreground inline-flex items-center rounded-md px-1.5 py-0.5 text-[0.625rem] font-medium"
+                                        x-text="tag"
+                                    ></span>
                                 </template>
                             </div>
                         </template>

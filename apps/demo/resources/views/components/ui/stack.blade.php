@@ -52,9 +52,4 @@
     ])->filter()->implode(' ');
 @endphp
 
-<div
-    data-slot="stack"
-    {{ $attributes->twMerge($classes) }}
->
-    {{ $slot }}
-</div>
+<div data-slot="stack" {{ $attributes->twMerge($classes) }}>{{ $slot }}</div>

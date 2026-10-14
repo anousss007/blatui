@@ -34,19 +34,36 @@
         {{ $attributes->twMerge('text-primary relative inline-grid shrink-0 place-items-center') }}
     >
         <svg
-            width="{{ $size }}" height="{{ $size }}" viewBox="0 0 {{ $size }} {{ $size }}" fill="none" aria-hidden="true"
+            width="{{ $size }}"
+            height="{{ $size }}"
+            viewBox="0 0 {{ $size }} {{ $size }}"
+            fill="none"
+            aria-hidden="true"
             class="{{ $indeterminate ? 'animate-spin' : '-rotate-90' }}"
         >
-            <circle cx="{{ $center }}" cy="{{ $center }}" r="{{ $r }}" stroke="currentColor" stroke-opacity="0.2" stroke-width="{{ $thickness }}" />
             <circle
-                cx="{{ $center }}" cy="{{ $center }}" r="{{ $r }}"
-                stroke="currentColor" stroke-width="{{ $thickness }}" stroke-linecap="round"
-                stroke-dasharray="{{ $circ }}" stroke-dashoffset="{{ $offset }}"
+                cx="{{ $center }}"
+                cy="{{ $center }}"
+                r="{{ $r }}"
+                stroke="currentColor"
+                stroke-opacity="0.2"
+                stroke-width="{{ $thickness }}"
+            />
+            <circle
+                cx="{{ $center }}"
+                cy="{{ $center }}"
+                r="{{ $r }}"
+                stroke="currentColor"
+                stroke-width="{{ $thickness }}"
+                stroke-linecap="round"
+                stroke-dasharray="{{ $circ }}"
+                stroke-dashoffset="{{ $offset }}"
                 class="transition-[stroke-dashoffset] duration-500 ease-out"
             />
         </svg>
         @if ($showValue && ! $indeterminate)
-            <span data-slot="progress-value" class="absolute text-sm font-semibold tabular-nums">{{ (int) round($pct) }}%</span>
+            <span data-slot="progress-value" class="absolute text-sm font-semibold tabular-nums"
+                >{{ (int) round($pct) }}%</span>
         @endif
     </div>
 @else

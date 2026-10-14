@@ -102,35 +102,52 @@
     x-modelable="value"
     {{-- Day-cell size tracks the spacing scale, like the p-3 padding around the grid:
          8 × .25rem = 2rem at the default, so this changes nothing until --spacing does. --}}
-    style="--cell-size: calc(var(--spacing) * 8);"
+    style="--cell-size: calc(var(--spacing) * 8)"
     @if ($calendarId) data-calendar-id="{{ $calendarId }}" @endif
     @unless ($showOutsideDays) data-hide-outside-days @endunless
     {{ $attributes->twMerge('group/calendar bg-background w-fit rounded-md border p-3') }}
 >
     @if ($name)
-        @if ($mode === 'single')
-            <input type="hidden" name="{{ $name }}" :value="fmt(single)">
-        @elseif ($mode === 'multiple')
-            <input type="hidden" name="{{ $name }}" :value="multipleValue">
-        @else
-            <input type="hidden" name="{{ $name }}[from]" :value="fmt(rangeFrom)">
-            <input type="hidden" name="{{ $name }}[to]" :value="fmt(rangeTo)">
-        @endif
+    @if ($mode === 'single')
+    <input type="hidden" name="{{ $name }}" :value="fmt(single)" />
+    @elseif ($mode === 'multiple')
+    <input type="hidden" name="{{ $name }}" :value="multipleValue" />
+    @else
+    <input type="hidden" name="{{ $name }}[from]" :value="fmt(rangeFrom)" />
+    <input type="hidden" name="{{ $name }}[to]" :value="fmt(rangeTo)" />
+    @endif
     @endif
 
     <div class="relative flex flex-col gap-4 md:flex-row">
         {{-- Navigation --}}
-        <button type="button" @click="prev()" :aria-disabled="!canPrev" aria-label="{{ $prevMonthLabel }}" class="{{ $navBtn }} absolute start-0 top-0 z-10">
+        <button
+            type="button"
+            @click="prev()"
+            :aria-disabled="! canPrev"
+            aria-label="{{ $prevMonthLabel }}"
+            class="{{ $navBtn }} absolute start-0 top-0 z-10"
+        >
             <x-lucide-chevron-left class="size-4 rtl:rotate-180" aria-hidden="true" />
             <span class="sr-only">{{ $prevMonthLabel }}</span>
         </button>
-        <button type="button" @click="next()" :aria-disabled="!canNext" aria-label="{{ $nextMonthLabel }}" class="{{ $navBtn }} absolute end-0 top-0 z-10">
+        <button
+            type="button"
+            @click="next()"
+            :aria-disabled="! canNext"
+            aria-label="{{ $nextMonthLabel }}"
+            class="{{ $navBtn }} absolute end-0 top-0 z-10"
+        >
             <x-lucide-chevron-right class="size-4 rtl:rotate-180" aria-hidden="true" />
             <span class="sr-only">{{ $nextMonthLabel }}</span>
         </button>
 
         {{-- Announce the visible month(s) to assistive tech on navigation --}}
-        <span role="status" aria-live="polite" class="sr-only" x-text="months.map(m => monthLabel(m)).join(', ')"></span>
+        <span
+            role="status"
+            aria-live="polite"
+            class="sr-only"
+            x-text="months.map((m) => monthLabel(m)).join(', ')"
+        ></span>
 
         <template x-for="(m, mi) in months" :key="fmt(m)">
             <div class="flex w-full flex-col gap-4">
@@ -138,16 +155,24 @@
                 <div class="flex h-(--cell-size) items-center justify-center">
                     <template x-if="captionLayout === 'dropdown'">
                         <div class="flex items-center gap-1.5 text-sm font-medium">
-                            <div class="relative rounded-md border border-input bg-background px-2 py-1 shadow-xs hover:bg-accent">
-                                <select aria-label="{{ __('Month') }}" class="absolute inset-0 cursor-pointer opacity-0" @change="setMonth($event.target.value)">
+                            <div class="border-input bg-background hover:bg-accent relative rounded-md border px-2 py-1 shadow-xs">
+                                <select
+                                    aria-label="{{ __('Month') }}"
+                                    class="absolute inset-0 cursor-pointer opacity-0"
+                                    @change="setMonth($event.target.value)"
+                                >
                                     <template x-for="(mn, idx) in monthNames" :key="idx">
                                         <option :value="idx" :selected="idx === m.getMonth()" x-text="mn"></option>
                                     </template>
                                 </select>
                                 <span x-text="m.toLocaleString(locale, { month: 'long' })"></span>
                             </div>
-                            <div class="relative rounded-md border border-input bg-background px-2 py-1 shadow-xs hover:bg-accent">
-                                <select aria-label="{{ __('Year') }}" class="absolute inset-0 cursor-pointer opacity-0" @change="setYear($event.target.value)">
+                            <div class="border-input bg-background hover:bg-accent relative rounded-md border px-2 py-1 shadow-xs">
+                                <select
+                                    aria-label="{{ __('Year') }}"
+                                    class="absolute inset-0 cursor-pointer opacity-0"
+                                    @change="setYear($event.target.value)"
+                                >
                                     <template x-for="y in years" :key="y">
                                         <option :value="y" :selected="y === m.getFullYear()" x-text="y"></option>
                                     </template>
@@ -162,14 +187,26 @@
                 </div>
 
                 {{-- Grid --}}
-                <table role="grid" aria-multiselectable="false" :aria-label="monthLabel(m)" class="w-full border-collapse">
+                <table
+                    role="grid"
+                    aria-multiselectable="false"
+                    :aria-label="monthLabel(m)"
+                    class="w-full border-collapse"
+                >
                     <thead aria-hidden="true">
                         <tr class="flex">
                             @if ($showWeekNumber)
-                                <th class="text-muted-foreground size-(--cell-size) text-[0.8rem] font-normal" scope="col"></th>
+                            <th
+                                class="text-muted-foreground size-(--cell-size) text-[0.8rem] font-normal"
+                                scope="col"
+                            ></th>
                             @endif
                             <template x-for="(wd, i) in weekdays" :key="i">
-                                <th class="text-muted-foreground flex size-(--cell-size) flex-1 items-center justify-center text-[0.8rem] font-normal" scope="col" x-text="wd"></th>
+                                <th
+                                    class="text-muted-foreground flex size-(--cell-size) flex-1 items-center justify-center text-[0.8rem] font-normal"
+                                    scope="col"
+                                    x-text="wd"
+                                ></th>
                             </template>
                         </tr>
                     </thead>
@@ -177,28 +214,37 @@
                         <template x-for="(week, wi) in weeksFor(m)" :key="fmt(week[0])">
                             <tr class="mt-1 flex w-full">
                                 @if ($showWeekNumber)
-                                    <td class="text-muted-foreground flex size-(--cell-size) items-center justify-center text-[0.8rem]" x-text="weekNumber(week)"></td>
+                                <td
+                                    class="text-muted-foreground flex size-(--cell-size) items-center justify-center text-[0.8rem]"
+                                    x-text="weekNumber(week)"
+                                ></td>
                                 @endif
                                 <template x-for="(day, di) in week" :key="fmt(day)">
-                                    <td role="gridcell" :aria-selected="isSelected(day)" class="relative flex-1 p-0 text-center">
+                                    <td
+                                        role="gridcell"
+                                        :aria-selected="isSelected(day)"
+                                        class="relative flex-1 p-0 text-center"
+                                    >
                                         <button
                                             type="button"
                                             @click="select(day)"
                                             @keydown="onDayKeydown($event, day)"
-                                            @mouseenter="if (mode === 'range') hover = day"
+                                            @mouseenter="if (mode === 'range') hover = day;"
                                             x-text="day.getDate()"
                                             :data-day="fmt(day)"
                                             :tabindex="isFocused(day) ? 0 : -1"
                                             :aria-label="dayLabel(day)"
                                             :aria-disabled="isDisabled(day)"
-                                            :data-selected="(mode !== 'range' && isSelected(day)) ? true : null"
-                                            :data-range-start="(mode === 'range' && rangeIs(day).start) ? true : null"
-                                            :data-range-middle="(mode === 'range' && rangeIs(day).middle) ? true : null"
-                                            :data-range-end="(mode === 'range' && rangeIs(day).end) ? true : null"
+                                            :data-selected="mode !== 'range' && isSelected(day) ? true : null"
+                                            :data-range-start="mode === 'range' && rangeIs(day).start ? true : null"
+                                            :data-range-middle="mode === 'range' && rangeIs(day).middle ? true : null"
+                                            :data-range-end="mode === 'range' && rangeIs(day).end ? true : null"
                                             :data-today="isToday(day) ? true : null"
                                             :data-outside="day.__outside ? true : null"
                                             :data-disabled="isDisabled(day) ? true : null"
-                                            :data-out-of-range="(outOfRange === 'flag' && isOutOfRange(day)) ? true : null"
+                                            :data-out-of-range="outOfRange === 'flag' && isOutOfRange(day)
+                                                ? true
+                                                : null"
                                             :class="modifierClass(day)"
                                             class="{{ $dayBtn }}"
                                         ></button>

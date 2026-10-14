@@ -21,4 +21,5 @@
     :placeholder="$placeholder"
     :disabled="$disabled"
     {{ $attributes }}
->{{ $value !== null ? $value : $slot }}</x-ui.textarea>
+>
+    {{ $value !== null ? $value : $slot }}</x-ui.textarea>

@@ -7,9 +7,9 @@
 @php
     // Size maps: avatar box, the negative inline-start overlap, ring width, and text size.
     $sizeMap = [
-        'sm'      => ['box' => 'size-6',  'overlap' => '-ms-2',   'ring' => 'ring-1', 'text' => 'text-xs'],
+        'sm' => ['box' => 'size-6',  'overlap' => '-ms-2',   'ring' => 'ring-1', 'text' => 'text-xs'],
         'default' => ['box' => 'size-8',  'overlap' => '-ms-2.5', 'ring' => 'ring-2', 'text' => 'text-sm'],
-        'lg'      => ['box' => 'size-12', 'overlap' => '-ms-3',   'ring' => 'ring-2', 'text' => 'text-base'],
+        'lg' => ['box' => 'size-12', 'overlap' => '-ms-3',   'ring' => 'ring-2', 'text' => 'text-base'],
     ];
     $s = $sizeMap[$size] ?? $sizeMap['default'];
 
@@ -28,15 +28,11 @@
         $first = mb_substr($parts[0], 0, 1);
         $last = count($parts) > 1 ? mb_substr($parts[count($parts) - 1], 0, 1) : '';
 
-        return mb_strtoupper($first . $last);
+        return mb_strtoupper($first.$last);
     };
 @endphp
 
-<div
-    data-slot="avatar-group"
-    role="list"
-    {{ $attributes->twMerge('flex items-center') }}
->
+<div data-slot="avatar-group" role="list" {{ $attributes->twMerge('flex items-center') }}>
     @foreach ($shown as $i => $avatar)
         @php
             $src = $avatar['src'] ?? null;

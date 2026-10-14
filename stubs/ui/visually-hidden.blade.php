@@ -15,7 +15,4 @@
     }
 @endphp
 
-<{{ $as }}
-    data-slot="visually-hidden"
-    {{ $attributes->twMerge($base) }}
->{{ $slot }}</{{ $as }}>
+<{{ $as }} data-slot="visually-hidden" {{ $attributes->twMerge($base) }}>{{ $slot }}</{{ $as }}>

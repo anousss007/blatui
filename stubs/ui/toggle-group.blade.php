@@ -45,8 +45,17 @@
             return this.type === 'multiple' ? this.value.includes(v) : this.value === v;
         },
     }"
-    x-init="$nextTick(() => { const f = $el.querySelector('[data-slot=toggle-group-item]:not([disabled])'); rovingValue = f?.getAttribute('data-value') ?? null })"
-    @keydown="if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes($event.key)) { $blatNav($event, { selector: '[data-slot=toggle-group-item]', orientation: 'both' }); }"
+    x-init="
+        $nextTick(() => {
+            const f = $el.querySelector('[data-slot=toggle-group-item]:not([disabled])');
+            rovingValue = f?.getAttribute('data-value') ?? null;
+        })
+    "
+    @keydown="
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes($event.key)) {
+            $blatNav($event, { selector: '[data-slot=toggle-group-item]', orientation: 'both' });
+        }
+    "
     {{ $attributes->twMerge('group/toggle-group flex w-fit items-center rounded-md data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch data-[variant=outline]:shadow-xs') }}
 >
     {{ $slot }}

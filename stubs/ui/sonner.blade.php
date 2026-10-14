@@ -106,7 +106,7 @@
         @focusin="hovered = true"
         @focusout="hovered = false"
         :style="'height:' + stackHeight() + 'px'"
-        style="transition: height .3s ease"
+        style="transition: height 0.3s ease"
     >
         <template x-for="(t, idx) in toasts" :key="t.id">
             <div
@@ -122,18 +122,35 @@
                 :data-type="t.type"
                 class="bg-background text-foreground absolute inset-x-0 {{ $anchor }} {{ $origin }} flex w-full items-start gap-3 rounded-md border p-4 shadow-lg transition-all duration-300 ease-out data-[type=success]:border-emerald-500/40 data-[type=error]:border-destructive/50 data-[type=warning]:border-amber-500/40 data-[type=info]:border-sky-500/40"
             >
-                <template x-if="t.type === 'success'"><x-lucide-circle-check class="text-emerald-500 mt-0.5 size-4 shrink-0" /></template>
-                <template x-if="t.type === 'error'"><x-lucide-circle-x class="text-destructive mt-0.5 size-4 shrink-0" /></template>
-                <template x-if="t.type === 'warning'"><x-lucide-triangle-alert class="text-amber-500 mt-0.5 size-4 shrink-0" /></template>
-                <template x-if="t.type === 'info'"><x-lucide-info class="text-sky-500 mt-0.5 size-4 shrink-0" /></template>
-                <template x-if="t.type === 'loading'"><x-lucide-loader-circle class="text-muted-foreground mt-0.5 size-4 shrink-0 animate-spin" /></template>
+                <template x-if="t.type === 'success'"
+                    ><x-lucide-circle-check class="mt-0.5 size-4 shrink-0 text-emerald-500"
+                /></template>
+                <template x-if="t.type === 'error'"
+                    ><x-lucide-circle-x class="text-destructive mt-0.5 size-4 shrink-0"
+                /></template>
+                <template x-if="t.type === 'warning'"
+                    ><x-lucide-triangle-alert class="mt-0.5 size-4 shrink-0 text-amber-500"
+                /></template>
+                <template x-if="t.type === 'info'"
+                    ><x-lucide-info class="mt-0.5 size-4 shrink-0 text-sky-500"
+                /></template>
+                <template x-if="t.type === 'loading'"
+                    ><x-lucide-loader-circle class="text-muted-foreground mt-0.5 size-4 shrink-0 animate-spin"
+                /></template>
                 <div class="flex-1 space-y-1">
                     <div x-show="t.title" x-text="t.title" class="text-sm font-semibold"></div>
                     <div x-show="t.description" x-text="t.description" class="text-muted-foreground text-sm"></div>
                 </div>
                 <template x-if="t.action">
-                    <button type="button" @click="t.action.onClick && t.action.onClick(); remove(t.id)"
-                        class="border-input hover:bg-accent shrink-0 self-center rounded-md border px-2.5 py-1 text-xs font-medium transition-colors" x-text="t.action.label"></button>
+                    <button
+                        type="button"
+                        @click="
+                            t.action.onClick && t.action.onClick();
+                            remove(t.id);
+                        "
+                        class="border-input hover:bg-accent shrink-0 self-center rounded-md border px-2.5 py-1 text-xs font-medium transition-colors"
+                        x-text="t.action.label"
+                    ></button>
                 </template>
                 <button
                     type="button"

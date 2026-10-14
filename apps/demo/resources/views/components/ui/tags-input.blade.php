@@ -42,7 +42,7 @@
         add() {
             const t = this.draft.trim();
             this.draft = '';
-            if (!t || this.atMax) return;
+            if (! t || this.atMax) return;
             if (this.tags.includes(t)) return;
             this.tags = [...this.tags, t];
         },
@@ -55,25 +55,28 @@
             if (this.draft === '' && this.tags.length) this.tags = this.tags.slice(0, -1);
         },
     }"
-    @click="!disabled && $refs.field && $refs.field.focus()"
+    @click="! disabled && $refs.field && $refs.field.focus()"
     @if ($disabled) aria-disabled="true" @endif
     {{ $attributes->twMerge('border-input dark:bg-input/30 flex min-h-9 w-full flex-wrap items-center gap-1.5 rounded-md border bg-transparent p-1.5 text-sm shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] has-[input:disabled]:pointer-events-none has-[input:disabled]:cursor-not-allowed has-[input:disabled]:opacity-50') }}
 >
     @if ($name)
         <template x-for="tag in tags" :key="tag">
-            <input type="hidden" name="{{ $name }}[]" :value="tag">
+            <input type="hidden" name="{{ $name }}[]" :value="tag" />
         </template>
     @endif
 
     <template x-for="(tag, i) in tags" :key="tag">
-        <span data-slot="tags-input-item" class="bg-secondary text-secondary-foreground inline-flex items-center gap-1 rounded px-2 py-0.5 text-sm">
+        <span
+            data-slot="tags-input-item"
+            class="bg-secondary text-secondary-foreground inline-flex items-center gap-1 rounded px-2 py-0.5 text-sm"
+        >
             <span x-text="tag"></span>
             <button
                 type="button"
-                x-show="!disabled"
+                x-show="! disabled"
                 @click.stop="remove(i)"
                 :aria-label="@js(__('Remove :label')).replace(':label', tag)"
-                class="hover:text-secondary-foreground/70 -me-0.5 inline-flex cursor-pointer items-center rounded-sm outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                class="hover:text-secondary-foreground/70 focus-visible:ring-ring/50 -me-0.5 inline-flex cursor-pointer items-center rounded-sm outline-none focus-visible:ring-[3px]"
             >
                 <x-lucide-x class="size-3.5" aria-hidden="true" />
             </button>
@@ -88,7 +91,12 @@
         placeholder="{{ $placeholder }}"
         :disabled="inputDisabled"
         @keydown.enter.prevent="add()"
-        @keydown="if ($event.key === ',') { $event.preventDefault(); add(); }"
+        @keydown="
+            if ($event.key === ',') {
+                $event.preventDefault();
+                add();
+            }
+        "
         @keydown.backspace="backspace()"
         @blur="add()"
         class="text-foreground placeholder:text-muted-foreground flex-1 bg-transparent px-1 py-0.5 text-sm outline-none disabled:cursor-not-allowed"

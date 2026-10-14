@@ -59,12 +59,16 @@
             <button
                 type="button"
                 x-data="{ active: false }"
-                @click="active = !active"
+                @click="active = ! active"
                 :aria-pressed="active.toString()"
                 aria-label="{{ __('Add to wishlist') }}"
-                class="bg-background/80 text-foreground hover:bg-background absolute end-2 top-2 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border shadow-sm backdrop-blur transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                class="bg-background/80 text-foreground hover:bg-background focus-visible:ring-ring/50 absolute end-2 top-2 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border shadow-sm backdrop-blur transition-colors outline-none focus-visible:ring-[3px]"
             >
-                <x-lucide-heart class="size-4 transition-colors" x-bind:class="active ? 'fill-red-500 text-red-500' : 'fill-none'" aria-hidden="true" />
+                <x-lucide-heart
+                    class="size-4 transition-colors"
+                    x-bind:class="active ? 'fill-red-500 text-red-500' : 'fill-none'"
+                    aria-hidden="true"
+                />
             </button>
         @endif
     </div>
@@ -77,7 +81,10 @@
 
         <h3 class="text-sm leading-snug font-medium">
             @if ($href)
-                <a href="{{ $href }}" class="rounded-sm outline-none hover:underline focus-visible:ring-ring/50 focus-visible:ring-[3px]">{{ $title }}</a>
+                <a
+                    href="{{ $href }}"
+                    class="focus-visible:ring-ring/50 rounded-sm outline-none hover:underline focus-visible:ring-[3px]"
+                >{{ $title }}</a>
             @else
                 {{ $title }}
             @endif
@@ -85,7 +92,12 @@
 
         @if ($rating !== null)
             <div class="flex items-center gap-2 text-sm">
-                <x-ui.rating :value="$rating" readonly size="sm" :name="__('Rated :rating out of 5', ['rating' => $rating])" />
+                <x-ui.rating
+                    :value="$rating"
+                    readonly
+                    size="sm"
+                    :name="__('Rated :rating out of 5', ['rating' => $rating])"
+                />
                 @if ($reviews !== null)
                     <span class="text-muted-foreground">({{ $reviews }})</span>
                 @endif

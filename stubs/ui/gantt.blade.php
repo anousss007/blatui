@@ -16,17 +16,17 @@
             continue;
         }
         $rows[] = [
-            'name'     => $t['name'] ?? '',
-            'start'    => Carbon::parse($t['start'])->startOfDay(),
-            'end'      => Carbon::parse($t['end'])->startOfDay(),
+            'name' => $t['name'] ?? '',
+            'start' => Carbon::parse($t['start'])->startOfDay(),
+            'end' => Carbon::parse($t['end'])->startOfDay(),
             'progress' => isset($t['progress']) ? max(0, min(100, (int) $t['progress'])) : null,
-            'color'    => $t['color'] ?? 'bg-primary',
+            'color' => $t['color'] ?? 'bg-primary',
         ];
     }
 
     // ── Overall range (inclusive of the end day) ───────────────────────
     $rangeStart = $start ? Carbon::parse($start)->startOfDay() : null;
-    $rangeEnd   = $end ? Carbon::parse($end)->startOfDay() : null;
+    $rangeEnd = $end ? Carbon::parse($end)->startOfDay() : null;
     foreach ($rows as $r) {
         if (! $rangeStart || $r['start']->lt($rangeStart)) {
             $rangeStart = $r['start']->copy();
@@ -94,7 +94,9 @@
 >
     <div
         data-slot="gantt-scroll"
-        tabindex="0" role="region" aria-label="{{ __('Project timeline (scrollable)') }}"
+        tabindex="0"
+        role="region"
+        aria-label="{{ __('Project timeline (scrollable)') }}"
         class="focus-visible:ring-ring/50 w-full overflow-x-auto rounded-[inherit] outline-none focus-visible:ring-[3px]"
     >
         <table
@@ -103,11 +105,13 @@
             style="min-width: calc({{ $labelWidth }} + {{ $timelineMinPx }}px)"
         >
             <caption class="sr-only">
-                {{ __(abs(count($rows)) === 1 ? 'Project timeline from :start to :end, :count task.' : 'Project timeline from :start to :end, :count tasks.', [
-                    'start' => $rangeStart->isoFormat('LL'),
-                    'end' => $rangeEnd->isoFormat('LL'),
-                    'count' => count($rows),
-                ]) }}
+                {{
+                    __(abs(count($rows)) === 1 ? 'Project timeline from :start to :end, :count task.' : 'Project timeline from :start to :end, :count tasks.', [
+                        'start' => $rangeStart->isoFormat('LL'),
+                        'end' => $rangeEnd->isoFormat('LL'),
+                        'count' => count($rows),
+                    ])
+                }}
             </caption>
 
             <thead>
@@ -116,7 +120,9 @@
                         scope="col"
                         class="bg-muted/40 text-muted-foreground sticky start-0 z-10 px-4 py-2 text-start align-bottom text-xs font-medium"
                         style="width: {{ $labelWidth }}; min-width: {{ $labelWidth }}"
-                    >{{ __('Task') }}</th>
+                    >
+                        {{ __('Task') }}
+                    </th>
                     @foreach ($buckets as $b)
                         <th
                             scope="col"
@@ -141,11 +147,11 @@
                     @php
                         // Bar geometry as % of the timeline area (RTL-safe via logical inset).
                         $barOffset = (int) floor($rangeStart->diffInDays($r['start'])) * $dayPct;
-                        $barDays   = (int) floor($r['start']->diffInDays($r['end'])) + 1; // inclusive
-                        $barWidth  = $barDays * $dayPct;
+                        $barDays = (int) floor($r['start']->diffInDays($r['end'])) + 1; // inclusive
+                        $barWidth = $barDays * $dayPct;
                         $isMilestone = $barDays <= 1;
-                        $dateLabel = $r['start']->isoFormat('MMM D') .
-                            (($r['start']->isSameDay($r['end'])) ? '' : ' – ' . $r['end']->isoFormat('MMM D'));
+                        $dateLabel = $r['start']->isoFormat('MMM D').
+                            (($r['start']->isSameDay($r['end'])) ? '' : ' – '.$r['end']->isoFormat('MMM D'));
                     @endphp
                     <tr data-slot="gantt-row" class="hover:bg-muted/30 group border-b transition-colors last:border-0">
                         <th
@@ -153,11 +159,16 @@
                             class="bg-card group-hover:bg-muted/30 sticky start-0 z-10 truncate px-4 py-2 text-start font-medium transition-colors"
                             style="width: {{ $labelWidth }}; min-width: {{ $labelWidth }}"
                             title="{{ $r['name'] }}"
-                        >{{ $r['name'] }}</th>
+                        >
+                            {{ $r['name'] }}
+                        </th>
                         <td class="border-s px-0 py-2" colspan="{{ count($buckets) }}">
                             <div data-slot="gantt-track" class="relative h-7" style="min-width: {{ $timelineMinPx }}px">
                                 {{-- subtle grid baseline so bars read against the range --}}
-                                <div class="bg-border/60 absolute inset-x-0 top-1/2 h-px -translate-y-1/2" aria-hidden="true"></div>
+                                <div
+                                    class="bg-border/60 absolute inset-x-0 top-1/2 h-px -translate-y-1/2"
+                                    aria-hidden="true"
+                                ></div>
 
                                 {{-- "Today" marker: drawn per-row so it stays aligned with the bars during scroll --}}
                                 @if ($showToday)
@@ -177,10 +188,13 @@
                                         style="inset-inline-start: calc({{ $barOffset + $dayPct / 2 }}% )"
                                         aria-hidden="true"
                                     ></div>
-                                    <span class="absolute top-1/2 -translate-y-1/2 ps-2 text-xs whitespace-nowrap"
-                                        style="inset-inline-start: calc({{ $barOffset + $dayPct / 2 }}% )">
+                                    <span
+                                        class="absolute top-1/2 -translate-y-1/2 ps-2 text-xs whitespace-nowrap"
+                                        style="inset-inline-start: calc({{ $barOffset + $dayPct / 2 }}% )"
+                                    >
                                         <span class="bg-foreground/5 text-foreground/80 rounded px-1 py-0.5">
-                                            {{ $r['name'] }}<span class="sr-only">, {{ __('milestone on :date', ['date' => $dateLabel]) }}</span>
+                                            {{ $r['name'] }}<span class="sr-only"
+                                                >, {{ __('milestone on :date', ['date' => $dateLabel]) }}</span>
                                         </span>
                                     </span>
                                 @else
@@ -194,7 +208,10 @@
                                     >
                                         {{-- Accessible text: the task name (which also shows in the sticky
                                              row header) plus dates / progress, read out as one label. --}}
-                                        <span class="sr-only">{{ $r['name'] }}, {{ $dateLabel }}@if (! is_null($r['progress'])), {{ __(':progress% complete', ['progress' => $r['progress']]) }} @endif</span>
+                                        <span class="sr-only"
+                                            >{{ $r['name'] }}, {{ $dateLabel }}
+                                            @if (! is_null($r['progress'])) ,{{ __(':progress% complete', ['progress' => $r['progress']]) }} @endif
+                                        </span>
                                         @if (! is_null($r['progress']))
                                             {{-- dim the part beyond progress with a neutral scrim so the
                                                  filled length conveys progress by position, not colour alone --}}
@@ -205,7 +222,10 @@
                                                 aria-hidden="true"
                                             ></div>
                                             {{-- % chip on a contrast-safe neutral backing (AA on any tone) --}}
-                                            <span class="text-foreground bg-card/80 relative me-1 rounded px-1 text-[10px] font-semibold tabular-nums" aria-hidden="true">{{ $r['progress'] }}%</span>
+                                            <span
+                                                class="text-foreground bg-card/80 relative me-1 rounded px-1 text-[10px] font-semibold tabular-nums"
+                                                aria-hidden="true"
+                                            >{{ $r['progress'] }}%</span>
                                         @endif
                                     </div>
                                 @endif
@@ -214,7 +234,9 @@
                     </tr>
                 @empty
                     <tr>
-                        <td class="text-muted-foreground px-4 py-8 text-center" colspan="2">{{ __('No tasks to display.') }}</td>
+                        <td class="text-muted-foreground px-4 py-8 text-center" colspan="2">
+                            {{ __('No tasks to display.') }}
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
@@ -222,7 +244,10 @@
     </div>
 
     @if ($showToday && count($rows))
-        <div data-slot="gantt-legend" class="text-muted-foreground flex items-center gap-1.5 border-t px-4 py-1.5 text-xs">
+        <div
+            data-slot="gantt-legend"
+            class="text-muted-foreground flex items-center gap-1.5 border-t px-4 py-1.5 text-xs"
+        >
             <span class="bg-destructive/70 inline-block h-3 w-px" aria-hidden="true"></span>
             {{ __('Today') }} · {{ $todayDate->isoFormat('MMM D, YYYY') }}
         </div>

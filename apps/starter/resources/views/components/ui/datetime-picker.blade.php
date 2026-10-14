@@ -224,22 +224,37 @@
 >
     @if ($name)
         @if ($isRange)
-            <input type="hidden" name="{{ $name }}[from]" :value="combined(from, timeFrom)" :aria-invalid="invalid ? 'true' : null">
-            <input type="hidden" name="{{ $name }}[to]" :value="combined(to, timeTo)" :aria-invalid="invalid ? 'true' : null">
+            <input
+                type="hidden"
+                name="{{ $name }}[from]"
+                :value="combined(from, timeFrom)"
+                :aria-invalid="invalid ? 'true' : null"
+            />
+            <input
+                type="hidden"
+                name="{{ $name }}[to]"
+                :value="combined(to, timeTo)"
+                :aria-invalid="invalid ? 'true' : null"
+            />
         @else
-            <input type="hidden" name="{{ $name }}" :value="combined(date, time)" :aria-invalid="invalid ? 'true' : null">
+            <input
+                type="hidden"
+                name="{{ $name }}"
+                :value="combined(date, time)"
+                :aria-invalid="invalid ? 'true' : null"
+            />
         @endif
     @endif
 
     <button
         type="button"
         x-ref="trigger"
-        @click="open = !open"
+        @click="open = ! open"
         aria-haspopup="dialog"
         :aria-expanded="open"
         :aria-controls="$id('blat-datetimepicker')"
         :aria-invalid="invalid ? 'true' : null"
-        :class="{ 'text-muted-foreground': !label }"
+        :class="{ 'text-muted-foreground': ! label }"
         class="{{ $width }} {{ $triggerCls }}"
     >
         <x-lucide-calendar class="size-4 opacity-50" aria-hidden="true" />
@@ -249,82 +264,105 @@
     {{-- Teleported to <body> so the popover is never clipped by an overflow-hidden ancestor
          (a card, table cell, the docs preview…). x-blat-anchor still positions it at the trigger. --}}
     <template x-teleport="body" wire:ignore>
-    <div
-        x-blat-dialog-layer
-        x-show="open"
-        x-cloak
-        x-blat-anchor.bottom-start.offset.4="$refs.trigger"
-        @click.outside="open = false"
-        @keydown.escape.window="open = false"
-        {{-- Listeners live here (inside the teleported popover) so they catch the calendar's /
+        <div
+            x-blat-dialog-layer
+            x-show="open"
+            x-cloak
+            x-blat-anchor.bottom-start.offset.4="$refs.trigger"
+            @click.outside="open = false"
+            @keydown.escape.window="open = false"
+            {{-- Listeners live here (inside the teleported popover) so they catch the calendar's /
              time-field's bubbling events; the popover shares the picker's x-data scope.
              `calendar:updated` covers programmatic seeds too, so the label/hidden inputs stay
              in step when the calendar is driven from outside. --}}
-        @calendar:updated="mode === 'range'
-            ? setRange(combined($event.detail.value.from, timeFrom), combined($event.detail.value.to, timeTo))
-            : (date = $event.detail.value)"
-        @time-change="onTime($event.detail)"
-        x-trap="open"
-        :id="$id('blat-datetimepicker')"
-        role="dialog"
-        aria-label="{{ $isRange ? __('Choose a date and time range') : __('Choose date and time') }}"
-        tabindex="-1"
-        class="bg-popover text-popover-foreground z-50 flex w-auto origin-top flex-col overflow-y-auto overscroll-contain rounded-md border shadow-md"
-        x-transition:enter="transition ease-out duration-150"
-        x-transition:enter-start="opacity-0 scale-95"
-        x-transition:enter-end="opacity-100 scale-100"
-    >
-        {{-- `contents` so this wrapper is purely a handle for $refs and changes no layout. The ref
+            @calendar:updated="
+                mode === 'range'
+                    ? setRange(combined($event.detail.value.from, timeFrom), combined($event.detail.value.to, timeTo))
+                    : (date = $event.detail.value)
+            "
+            @time-change="onTime($event.detail)"
+            x-trap="open"
+            :id="$id('blat-datetimepicker')"
+            role="dialog"
+            aria-label="{{ $isRange ? __('Choose a date and time range') : __('Choose date and time') }}"
+            tabindex="-1"
+            class="bg-popover text-popover-foreground z-50 flex w-auto origin-top flex-col overflow-y-auto overscroll-contain rounded-md border shadow-md"
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+        >
+            {{-- `contents` so this wrapper is purely a handle for $refs and changes no layout. The ref
              cannot go on the calendar itself: an x-ref on an element that owns an x-data registers
              into THAT scope, not this one. --}}
-        <div x-ref="cal" class="contents">
-        <x-ui.calendar
-            :mode="$mode"
-            :value="$isRange ? $calRange : $initDate"
-            :caption-layout="$captionLayout"
-            :week-start="$weekStart"
-            :number-of-months="$months"
-            :default-month="$defaultMonth"
-            :show-outside-days="$showOutsideDays"
-            :min-date="$minDate"
-            :max-date="$maxDate"
-            :out-of-range="$outOfRange"
-            class="rounded-none border-0"
-        />
-        </div>
+            <div x-ref="cal" class="contents">
+                <x-ui.calendar
+                    :mode="$mode"
+                    :value="$isRange ? $calRange : $initDate"
+                    :caption-layout="$captionLayout"
+                    :week-start="$weekStart"
+                    :number-of-months="$months"
+                    :default-month="$defaultMonth"
+                    :show-outside-days="$showOutsideDays"
+                    :min-date="$minDate"
+                    :max-date="$maxDate"
+                    :out-of-range="$outOfRange"
+                    class="rounded-none border-0"
+                />
+            </div>
 
-        <div class="flex flex-col gap-3 border-t p-3">
-            @if ($isRange)
-                <div class="flex items-center justify-between gap-3" x-ref="tFrom">
-                    <span class="text-sm font-medium">{{ __('Start') }}</span>
-                    <x-ui.time-field part="from" :value="$fromTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
-                </div>
-                <div class="flex items-center justify-between gap-3" x-ref="tTo">
-                    <span class="text-sm font-medium">{{ __('End') }}</span>
-                    <x-ui.time-field part="to" :value="$toTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
-                </div>
-            @else
-                <div class="flex items-center justify-between gap-3" x-ref="tOne">
-                    <span class="text-sm font-medium">{{ __('Time') }}</span>
-                    <x-ui.time-field :value="$initTime" :variant="$timeVariant" :hour-cycle="$hourCycle" :seconds="$seconds" :minute-step="$minuteStep" />
-                </div>
-            @endif
+            <div class="flex flex-col gap-3 border-t p-3">
+                @if ($isRange)
+                    <div class="flex items-center justify-between gap-3" x-ref="tFrom">
+                        <span class="text-sm font-medium">{{ __('Start') }}</span>
+                        <x-ui.time-field
+                            part="from"
+                            :value="$fromTime"
+                            :variant="$timeVariant"
+                            :hour-cycle="$hourCycle"
+                            :seconds="$seconds"
+                            :minute-step="$minuteStep"
+                        />
+                    </div>
+                    <div class="flex items-center justify-between gap-3" x-ref="tTo">
+                        <span class="text-sm font-medium">{{ __('End') }}</span>
+                        <x-ui.time-field
+                            part="to"
+                            :value="$toTime"
+                            :variant="$timeVariant"
+                            :hour-cycle="$hourCycle"
+                            :seconds="$seconds"
+                            :minute-step="$minuteStep"
+                        />
+                    </div>
+                @else
+                    <div class="flex items-center justify-between gap-3" x-ref="tOne">
+                        <span class="text-sm font-medium">{{ __('Time') }}</span>
+                        <x-ui.time-field
+                            :value="$initTime"
+                            :variant="$timeVariant"
+                            :hour-cycle="$hourCycle"
+                            :seconds="$seconds"
+                            :minute-step="$minuteStep"
+                        />
+                    </div>
+                @endif
 
-            <template x-if="errors.length">
-                <ul class="flex flex-col gap-0.5" role="alert">
-                    <template x-for="msg in errors" :key="msg">
-                        <li class="text-destructive flex items-start gap-1 text-xs">
-                            <x-lucide-circle-alert class="mt-0.5 size-3 shrink-0" aria-hidden="true" />
-                            <span x-text="msg"></span>
-                        </li>
-                    </template>
-                </ul>
-            </template>
-        </div>
+                <template x-if="errors.length">
+                    <ul class="flex flex-col gap-0.5" role="alert">
+                        <template x-for="msg in errors" :key="msg">
+                            <li class="text-destructive flex items-start gap-1 text-xs">
+                                <x-lucide-circle-alert class="mt-0.5 size-3 shrink-0" aria-hidden="true" />
+                                <span x-text="msg"></span>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+            </div>
 
-        <div class="flex justify-end border-t p-3">
-            <x-ui.button type="button" size="sm" x-bind:disabled="invalid" @click="open = false">{{ __('Done') }}</x-ui.button>
+            <div class="flex justify-end border-t p-3">
+                <x-ui.button type="button" size="sm" x-bind:disabled="invalid" @click="open = false">
+                    {{ __('Done') }}</x-ui.button>
+            </div>
         </div>
-    </div>
     </template>
 </div>

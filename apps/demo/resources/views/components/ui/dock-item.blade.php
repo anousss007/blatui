@@ -33,7 +33,7 @@
         <span
             data-slot="dock-item-tooltip"
             role="tooltip"
-            class="bg-popover text-popover-foreground pointer-events-none absolute bottom-full mb-2 scale-95 rounded-md border px-2 py-1 text-xs font-medium whitespace-nowrap opacity-0 shadow-md transition-[opacity,transform] group-hover/dock-item:scale-100 group-hover/dock-item:opacity-100 group-focus-within/dock-item:scale-100 group-focus-within/dock-item:opacity-100 motion-reduce:transition-none"
+            class="bg-popover text-popover-foreground pointer-events-none absolute bottom-full mb-2 scale-95 rounded-md border px-2 py-1 text-xs font-medium whitespace-nowrap opacity-0 shadow-md transition-[opacity,transform] group-focus-within/dock-item:scale-100 group-focus-within/dock-item:opacity-100 group-hover/dock-item:scale-100 group-hover/dock-item:opacity-100 motion-reduce:transition-none"
         >{{ $label }}</span>
     @endif
 
@@ -44,7 +44,7 @@
                 const r = this.$el.getBoundingClientRect();
                 // Centre measured against the UNSCALED footprint: divide out the
                 // current scale so the magnify can't feed back on itself.
-                const center = r.left + (r.width / this.scale) / 2;
+                const center = r.left + r.width / this.scale / 2;
                 this.scale = this.scaleFor(center);
             },
         }"
@@ -66,6 +66,10 @@
 
     {{-- Active indicator dot. --}}
     @if ($active)
-        <span data-slot="dock-item-dot" class="bg-foreground/70 absolute -bottom-1 size-1 rounded-full" aria-hidden="true"></span>
+        <span
+            data-slot="dock-item-dot"
+            class="bg-foreground/70 absolute -bottom-1 size-1 rounded-full"
+            aria-hidden="true"
+        ></span>
     @endif
 </div>

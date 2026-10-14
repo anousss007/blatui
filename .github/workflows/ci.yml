@@ -59,6 +59,30 @@ jobs:
       - name: Check code style
         run: vendor/bin/pint --test
 
+  blade-format:
+    name: Pint (component Blade formatting)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/demo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        # Pint's Blade rule runs Prettier from the demo's node_modules, so both are needed.
+        run: |
+          composer update --prefer-dist --no-interaction --no-progress
+          npm ci
+      - name: Check the authored components are formatted
+        # Scoped by apps/demo/pint.json to components/ui + components/block — what ships.
+        run: vendor/bin/pint --test
+
   build-drift:
     name: stubs/ is in sync with apps/demo
     runs-on: ubuntu-latest

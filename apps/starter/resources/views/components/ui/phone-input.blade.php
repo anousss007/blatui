@@ -45,7 +45,7 @@
         get selected() { return this.countries.find(c => c.code === this.country) || this.countries[0] },
         get visible() {
             const q = this.query.toLowerCase().replace('+', '');
-            if (!q) return this.countries;
+            if (! q) return this.countries;
             return this.countries.filter(c => c.name.toLowerCase().includes(q) || c.dial.replace('+', '').includes(q));
         },
         choose(code) { this.country = code; this.open = false; this.query = '' },
@@ -53,20 +53,24 @@
     {{ $attributes->twMerge('relative flex w-full max-w-xs') }}
 >
     @if ($name)
-        <input type="hidden" :name="@js($name) + '_country'" :value="country">
-        <input type="hidden" :name="@js($name) + '_dial'" :value="selected.dial">
+        <input type="hidden" :name="@js($name) + '_country'" :value="country" />
+        <input type="hidden" :name="@js($name) + '_dial'" :value="selected.dial" />
     @endif
 
     <button
         type="button"
-        @click="open = !open"
+        @click="open = ! open"
         :aria-expanded="open"
         aria-label="{{ __('Select country') }}"
-        class="border-input dark:bg-input/30 inline-flex h-9 shrink-0 items-center gap-1.5 rounded-l-md border border-r-0 bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:z-10 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+        class="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 shrink-0 items-center gap-1.5 rounded-l-md border border-r-0 bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:z-10 focus-visible:ring-[3px]"
     >
         <span class="text-base leading-none" x-text="selected.flag"></span>
         <span class="text-muted-foreground" x-text="selected.dial"></span>
-        <x-lucide-chevron-down class="size-4 shrink-0 opacity-50 transition-transform" x-bind:class="open && 'rotate-180'" aria-hidden="true" />
+        <x-lucide-chevron-down
+            class="size-4 shrink-0 opacity-50 transition-transform"
+            x-bind:class="open && 'rotate-180'"
+            aria-hidden="true"
+        />
     </button>
 
     <input
@@ -78,19 +82,25 @@
         autocomplete="tel-national"
         placeholder="{{ $placeholder }}"
         {{ $wireAttrs }}
-        class="border-input dark:bg-input/30 placeholder:text-muted-foreground flex h-9 w-full min-w-0 rounded-r-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:z-10 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
-    >
+        class="border-input dark:bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex h-9 w-full min-w-0 rounded-r-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:z-10 focus-visible:ring-[3px] md:text-sm"
+    />
 
     <div
         x-show="open"
         x-cloak
         @click.outside="open = false"
         @keydown.escape.stop="open = false"
-        class="bg-popover text-popover-foreground absolute top-full start-0 z-50 mt-1 w-64 overflow-hidden rounded-md border shadow-md"
+        class="bg-popover text-popover-foreground absolute start-0 top-full z-50 mt-1 w-64 overflow-hidden rounded-md border shadow-md"
     >
         <div class="flex h-9 items-center gap-2 border-b px-3">
             <x-lucide-search class="size-4 shrink-0 opacity-50" aria-hidden="true" />
-            <input x-model="query" x-init="$watch('open', v => v && $nextTick(() => $el.focus()))" type="text" placeholder="{{ __('Search country...') }}" class="placeholder:text-muted-foreground w-full bg-transparent text-sm outline-none" />
+            <input
+                x-model="query"
+                x-init="$watch('open', (v) => v && $nextTick(() => $el.focus()))"
+                type="text"
+                placeholder="{{ __('Search country...') }}"
+                class="placeholder:text-muted-foreground w-full bg-transparent text-sm outline-none"
+            />
         </div>
         <div class="max-h-60 overflow-y-auto p-1">
             <p x-show="visible.length === 0" class="py-6 text-center text-sm">{{ __('No country found.') }}</p>

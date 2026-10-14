@@ -47,9 +47,10 @@
         @play="started = true"
         @ended="started = false"
     >
-        @if ($src)<source src="{{ $src }}" />@endif
-        {{ $slot }}
-        {{ __('Your browser does not support the video tag.') }}
+        @if ($src)
+            <source src="{{ $src }}" />
+        @endif
+        {{ $slot }} {{ __('Your browser does not support the video tag.') }}
     </video>
 
     @unless ($autoplay)
@@ -59,7 +60,7 @@
             x-transition.opacity
             @click="$refs.player.play()"
             aria-label="{{ __('Play video') }}"
-            class="absolute inset-0 grid place-items-center bg-black/20 outline-none transition-colors hover:bg-black/30 focus-visible:bg-black/30"
+            class="absolute inset-0 grid place-items-center bg-black/20 transition-colors outline-none hover:bg-black/30 focus-visible:bg-black/30"
         >
             <span class="grid size-16 place-items-center rounded-full bg-white/90 text-black shadow-lg transition-transform group-hover:scale-105">
                 <x-lucide-play class="size-7 translate-x-0.5 fill-current" />

@@ -28,12 +28,24 @@
     $groupStyle = "gap: {$gap}; {$padSide}: {$gap};";
 @endphp
 
-<div data-slot="marquee" data-direction="{{ $direction }}" {{ $attributes->twMerge('group/marquee relative flex overflow-hidden '.($vertical ? 'flex-col' : 'flex-row').' '.$fadeMask) }}>
+<div
+    data-slot="marquee"
+    data-direction="{{ $direction }}"
+    {{ $attributes->twMerge('group/marquee relative flex overflow-hidden '.($vertical ? 'flex-col' : 'flex-row').' '.$fadeMask) }}
+>
     <div
         class="flex {{ $flexDir }} w-max shrink-0 {{ $vertical ? 'h-max' : '' }} {{ $pauseOnHover ? 'hover:[animation-play-state:paused]' : '' }} motion-reduce:!animate-none"
         style="animation: {{ $anim }} {{ $duration }} linear infinite{{ $reverse ? ' reverse' : '' }};"
     >
-        <div class="flex {{ $flexDir }} shrink-0 items-center justify-around" style="{{ $groupStyle }}">{{ $slot }}</div>
-        <div class="flex {{ $flexDir }} shrink-0 items-center justify-around" aria-hidden="true" style="{{ $groupStyle }}">{{ $slot }}</div>
+        <div class="flex {{ $flexDir }} shrink-0 items-center justify-around" style="{{ $groupStyle }}">
+            {{ $slot }}
+        </div>
+        <div
+            class="flex {{ $flexDir }} shrink-0 items-center justify-around"
+            aria-hidden="true"
+            style="{{ $groupStyle }}"
+        >
+            {{ $slot }}
+        </div>
     </div>
 </div>

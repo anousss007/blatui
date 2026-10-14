@@ -42,16 +42,16 @@
         number_format($maxLat, 6, '.', ''),
     ]);
 
-    $embed = 'https://www.openstreetmap.org/export/embed.html?bbox=' . $bbox . '&layer=mapnik';
+    $embed = 'https://www.openstreetmap.org/export/embed.html?bbox='.$bbox.'&layer=mapnik';
     if ($marker) {
-        $embed .= '&marker=' . number_format($lat, 6, '.', '') . ',' . number_format($lon, 6, '.', '');
+        $embed .= '&marker='.number_format($lat, 6, '.', '').','.number_format($lon, 6, '.', '');
     }
 
-    $larger = 'https://www.openstreetmap.org/?mlat=' . number_format($lat, 6, '.', '')
-        . '&mlon=' . number_format($lon, 6, '.', '')
-        . '#map=' . $zoom . '/' . number_format($lat, 6, '.', '') . '/' . number_format($lon, 6, '.', '');
+    $larger = 'https://www.openstreetmap.org/?mlat='.number_format($lat, 6, '.', '')
+        .'&mlon='.number_format($lon, 6, '.', '')
+        .'#map='.$zoom.'/'.number_format($lat, 6, '.', '').'/'.number_format($lon, 6, '.', '');
 
-    $frameStyle = $ratio !== null ? 'aspect-ratio: ' . $ratio . ';' : 'height: ' . (int) $height . 'px;';
+    $frameStyle = $ratio !== null ? 'aspect-ratio: '.$ratio.';' : 'height: '.(int) $height.'px;';
 @endphp
 
 <div data-slot="map" {{ $attributes->twMerge('w-full') }}>

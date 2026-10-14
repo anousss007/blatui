@@ -48,7 +48,7 @@
             this.gy = 50;
         },
         get cardStyle() {
-            const s = this.active && !this.reduced ? this.scaleTo : 1;
+            const s = this.active && ! this.reduced ? this.scaleTo : 1;
             return `transform: rotateX(${this.rx}deg) rotateY(${this.ry}deg) scale(${s});`;
         },
     }"
@@ -60,14 +60,14 @@
         @mouseleave="leave()"
         :style="cardStyle"
         :class="active ? 'transition-none' : 'transition-transform duration-500 ease-out'"
-        class="relative bg-card text-card-foreground overflow-hidden rounded-xl border shadow-sm [transform-style:preserve-3d] motion-reduce:!transform-none motion-reduce:transition-none"
+        class="bg-card text-card-foreground relative overflow-hidden rounded-xl border shadow-sm [transform-style:preserve-3d] motion-reduce:!transform-none motion-reduce:transition-none"
     >
         {{ $slot }}
 
         @if ($glare)
             <div
                 aria-hidden="true"
-                x-show="active && !reduced"
+                x-show="active && ! reduced"
                 x-cloak
                 class="pointer-events-none absolute inset-0 mix-blend-overlay motion-reduce:hidden"
                 :style="`background: radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,0.45), rgba(255,255,255,0) 55%);`"

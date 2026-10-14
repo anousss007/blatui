@@ -55,13 +55,21 @@
             // local holder when there is none (see blatui-core.js). No second copy to sync.
             Alpine.data('blatMarkdownEditor', (model) => ({
                 _model: model,
-                get source() { return this._model.value ?? ''; },
-                set source(v) { this._model.value = v; },
+                get source() {
+                    return this._model.value ?? '';
+                },
+                set source(v) {
+                    this._model.value = v;
+                },
                 view: 'write',
-                get html() { return this.render(this.source); },
+                get html() {
+                    return this.render(this.source);
+                },
 
                 // ---- Selection-aware insertion helpers (toolbar) ----
-                get textarea() { return this.$refs.textarea; },
+                get textarea() {
+                    return this.$refs.textarea;
+                },
 
                 wrap(before, after = before) {
                     const ta = this.textarea;
@@ -83,7 +91,10 @@
                     let lineEnd = this.source.indexOf('\n', end);
                     if (lineEnd === -1) lineEnd = this.source.length;
                     const block = this.source.slice(lineStart, lineEnd) || '';
-                    const out = block.split('\n').map((l, i) => make(l, i)).join('\n');
+                    const out = block
+                        .split('\n')
+                        .map((l, i) => make(l, i))
+                        .join('\n');
                     this.source = this.source.slice(0, lineStart) + out + this.source.slice(lineEnd);
                     this.$nextTick(() => {
                         ta.focus();
@@ -105,12 +116,25 @@
                     });
                 },
 
-                bold() { this.wrap('**'); },
-                italic() { this.wrap('*'); },
-                code() { this.wrap('`'); },
-                ul() { this.prefixLines(l => l.startsWith('- ') ? l : '- ' + l); },
-                ol() { let n = 0; this.prefixLines(l => (++n) + '. ' + l.replace(/^\d+\.\s+/, '')); },
-                quote() { this.prefixLines(l => l.startsWith('> ') ? l : '> ' + l); },
+                bold() {
+                    this.wrap('**');
+                },
+                italic() {
+                    this.wrap('*');
+                },
+                code() {
+                    this.wrap('`');
+                },
+                ul() {
+                    this.prefixLines((l) => (l.startsWith('- ') ? l : '- ' + l));
+                },
+                ol() {
+                    let n = 0;
+                    this.prefixLines((l) => ++n + '. ' + l.replace(/^\d+\.\s+/, ''));
+                },
+                quote() {
+                    this.prefixLines((l) => (l.startsWith('> ') ? l : '> ' + l));
+                },
 
                 // ---- Inline markdown→HTML renderer (safe subset) ----
                 escape(str) {
@@ -131,11 +155,22 @@
 
                 inline(text) {
                     let out = text;
-                    out = out.replace(/`([^`]+)`/g, (m, c) =>
-                        '<code class="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-[0.85em] font-medium">' + c + '</code>');
+                    out = out.replace(
+                        /`([^`]+)`/g,
+                        (m, c) =>
+                            '<code class="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-[0.85em] font-medium">' +
+                            c +
+                            '</code>',
+                    );
                     out = out.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, t, u) => {
                         const href = this.safeUrl(u.replace(/&amp;/g, '&')).replace(/&/g, '&amp;');
-                        return '<a href="' + href + '" class="text-primary font-medium underline underline-offset-4" rel="noopener noreferrer nofollow">' + t + '</a>';
+                        return (
+                            '<a href="' +
+                            href +
+                            '" class="text-primary font-medium underline underline-offset-4" rel="noopener noreferrer nofollow">' +
+                            t +
+                            '</a>'
+                        );
                     });
                     out = out.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold">$1</strong>');
                     out = out.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em class="italic">$2</em>');
@@ -148,7 +183,12 @@
                     const html = [];
                     let i = 0;
                     let listType = null;
-                    const closeList = () => { if (listType) { html.push('</' + listType + '>'); listType = null; } };
+                    const closeList = () => {
+                        if (listType) {
+                            html.push('</' + listType + '>');
+                            listType = null;
+                        }
+                    };
 
                     while (i < lines.length) {
                         let line = lines[i];
@@ -157,36 +197,89 @@
                             closeList();
                             const buf = [];
                             i++;
-                            while (i < lines.length && !/^```/.test(lines[i].trim())) { buf.push(lines[i]); i++; }
+                            while (i < lines.length && !/^```/.test(lines[i].trim())) {
+                                buf.push(lines[i]);
+                                i++;
+                            }
                             i++;
-                            html.push('<pre class="bg-muted my-3 overflow-x-auto rounded-md p-3 text-sm"><code class="font-mono">' + buf.join('\n') + '</code></pre>');
+                            html.push(
+                                '<pre class="bg-muted my-3 overflow-x-auto rounded-md p-3 text-sm"><code class="font-mono">' +
+                                    buf.join('\n') +
+                                    '</code></pre>',
+                            );
                             continue;
                         }
 
                         let m;
-                        if ((m = line.match(/^###\s+(.*)$/))) { closeList(); html.push('<h3 class="mt-4 mb-2 text-lg font-semibold tracking-tight">' + this.inline(m[1]) + '</h3>'); i++; continue; }
-                        if ((m = line.match(/^##\s+(.*)$/)))  { closeList(); html.push('<h2 class="mt-5 mb-2 text-xl font-semibold tracking-tight">' + this.inline(m[1]) + '</h2>'); i++; continue; }
-                        if ((m = line.match(/^#\s+(.*)$/)))   { closeList(); html.push('<h1 class="mt-6 mb-3 text-2xl font-bold tracking-tight first:mt-0">' + this.inline(m[1]) + '</h1>'); i++; continue; }
+                        if ((m = line.match(/^###\s+(.*)$/))) {
+                            closeList();
+                            html.push(
+                                '<h3 class="mt-4 mb-2 text-lg font-semibold tracking-tight">' + this.inline(m[1]) + '</h3>',
+                            );
+                            i++;
+                            continue;
+                        }
+                        if ((m = line.match(/^##\s+(.*)$/))) {
+                            closeList();
+                            html.push(
+                                '<h2 class="mt-5 mb-2 text-xl font-semibold tracking-tight">' + this.inline(m[1]) + '</h2>',
+                            );
+                            i++;
+                            continue;
+                        }
+                        if ((m = line.match(/^#\s+(.*)$/))) {
+                            closeList();
+                            html.push(
+                                '<h1 class="mt-6 mb-3 text-2xl font-bold tracking-tight first:mt-0">' +
+                                    this.inline(m[1]) +
+                                    '</h1>',
+                            );
+                            i++;
+                            continue;
+                        }
 
                         if (/^&gt;\s?/.test(line)) {
                             closeList();
                             const buf = [];
-                            while (i < lines.length && /^&gt;\s?/.test(lines[i])) { buf.push(this.inline(lines[i].replace(/^&gt;\s?/, ''))); i++; }
-                            html.push('<blockquote class="text-muted-foreground my-3 border-s-2 ps-4 italic">' + buf.join('<br>') + '</blockquote>');
+                            while (i < lines.length && /^&gt;\s?/.test(lines[i])) {
+                                buf.push(this.inline(lines[i].replace(/^&gt;\s?/, '')));
+                                i++;
+                            }
+                            html.push(
+                                '<blockquote class="text-muted-foreground my-3 border-s-2 ps-4 italic">' +
+                                    buf.join('<br>') +
+                                    '</blockquote>',
+                            );
                             continue;
                         }
 
                         if ((m = line.match(/^[-*]\s+(.*)$/))) {
-                            if (listType !== 'ul') { closeList(); html.push('<ul class="my-3 ms-6 list-disc space-y-1">'); listType = 'ul'; }
-                            html.push('<li>' + this.inline(m[1]) + '</li>'); i++; continue;
+                            if (listType !== 'ul') {
+                                closeList();
+                                html.push('<ul class="my-3 ms-6 list-disc space-y-1">');
+                                listType = 'ul';
+                            }
+                            html.push('<li>' + this.inline(m[1]) + '</li>');
+                            i++;
+                            continue;
                         }
 
                         if ((m = line.match(/^\d+\.\s+(.*)$/))) {
-                            if (listType !== 'ol') { closeList(); html.push('<ol class="my-3 ms-6 list-decimal space-y-1">'); listType = 'ol'; }
-                            html.push('<li>' + this.inline(m[1]) + '</li>'); i++; continue;
+                            if (listType !== 'ol') {
+                                closeList();
+                                html.push('<ol class="my-3 ms-6 list-decimal space-y-1">');
+                                listType = 'ol';
+                            }
+                            html.push('<li>' + this.inline(m[1]) + '</li>');
+                            i++;
+                            continue;
                         }
 
-                        if (line.trim() === '') { closeList(); i++; continue; }
+                        if (line.trim() === '') {
+                            closeList();
+                            i++;
+                            continue;
+                        }
 
                         closeList();
                         const buf = [];
@@ -198,12 +291,17 @@
                             !/^&gt;\s?/.test(lines[i]) &&
                             !/^[-*]\s+/.test(lines[i]) &&
                             !/^\d+\.\s+/.test(lines[i])
-                        ) { buf.push(this.inline(lines[i])); i++; }
+                        ) {
+                            buf.push(this.inline(lines[i]));
+                            i++;
+                        }
                         html.push('<p class="my-2 leading-7">' + buf.join('<br>') + '</p>');
                     }
 
                     closeList();
-                    return html.join('') || '<p class="text-muted-foreground italic">' + @js(e(__('Nothing to preview yet.'))) + '</p>';
+                    return (
+                        html.join('') || '<p class="text-muted-foreground italic">' + @js(e(__('Nothing to preview yet.'))) + '</p>'
+                    );
                 },
             }));
         });
@@ -224,32 +322,71 @@
     <div class="bg-muted/40 flex flex-wrap items-center gap-1 border-b p-1.5">
         {{-- Formatting tools --}}
         <div class="flex items-center gap-0.5" role="group" aria-label="{{ __('Formatting') }}">
-            <button type="button" aria-label="{{ __('Bold') }}" @click="bold()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button
+                type="button"
+                aria-label="{{ __('Bold') }}"
+                @click="bold()"
+                class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm transition-colors outline-none focus-visible:ring-[3px]"
+            >
                 <x-lucide-bold class="size-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="{{ __('Italic') }}" @click="italic()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button
+                type="button"
+                aria-label="{{ __('Italic') }}"
+                @click="italic()"
+                class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm transition-colors outline-none focus-visible:ring-[3px]"
+            >
                 <x-lucide-italic class="size-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="{{ __('Inline code') }}" @click="code()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button
+                type="button"
+                aria-label="{{ __('Inline code') }}"
+                @click="code()"
+                class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm transition-colors outline-none focus-visible:ring-[3px]"
+            >
                 <x-lucide-code class="size-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="{{ __('Insert link') }}" @click="insertLink()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button
+                type="button"
+                aria-label="{{ __('Insert link') }}"
+                @click="insertLink()"
+                class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm transition-colors outline-none focus-visible:ring-[3px]"
+            >
                 <x-lucide-link class="size-4" aria-hidden="true" />
             </button>
             <span class="bg-border mx-0.5 h-5 w-px" aria-hidden="true"></span>
-            <button type="button" aria-label="{{ __('Bulleted list') }}" @click="ul()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button
+                type="button"
+                aria-label="{{ __('Bulleted list') }}"
+                @click="ul()"
+                class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm transition-colors outline-none focus-visible:ring-[3px]"
+            >
                 <x-lucide-list class="size-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="{{ __('Numbered list') }}" @click="ol()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button
+                type="button"
+                aria-label="{{ __('Numbered list') }}"
+                @click="ol()"
+                class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm transition-colors outline-none focus-visible:ring-[3px]"
+            >
                 <x-lucide-list-ordered class="size-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="{{ __('Blockquote') }}" @click="quote()" class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm outline-none transition-colors focus-visible:ring-[3px]">
+            <button
+                type="button"
+                aria-label="{{ __('Blockquote') }}"
+                @click="quote()"
+                class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-7 items-center justify-center rounded-sm transition-colors outline-none focus-visible:ring-[3px]"
+            >
                 <x-lucide-quote class="size-4" aria-hidden="true" />
             </button>
         </div>
 
         {{-- Write / Preview tabs --}}
-        <div role="tablist" aria-label="{{ __('Editor view') }}" class="bg-muted text-muted-foreground ms-auto inline-flex h-8 items-center justify-center rounded-md p-0.5">
+        <div
+            role="tablist"
+            aria-label="{{ __('Editor view') }}"
+            class="bg-muted text-muted-foreground ms-auto inline-flex h-8 items-center justify-center rounded-md p-0.5"
+        >
             <button
                 type="button"
                 role="tab"
@@ -258,10 +395,16 @@
                 :aria-controls="$id('blat-md-panel', 'write')"
                 :id="$id('blat-md-tab', 'write')"
                 @click="view = 'write'"
-                @keydown.arrow-right.prevent="view = 'preview'; $nextTick(() => $refs.tabPreview.focus())"
-                @keydown.arrow-left.prevent="view = 'write'; $nextTick(() => $refs.tabWrite.focus())"
+                @keydown.arrow-right.prevent="
+                    view = 'preview';
+                    $nextTick(() => $refs.tabPreview.focus());
+                "
+                @keydown.arrow-left.prevent="
+                    view = 'write';
+                    $nextTick(() => $refs.tabWrite.focus());
+                "
                 x-ref="tabWrite"
-                class="focus-visible:ring-ring/50 inline-flex h-7 items-center justify-center rounded-sm px-3 text-sm font-medium outline-none transition-all focus-visible:ring-[3px]"
+                class="focus-visible:ring-ring/50 inline-flex h-7 items-center justify-center rounded-sm px-3 text-sm font-medium transition-all outline-none focus-visible:ring-[3px]"
                 :class="view === 'write' ? 'bg-background text-foreground shadow-xs' : 'hover:text-foreground'"
             >
                 {{ __('Write') }}
@@ -274,10 +417,16 @@
                 :aria-controls="$id('blat-md-panel', 'preview')"
                 :id="$id('blat-md-tab', 'preview')"
                 @click="view = 'preview'"
-                @keydown.arrow-right.prevent="view = 'preview'; $nextTick(() => $refs.tabPreview.focus())"
-                @keydown.arrow-left.prevent="view = 'write'; $nextTick(() => $refs.tabWrite.focus())"
+                @keydown.arrow-right.prevent="
+                    view = 'preview';
+                    $nextTick(() => $refs.tabPreview.focus());
+                "
+                @keydown.arrow-left.prevent="
+                    view = 'write';
+                    $nextTick(() => $refs.tabWrite.focus());
+                "
                 x-ref="tabPreview"
-                class="focus-visible:ring-ring/50 inline-flex h-7 items-center justify-center rounded-sm px-3 text-sm font-medium outline-none transition-all focus-visible:ring-[3px]"
+                class="focus-visible:ring-ring/50 inline-flex h-7 items-center justify-center rounded-sm px-3 text-sm font-medium transition-all outline-none focus-visible:ring-[3px]"
                 :class="view === 'preview' ? 'bg-background text-foreground shadow-xs' : 'hover:text-foreground'"
             >
                 {{ __('Preview') }}
@@ -286,7 +435,12 @@
     </div>
 
     {{-- Write panel --}}
-    <div role="tabpanel" :id="$id('blat-md-panel', 'write')" :aria-labelledby="$id('blat-md-tab', 'write')" x-show="view === 'write'">
+    <div
+        role="tabpanel"
+        :id="$id('blat-md-panel', 'write')"
+        :aria-labelledby="$id('blat-md-tab', 'write')"
+        x-show="view === 'write'"
+    >
         <textarea
             x-ref="textarea"
             x-model="source"
@@ -306,7 +460,7 @@
         :aria-labelledby="$id('blat-md-tab', 'preview')"
         x-show="view === 'preview'"
         x-cloak
-        class="text-foreground min-h-32 px-4 py-3 text-sm break-words [&_ol]:my-3 [&_pre]:my-3 [&_ul]:my-3"
+        class="text-foreground [&_ol]:my-3 [&_pre]:my-3 [&_ul]:my-3 min-h-32 px-4 py-3 text-sm break-words"
         x-html="html"
     ></div>
 </div>

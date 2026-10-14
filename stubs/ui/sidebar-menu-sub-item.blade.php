@@ -1,3 +1,7 @@
-<li data-slot="sidebar-menu-sub-item" data-sidebar="menu-sub-item" {{ $attributes->twMerge('group/menu-sub-item relative') }}>
+<li
+    data-slot="sidebar-menu-sub-item"
+    data-sidebar="menu-sub-item"
+    {{ $attributes->twMerge('group/menu-sub-item relative') }}
+>
     {{ $slot }}
 </li>

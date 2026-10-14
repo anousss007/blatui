@@ -54,7 +54,12 @@
                 aria-label="{{ $img['alt'] !== '' ? __('View image: :alt', ['alt' => $img['alt']]) : __('View image :number', ['number' => $i + 1]) }}"
                 class="group bg-muted focus-visible:ring-ring relative aspect-square overflow-hidden {{ $rounded }} border outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
-                <img src="{{ $img['thumb'] }}" alt="{{ $img['alt'] }}" loading="lazy" class="size-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                <img
+                    src="{{ $img['thumb'] }}"
+                    alt="{{ $img['alt'] }}"
+                    loading="lazy"
+                    class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
             </button>
         @endforeach
     </div>
@@ -68,7 +73,13 @@
             @keydown.arrow-right.window="open && next()"
             @keydown.arrow-left.window="open && prev()"
         >
-            <div x-show="open" @click="open = false" aria-hidden="true" x-transition.opacity class="fixed inset-0 bg-black/90"></div>
+            <div
+                x-show="open"
+                @click="open = false"
+                aria-hidden="true"
+                x-transition.opacity
+                class="fixed inset-0 bg-black/90"
+            ></div>
 
             <div
                 x-show="open"
@@ -81,8 +92,17 @@
                 class="fixed inset-0 z-50 flex flex-col"
             >
                 <div class="flex items-center justify-between p-4 text-white">
-                    <span class="text-sm tabular-nums" aria-live="polite" x-text="(index + 1) + ' / ' + images.length"></span>
-                    <button type="button" @click="open = false" aria-label="{{ __('Close') }}" class="rounded-md p-2 opacity-80 outline-none transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-white/60">
+                    <span
+                        class="text-sm tabular-nums"
+                        aria-live="polite"
+                        x-text="index + 1 + ' / ' + images.length"
+                    ></span>
+                    <button
+                        type="button"
+                        @click="open = false"
+                        aria-label="{{ __('Close') }}"
+                        class="rounded-md p-2 opacity-80 transition-opacity outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-white/60"
+                    >
                         <x-lucide-x class="size-5" />
                     </button>
                 </div>
@@ -93,19 +113,23 @@
                         x-show="images.length > 1"
                         @click="prev()"
                         aria-label="{{ __('Previous image') }}"
-                        class="absolute start-3 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white outline-none backdrop-blur transition hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70"
+                        class="absolute start-3 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white backdrop-blur transition outline-none hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70"
                     >
                         <x-lucide-chevron-left class="blat-rtl-flip size-6" />
                     </button>
 
-                    <img :src="current.src" :alt="current.alt" class="max-h-full max-w-full rounded-lg object-contain shadow-2xl" />
+                    <img
+                        :src="current.src"
+                        :alt="current.alt"
+                        class="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
+                    />
 
                     <button
                         type="button"
                         x-show="images.length > 1"
                         @click="next()"
                         aria-label="{{ __('Next image') }}"
-                        class="absolute end-3 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white outline-none backdrop-blur transition hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70"
+                        class="absolute end-3 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white backdrop-blur transition outline-none hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70"
                     >
                         <x-lucide-chevron-right class="blat-rtl-flip size-6" />
                     </button>

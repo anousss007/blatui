@@ -23,13 +23,13 @@
             src="{{ $placeholder }}"
             alt=""
             aria-hidden="true"
-            x-show="!loaded && !error"
+            x-show="! loaded && ! error"
             class="absolute inset-0 size-full scale-110 blur-xl {{ $object }}"
         />
     @else
         <div
             aria-hidden="true"
-            x-show="!loaded && !error"
+            x-show="! loaded && ! error"
             class="bg-muted absolute inset-0 size-full animate-pulse"
         ></div>
     @endif
@@ -40,7 +40,7 @@
         alt="{{ $alt }}"
         loading="lazy"
         decoding="async"
-        x-show="!error"
+        x-show="! error"
         x-on:load="loaded = true"
         x-on:error="error = true"
         x-bind:class="loaded ? 'opacity-100' : 'opacity-0'"

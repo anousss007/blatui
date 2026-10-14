@@ -69,14 +69,21 @@ apps/livewire/tests/browser/   → morph acceptance suite (reuses the harness ab
 # 1. edit a component in apps/demo/resources/views/components/ui/
 # 2. see it live
 (cd apps/demo && composer install && npm install && npm run dev)
-# 3. regenerate the package from your change
+# 3. format the components (Pint's Blade rule — scoped by apps/demo/pint.json to ui/ + block/)
+(cd apps/demo && vendor/bin/pint)
+# 4. regenerate the package from your change
 bash scripts/build-package.sh
-# 4. commit BOTH the demo edit and the regenerated stubs/ in one PR
-# 5. run the package tests + style check (from the repo root)
+# 5. commit BOTH the demo edit and the regenerated stubs/ in one PR
+# 6. run the package tests + style check (from the repo root)
 composer install && vendor/bin/pint && vendor/bin/phpunit
 ```
 
-CI runs the package tests (PHP 8.2–8.4), Pint, the JS engine tests, a **drift check** that
+Prettier only knows `<pre>` and `<textarea>` are whitespace-sensitive. An element made so by a
+class (`whitespace-pre`, `whitespace-pre-wrap`) gets its children reflowed onto indented lines,
+and those lines render. Put `{{-- prettier-ignore --}}` (exactly that, nothing after it) directly
+above such an element; see `diff-viewer`. The visual suite catches the case you miss.
+
+CI runs the package tests (PHP 8.2–8.4), Pint (PHP, plus Blade formatting of the shipped components), the JS engine tests, a **drift check** that
 regenerates the package and fails if `stubs/` differs from the authored source — so a hand-edited
 or stale stub is rejected with a pointer back to the demo file — and the **browser acceptance
 suite** below.
@@ -189,7 +196,7 @@ suite does.
 
 1. Fork & branch from `main`.
 2. Keep changes focused; add a test in `tests/` when you change CLI behaviour.
-3. Run `bash scripts/build-package.sh`, then `vendor/bin/pint` and `vendor/bin/phpunit`.
+3. Run `(cd apps/demo && vendor/bin/pint)`, `bash scripts/build-package.sh`, then `vendor/bin/pint` and `vendor/bin/phpunit`.
 4. Describe the change clearly and reference any related issue.
 
 ## Reporting bugs

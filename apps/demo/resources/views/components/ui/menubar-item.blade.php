@@ -26,4 +26,5 @@
     :inset="$inset"
     :disabled="$disabled"
     {{ $attributes }}
->{{ $slot }}</x-ui.menu-item>
+>
+    {{ $slot }}</x-ui.menu-item>

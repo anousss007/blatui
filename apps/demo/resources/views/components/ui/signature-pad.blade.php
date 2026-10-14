@@ -140,7 +140,7 @@
     <div class="border-input bg-background relative overflow-hidden rounded-md border">
         {{-- Baseline + "Sign here" hint; fades out once any ink lands on the pad. --}}
         <div
-            x-show="!hasInk"
+            x-show="! hasInk"
             x-transition.opacity
             class="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center"
             aria-hidden="true"
@@ -164,17 +164,29 @@
     </div>
 
     <div class="flex items-center gap-2">
-        <x-ui.button type="button" variant="outline" size="sm" x-on:click="undo()" x-bind:disabled="strokes.length === 0">
+        <x-ui.button
+            type="button"
+            variant="outline"
+            size="sm"
+            x-on:click="undo()"
+            x-bind:disabled="strokes.length === 0"
+        >
             <x-lucide-undo-2 aria-hidden="true" />
             {{ __('Undo') }}
         </x-ui.button>
-        <x-ui.button type="button" variant="ghost" size="sm" x-on:click="clear()" x-bind:disabled="!hasInk">
+        <x-ui.button type="button" variant="ghost" size="sm" x-on:click="clear()" x-bind:disabled="! hasInk">
             <x-lucide-eraser aria-hidden="true" />
             {{ __('Clear') }}
         </x-ui.button>
     </div>
 
     @if ($name || $hasWire)
-        <input type="hidden" x-ref="field" @if ($name) name="{{ $name }}" @endif {{ $wireAttrs }} @if ($id) id="{{ $id }}" @endif>
+        <input
+            type="hidden"
+            x-ref="field"
+            @if ($name) name="{{ $name }}" @endif
+            {{ $wireAttrs }}
+            @if ($id) id="{{ $id }}" @endif
+        />
     @endif
 </div>

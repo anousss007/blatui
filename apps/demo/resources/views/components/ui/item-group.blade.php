@@ -1,3 +1,1 @@
-<div data-slot="item-group" {{ $attributes->twMerge('group/item-group flex flex-col') }}>
-    {{ $slot }}
-</div>
+<div data-slot="item-group" {{ $attributes->twMerge('group/item-group flex flex-col') }}>{{ $slot }}</div>

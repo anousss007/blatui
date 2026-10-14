@@ -36,17 +36,12 @@
     // Keeps the radio names unique when no form name is supplied. It is only a name: it never
     // becomes an id, because an id generated per render is a fresh morph key per render and
     // Livewire replaces the element rather than patching it. Issue #27.
-    $radioName = $name ?? 'variant-selector-' . \Illuminate\Support\Str::random(8);
+    $radioName = $name ?? 'variant-selector-'.\Illuminate\Support\Str::random(8);
 @endphp
 
-<div
-    data-slot="variant-selector"
-    {{ $attributes->twMerge('flex flex-col gap-2') }}
->
+<div data-slot="variant-selector" {{ $attributes->twMerge('flex flex-col gap-2') }}>
     @if ($label)
-        <span data-slot="variant-selector-label" class="text-sm font-medium text-foreground">
-            {{ $label }}
-        </span>
+        <span data-slot="variant-selector-label" class="text-foreground text-sm font-medium"> {{ $label }} </span>
     @endif
 
     <div
@@ -79,7 +74,7 @@
                             @checked($isChecked)
                             @disabled($optionDisabled)
                             class="peer sr-only"
-                        >
+                        />
                         <span
                             title="{{ $option['label'] }}"
                             @class([
@@ -98,8 +93,11 @@
                             />
                             {{-- Diagonal line marks a disabled swatch beyond opacity alone. --}}
                             @if ($optionDisabled)
-                                <span aria-hidden="true" class="pointer-events-none absolute inset-0 grid place-items-center">
-                                    <span class="block h-px w-[140%] rotate-45 bg-foreground/60"></span>
+                                <span
+                                    aria-hidden="true"
+                                    class="pointer-events-none absolute inset-0 grid place-items-center"
+                                >
+                                    <span class="bg-foreground/60 block h-px w-[140%] rotate-45"></span>
                                 </span>
                             @endif
                             <span class="sr-only">{{ $option['label'] }}</span>
@@ -121,16 +119,14 @@
                             @checked($isChecked)
                             @disabled($optionDisabled)
                             class="peer sr-only"
-                        >
-                        <span
-                            @class([
-                                'inline-flex min-w-9 items-center justify-center rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-[color,box-shadow,background-color] outline-none select-none',
-                                'peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:text-primary peer-checked:ring-2 peer-checked:ring-primary' => true,
-                                'peer-focus-visible:ring-2 peer-focus-visible:ring-ring' => true,
-                                'cursor-pointer hover:bg-accent hover:text-accent-foreground' => ! $optionDisabled,
-                                'cursor-not-allowed text-muted-foreground/50 line-through opacity-60' => $optionDisabled,
-                            ])
-                        >
+                        />
+                        <span @class([
+                            'inline-flex min-w-9 items-center justify-center rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-[color,box-shadow,background-color] outline-none select-none',
+                            'peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:text-primary peer-checked:ring-2 peer-checked:ring-primary' => true,
+                            'peer-focus-visible:ring-2 peer-focus-visible:ring-ring' => true,
+                            'cursor-pointer hover:bg-accent hover:text-accent-foreground' => ! $optionDisabled,
+                            'cursor-not-allowed text-muted-foreground/50 line-through opacity-60' => $optionDisabled,
+                        ])>
                             {{ $option['label'] }}
                         </span>
                     </label>

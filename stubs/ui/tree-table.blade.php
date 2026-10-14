@@ -22,6 +22,7 @@
                 $ids = array_merge($ids, $self($children, $path, $self));
             }
         }
+
         return $ids;
     };
     $openIds = $collectOpen($rows, '', $collectOpen);
@@ -54,6 +55,7 @@
                 }
             }
         }
+
         return $out;
     };
     $markdown = $copyable ? $buildMarkdown($rows, '', $buildMarkdown, true) : '';
@@ -97,8 +99,15 @@
 >
     @if ($copyable)
         <div class="flex justify-end border-b px-2 py-1.5">
-            <x-ui.button type="button" variant="ghost" size="sm" class="gap-1.5" @click="copyTree()" aria-label="{{ __('Copy tree as markdown') }}">
-                <x-lucide-copy class="size-3.5" x-show="!copied" />
+            <x-ui.button
+                type="button"
+                variant="ghost"
+                size="sm"
+                class="gap-1.5"
+                @click="copyTree()"
+                aria-label="{{ __('Copy tree as markdown') }}"
+            >
+                <x-lucide-copy class="size-3.5" x-show="! copied" />
                 <x-lucide-check class="size-3.5 text-emerald-500" x-show="copied" x-cloak />
                 <span x-text="copied ? @js(__('Copied')) : @js(__('Copy tree'))"></span>
             </x-ui.button>
@@ -115,18 +124,15 @@
                             'text-muted-foreground px-4 py-3 font-medium',
                             $alignClass($col['align'] ?? null),
                         ])
-                    >{{ $col['label'] ?? '' }}</th>
+                    >
+                        {{ $col['label'] ?? '' }}
+                    </th>
                 @endforeach
             </tr>
         </thead>
         <tbody>
             @foreach (array_values($rows) as $i => $row)
-                <x-ui.tree-table-row
-                    :row="$row"
-                    :columns="$columns"
-                    :path="(string) $i"
-                    :depth="0"
-                />
+                <x-ui.tree-table-row :row="$row" :columns="$columns" :path="(string) $i" :depth="0" />
             @endforeach
         </tbody>
     </table>

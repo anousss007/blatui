@@ -46,7 +46,7 @@
                             @click="toggle(@js($path))"
                             :aria-expanded="isOpen(@js($path)) ? 'true' : 'false'"
                             aria-label="{{ __('Toggle row') }}"
-                            class="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 -ms-1 flex size-5 shrink-0 cursor-pointer items-center justify-center rounded outline-none focus-visible:ring-[3px] [&[aria-expanded=true]>svg]:rotate-90"
+                            class="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 [&[aria-expanded=true]>svg]:rotate-90 -ms-1 flex size-5 shrink-0 cursor-pointer items-center justify-center rounded outline-none focus-visible:ring-[3px]"
                         >
                             <x-lucide-chevron-right
                                 class="size-4 transition-transform duration-150 rtl:-scale-x-100"
@@ -67,11 +67,6 @@
 
 @if ($hasChildren)
     @foreach (array_values($children) as $childIndex => $childRow)
-        <x-ui.tree-table-row
-            :row="$childRow"
-            :columns="$columns"
-            :path="$path.'.'.$childIndex"
-            :depth="$depth + 1"
-        />
+        <x-ui.tree-table-row :row="$childRow" :columns="$columns" :path="$path.'.'.$childIndex" :depth="$depth + 1" />
     @endforeach
 @endif

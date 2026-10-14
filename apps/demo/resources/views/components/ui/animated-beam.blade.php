@@ -36,15 +36,19 @@
            sized off the measured path length (--blat-beam-len) so one dash crosses the whole
            line, then the offset animates it from -length back to 0. */
         @keyframes blat-animated-beam-sweep {
-            from { stroke-dashoffset: var(--blat-beam-len, 0); }
-            to   { stroke-dashoffset: 0; }
+            from {
+                stroke-dashoffset: var(--blat-beam-len, 0);
+            }
+            to {
+                stroke-dashoffset: 0;
+            }
         }
-        [data-slot="animated-beam"] .blat-animated-beam-flow {
+        [data-slot='animated-beam'] .blat-animated-beam-flow {
             stroke-dasharray: var(--blat-beam-dash, 60) calc(var(--blat-beam-len, 1000) + var(--blat-beam-dash, 60));
             animation: blat-animated-beam-sweep var(--blat-beam-duration, 3s) linear infinite;
         }
         @media (prefers-reduced-motion: reduce) {
-            [data-slot="animated-beam"] .blat-animated-beam-flow {
+            [data-slot='animated-beam'] .blat-animated-beam-flow {
                 animation: none;
                 /* Hide the travelling dash entirely; the static resting path remains visible. */
                 stroke-dasharray: 0 100000;
@@ -54,7 +58,7 @@
 @endonce
 
 @php
-    $beamDuration = (float) $duration . 's';
+    $beamDuration = (float) $duration.'s';
     $curve = (float) $curvature;
 @endphp
 
@@ -77,7 +81,7 @@
             const box = root.getBoundingClientRect();
             this.w = box.width;
             this.h = box.height;
-            if (!fromEl || !toEl || !box.width || !box.height) { this.ready = false; return; }
+            if (! fromEl || ! toEl || ! box.width || ! box.height) { this.ready = false; return; }
             const a = fromEl.getBoundingClientRect();
             const b = toEl.getBoundingClientRect();
             const ax = a.left - box.left + a.width / 2;
@@ -134,13 +138,7 @@
         </defs>
 
         {{-- Resting path: a faint static line so the connection reads even before/without motion. --}}
-        <path
-            :d="d"
-            stroke="var(--color-border)"
-            stroke-width="2"
-            stroke-linecap="round"
-            class="opacity-60"
-        />
+        <path :d="d" stroke="var(--color-border)" stroke-width="2" stroke-linecap="round" class="opacity-60" />
 
         {{-- Travelling light: a short gradient-painted dash swept along the path via dashoffset. --}}
         <path

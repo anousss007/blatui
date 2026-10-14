@@ -28,7 +28,9 @@
     {{-- Content --}}
     <div class="flex-1 pt-1 pb-1">
         @if ($time)
-            <div data-slot="timeline-time" class="text-muted-foreground text-xs font-medium tabular-nums">{{ $time }}</div>
+            <div data-slot="timeline-time" class="text-muted-foreground text-xs font-medium tabular-nums">
+                {{ $time }}
+            </div>
         @endif
         @if ($title)
             <h3 data-slot="timeline-title" class="text-sm font-semibold">{{ $title }}</h3>

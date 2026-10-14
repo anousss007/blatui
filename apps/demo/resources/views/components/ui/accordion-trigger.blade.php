@@ -23,28 +23,23 @@
     >
         {{ $slot }}
 
-        @switch($icon)
-            @case('none')
+        @switch ($icon)
+            @case ('none')
                 @break
-
-            @case('plus-minus')
+            @case ('plus-minus')
                 <x-lucide-plus :class="$iconCls.' [[data-state=open]>&]:hidden'" />
                 <x-lucide-minus :class="$iconCls.' hidden [[data-state=open]>&]:block'" />
                 @break
-
-            @case('plus')
+            @case ('plus')
                 <x-lucide-plus :class="$iconCls.' [[data-state=open]>&]:rotate-45'" />
                 @break
-
-            @case('chevron-updown')
+            @case ('chevron-updown')
                 <x-lucide-chevron-down :class="$iconCls.' [[data-state=open]>&]:hidden'" />
                 <x-lucide-chevron-up :class="$iconCls.' hidden [[data-state=open]>&]:block'" />
                 @break
-
-            @case('chevron-left')
+            @case ('chevron-left')
                 <x-lucide-chevron-left :class="$iconCls.' [[data-state=open]>&]:-rotate-90'" />
                 @break
-
             @default
                 <x-lucide-chevron-down :class="$iconCls.' translate-y-0.5 [[data-state=open]>&]:rotate-180'" />
         @endswitch

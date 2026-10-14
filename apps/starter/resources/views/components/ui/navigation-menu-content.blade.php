@@ -3,7 +3,7 @@
     x-cloak
     x-blat-anchor.bottom-start.offset.8.no-size="$refs.trigger"
     @mouseenter="active = id"
-    @click.outside="if (active === id) active = null"
+    @click.outside="if (active === id) active = null;"
     @keydown.escape.window="active = null"
     :id="id"
     :aria-labelledby="id + '-trigger'"

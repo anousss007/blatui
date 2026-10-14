@@ -3,7 +3,7 @@
 ])
 
 <x-dynamic-component
-    :component="'lucide-' . $icon"
+    :component="'lucide-'.$icon"
     data-slot="spinner"
     role="status"
     aria-label="{{ __('Loading') }}"

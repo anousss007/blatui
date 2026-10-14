@@ -32,53 +32,57 @@
 @endphp
 
 @if ($href)
-@if ($clickConditional)
-    <a
-        href="{{ $href }}"
-        role="menuitem"
-        tabindex="-1"
-        data-slot="{{ $dataSlot }}"
-        data-variant="{{ $variant }}"
-        @if ($inset) data-inset @endif
-        @if ($clickExpr) @click="{{ $clickExpr }}" @endif
-        {{ $attributes->twMerge($classes) }}
-    >{{ $slot }}</a>
+    @if ($clickConditional)
+        <a
+            href="{{ $href }}"
+            role="menuitem"
+            tabindex="-1"
+            data-slot="{{ $dataSlot }}"
+            data-variant="{{ $variant }}"
+            @if ($inset) data-inset @endif
+            @if ($clickExpr) @click="{{ $clickExpr }}" @endif
+            {{ $attributes->twMerge($classes) }}
+        >{{ $slot }}</a>
+    @else
+        <a
+            href="{{ $href }}"
+            role="menuitem"
+            tabindex="-1"
+            data-slot="{{ $dataSlot }}"
+            data-variant="{{ $variant }}"
+            @if ($inset) data-inset @endif
+            @click="{{ $clickExpr }}"
+            {{ $attributes->twMerge($classes) }}
+        >{{ $slot }}</a>
+    @endif
 @else
-    <a
-        href="{{ $href }}"
-        role="menuitem"
-        tabindex="-1"
-        data-slot="{{ $dataSlot }}"
-        data-variant="{{ $variant }}"
-        @if ($inset) data-inset @endif
-        @click="{{ $clickExpr }}"
-        {{ $attributes->twMerge($classes) }}
-    >{{ $slot }}</a>
-@endif
-@else
-@if ($clickConditional)
-    <button
-        type="{{ $type }}"
-        role="menuitem"
-        tabindex="-1"
-        data-slot="{{ $dataSlot }}"
-        data-variant="{{ $variant }}"
-        @if ($inset) data-inset @endif
-        @if ($disabled) disabled data-disabled aria-disabled="true" @endif
-        @if ($clickExpr) @click="{{ $clickExpr }}" @endif
-        {{ $attributes->twMerge($classes) }}
-    >{{ $slot }}</button>
-@else
-    <button
-        type="{{ $type }}"
-        role="menuitem"
-        tabindex="-1"
-        data-slot="{{ $dataSlot }}"
-        data-variant="{{ $variant }}"
-        @if ($inset) data-inset @endif
-        @if ($disabled) disabled data-disabled aria-disabled="true" @endif
-        @click="{{ $clickExpr }}"
-        {{ $attributes->twMerge($classes) }}
-    >{{ $slot }}</button>
-@endif
+    @if ($clickConditional)
+        <button
+            type="{{ $type }}"
+            role="menuitem"
+            tabindex="-1"
+            data-slot="{{ $dataSlot }}"
+            data-variant="{{ $variant }}"
+            @if ($inset) data-inset @endif
+            @if ($disabled) disabled data-disabled aria-disabled="true" @endif
+            @if ($clickExpr) @click="{{ $clickExpr }}" @endif
+            {{ $attributes->twMerge($classes) }}
+        >
+            {{ $slot }}
+        </button>
+    @else
+        <button
+            type="{{ $type }}"
+            role="menuitem"
+            tabindex="-1"
+            data-slot="{{ $dataSlot }}"
+            data-variant="{{ $variant }}"
+            @if ($inset) data-inset @endif
+            @if ($disabled) disabled data-disabled aria-disabled="true" @endif
+            @click="{{ $clickExpr }}"
+            {{ $attributes->twMerge($classes) }}
+        >
+            {{ $slot }}
+        </button>
+    @endif
 @endif

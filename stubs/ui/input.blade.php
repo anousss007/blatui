@@ -1,7 +1,7 @@
 @props(['type' => 'text', 'size' => 'default', 'toggle' => null, 'color' => null])
 
 @php
-    $base = "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex w-full min-w-0 rounded-md border bg-transparent shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:border-0 file:bg-transparent file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive";
+    $base = 'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex w-full min-w-0 rounded-md border bg-transparent shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:border-0 file:bg-transparent file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive';
 
     $sizes = [
         'sm' => 'h-8 px-2.5 py-1 text-sm file:h-6 file:text-xs',
@@ -37,7 +37,10 @@
         {{ $attributes->only('class')->twMerge('relative w-full') }}
     >
         @if ($hasLeading)
-            <span data-slot="input-leading" class="text-muted-foreground pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 [&_svg]:size-4 [&_svg]:shrink-0">
+            <span
+                data-slot="input-leading"
+                class="text-muted-foreground [&_svg]:size-4 [&_svg]:shrink-0 pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3"
+            >
                 {{ $leading }}
             </span>
         @endif
@@ -58,19 +61,42 @@
         @if ($isPassword)
             <button
                 type="button"
-                @click="show = !show"
+                @click="show = ! show"
                 aria-label="{{ __('Show password') }}"
                 x-bind:aria-label="show ? @js(__('Hide password')) : @js(__('Show password'))"
                 x-bind:aria-pressed="show"
-                class="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex items-center rounded-md px-3 outline-none transition-colors focus-visible:ring-[3px]"
+                class="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex items-center rounded-md px-3 transition-colors outline-none focus-visible:ring-[3px]"
             >
                 {{-- eye (password hidden) --}}
-                <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg
+                    x-show="! show"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="size-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                >
                     <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
                     <circle cx="12" cy="12" r="3" />
                 </svg>
                 {{-- eye-off (password visible) --}}
-                <svg x-show="show" style="display: none;" xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg
+                    x-show="show"
+                    style="display: none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="size-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                >
                     <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
                     <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
                     <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
@@ -78,7 +104,10 @@
                 </svg>
             </button>
         @elseif ($hasTrailing)
-            <span data-slot="input-trailing" class="text-muted-foreground absolute inset-y-0 end-0 flex items-center pe-3 [&_svg]:size-4 [&_svg]:shrink-0">
+            <span
+                data-slot="input-trailing"
+                class="text-muted-foreground [&_svg]:size-4 [&_svg]:shrink-0 absolute inset-y-0 end-0 flex items-center pe-3"
+            >
                 {{ $trailing }}
             </span>
         @endif

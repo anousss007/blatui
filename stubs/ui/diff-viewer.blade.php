@@ -89,6 +89,7 @@
             if ($row['type'] === 'eq') {
                 $pairs[] = ['left' => $row, 'right' => $row];
                 $i++;
+
                 continue;
             }
             // Gather a contiguous run of del then add.
@@ -132,16 +133,25 @@
     {{ $attributes->twMerge('bg-card text-card-foreground overflow-hidden rounded-lg border font-mono text-[13px]') }}
 >
     @if ($filename)
-        <div data-slot="diff-viewer-header" class="bg-muted/40 text-muted-foreground flex items-center gap-2 border-b px-4 py-2 text-xs">
+        <div
+            data-slot="diff-viewer-header"
+            class="bg-muted/40 text-muted-foreground flex items-center gap-2 border-b px-4 py-2 text-xs"
+        >
             <x-lucide-file-diff class="size-3.5" aria-hidden="true" />
             <span>{{ $filename }}</span>
         </div>
     @endif
 
     @if ($mode === 'split')
-        <div data-slot="diff-viewer-scroll" tabindex="0" class="overflow-x-auto outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:ring-inset">
+        <div
+            data-slot="diff-viewer-scroll"
+            tabindex="0"
+            class="focus-visible:ring-ring/50 overflow-x-auto outline-none focus-visible:ring-[3px] focus-visible:ring-inset"
+        >
             <table dir="ltr" class="w-full border-collapse text-start tabular-nums">
-                <caption class="sr-only">{{ $filename ? __('Side-by-side diff of :filename: original on the left, changed on the right.', ['filename' => $filename]) : __('Side-by-side diff: original on the left, changed on the right.') }}</caption>
+                <caption class="sr-only">
+                    {{ $filename ? __('Side-by-side diff of :filename: original on the left, changed on the right.', ['filename' => $filename]) : __('Side-by-side diff: original on the left, changed on the right.') }}
+                </caption>
                 <thead class="sr-only">
                     <tr>
                         <th scope="col">{{ __('Original line number') }}</th>
@@ -155,12 +165,19 @@
                         @php($left = $pair['left'])
                         @php($right = $pair['right'])
                         <tr>
-                            <td class="text-muted-foreground/50 border-r select-none px-2 py-0.5 text-end align-top">{{ $left['oldNo'] ?? '' }}</td>
+                            <td class="text-muted-foreground/50 border-r px-2 py-0.5 text-end align-top select-none">
+                                {{ $left['oldNo'] ?? '' }}
+                            </td>
+                            {{-- The code cells are whitespace-pre-wrap: any whitespace Prettier adds inside them renders, so they are kept on one line. --}}
+                            {{-- prettier-ignore --}}
                             <td @class([
                                 'border-r py-0.5 pr-3 align-top whitespace-pre-wrap',
                                 $lineBg[$left['type']] => $left,
                             ])><span @class(['inline-block w-4 shrink-0 select-none text-center', $gutterColor[$left['type'] ?? 'eq']]) aria-hidden="true">{{ $left ? $gutter[$left['type']] : '' }}</span>@if ($left && $left['type'] === 'del')<span class="sr-only">{{ $srPrefix['del'] }}</span>@endif<span>{{ $left['text'] ?? '' }}</span></td>
-                            <td class="text-muted-foreground/50 border-r select-none px-2 py-0.5 text-end align-top">{{ $right['newNo'] ?? '' }}</td>
+                            <td class="text-muted-foreground/50 border-r px-2 py-0.5 text-end align-top select-none">
+                                {{ $right['newNo'] ?? '' }}
+                            </td>
+                            {{-- prettier-ignore --}}
                             <td @class([
                                 'py-0.5 pr-3 align-top whitespace-pre-wrap',
                                 $lineBg[$right['type']] => $right,
@@ -171,9 +188,15 @@
             </table>
         </div>
     @else
-        <div data-slot="diff-viewer-scroll" tabindex="0" class="overflow-x-auto outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:ring-inset">
+        <div
+            data-slot="diff-viewer-scroll"
+            tabindex="0"
+            class="focus-visible:ring-ring/50 overflow-x-auto outline-none focus-visible:ring-[3px] focus-visible:ring-inset"
+        >
             <table dir="ltr" class="w-full border-collapse text-start tabular-nums">
-                <caption class="sr-only">{{ $filename ? __('Inline diff of :filename: removed lines are marked with a minus, added lines with a plus.', ['filename' => $filename]) : __('Inline diff: removed lines are marked with a minus, added lines with a plus.') }}</caption>
+                <caption class="sr-only">
+                    {{ $filename ? __('Inline diff of :filename: removed lines are marked with a minus, added lines with a plus.', ['filename' => $filename]) : __('Inline diff: removed lines are marked with a minus, added lines with a plus.') }}
+                </caption>
                 <thead class="sr-only">
                     <tr>
                         <th scope="col">{{ __('Original line number') }}</th>
@@ -184,8 +207,13 @@
                 <tbody>
                     @foreach ($rows as $row)
                         <tr @class([$lineBg[$row['type']]])>
-                            <td class="text-muted-foreground/50 select-none px-2 py-0.5 text-end align-top">{{ $row['oldNo'] ?? '' }}</td>
-                            <td class="text-muted-foreground/50 border-r select-none px-2 py-0.5 text-end align-top">{{ $row['newNo'] ?? '' }}</td>
+                            <td class="text-muted-foreground/50 px-2 py-0.5 text-end align-top select-none">
+                                {{ $row['oldNo'] ?? '' }}
+                            </td>
+                            <td class="text-muted-foreground/50 border-r px-2 py-0.5 text-end align-top select-none">
+                                {{ $row['newNo'] ?? '' }}
+                            </td>
+                            {{-- prettier-ignore --}}
                             <td class="py-0.5 pr-3 align-top whitespace-pre-wrap"><span @class(['inline-block w-4 shrink-0 select-none text-center', $gutterColor[$row['type']]]) aria-hidden="true">{{ $gutter[$row['type']] }}</span>@if ($row['type'] !== 'eq')<span class="sr-only">{{ $srPrefix[$row['type']] }}</span>@endif<span>{{ $row['text'] }}</span></td>
                         </tr>
                     @endforeach

@@ -32,10 +32,11 @@
             }
             100% {
                 opacity: 0;
-                transform: translate3d(var(--blat-confetti-x), var(--blat-confetti-y), 0) rotate(var(--blat-confetti-rot));
+                transform: translate3d(var(--blat-confetti-x), var(--blat-confetti-y), 0)
+                    rotate(var(--blat-confetti-rot));
             }
         }
-        [data-slot="confetti"] .blat-confetti-piece {
+        [data-slot='confetti'] .blat-confetti-piece {
             position: absolute;
             top: 0;
             left: 0;
@@ -43,10 +44,11 @@
             height: calc(var(--blat-confetti-size, 8px) * 0.4);
             border-radius: 1px;
             will-change: transform, opacity;
-            animation: blat-confetti-fall var(--blat-confetti-dur, 1100ms) cubic-bezier(0.16, 1, 0.3, 1) var(--blat-confetti-delay, 0ms) forwards;
+            animation: blat-confetti-fall var(--blat-confetti-dur, 1100ms) cubic-bezier(0.16, 1, 0.3, 1)
+                var(--blat-confetti-delay, 0ms) forwards;
         }
         @media (prefers-reduced-motion: reduce) {
-            [data-slot="confetti"] .blat-confetti-piece {
+            [data-slot='confetti'] .blat-confetti-piece {
                 animation: none;
                 display: none;
             }
@@ -141,9 +143,5 @@
     @endif
 
     {{-- Decorative particle overlay: fixed, full-viewport, never intercepts pointer events. --}}
-    <span
-        x-ref="overlay"
-        aria-hidden="true"
-        class="pointer-events-none fixed inset-0 z-[9999] overflow-hidden"
-    ></span>
+    <span x-ref="overlay" aria-hidden="true" class="pointer-events-none fixed inset-0 z-[9999] overflow-hidden"></span>
 </span>

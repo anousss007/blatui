@@ -49,7 +49,7 @@
     @if ($name || $description)
         <span class="flex min-w-0 flex-1 flex-col">
             @if ($name)
-                <span class="truncate text-sm font-medium leading-tight">{{ $name }}</span>
+                <span class="truncate text-sm leading-tight font-medium">{{ $name }}</span>
             @endif
             @if ($description)
                 <span class="text-muted-foreground truncate text-xs leading-tight">{{ $description }}</span>

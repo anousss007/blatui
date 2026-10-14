@@ -31,10 +31,10 @@
     `[data-slot="add-to-cart"]` working without altering layout.
 --}}
 <span class="contents" data-slot="add-to-cart">
-<x-ui.button
-    type="button"
-    :size="$size"
-    x-data="{
+    <x-ui.button
+        type="button"
+        :size="$size"
+        x-data="{
         state: 'idle',
         announce: '',
         _t: [],
@@ -56,41 +56,43 @@
         },
         destroy() { this._t.forEach(clearTimeout); },
     }"
-    @click="add()"
-    {{-- `x-bind:` (not `:`) so Blade doesn't read these as PHP prop bindings on <x-ui.button>. --}}
-    x-bind:disabled="state !== 'idle'"
-    x-bind:aria-busy="state === 'adding'"
-    {{-- Recolor to the success token only in the `added` state (overrides button's --primary). --}}
-    x-bind:style="state === 'added' ? '--primary: oklch(0.596 0.145 163.225); --primary-foreground: #ffffff;' : null"
-    {{-- Stay near-opaque while disabled (adding/added) and show a pointer when actionable. --}}
-    x-bind:class="state === 'idle' ? 'cursor-pointer' : ''"
-    {{ $attributes->twMerge('disabled:opacity-90') }}
->
-    {{-- Idle --}}
-    <span x-show="state === 'idle'" class="contents">
-        <x-dynamic-component :component="'lucide-'.$icon" aria-hidden="true" />
-        @if (trim($slot) !== '' || $label !== false)
+        @click="add()"
+        {{-- `x-bind:` (not `:`) so Blade doesn't read these as PHP prop bindings on <x-ui.button>. --}}
+        x-bind:disabled="state !== 'idle'"
+        x-bind:aria-busy="state === 'adding'"
+        {{-- Recolor to the success token only in the `added` state (overrides button's --primary). --}}
+        x-bind:style="
+            state === 'added' ? '--primary: oklch(0.596 0.145 163.225); --primary-foreground: #ffffff;' : null
+        "
+        {{-- Stay near-opaque while disabled (adding/added) and show a pointer when actionable. --}}
+        x-bind:class="state === 'idle' ? 'cursor-pointer' : ''"
+        {{ $attributes->twMerge('disabled:opacity-90') }}
+    >
+        {{-- Idle --}}
+        <span x-show="state === 'idle'" class="contents">
+            <x-dynamic-component :component="'lucide-'.$icon" aria-hidden="true" />
+            @if (trim($slot) !== '' || $label !== false)
             <span>{{ trim($slot) !== '' ? $slot : $label }}</span>
-        @endif
-    </span>
+            @endif
+        </span>
 
-    {{-- Adding --}}
-    <span x-show="state === 'adding'" x-cloak class="contents">
-        <x-lucide-loader-circle class="animate-spin" aria-hidden="true" />
-        @if (trim($slot) !== '' || $label !== false)
+        {{-- Adding --}}
+        <span x-show="state === 'adding'" x-cloak class="contents">
+            <x-lucide-loader-circle class="animate-spin" aria-hidden="true" />
+            @if (trim($slot) !== '' || $label !== false)
             <span>{{ $label }}…</span>
-        @endif
-    </span>
+            @endif
+        </span>
 
-    {{-- Added --}}
-    <span x-show="state === 'added'" x-cloak class="contents">
-        <x-lucide-check aria-hidden="true" />
-        @if (trim($slot) !== '' || $label !== false)
+        {{-- Added --}}
+        <span x-show="state === 'added'" x-cloak class="contents">
+            <x-lucide-check aria-hidden="true" />
+            @if (trim($slot) !== '' || $label !== false)
             <span>{{ $addedLabel }}</span>
-        @endif
-    </span>
+            @endif
+        </span>
 
-    {{-- Polite live region announces every transition to screen readers. --}}
-    <span class="sr-only" aria-live="polite" x-text="announce"></span>
-</x-ui.button>
+        {{-- Polite live region announces every transition to screen readers. --}}
+        <span class="sr-only" aria-live="polite" x-text="announce"></span>
+    </x-ui.button>
 </span>

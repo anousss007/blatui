@@ -40,7 +40,7 @@
         {{-- Front face --}}
         <div
             data-slot="flip-card-front"
-            class="bg-card text-card-foreground absolute inset-0 flex flex-col overflow-hidden rounded-xl border p-6 shadow-sm [backface-visibility:hidden] [-webkit-backface-visibility:hidden]"
+            class="bg-card text-card-foreground absolute inset-0 flex flex-col overflow-hidden rounded-xl border p-6 shadow-sm [-webkit-backface-visibility:hidden] [backface-visibility:hidden]"
             :inert="flipped"
             :aria-hidden="flipped ? 'true' : 'false'"
         >
@@ -50,8 +50,8 @@
         {{-- Back face (pre-rotated so it reads correctly once the flipper turns) --}}
         <div
             data-slot="flip-card-back"
-            class="bg-card text-card-foreground absolute inset-0 flex flex-col overflow-hidden rounded-xl border p-6 shadow-sm [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)]"
-            :inert="!flipped"
+            class="bg-card text-card-foreground absolute inset-0 flex [transform:rotateY(180deg)] flex-col overflow-hidden rounded-xl border p-6 shadow-sm [-webkit-backface-visibility:hidden] [backface-visibility:hidden]"
+            :inert="! flipped"
             :aria-hidden="flipped ? 'false' : 'true'"
         >
             {{ $back ?? '' }}

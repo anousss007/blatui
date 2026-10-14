@@ -46,7 +46,7 @@
         selected: [],
         get filtered() {
             const rows = this.rows.map((r, i) => ({ r, i }));
-            if (!this.q) return rows;
+            if (! this.q) return rows;
             const q = this.q.toLowerCase();
             return rows.filter(({ r }) => this.searchKeys.some(k => String(r[k] ?? '').toLowerCase().includes(q)));
         },
@@ -55,7 +55,7 @@
             if (this.sortKey) {
                 arr.sort((a, b) => {
                     let x = a.r[this.sortKey] ?? '', y = b.r[this.sortKey] ?? '';
-                    const num = x !== '' && y !== '' && !isNaN(parseFloat(x)) && !isNaN(parseFloat(y));
+                    const num = x !== '' && y !== '' && ! isNaN(parseFloat(x)) && ! isNaN(parseFloat(y));
                     const c = num ? parseFloat(x) - parseFloat(y) : String(x).localeCompare(String(y));
                     return this.sortDir === 'asc' ? c : -c;
                 });
@@ -68,11 +68,11 @@
         get allPageSelected() { const idx = this.pageIndices; return idx.length > 0 && idx.every(i => this.selected.includes(i)) },
         toggleSort(key) { this.sortKey === key ? (this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc') : (this.sortKey = key, this.sortDir = 'asc'); this.page = 1 },
         toggleRow(i) { this.selected.includes(i) ? this.selected = this.selected.filter(x => x !== i) : this.selected.push(i) },
-        toggleAll() { const idx = this.pageIndices; this.allPageSelected ? this.selected = this.selected.filter(i => !idx.includes(i)) : idx.forEach(i => this.selected.includes(i) || this.selected.push(i)) },
+        toggleAll() { const idx = this.pageIndices; this.allPageSelected ? this.selected = this.selected.filter(i => ! idx.includes(i)) : idx.forEach(i => this.selected.includes(i) || this.selected.push(i)) },
         next() { if (this.page < this.pageCount) this.page++ },
         prev() { if (this.page > 1) this.page-- },
     }"
-    x-init="$watch('q', () => page = 1)"
+    x-init="$watch('q', () => (page = 1))"
     {{ $attributes->twMerge('w-full') }}
 >
     @if ($searchable)
@@ -88,22 +88,42 @@
                     @if ($selectable)
                         <th scope="col" class="h-10 w-10 px-2 text-start align-middle">
                             <span class="sr-only">{{ __('Select') }}</span>
-                            <button type="button" role="checkbox" aria-label="{{ __('Select all rows') }}" @click="toggleAll()" :aria-checked="allPageSelected" :data-state="allPageSelected ? 'checked' : 'unchecked'"
-                                class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]">
+                            <button
+                                type="button"
+                                role="checkbox"
+                                aria-label="{{ __('Select all rows') }}"
+                                @click="toggleAll()"
+                                :aria-checked="allPageSelected"
+                                :data-state="allPageSelected ? 'checked' : 'unchecked'"
+                                class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]"
+                            >
                                 <x-lucide-check class="size-3.5" x-show="allPageSelected" x-cloak aria-hidden="true" />
                             </button>
                         </th>
                     @endif
                     @foreach ($cols as $col)
-                        <th scope="col" @if ($col['sortable']) :aria-sort="sortKey === '{{ $col['key'] }}' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" @endif
-                            class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap {{ $col['class'] }}">
+                        <th
+                            scope="col"
+                            @if ($col['sortable']) :aria-sort="sortKey === '{{ $col['key'] }}' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" @endif
+                            class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap {{ $col['class'] }}"
+                        >
                             @if ($col['sortable'])
-                                <button type="button" @click="toggleSort('{{ $col['key'] }}')" class="hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 -ms-2 inline-flex items-center gap-1 rounded-md px-2 py-1 transition-colors outline-none focus-visible:ring-[3px]">
+                                <button
+                                    type="button"
+                                    @click="toggleSort('{{ $col['key'] }}')"
+                                    class="hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 -ms-2 inline-flex items-center gap-1 rounded-md px-2 py-1 transition-colors outline-none focus-visible:ring-[3px]"
+                                >
                                     {{ $col['label'] }}
                                     <span class="text-muted-foreground inline-flex" aria-hidden="true">
-                                        <span x-show="sortKey === '{{ $col['key'] }}' && sortDir === 'asc'" x-cloak><x-lucide-chevron-up class="size-3.5" /></span>
-                                        <span x-show="sortKey === '{{ $col['key'] }}' && sortDir === 'desc'" x-cloak><x-lucide-chevron-down class="size-3.5" /></span>
-                                        <span x-show="sortKey !== '{{ $col['key'] }}'"><x-lucide-chevrons-up-down class="size-3.5 opacity-50" /></span>
+                                        <span x-show="sortKey === '{{ $col['key'] }}' && sortDir === 'asc'" x-cloak
+                                            ><x-lucide-chevron-up class="size-3.5"
+                                        /></span>
+                                        <span x-show="sortKey === '{{ $col['key'] }}' && sortDir === 'desc'" x-cloak
+                                            ><x-lucide-chevron-down class="size-3.5"
+                                        /></span>
+                                        <span x-show="sortKey !== '{{ $col['key'] }}'"
+                                            ><x-lucide-chevrons-up-down class="size-3.5 opacity-50"
+                                        /></span>
                                     </span>
                                 </button>
                             @else
@@ -112,10 +132,13 @@
                         </th>
                     @endforeach
                     @isset($actions)
-                        <th scope="col" @class([
-                            'text-foreground bg-background h-10 px-2 text-end align-middle font-medium whitespace-nowrap',
-                            'sticky end-0 border-s' => $stickyActions,
-                        ])>
+                        <th
+                            scope="col"
+                            @class([
+                                'text-foreground bg-background h-10 px-2 text-end align-middle font-medium whitespace-nowrap',
+                                'sticky end-0 border-s' => $stickyActions,
+                            ])
+                        >
                             <span class="sr-only">{{ $actionsLabel }}</span>
                         </th>
                     @endisset
@@ -123,17 +146,35 @@
             </thead>
             <tbody data-slot="table-body" class="[&_tr:last-child]:border-0">
                 <template x-for="item in paged" :key="item.r['{{ $rowKey }}'] ?? item.i">
-                    <tr class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors" :data-state="selected.includes(item.i) ? 'selected' : null">
+                    <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        :data-state="selected.includes(item.i) ? 'selected' : null"
+                    >
                         @if ($selectable)
                             <td class="w-10 px-2 align-middle">
-                                <button type="button" role="checkbox" aria-label="{{ __('Select row') }}" @click="toggleRow(item.i)" :aria-checked="selected.includes(item.i)" :data-state="selected.includes(item.i) ? 'checked' : 'unchecked'"
-                                    class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]">
-                                    <x-lucide-check class="size-3.5" x-show="selected.includes(item.i)" x-cloak aria-hidden="true" />
+                                <button
+                                    type="button"
+                                    role="checkbox"
+                                    aria-label="{{ __('Select row') }}"
+                                    @click="toggleRow(item.i)"
+                                    :aria-checked="selected.includes(item.i)"
+                                    :data-state="selected.includes(item.i) ? 'checked' : 'unchecked'"
+                                    class="border-input data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex size-4 items-center justify-center rounded-[4px] border shadow-xs outline-none focus-visible:ring-[3px]"
+                                >
+                                    <x-lucide-check
+                                        class="size-3.5"
+                                        x-show="selected.includes(item.i)"
+                                        x-cloak
+                                        aria-hidden="true"
+                                    />
                                 </button>
                             </td>
                         @endif
                         @foreach ($cols as $col)
-                            <td class="p-2 align-middle whitespace-nowrap {{ $col['class'] }}" x-text="item.r['{{ $col['key'] }}']"></td>
+                            <td
+                                class="p-2 align-middle whitespace-nowrap {{ $col['class'] }}"
+                                x-text="item.r['{{ $col['key'] }}']"
+                            ></td>
                         @endforeach
                         @isset($actions)
                             <td @class([
@@ -146,7 +187,12 @@
                     </tr>
                 </template>
                 <tr x-show="paged.length === 0">
-                    <td colspan="{{ $cols->count() + ($selectable ? 1 : 0) + (isset($actions) ? 1 : 0) }}" class="text-muted-foreground h-24 text-center align-middle">{{ __('No results.') }}</td>
+                    <td
+                        colspan="{{ $cols->count() + ($selectable ? 1 : 0) + (isset($actions) ? 1 : 0) }}"
+                        class="text-muted-foreground h-24 text-center align-middle"
+                    >
+                        {{ __('No results.') }}
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -161,9 +207,14 @@
             @endif
         </p>
         <div class="flex items-center gap-2">
-            <span class="text-sm font-medium" x-text="@js(__('Page :page of :pages')).replace(':pages', pageCount).replace(':page', page)"></span>
-            <x-ui.button variant="outline" size="sm" x-bind:disabled="page === 1" @click="prev()">{{ __('Previous') }}</x-ui.button>
-            <x-ui.button variant="outline" size="sm" x-bind:disabled="page === pageCount" @click="next()">{{ __('Next') }}</x-ui.button>
+            <span
+                class="text-sm font-medium"
+                x-text="@js(__('Page :page of :pages')).replace(':pages', pageCount).replace(':page', page)"
+            ></span>
+            <x-ui.button variant="outline" size="sm" x-bind:disabled="page === 1" @click="prev()">
+                {{ __('Previous') }}</x-ui.button>
+            <x-ui.button variant="outline" size="sm" x-bind:disabled="page === pageCount" @click="next()">
+                {{ __('Next') }}</x-ui.button>
         </div>
     </div>
 </div>

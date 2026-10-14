@@ -15,12 +15,15 @@
         x-show="active === id"
         x-cloak
         {!! $anchorAttr !!}
-        @click.outside="if (active === id) closeMenu(false)"
+        @click.outside="if (active === id) closeMenu(false);"
         @keydown.escape.prevent.stop="closeMenu()"
         @keydown.tab.prevent.stop="closeMenu(false)"
         @keydown.left.prevent.stop="moveTrigger(-1, id)"
         @keydown.right.prevent.stop="moveTrigger(1, id)"
-        @keydown="$blatNav($event); $blatType($event)"
+        @keydown="
+            $blatNav($event);
+            $blatType($event);
+        "
         :id="id"
         :aria-labelledby="id + '-trigger'"
         role="menu"

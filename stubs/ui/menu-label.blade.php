@@ -10,4 +10,6 @@
     role="presentation"
     @if ($inset) data-inset @endif
     {{ $attributes->twMerge($classes) }}
->{{ $slot }}</div>
+>
+    {{ $slot }}
+</div>

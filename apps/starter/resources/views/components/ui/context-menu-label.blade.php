@@ -5,4 +5,5 @@
     :classes="'text-foreground px-2 py-1.5 text-sm font-medium data-[inset]:ps-8'"
     :inset="$inset"
     {{ $attributes }}
->{{ $slot }}</x-ui.menu-label>
+>
+    {{ $slot }}</x-ui.menu-label>

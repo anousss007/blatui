@@ -108,14 +108,14 @@
         draft: null,
         get text() { return this.draft ?? this.format(this.value); },
         format(v) {
-            if (v === null || v === undefined || v === '' || !isFinite(v)) return '';
+            if (v === null || v === undefined || v === '' || ! isFinite(v)) return '';
             return this.decimals === null ? String(v) : Number(v).toFixed(this.decimals);
         },
         // A comma is accepted as the decimal separator: inputmode=decimal puts one on the keypad
         // in most of the locales that write numbers that way.
         parse(raw) {
             const s = String(raw).trim().replace(',', '.');
-            if (s === '' || !/^[-+]?(\d+\.?\d*|\.\d+)$/.test(s)) return null;
+            if (s === '' || ! /^[-+]?(\d+\.?\d*|\.\d+)$/.test(s)) return null;
             const n = Number(s);
             return this.decimals === null ? n : this.$blatNumber.round(n, this.decimals);
         },
@@ -160,9 +160,9 @@
         // 1,234.56), so it is read as a number rather than as cents — 1.9 stays 1.90, it does not
         // become 0.19. Bare digits fall through and enter like typed ones.
         onPaste(e) {
-            if (!this.mask) return;
+            if (! this.mask) return;
             const t = e.clipboardData?.getData('text') ?? '';
-            if (!/[.,]/.test(t)) return;
+            if (! /[.,]/.test(t)) return;
             e.preventDefault();
             let n = this.$blatNumber.loose(t);
             if (n === null) return;
@@ -208,9 +208,13 @@
         type="text"
         inputmode="{{ $mask ? 'numeric' : 'decimal' }}"
         role="spinbutton"
-        @if ($ariaLabelledby) aria-labelledby="{{ $ariaLabelledby }}"
-        @elseif ($inputLabel) aria-label="{{ $inputLabel }}"
-        @else aria-label="{{ __('Number') }}" @endif
+        @if ($ariaLabelledby)
+            aria-labelledby="{{ $ariaLabelledby }}"
+        @elseif ($inputLabel)
+            aria-label="{{ $inputLabel }}"
+        @else
+            aria-label="{{ __('Number') }}"
+        @endif
         @if ($name) name="{{ $name }}" @endif
         @if ($id) id="{{ $id }}" @endif
         @if ($placeholder) placeholder="{{ $placeholder }}" @endif

@@ -19,11 +19,11 @@
     <button
         type="button"
         data-slot="reasoning-trigger"
-        @click="open = !open"
+        @click="open = ! open"
         :aria-expanded="open"
         @if ($id) aria-controls="{{ $id }}" @else :aria-controls="$id('blat-reasoning')" @endif
         :data-state="open ? 'open' : 'closed'"
-        class="group inline-flex items-center gap-2 rounded-md text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        class="group text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 inline-flex items-center gap-2 rounded-md transition-colors outline-none focus-visible:ring-[3px]"
     >
         <x-lucide-brain class="size-4 shrink-0" aria-hidden="true" />
         <span class="font-medium">{{ $headerLabel }}</span>
@@ -41,7 +41,7 @@
         x-collapse
         x-cloak
         :data-state="open ? 'open' : 'closed'"
-        class="mt-2 border-s-2 border-border ps-4 text-sm leading-relaxed text-muted-foreground"
+        class="border-border text-muted-foreground mt-2 border-s-2 ps-4 text-sm leading-relaxed"
     >
         {{ $slot }}
     </div>

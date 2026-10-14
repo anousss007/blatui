@@ -6,9 +6,11 @@
     <x-ui.sidebar-menu-item x-data="{ selected: '{{ $default }}' }">
         <x-ui.dropdown-menu>
             <x-ui.dropdown-menu-trigger class="w-full">
-                <x-ui.sidebar-menu-button size="lg"
+                <x-ui.sidebar-menu-button
+                    size="lg"
                     class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                    ::data-state="open ? 'open' : 'closed'">
+                    ::data-state="open ? 'open' : 'closed'"
+                >
                     <div class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                         <x-lucide-gallery-vertical-end class="size-4" />
                     </div>

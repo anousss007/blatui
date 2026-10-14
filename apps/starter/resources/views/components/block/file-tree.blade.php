@@ -13,9 +13,12 @@
     </x-ui.sidebar-menu-button>
 @else
     <x-ui.sidebar-menu-item>
-        <x-ui.collapsible class="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
-            :open="in_array($name, ['components', 'ui'])" ::data-state="open ? 'open' : 'closed'">
-            <x-ui.sidebar-menu-button x-on:click="open = !open" ::data-state="open ? 'open' : 'closed'">
+        <x-ui.collapsible
+            class="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
+            :open="in_array($name, ['components', 'ui'])"
+            ::data-state="open ? 'open' : 'closed'"
+        >
+            <x-ui.sidebar-menu-button x-on:click="open = ! open" ::data-state="open ? 'open' : 'closed'">
                 <x-lucide-chevron-right class="transition-transform" />
                 <x-lucide-folder />
                 {{ $name }}

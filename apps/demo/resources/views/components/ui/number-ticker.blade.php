@@ -42,7 +42,7 @@
         raf: null,
         format(n) {
             const parts = n.toFixed(this.decimals).split('.');
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, this.separator);
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?! \d))/g, this.separator);
             return parts.join('.');
         },
         init() {
@@ -91,5 +91,9 @@
     <span class="sr-only">{{ $finalFormatted }}</span>
 
     {{-- Animated digits (hidden from assistive tech to avoid per-frame chatter). --}}
-    <span aria-hidden="true">@if($prefix !== ''){{ $prefix }}@endif<span x-text="format(current)"></span>@if($suffix !== ''){{ $suffix }}@endif</span>
+    <span aria-hidden="true">
+        @if ($prefix !== '') {{ $prefix }}@endif
+        <span x-text="format(current)"></span>
+        @if ($suffix !== '') {{ $suffix }}@endif
+    </span>
 </span>

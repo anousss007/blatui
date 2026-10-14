@@ -99,7 +99,7 @@
     {{ $slot }}
 
     {{-- Sentinel: the observer watches this; hidden once finished so it can't re-trigger. --}}
-    <div x-ref="sentinel" aria-hidden="true" class="h-px w-full" x-show="!finished" x-cloak></div>
+    <div x-ref="sentinel" aria-hidden="true" class="h-px w-full" x-show="! finished" x-cloak></div>
 
     {{-- Loading indicator — visible, announced politely. --}}
     <div
@@ -107,14 +107,14 @@
         aria-live="polite"
         x-show="loading"
         x-cloak
-        class="flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground"
+        class="text-muted-foreground flex items-center justify-center gap-2 py-3 text-sm"
     >
         <x-ui.spinner class="size-4" aria-hidden="true" />
         <span>{{ __('Loading more…') }}</span>
     </div>
 
     {{-- Keyboard / no-JS fallback: a real button that runs the same load path. --}}
-    <div x-show="!finished && !loading" class="flex justify-center py-2">
+    <div x-show="! finished && ! loading" class="flex justify-center py-2">
         <x-ui.button
             type="button"
             variant="outline"
@@ -127,12 +127,7 @@
     </div>
 
     {{-- End-of-list message. --}}
-    <div
-        role="status"
-        x-show="finished"
-        x-cloak
-        class="py-3 text-center text-sm text-muted-foreground"
-    >
+    <div role="status" x-show="finished" x-cloak class="text-muted-foreground py-3 text-center text-sm">
         {{ __("You’ve reached the end.") }}
     </div>
 </div>

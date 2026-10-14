@@ -17,7 +17,7 @@
                 })
                 .filter((el) => el);
 
-            if (!targets.length) return;
+            if (! targets.length) return;
 
             // Default the active section to the first available target.
             this.active = targets[0].id;
@@ -51,7 +51,7 @@
                     :href="item.href"
                     @click="active = idFor(item.href)"
                     :aria-current="active === idFor(item.href) ? 'true' : null"
-                    class="block border-s-2 ps-3 py-1 outline-none transition-colors rounded-e-sm focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                    class="focus-visible:ring-ring/50 block rounded-e-sm border-s-2 py-1 ps-3 transition-colors outline-none focus-visible:ring-[3px]"
                     :class="[
                         active === idFor(item.href)
                             ? 'border-primary text-foreground font-medium'

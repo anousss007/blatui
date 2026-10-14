@@ -24,10 +24,6 @@
 @endphp
 
 <div data-slot="description-item" {{ $attributes->twMerge($rowClasses) }}>
-    <dt @class(['text-muted-foreground text-sm', 'sm:col-span-1' => $isHorizontal])>
-        {{ $term }}
-    </dt>
-    <dd @class(['text-foreground text-sm', 'sm:col-span-2' => $isHorizontal])>
-        {{ $slot }}
-    </dd>
+    <dt @class(['text-muted-foreground text-sm', 'sm:col-span-1' => $isHorizontal])>{{ $term }}</dt>
+    <dd @class(['text-foreground text-sm', 'sm:col-span-2' => $isHorizontal])>{{ $slot }}</dd>
 </div>
