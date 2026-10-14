@@ -32,7 +32,7 @@
         get progress() { return this.duration > 0 ? (this.currentTime / this.duration) * 100 : 0 },
         get volumePercent() { return (this.muted ? 0 : this.volume) * 100 },
         fmt(s) {
-            if (!isFinite(s) || s < 0) s = 0;
+            if (! isFinite(s) || s < 0) s = 0;
             const m = Math.floor(s / 60);
             const sec = Math.floor(s % 60);
             return m + ':' + String(sec).padStart(2, '0');
@@ -54,7 +54,7 @@
         },
         toggleMute() {
             const a = this.$refs.audio;
-            this.muted = !this.muted;
+            this.muted = ! this.muted;
             a.muted = this.muted;
         },
     }"
@@ -68,12 +68,21 @@
         class="sr-only"
         tabindex="-1"
         aria-hidden="true"
-        @loadedmetadata="duration = $refs.audio.duration; volume = $refs.audio.volume"
+        @loadedmetadata="
+            duration = $refs.audio.duration;
+            volume = $refs.audio.volume;
+        "
         @timeupdate="currentTime = $refs.audio.currentTime"
         @play="playing = true"
         @pause="playing = false"
-        @ended="playing = false; currentTime = $refs.audio.duration"
-        @volumechange="volume = $refs.audio.volume; muted = $refs.audio.muted"
+        @ended="
+            playing = false;
+            currentTime = $refs.audio.duration;
+        "
+        @volumechange="
+            volume = $refs.audio.volume;
+            muted = $refs.audio.muted;
+        "
     ></audio>
 
     @if ($title || $artist)
@@ -93,13 +102,17 @@
             @click="toggle()"
             :aria-label="playing ? @js(__('Pause')) : @js(__('Play'))"
             :aria-pressed="playing"
-            class="bg-primary text-primary-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-full shadow-xs transition-all outline-none hover:bg-primary/90 focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+            class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/50 inline-flex size-9 shrink-0 items-center justify-center rounded-full shadow-xs transition-all outline-none focus-visible:ring-[3px]"
         >
             <x-lucide-pause x-show="playing" class="size-4 fill-current" aria-hidden="true" />
-            <x-lucide-play x-show="!playing" x-cloak class="size-4 fill-current" aria-hidden="true" />
+            <x-lucide-play x-show="! playing" x-cloak class="size-4 fill-current" aria-hidden="true" />
         </button>
 
-        <span data-slot="audio-player-time" class="text-muted-foreground w-10 text-end text-xs tabular-nums" x-text="fmt(currentTime)">0:00</span>
+        <span
+            data-slot="audio-player-time"
+            class="text-muted-foreground w-10 text-end text-xs tabular-nums"
+            x-text="fmt(currentTime)"
+        >0:00</span>
 
         <input
             type="range"
@@ -109,21 +122,25 @@
             aria-label="{{ __('Seek') }}"
             :value="progress"
             @input="seek($event.target.value)"
-            class="bg-muted h-1.5 grow min-w-0 cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] [&::-webkit-slider-thumb]:size-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:size-3.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background"
+            class="bg-muted focus-visible:ring-ring/50 [&::-webkit-slider-thumb]:size-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:size-3.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background h-1.5 min-w-0 grow cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-[3px]"
             :style="`background-image: linear-gradient(to right, var(--color-primary) ${progress}%, transparent ${progress}%)`"
-        >
+        />
 
-        <span data-slot="audio-player-duration" class="text-muted-foreground w-10 text-xs tabular-nums" x-text="fmt(duration)">0:00</span>
+        <span
+            data-slot="audio-player-duration"
+            class="text-muted-foreground w-10 text-xs tabular-nums"
+            x-text="fmt(duration)"
+        >0:00</span>
 
         <button
             type="button"
             @click="toggleMute()"
             :aria-label="muted ? @js(__('Unmute')) : @js(__('Mute'))"
             :aria-pressed="muted"
-            class="text-muted-foreground hover:text-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+            class="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 inline-flex size-8 shrink-0 items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-[3px]"
         >
             <x-lucide-volume-x x-show="muted" x-cloak class="size-4" aria-hidden="true" />
-            <x-lucide-volume-2 x-show="!muted" class="size-4" aria-hidden="true" />
+            <x-lucide-volume-2 x-show="! muted" class="size-4" aria-hidden="true" />
         </button>
 
         <input
@@ -134,8 +151,8 @@
             aria-label="{{ __('Volume') }}"
             :value="volumePercent"
             @input="setVolume($event.target.value)"
-            class="bg-muted hidden h-1.5 w-16 shrink-0 cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] sm:block [&::-webkit-slider-thumb]:size-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:size-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background"
+            class="bg-muted focus-visible:ring-ring/50 [&::-webkit-slider-thumb]:size-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:size-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background hidden h-1.5 w-16 shrink-0 cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-[3px] sm:block"
             :style="`background-image: linear-gradient(to right, var(--color-primary) ${volumePercent}%, transparent ${volumePercent}%)`"
-        >
+        />
     </div>
 </div>

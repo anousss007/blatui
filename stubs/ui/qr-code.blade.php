@@ -60,16 +60,40 @@
                 // Number of error-correction codewords per block, indexed [eccOrd][version]
                 const ECC_CODEWORDS_PER_BLOCK = [
                     // version: 0(unused) 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40
-                    [-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30], // L
-                    [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28], // M
-                    [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30], // Q
-                    [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30], // H
+                    [
+                        -1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30,
+                        30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+                    ], // L
+                    [
+                        -1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28,
+                        28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+                    ], // M
+                    [
+                        -1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30,
+                        30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+                    ], // Q
+                    [
+                        -1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30,
+                        30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+                    ], // H
                 ];
                 const NUM_ERROR_CORRECTION_BLOCKS = [
-                    [-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25], // L
-                    [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49], // M
-                    [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68], // Q
-                    [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81], // H
+                    [
+                        -1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14,
+                        15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25,
+                    ], // L
+                    [
+                        -1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23,
+                        25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49,
+                    ], // M
+                    [
+                        -1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34,
+                        34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68,
+                    ], // Q
+                    [
+                        -1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35,
+                        37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81,
+                    ], // H
                 ];
 
                 // ---- Galois-field (GF(256)) arithmetic for Reed–Solomon ----
@@ -267,13 +291,11 @@
                     const numAlign = alignPos.length;
                     for (let i = 0; i < numAlign; i++) {
                         for (let j = 0; j < numAlign; j++) {
-                            if (
-                                !(
-                                    (i === 0 && j === 0) ||
-                                    (i === 0 && j === numAlign - 1) ||
-                                    (i === numAlign - 1 && j === 0)
-                                )
-                            ) {
+                            if (!(
+                                (i === 0 && j === 0) ||
+                                (i === 0 && j === numAlign - 1) ||
+                                (i === numAlign - 1 && j === 0)
+                            )) {
                                 drawAlignment(alignPos[i], alignPos[j]);
                             }
                         }
@@ -340,14 +362,30 @@
                                 if (isFunction[y][x]) continue;
                                 let invert;
                                 switch (mask) {
-                                    case 0: invert = (x + y) % 2 === 0; break;
-                                    case 1: invert = y % 2 === 0; break;
-                                    case 2: invert = x % 3 === 0; break;
-                                    case 3: invert = (x + y) % 3 === 0; break;
-                                    case 4: invert = (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0; break;
-                                    case 5: invert = ((x * y) % 2) + ((x * y) % 3) === 0; break;
-                                    case 6: invert = (((x * y) % 2) + ((x * y) % 3)) % 2 === 0; break;
-                                    case 7: invert = (((x + y) % 2) + ((x * y) % 3)) % 2 === 0; break;
+                                    case 0:
+                                        invert = (x + y) % 2 === 0;
+                                        break;
+                                    case 1:
+                                        invert = y % 2 === 0;
+                                        break;
+                                    case 2:
+                                        invert = x % 3 === 0;
+                                        break;
+                                    case 3:
+                                        invert = (x + y) % 3 === 0;
+                                        break;
+                                    case 4:
+                                        invert = (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0;
+                                        break;
+                                    case 5:
+                                        invert = ((x * y) % 2) + ((x * y) % 3) === 0;
+                                        break;
+                                    case 6:
+                                        invert = (((x * y) % 2) + ((x * y) % 3)) % 2 === 0;
+                                        break;
+                                    case 7:
+                                        invert = (((x + y) % 2) + ((x * y) % 3)) % 2 === 0;
+                                        break;
                                 }
                                 if (invert) modules[y][x] = !modules[y][x];
                             }
@@ -361,18 +399,28 @@
                         let result = 0;
                         // Rule 1: runs of >= 5 same-colour modules in each row and column.
                         for (let y = 0; y < size; y++) {
-                            let run = 1, prev = modules[y][0];
+                            let run = 1,
+                                prev = modules[y][0];
                             for (let x = 1; x < size; x++) {
                                 if (modules[y][x] === prev) run++;
-                                else { if (run >= 5) result += 3 + (run - 5); run = 1; prev = modules[y][x]; }
+                                else {
+                                    if (run >= 5) result += 3 + (run - 5);
+                                    run = 1;
+                                    prev = modules[y][x];
+                                }
                             }
                             if (run >= 5) result += 3 + (run - 5);
                         }
                         for (let x = 0; x < size; x++) {
-                            let run = 1, prev = modules[0][x];
+                            let run = 1,
+                                prev = modules[0][x];
                             for (let y = 1; y < size; y++) {
                                 if (modules[y][x] === prev) run++;
-                                else { if (run >= 5) result += 3 + (run - 5); run = 1; prev = modules[y][x]; }
+                                else {
+                                    if (run >= 5) result += 3 + (run - 5);
+                                    run = 1;
+                                    prev = modules[y][x];
+                                }
                             }
                             if (run >= 5) result += 3 + (run - 5);
                         }
@@ -380,7 +428,11 @@
                         for (let y = 0; y < size - 1; y++) {
                             for (let x = 0; x < size - 1; x++) {
                                 const color = modules[y][x];
-                                if (color === modules[y][x + 1] && color === modules[y + 1][x] && color === modules[y + 1][x + 1])
+                                if (
+                                    color === modules[y][x + 1] &&
+                                    color === modules[y + 1][x] &&
+                                    color === modules[y + 1][x + 1]
+                                )
                                     result += 3;
                             }
                         }
@@ -388,7 +440,8 @@
                         const scanLine = (get) => {
                             let count = 0;
                             for (let i = 0; i + 11 <= size; i++) {
-                                let okA = true, okB = true;
+                                let okA = true,
+                                    okB = true;
                                 for (let k = 0; k < 11; k++) {
                                     const v = get(i + k);
                                     if (v !== FINDER_A[k]) okA = false;
@@ -496,6 +549,6 @@
         class="block h-full w-full"
         shape-rendering="crispEdges"
     >
-        <path :d="pathData" fill="currentColor" x-show="!error"></path>
+        <path :d="pathData" fill="currentColor" x-show="! error"></path>
     </svg>
 </div>

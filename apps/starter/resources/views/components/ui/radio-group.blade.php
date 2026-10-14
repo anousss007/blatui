@@ -23,12 +23,28 @@
     data-slot="radio-group"
     role="radiogroup"
     x-data="{ _model: $blatModel(@js($value)), get value() { return this._model.value; }, set value(v) { this._model.value = v; }, rovingValue: @js($value) }"
-    x-init="$nextTick(() => { if (rovingValue === null) { const f = $el.querySelector('[role=radio]:not([disabled])'); rovingValue = f?.getAttribute('data-value') ?? null } })"
-    @keydown="if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End'].includes($event.key)) { $blatNav($event, { selector: '[role=radio]', orientation: 'both' }); const v = document.activeElement?.getAttribute('data-value'); if (v != null) { value = v; rovingValue = v; } }"
+    x-init="
+        $nextTick(() => {
+            if (rovingValue === null) {
+                const f = $el.querySelector('[role=radio]:not([disabled])');
+                rovingValue = f?.getAttribute('data-value') ?? null;
+            }
+        })
+    "
+    @keydown="
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes($event.key)) {
+            $blatNav($event, { selector: '[role=radio]', orientation: 'both' });
+            const v = document.activeElement?.getAttribute('data-value');
+            if (v != null) {
+                value = v;
+                rovingValue = v;
+            }
+        }
+    "
     {{ $attributes->twMerge('grid gap-3') }}
 >
     @if ($name)
-        <input type="hidden" name="{{ $name }}" :value="value">
+        <input type="hidden" name="{{ $name }}" :value="value" />
     @endif
     {{ $slot }}
 </div>

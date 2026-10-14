@@ -128,47 +128,86 @@
 >
     @if ($range)
         @if ($name)
-            <input type="hidden" name="{{ $name }}[min]" :value="low">
-            <input type="hidden" name="{{ $name }}[max]" :value="high">
+            <input type="hidden" name="{{ $name }}[min]" :value="low" />
+            <input type="hidden" name="{{ $name }}[max]" :value="high" />
         @endif
         <span data-slot="slider-track" x-ref="track" @pointerdown="start($event)" class="{{ $trackCls }}">
-            <span data-slot="slider-range" class="bg-primary absolute {{ $vertical ? 'w-full' : 'h-full' }}" :style="fillStyle(lowPercent, highPercent - lowPercent)"></span>
+            <span
+                data-slot="slider-range"
+                class="bg-primary absolute {{ $vertical ? 'w-full' : 'h-full' }}"
+                :style="fillStyle(lowPercent, highPercent - lowPercent)"
+            ></span>
         </span>
         <span
-            data-slot="slider-thumb" role="slider" aria-orientation="{{ $orientation }}" aria-label="{{ __(':label minimum', ['label' => $ariaLabel]) }}"
-            :tabindex="disabled ? -1 : 0" :aria-disabled="disabled" :aria-valuemin="min" :aria-valuemax="high" :aria-valuenow="low"
+            data-slot="slider-thumb"
+            role="slider"
+            aria-orientation="{{ $orientation }}"
+            aria-label="{{ __(':label minimum', ['label' => $ariaLabel]) }}"
+            :tabindex="disabled ? -1 : 0"
+            :aria-disabled="disabled"
+            :aria-valuemin="min"
+            :aria-valuemax="high"
+            :aria-valuenow="low"
             @pointerdown.stop="start($event, 'low')"
-            @keydown.left.prevent="bumpLow(-1)" @keydown.down.prevent="bumpLow(-1)"
-            @keydown.right.prevent="bumpLow(1)" @keydown.up.prevent="bumpLow(1)"
-            @keydown.home.prevent="low = min" @keydown.end.prevent="low = high"
+            @keydown.left.prevent="bumpLow(-1)"
+            @keydown.down.prevent="bumpLow(-1)"
+            @keydown.right.prevent="bumpLow(1)"
+            @keydown.up.prevent="bumpLow(1)"
+            @keydown.home.prevent="low = min"
+            @keydown.end.prevent="low = high"
             :style="thumbStyle(lowPercent)"
             class="{{ $thumbCls }}"
         ></span>
         <span
-            data-slot="slider-thumb" role="slider" aria-orientation="{{ $orientation }}" aria-label="{{ __(':label maximum', ['label' => $ariaLabel]) }}"
-            :tabindex="disabled ? -1 : 0" :aria-disabled="disabled" :aria-valuemin="low" :aria-valuemax="max" :aria-valuenow="high"
+            data-slot="slider-thumb"
+            role="slider"
+            aria-orientation="{{ $orientation }}"
+            aria-label="{{ __(':label maximum', ['label' => $ariaLabel]) }}"
+            :tabindex="disabled ? -1 : 0"
+            :aria-disabled="disabled"
+            :aria-valuemin="low"
+            :aria-valuemax="max"
+            :aria-valuenow="high"
             @pointerdown.stop="start($event, 'high')"
-            @keydown.left.prevent="bumpHigh(-1)" @keydown.down.prevent="bumpHigh(-1)"
-            @keydown.right.prevent="bumpHigh(1)" @keydown.up.prevent="bumpHigh(1)"
-            @keydown.home.prevent="high = low" @keydown.end.prevent="high = max"
+            @keydown.left.prevent="bumpHigh(-1)"
+            @keydown.down.prevent="bumpHigh(-1)"
+            @keydown.right.prevent="bumpHigh(1)"
+            @keydown.up.prevent="bumpHigh(1)"
+            @keydown.home.prevent="high = low"
+            @keydown.end.prevent="high = max"
             :style="thumbStyle(highPercent)"
             class="{{ $thumbCls }}"
         ></span>
     @else
         @if ($name)
-            <input type="hidden" name="{{ $name }}" :value="value">
+            <input type="hidden" name="{{ $name }}" :value="value" />
         @endif
         <span data-slot="slider-track" x-ref="track" @pointerdown="start($event)" class="{{ $trackCls }}">
-            <span data-slot="slider-range" class="bg-primary absolute {{ $vertical ? 'w-full' : 'h-full' }}" :style="fillStyle(0, percent)"></span>
+            <span
+                data-slot="slider-range"
+                class="bg-primary absolute {{ $vertical ? 'w-full' : 'h-full' }}"
+                :style="fillStyle(0, percent)"
+            ></span>
         </span>
         <span
-            data-slot="slider-thumb" role="slider" aria-orientation="{{ $orientation }}" aria-label="{{ $ariaLabel }}"
-            :tabindex="disabled ? -1 : 0" :aria-disabled="disabled" :aria-valuemin="min" :aria-valuemax="max" :aria-valuenow="value"
+            data-slot="slider-thumb"
+            role="slider"
+            aria-orientation="{{ $orientation }}"
+            aria-label="{{ $ariaLabel }}"
+            :tabindex="disabled ? -1 : 0"
+            :aria-disabled="disabled"
+            :aria-valuemin="min"
+            :aria-valuemax="max"
+            :aria-valuenow="value"
             @pointerdown="start($event)"
-            @keydown.left.prevent="bump(-1)" @keydown.down.prevent="bump(-1)"
-            @keydown.right.prevent="bump(1)" @keydown.up.prevent="bump(1)"
-            @keydown.home.prevent="value = min" @keydown.end.prevent="value = max"
-            @keydown.page-up.prevent="page(1)" @keydown.page-down.prevent="page(-1)"
+            @keydown.left.prevent="bump(-1)"
+            @keydown.down.prevent="bump(-1)"
+            @keydown.right.prevent="bump(1)"
+            @keydown.up.prevent="bump(1)"
+            @keydown.home.prevent="value = min"
+            @keydown.end.prevent="value = max"
+            @keydown.page-up.prevent="page(1)"
+            @keydown.page-down.prevent="page(-1)"
             :style="thumbStyle(percent)"
             class="{{ $thumbCls }}"
         ></span>

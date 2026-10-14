@@ -12,18 +12,20 @@
     $items = collect($options)->map(function ($option) {
         if (is_array($option)) {
             $val = $option['value'] ?? ($option['label'] ?? null);
+
             return [
                 'value' => (string) $val,
                 'label' => (string) ($option['label'] ?? $val),
                 'icon' => $option['icon'] ?? null,
             ];
         }
+
         return ['value' => (string) $option, 'label' => (string) $option, 'icon' => null];
     })->values();
 
     // A stable name keeps the radios in one native group — that gives roving focus and
     // arrow-key navigation for free, and lets the selection submit with a form.
-    $groupName = $name ?? ('segmented-control-' . \Illuminate\Support\Str::random(6));
+    $groupName = $name ?? ('segmented-control-'.\Illuminate\Support\Str::random(6));
 
     $tracks = [
         'sm' => 'h-8 p-0.5 text-xs',
@@ -57,7 +59,11 @@
             $checked = $value !== null && (string) $value === $item['value'];
         @endphp
         {{-- Wrapper flexes each segment to equal width and scopes the peer input to its own label. --}}
-        <span data-slot="segmented-control-item" data-value="{{ $item['value'] }}" class="relative inline-flex min-w-0 flex-1 shrink-0">
+        <span
+            data-slot="segmented-control-item"
+            data-value="{{ $item['value'] }}"
+            class="relative inline-flex min-w-0 flex-1 shrink-0"
+        >
             {{-- The radio sits INSIDE its label, which is what pairs the two. A `for`/`id` pair
                  needs an id, and an id this component generated would be a fresh morph key on
                  every render: Livewire keys on `el.id` absent a wire:key, so it replaced the
@@ -75,21 +81,19 @@
                     @checked($checked)
                     @disabled($disabled)
                     {{ $wireAttrs }}
-                >
+                />
                 {{-- The styled segment. peer-checked gives the raised/filled active look (more than colour). --}}
-                <span
-                    @class([
-                        'inline-flex w-full min-w-0 items-center justify-center whitespace-nowrap rounded-md font-medium text-muted-foreground transition-[color,box-shadow] outline-none',
-                        'peer-checked:bg-background peer-checked:text-foreground peer-checked:shadow-sm',
-                        'peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50',
-                        '[&_svg]:pointer-events-none [&_svg]:shrink-0',
-                        $segment,
-                        'cursor-pointer hover:text-foreground' => ! $disabled,
-                        'cursor-not-allowed' => $disabled,
-                    ])
-                >
+                <span @class([
+                    'inline-flex w-full min-w-0 items-center justify-center whitespace-nowrap rounded-md font-medium text-muted-foreground transition-[color,box-shadow] outline-none',
+                    'peer-checked:bg-background peer-checked:text-foreground peer-checked:shadow-sm',
+                    'peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50',
+                    '[&_svg]:pointer-events-none [&_svg]:shrink-0',
+                    $segment,
+                    'cursor-pointer hover:text-foreground' => ! $disabled,
+                    'cursor-not-allowed' => $disabled,
+                ])>
                     @if ($item['icon'])
-                        <x-dynamic-component :component="'lucide-' . $item['icon']" aria-hidden="true" />
+                        <x-dynamic-component :component="'lucide-'.$item['icon']" aria-hidden="true" />
                     @endif
                     <span>{{ $item['label'] }}</span>
                 </span>

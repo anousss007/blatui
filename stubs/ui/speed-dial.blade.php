@@ -31,7 +31,7 @@
     x-data="{
         open: @js((bool) $open),
         count: @js(count($items)),
-        toggle() { this.open = !this.open; },
+        toggle() { this.open = ! this.open; },
         close() { this.open = false; },
     }"
     @keydown.escape.window="open && (close(), $refs.fab.focus())"
@@ -39,10 +39,7 @@
     {{ $attributes->twMerge('relative inline-flex flex-col items-center motion-reduce:transition-none') }}
 >
     {{-- Action stack: absolutely positioned so toggling does not shift the FAB. --}}
-    <div
-        class="absolute {{ $stackClasses }} flex items-center gap-3"
-        :class="open ? '' : 'pointer-events-none'"
-    >
+    <div class="absolute {{ $stackClasses }} flex items-center gap-3" :class="open ? '' : 'pointer-events-none'">
         @foreach ($items as $i => $action)
             @php
                 // Stagger: the action nearest the FAB leads. For `up` the DOM order is
@@ -76,7 +73,7 @@
                         {{ $action['label'] }}
                     </span>
                 @endif
-                <span class="bg-card text-foreground inline-flex size-10 shrink-0 items-center justify-center rounded-full border shadow-sm transition-colors group-hover/action:bg-accent group-hover/action:text-accent-foreground group-focus-visible/action:ring-ring/50 group-focus-visible/action:ring-[3px]">
+                <span class="bg-card text-foreground group-hover/action:bg-accent group-hover/action:text-accent-foreground group-focus-visible/action:ring-ring/50 inline-flex size-10 shrink-0 items-center justify-center rounded-full border shadow-sm transition-colors group-focus-visible/action:ring-[3px]">
                     @if (! empty($action['icon']))
                         <x-dynamic-component :component="'lucide-'.$action['icon']" class="size-5" aria-hidden="true" />
                     @endif
@@ -93,7 +90,7 @@
         aria-haspopup="menu"
         :aria-expanded="open ? 'true' : 'false'"
         @click="toggle()"
-        class="bg-primary text-primary-foreground inline-flex size-14 shrink-0 cursor-pointer items-center justify-center rounded-full shadow-lg transition-colors outline-none hover:bg-primary/90 focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+        class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/50 inline-flex size-14 shrink-0 cursor-pointer items-center justify-center rounded-full shadow-lg transition-colors outline-none focus-visible:ring-[3px]"
     >
         <x-dynamic-component
             :component="'lucide-'.$icon"

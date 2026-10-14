@@ -15,14 +15,18 @@
     aria-label="{{ $attributes->get('aria-label', __('Tree')) }}"
     x-data="{
         focusables() {
-            return [...$el.querySelectorAll('[role=treeitem]')].filter(el => el.offsetParent !== null);
+            return [...$el.querySelectorAll('[role=treeitem]')].filter((el) => el.offsetParent !== null);
         },
         move(current, dir) {
             const items = this.focusables();
             const i = items.indexOf(current);
             if (i === -1) return;
             const next = items[Math.min(items.length - 1, Math.max(0, i + dir))];
-            if (next) { items.forEach(el => el.tabIndex = -1); next.tabIndex = 0; next.focus(); }
+            if (next) {
+                items.forEach((el) => (el.tabIndex = -1));
+                next.tabIndex = 0;
+                next.focus();
+            }
         },
     }"
     @keydown.down.prevent="move($event.target, 1)"

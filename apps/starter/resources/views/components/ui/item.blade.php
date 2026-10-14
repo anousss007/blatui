@@ -5,7 +5,7 @@
 ])
 
 @php
-    $base = "group/item flex items-center border border-transparent text-sm rounded-md transition-colors [a]:hover:bg-accent/50 [a]:transition-colors duration-100 flex-wrap outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
+    $base = 'group/item flex items-center border border-transparent text-sm rounded-md transition-colors [a]:hover:bg-accent/50 [a]:transition-colors duration-100 flex-wrap outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]';
     $variants = [
         'default' => 'bg-transparent',
         'outline' => 'border-border',
@@ -19,7 +19,15 @@
 @endphp
 
 @if ($href)
-    <a href="{{ $href }}" data-slot="item" data-variant="{{ $variant }}" data-size="{{ $size }}" {{ $attributes->twMerge($classes) }}>{{ $slot }}</a>
+    <a
+        href="{{ $href }}"
+        data-slot="item"
+        data-variant="{{ $variant }}"
+        data-size="{{ $size }}"
+        {{ $attributes->twMerge($classes) }}
+    >{{ $slot }}</a>
 @else
-    <div data-slot="item" data-variant="{{ $variant }}" data-size="{{ $size }}" {{ $attributes->twMerge($classes) }}>{{ $slot }}</div>
+    <div data-slot="item" data-variant="{{ $variant }}" data-size="{{ $size }}" {{ $attributes->twMerge($classes) }}>
+        {{ $slot }}
+    </div>
 @endif

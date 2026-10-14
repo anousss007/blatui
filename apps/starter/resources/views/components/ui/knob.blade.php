@@ -120,7 +120,7 @@
     {{ $attributes->twMerge('text-primary inline-flex flex-col items-center gap-2 select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50') }}
 >
     @if ($name)
-        <input type="hidden" name="{{ $name }}" :value="value">
+        <input type="hidden" name="{{ $name }}" :value="value" />
     @endif
 
     <div
@@ -151,21 +151,35 @@
         <svg viewBox="0 0 {{ $vb }} {{ $vb }}" fill="none" aria-hidden="true" class="size-full -rotate-[135deg]">
             {{-- background track (270° arc) --}}
             <circle
-                cx="{{ $center }}" cy="{{ $center }}" r="{{ $radius }}"
-                class="stroke-border" stroke-width="{{ $thickness }}" stroke-linecap="round"
+                cx="{{ $center }}"
+                cy="{{ $center }}"
+                r="{{ $radius }}"
+                class="stroke-border"
+                stroke-width="{{ $thickness }}"
+                stroke-linecap="round"
                 stroke-dasharray="{{ $arcLen }} {{ $circ }}"
             />
             {{-- value arc --}}
             <circle
-                cx="{{ $center }}" cy="{{ $center }}" r="{{ $radius }}"
-                stroke="currentColor" stroke-width="{{ $thickness }}" stroke-linecap="round"
-                stroke-dasharray="{{ $circ }}" :stroke-dashoffset="dashOffset"
+                cx="{{ $center }}"
+                cy="{{ $center }}"
+                r="{{ $radius }}"
+                stroke="currentColor"
+                stroke-width="{{ $thickness }}"
+                stroke-linecap="round"
+                stroke-dasharray="{{ $circ }}"
+                :stroke-dashoffset="dashOffset"
                 class="transition-[stroke-dashoffset] duration-100 ease-out"
             />
             {{-- indicator notch at the current angle (rotates around centre) --}}
             <line
-                x1="{{ $center }}" y1="{{ $thickness + 3 }}" x2="{{ $center }}" y2="{{ $thickness + 11 }}"
-                stroke="currentColor" stroke-width="{{ $thickness * 0.5 }}" stroke-linecap="round"
+                x1="{{ $center }}"
+                y1="{{ $thickness + 3 }}"
+                x2="{{ $center }}"
+                y2="{{ $thickness + 11 }}"
+                stroke="currentColor"
+                stroke-width="{{ $thickness * 0.5 }}"
+                stroke-linecap="round"
                 :style="`transform: rotate(${angle + 135}deg); transform-origin: {{ $center }}px {{ $center }}px;`"
             />
         </svg>

@@ -2,9 +2,9 @@
 
 @php
     $variants = [
-        'default' => "bg-transparent",
+        'default' => 'bg-transparent',
         'icon' => "bg-muted size-8 border rounded-sm [&_svg:not([class*='size-'])]:size-4",
-        'image' => "size-10 rounded-sm overflow-hidden [&_img]:size-full [&_img]:object-cover",
+        'image' => 'size-10 rounded-sm overflow-hidden [&_img]:size-full [&_img]:object-cover',
     ];
 @endphp
 

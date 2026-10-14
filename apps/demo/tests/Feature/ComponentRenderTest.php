@@ -380,7 +380,7 @@ class ComponentRenderTest extends TestCase
     {
         $provider = $this->render('<x-ui.sidebar-provider>x</x-ui.sidebar-provider>');
         $this->assertStringContainsString('collapsed: false', $provider);
-        $this->assertStringContainsString('x-effect="collapsed = !isMobile && !open"', $provider);
+        $this->assertMatchesRegularExpression('/x-effect="collapsed = !\s*isMobile && !\s*open"/', $provider);
         $this->assertStringNotContainsString('get collapsed', $provider);
 
         $tipped = $this->render('<x-ui.sidebar-menu-button tooltip="Home">x</x-ui.sidebar-menu-button>');
@@ -388,7 +388,7 @@ class ComponentRenderTest extends TestCase
 
         // The shipped block composes collapsible + tooltip around the same button.
         $block = $this->render('<x-block.nav-main :items="[[\'title\' => \'Home\', \'icon\' => \'house\', \'items\' => []]]" />');
-        $this->assertStringContainsString('x-on:click="open = !open"', $block);
+        $this->assertMatchesRegularExpression('/x-on:click="open = !\s*open"/', $block);
         $this->assertStringContainsString('data-slot="sidebar-menu-button-tooltip"', $block);
         $this->assertStringNotContainsString('open: false, tipOpen', $block);
     }
@@ -579,7 +579,7 @@ class ComponentRenderTest extends TestCase
     public function test_notification_center_links_where_it_is_told_to(): void
     {
         $html = $this->render('<x-ui.notification-center view-all-href="/notifications" navigate :notifications="[[\'title\' => \'Paid\', \'time\' => \'now\', \'href\' => \'/invoices/7\'], [\'title\' => \'Plain\', \'time\' => \'now\']]" />');
-        $this->assertMatchesRegularExpression('#<a href="/invoices/7"\s+wire:navigate#', $html);
+        $this->assertMatchesRegularExpression('#<a\s+href="/invoices/7"\s+wire:navigate#', $html);
         $this->assertMatchesRegularExpression('#href="/notifications"\s+wire:navigate#', $html);
         $this->assertSame(2, preg_match_all('/<a\s/', $html));
 

@@ -65,31 +65,44 @@
         x-model="value"
         x-init="$nextTick(() => resize($el))"
         @input="resize($el)"
-        @keydown.enter="if ($event.metaKey || $event.ctrlKey) { $event.preventDefault(); submit(); }"
+        @keydown.enter="
+            if ($event.metaKey || $event.ctrlKey) {
+                $event.preventDefault();
+                submit();
+            }
+        "
         rows="{{ (int) $rows }}"
         aria-label="{{ $textareaLabel }}"
         placeholder="{{ $placeholder }}"
-        @if ($name) name="{{ $name }}" @endif
-        @if ($id) id="{{ $id }}" @endif
+        @if ($name)
+        name="{{ $name }}"
+        @endif
+        @if ($id)
+        id="{{ $id }}"
+        @endif
         @disabled($disabled)
         class="placeholder:text-muted-foreground text-foreground flex w-full resize-none overflow-hidden bg-transparent px-2 pt-1 text-base outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
     ></textarea>
 
     <div data-slot="prompt-input-toolbar" class="flex items-center gap-2">
         @if ($attachable)
-            <button
-                type="button"
-                aria-label="{{ __('Attach file') }}"
-                @disabled($disabled)
-                class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-8 shrink-0 items-center justify-center rounded-lg outline-none transition-colors focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-                <x-lucide-paperclip class="size-4" aria-hidden="true" />
-            </button>
+        <button
+            type="button"
+            aria-label="{{ __('Attach file') }}"
+            @disabled($disabled)
+            class="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+            <x-lucide-paperclip class="size-4" aria-hidden="true" />
+        </button>
         @endif
 
         <div class="flex-1"></div>
 
-        <span data-slot="prompt-input-hint" class="text-muted-foreground hidden text-xs select-none sm:inline" aria-hidden="true">
+        <span
+            data-slot="prompt-input-hint"
+            class="text-muted-foreground hidden text-xs select-none sm:inline"
+            aria-hidden="true"
+        >
             <kbd class="font-sans">⌘↵</kbd> {{ __('to send') }}
         </span>
 
@@ -98,7 +111,7 @@
             aria-label="{{ __('Send') }}"
             @click="submit()"
             :disabled="disabled || empty"
-            class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/50 inline-flex size-8 shrink-0 items-center justify-center rounded-full shadow-xs outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50"
+            class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/50 inline-flex size-8 shrink-0 items-center justify-center rounded-full shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50"
         >
             <x-lucide-arrow-up class="size-4" aria-hidden="true" />
         </button>

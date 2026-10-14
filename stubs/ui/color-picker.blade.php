@@ -91,7 +91,7 @@
         // #rrggbb → hue (0..360) so a typed/picked colour positions the slider.
         hexToHue(hex) {
             const n = this.normalize(hex);
-            if (!n) return 0;
+            if (! n) return 0;
             const r = parseInt(n.slice(1, 3), 16) / 255;
             const g = parseInt(n.slice(3, 5), 16) / 255;
             const b = parseInt(n.slice(5, 7), 16) / 255;
@@ -127,7 +127,7 @@
 
         pick(c) {
             const n = this.normalize(c);
-            if (!n) return;
+            if (! n) return;
             this.hex = n;
             this.input = n;
             this.hue = this.hexToHue(n);
@@ -139,20 +139,24 @@
     {{ $attributes->twMerge('relative inline-block text-start') }}
 >
     @if ($name)
-        <input type="hidden" name="{{ $name }}" :value="hex">
+        <input type="hidden" name="{{ $name }}" :value="hex" />
     @endif
 
     {{-- Trigger: shown only in popover mode. --}}
-    <template x-if="!inline">
+    <template x-if="! inline">
         <button
             type="button"
             :disabled="disabled"
             aria-haspopup="dialog"
             :aria-expanded="open"
-            @click="open = !open"
+            @click="open = ! open"
             class="border-input bg-background ring-offset-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium shadow-xs transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
         >
-            <span class="border-border/50 size-4 rounded-sm border" :style="`background-color: ${hex}`" aria-hidden="true"></span>
+            <span
+                class="border-border/50 size-4 rounded-sm border"
+                :style="`background-color: ${hex}`"
+                aria-hidden="true"
+            ></span>
             <span class="font-mono" x-text="hex"></span>
         </button>
     </template>
@@ -177,7 +181,7 @@
             'bg-popover text-popover-foreground border-border z-50 w-64 rounded-lg border p-4 shadow-md',
             'absolute start-0 top-full mt-2' => ! $inline,
         ])
-        @unless ($inline) style="display: none;" @endunless
+        @unless ($inline) style="display: none" @endunless
     >
         <div class="flex flex-col gap-4">
             {{-- Large preview swatch --}}
@@ -198,7 +202,18 @@
                     @input="setHue($event.target.value)"
                     aria-label="{{ __('Hue') }}"
                     class="focus-visible:ring-ring h-3 w-full cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-2"
-                    style="background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);"
+                    style="
+                        background: linear-gradient(
+                            to right,
+                            #ff0000 0%,
+                            #ffff00 17%,
+                            #00ff00 33%,
+                            #00ffff 50%,
+                            #0000ff 67%,
+                            #ff00ff 83%,
+                            #ff0000 100%
+                        );
+                    "
                 />
             </div>
 
@@ -217,9 +232,9 @@
                     x-model="input"
                     @input="commit($event.target.value)"
                     @blur="sync()"
-                    :aria-invalid="!isValid"
+                    :aria-invalid="! isValid"
                     placeholder="#rrggbb"
-                    class="border-input bg-transparent dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 font-mono text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+                    class="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 font-mono text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
                 />
             </div>
 

@@ -32,11 +32,19 @@
     }"
     {{ $attributes->twMerge('inline-flex items-center gap-2') }}
 >
-    <span x-show="done" x-cloak data-slot="countdown-expired" class="text-muted-foreground text-sm font-medium">{{ trim($slot) !== '' ? $slot : $expired }}</span>
+    <span
+        x-show="done"
+        x-cloak
+        data-slot="countdown-expired"
+        class="text-muted-foreground text-sm font-medium"
+    >{{ trim($slot) !== '' ? $slot : $expired }}</span>
 
-    <div x-show="!done" class="flex items-center gap-2">
+    <div x-show="! done" class="flex items-center gap-2">
         @foreach (['days', 'hours', 'minutes', 'seconds'] as $unit)
-            <div data-slot="countdown-unit" class="bg-card flex min-w-[3.25rem] flex-col items-center rounded-lg border px-2 py-1.5 shadow-xs">
+            <div
+                data-slot="countdown-unit"
+                class="bg-card flex min-w-[3.25rem] flex-col items-center rounded-lg border px-2 py-1.5 shadow-xs"
+            >
                 <span class="text-xl font-bold tabular-nums" x-text="pad({{ $unit }})">00</span>
                 <span class="text-muted-foreground text-[10px] font-medium tracking-wide uppercase">{{ $labels[$unit] ?? ucfirst($unit) }}</span>
             </div>

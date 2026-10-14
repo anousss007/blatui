@@ -78,7 +78,9 @@
         foreach ($nodes as $i => $node) {
             $key = (string) data_get($node, $rowKey);
             // A row listed twice, or its own ancestor, would recurse forever; draw it once.
-            if (isset($seen[$key])) continue;
+            if (isset($seen[$key])) {
+                continue;
+            }
             $seen[$key] = true;
             $children = $childrenOf($node);
             $flat[] = [
@@ -93,7 +95,9 @@
         // Flat rows: a row whose parent is not in the set is a root here — which is what a
         // search result or a page of a paginator looks like.
         $keys = [];
-        foreach ($items as $r) $keys[(string) data_get($r, $rowKey)] = true;
+        foreach ($items as $r) {
+            $keys[(string) data_get($r, $rowKey)] = true;
+        }
         $byParent = [];
         foreach ($items as $r) {
             $p = data_get($r, $parentKey);
@@ -119,16 +123,24 @@
         $params = $action['params'] ?? [data_get($row, $rowKey)];
 
         return collect($params)->map(function ($p) {
-            if (is_bool($p)) return $p ? 'true' : 'false';
-            if (is_int($p) || is_float($p)) return (string) $p;
+            if (is_bool($p)) {
+                return $p ? 'true' : 'false';
+            }
+            if (is_int($p) || is_float($p)) {
+                return (string) $p;
+            }
 
             return "'".addslashes((string) $p)."'";
         })->implode(', ');
     };
     $actionHref = function (array $action, $row) use ($rowKey) {
         $h = $action['href'] ?? null;
-        if ($h instanceof \Closure) return $h($row);
-        if (is_string($h)) return str_replace('{id}', (string) data_get($row, $rowKey), $h);
+        if ($h instanceof \Closure) {
+            return $h($row);
+        }
+        if (is_string($h)) {
+            return str_replace('{id}', (string) data_get($row, $rowKey), $h);
+        }
 
         return null;
     };
@@ -191,34 +203,56 @@
                         : [(string) $key => (string) $label])->all();
                 @endphp
                 <div class="ms-auto">
-                    <x-ui.select wire:model.live="{{ $perPageModel }}" :options="$perPage" :aria-label="$perPageLabel" size="sm" class="w-auto" />
+                    <x-ui.select
+                        wire:model.live="{{ $perPageModel }}"
+                        :options="$perPage"
+                        :aria-label="$perPageLabel"
+                        size="sm"
+                        class="w-auto"
+                    />
                 </div>
             @endif
         </div>
     @endif
 
-    <div class="{{ $wrapperClass }} {{ $stack ? 'md:overflow-x-auto' : 'relative w-full overflow-x-auto' }}"
-        wire:loading.class.delay="opacity-60">
-        <table role="treegrid" data-slot="table" class="w-full caption-bottom text-sm {{ $stack ? 'max-md:block' : '' }}"
-            @if ($reorderable) :aria-describedby="$id('tree-hint')" @endif>
+    <div
+        class="{{ $wrapperClass }} {{ $stack ? 'md:overflow-x-auto' : 'relative w-full overflow-x-auto' }}"
+        wire:loading.class.delay="opacity-60"
+    >
+        <table
+            role="treegrid"
+            data-slot="table"
+            class="w-full caption-bottom text-sm {{ $stack ? 'max-md:block' : '' }}"
+            @if ($reorderable) :aria-describedby="$id('tree-hint')" @endif
+        >
             @if ($caption)
-                <caption class="{{ $captionVisible ? 'text-muted-foreground p-2 text-start text-sm' : 'sr-only' }}">{{ $caption }}</caption>
+                <caption class="{{ $captionVisible ? 'text-muted-foreground p-2 text-start text-sm' : 'sr-only' }}">
+                    {{ $caption }}
+                </caption>
             @endif
 
             <thead data-slot="table-header" class="[&_tr]:border-b {{ $stack ? 'max-md:sr-only' : '' }}">
                 <tr class="border-b">
                     @foreach ($cols as $col)
-                        <th scope="col"
+                        <th
+                            scope="col"
                             @if ($col['sortable']) aria-sort="{{ $sort === $col['key'] ? ($direction === 'asc' ? 'ascending' : 'descending') : 'none' }}" @endif
                             @if ($col['width']) style="width: {{ $col['width'] }}" @endif
-                            class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap {{ $alignClass($col['align']) }} {{ $col['class'] }}">
+                            class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap {{ $alignClass($col['align']) }} {{ $col['class'] }}"
+                        >
                             @if ($col['sortable'])
-                                <button type="button" wire:click="{{ $sortMethod }}('{{ $col['key'] }}')"
-                                    class="hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 -ms-2 inline-flex items-center gap-1 rounded-md px-2 py-1 transition-colors outline-none focus-visible:ring-[3px]">
+                                <button
+                                    type="button"
+                                    wire:click="{{ $sortMethod }}('{{ $col['key'] }}')"
+                                    class="hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 -ms-2 inline-flex items-center gap-1 rounded-md px-2 py-1 transition-colors outline-none focus-visible:ring-[3px]"
+                                >
                                     {{ $col['label'] }}
                                     <span class="text-muted-foreground inline-flex" aria-hidden="true">
                                         @if ($sort === $col['key'])
-                                            <x-dynamic-component :component="'lucide-'.($direction === 'asc' ? 'chevron-up' : 'chevron-down')" class="size-3.5" />
+                                            <x-dynamic-component
+                                                :component="'lucide-'.($direction === 'asc' ? 'chevron-up' : 'chevron-down')"
+                                                class="size-3.5"
+                                            />
                                         @else
                                             <x-lucide-chevrons-up-down class="size-3.5 opacity-50" />
                                         @endif
@@ -231,7 +265,10 @@
                     @endforeach
 
                     @if ($hasActions)
-                        <th scope="col" class="text-foreground h-10 px-2 text-end align-middle font-medium whitespace-nowrap">
+                        <th
+                            scope="col"
+                            class="text-foreground h-10 px-2 text-end align-middle font-medium whitespace-nowrap"
+                        >
                             <span class="sr-only">{{ $actionsLabel }}</span>
                         </th>
                     @endif
@@ -241,8 +278,12 @@
             {{-- Every row is rendered, open or not: expanding is Alpine showing what is already
                  there, so it costs no request and survives any re-render. --}}
             {{-- The drop line is drawn on the cells, because the row's own box-shadow is its focus ring. --}}
-            <tbody x-ref="body" data-slot="table-body" @keydown="onKeydown($event)"
-                class="{{ $stack ? 'max-md:block md:[&_tr:last-child]:border-0' : '[&_tr:last-child]:border-0' }}">
+            <tbody
+                x-ref="body"
+                data-slot="table-body"
+                @keydown="onKeydown($event)"
+                class="{{ $stack ? 'max-md:block md:[&_tr:last-child]:border-0' : '[&_tr:last-child]:border-0' }}"
+            >
                 @forelse ($flat as $node)
                     @php $row = $node['row']; @endphp
                     <tr
@@ -279,37 +320,51 @@
                                 $value = data_get($row, $col['key']);
                                 $isTree = $col['key'] === $treeCol;
                             @endphp
-                            <td role="gridcell"
+                            <td
+                                role="gridcell"
                                 @if ($isTree) style="padding-inline-start: calc(0.5rem + var(--depth) * 1.5rem)" @endif
                                 @class([
                                     'p-2 align-middle whitespace-nowrap',
                                     $alignClass($col['align']),
                                     $col['class'],
                                     'max-md:flex max-md:items-center max-md:justify-between max-md:gap-4 max-md:whitespace-normal max-md:px-4 max-md:py-2.5 max-md:text-end max-md:ps-4!' => $stack,
-                                ])>
+                                ])
+                            >
                                 @if ($stack && ! $isTree)
-                                    <span class="text-muted-foreground font-medium md:hidden" aria-hidden="true">{{ $col['label'] }}</span>
+                                    <span
+                                        class="text-muted-foreground font-medium md:hidden"
+                                        aria-hidden="true"
+                                    >{{ $col['label'] }}</span>
                                 @endif
 
                                 @if ($isTree)
                                     <div class="flex min-w-0 items-center gap-1">
                                         @if ($reorderable)
-                                            <button type="button" tabindex="-1"
+                                            <button
+                                                type="button"
+                                                tabindex="-1"
                                                 data-slot="server-tree-table-handle"
                                                 aria-label="{{ __('Drag to reorder') }}"
                                                 @pointerdown="onHandleDown($event, @js($node['key']))"
-                                                class="text-muted-foreground hover:text-foreground flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded active:cursor-grabbing">
+                                                class="text-muted-foreground hover:text-foreground flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded active:cursor-grabbing"
+                                            >
                                                 <x-lucide-grip-vertical class="size-4" aria-hidden="true" />
                                             </button>
                                         @endif
 
                                         @if ($node['hasChildren'])
-                                            <button type="button" tabindex="-1"
+                                            <button
+                                                type="button"
+                                                tabindex="-1"
                                                 data-slot="server-tree-table-toggle"
                                                 @click="toggle(@js($node['key']))"
                                                 :aria-label="isOpen(@js($node['key'])) ? @js(__('Collapse')) : @js(__('Expand'))"
-                                                class="text-muted-foreground hover:text-foreground flex size-6 shrink-0 cursor-pointer items-center justify-center rounded">
-                                                <x-lucide-chevron-right class="size-4 transition-transform duration-150 rtl:-scale-x-100" aria-hidden="true" />
+                                                class="text-muted-foreground hover:text-foreground flex size-6 shrink-0 cursor-pointer items-center justify-center rounded"
+                                            >
+                                                <x-lucide-chevron-right
+                                                    class="size-4 transition-transform duration-150 rtl:-scale-x-100"
+                                                    aria-hidden="true"
+                                                />
                                             </button>
                                         @else
                                             <span class="size-6 shrink-0" aria-hidden="true"></span>
@@ -332,32 +387,48 @@
                         @endforeach
 
                         @if ($hasActions)
-                            <td role="gridcell" @class([
-                                'p-2 align-middle whitespace-nowrap',
-                                'max-md:flex max-md:justify-end max-md:px-4 max-md:py-3' => $stack,
-                            ])>
+                            <td
+                                role="gridcell"
+                                @class([
+                                    'p-2 align-middle whitespace-nowrap',
+                                    'max-md:flex max-md:justify-end max-md:px-4 max-md:py-3' => $stack,
+                                ])
+                            >
                                 @if ($actionsView)
                                     @include($actionsView, ['row' => $row, 'depth' => $node['depth']])
                                 @elseif ($actionsMode === 'dropdown')
                                     <div class="flex justify-end">
                                         <x-ui.dropdown-menu>
                                             <x-ui.dropdown-menu-trigger>
-                                                <x-ui.button variant="ghost" size="icon-xs" aria-label="{{ $actionsLabel }}">
+                                                <x-ui.button
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    aria-label="{{ $actionsLabel }}"
+                                                >
                                                     <x-lucide-ellipsis class="size-4" aria-hidden="true" />
                                                 </x-ui.button>
                                             </x-ui.dropdown-menu-trigger>
                                             <x-ui.dropdown-menu-content align="end">
                                                 @foreach ($actions as $action)
-                                                    @continue (isset($action['visible']) && $action['visible'] instanceof \Closure && ! ($action['visible'])($row))
+                                                    @continue(isset($action['visible']) && $action['visible'] instanceof \Closure && ! ($action['visible'])($row))
                                                     @php
                                                         $href = $actionHref($action, $row);
                                                         $variant = in_array($action['variant'] ?? null, ['danger', 'destructive'], true) ? 'destructive' : 'default';
                                                         $wireClick = (! $href && ($action['method'] ?? null)) ? $action['method'].'('.$actionArgs($action, $row).')' : null;
                                                         $wireConfirm = $action['confirm'] ?? null;
                                                     @endphp
-                                                    <x-ui.dropdown-menu-item :href="$href" :variant="$variant" :wire:click="$wireClick" :wire:confirm="$wireConfirm">
+                                                    <x-ui.dropdown-menu-item
+                                                        :href="$href"
+                                                        :variant="$variant"
+                                                        :wire:click="$wireClick"
+                                                        :wire:confirm="$wireConfirm"
+                                                    >
                                                         @isset($action['icon'])
-                                                            <x-dynamic-component :component="'lucide-'.$action['icon']" class="size-4" aria-hidden="true" />
+                                                            <x-dynamic-component
+                                                                :component="'lucide-'.$action['icon']"
+                                                                class="size-4"
+                                                                aria-hidden="true"
+                                                            />
                                                         @endisset
                                                         {{ $action['label'] ?? '' }}
                                                     </x-ui.dropdown-menu-item>
@@ -368,7 +439,7 @@
                                 @else
                                     <div class="flex items-center justify-end gap-1">
                                         @foreach ($actions as $action)
-                                            @continue (isset($action['visible']) && $action['visible'] instanceof \Closure && ! ($action['visible'])($row))
+                                            @continue(isset($action['visible']) && $action['visible'] instanceof \Closure && ! ($action['visible'])($row))
                                             @php
                                                 $href = $actionHref($action, $row);
                                                 $wireClick = (! $href && ($action['method'] ?? null)) ? $action['method'].'('.$actionArgs($action, $row).')' : null;
@@ -385,7 +456,11 @@
                                                 :aria-label="$action['label'] ?? __('Action')"
                                             >
                                                 @isset($action['icon'])
-                                                    <x-dynamic-component :component="'lucide-'.$action['icon']" class="size-4" aria-hidden="true" />
+                                                    <x-dynamic-component
+                                                        :component="'lucide-'.$action['icon']"
+                                                        class="size-4"
+                                                        aria-hidden="true"
+                                                    />
                                                 @endisset
                                                 @unless ($action['iconOnly'] ?? false)
                                                     <span @class(['sr-only sm:not-sr-only' => isset($action['icon'])])>{{ $action['label'] ?? '' }}</span>
@@ -399,9 +474,16 @@
                     </tr>
                 @empty
                     <tr class="{{ $stack ? 'max-md:block' : '' }}">
-                        <td colspan="{{ $colspan }}" class="h-24 text-center align-middle {{ $stack ? 'max-md:block' : '' }}">
+                        <td
+                            colspan="{{ $colspan }}"
+                            class="h-24 text-center align-middle {{ $stack ? 'max-md:block' : '' }}"
+                        >
                             <div class="text-muted-foreground flex flex-col items-center justify-center gap-2 py-6">
-                                <x-dynamic-component :component="'lucide-'.$emptyIcon" class="size-6 opacity-60" aria-hidden="true" />
+                                <x-dynamic-component
+                                    :component="'lucide-'.$emptyIcon"
+                                    class="size-6 opacity-60"
+                                    aria-hidden="true"
+                                />
                                 <span>{{ $emptyText }}</span>
                             </div>
                         </td>
@@ -412,14 +494,14 @@
     </div>
 
     @if ($reorderable)
-        <p class="sr-only" :id="$id('tree-hint')">{{ __('To move a row, focus it and press Space, move it with the arrow keys, then press Space again to drop it or Escape to cancel.') }}</p>
+        <p class="sr-only" :id="$id('tree-hint')">
+            {{ __('To move a row, focus it and press Space, move it with the arrow keys, then press Space again to drop it or Escape to cancel.') }}
+        </p>
         {{-- What a screen reader hears while a row is moved with the keyboard. --}}
         <p class="sr-only" aria-live="assertive" x-text="announcement"></p>
     @endif
 
     @if ($isPaginator && $paginate && $rows->hasPages())
-        <div class="pt-4">
-            {{ $rows->links() }}
-        </div>
+        <div class="pt-4">{{ $rows->links() }}</div>
     @endif
 </div>

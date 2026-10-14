@@ -12,6 +12,4 @@
     ][$size] ?? 'max-w-6xl';
 @endphp
 
-<div data-slot="container" {{ $attributes->twMerge('mx-auto w-full px-4 sm:px-6 lg:px-8 ' . $maxW) }}>
-    {{ $slot }}
-</div>
+<div data-slot="container" {{ $attributes->twMerge('mx-auto w-full px-4 sm:px-6 lg:px-8 ' . $maxW) }}>{{ $slot }}</div>

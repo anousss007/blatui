@@ -46,33 +46,36 @@
     <button
         type="button"
         data-slot="tool-call-trigger"
-        @click="open = !open"
+        @click="open = ! open"
         :id="$id('blat-tool-call', 'trigger')"
         :aria-controls="$id('blat-tool-call', 'body')"
         :aria-expanded="open"
         :data-state="open ? 'open' : 'closed'"
         @if ($id) data-tool-id="{{ $id }}" @endif
-        class="focus-visible:ring-ring focus-visible:ring-[3px] focus-visible:ring-offset-0 flex w-full items-center gap-3 px-4 py-3 text-start outline-none transition-colors hover:bg-muted/50"
+        class="focus-visible:ring-ring hover:bg-muted/50 flex w-full items-center gap-3 px-4 py-3 text-start transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-offset-0"
     >
         <x-lucide-wrench class="text-muted-foreground pointer-events-none size-4 shrink-0" aria-hidden="true" />
 
-        <span data-slot="tool-call-name" class="min-w-0 flex-1 truncate font-mono text-sm font-medium">{{ $name }}</span>
+        <span
+            data-slot="tool-call-name"
+            class="min-w-0 flex-1 truncate font-mono text-sm font-medium"
+        >{{ $name }}</span>
 
-        <span data-slot="tool-call-status" @class(['inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium', $meta['text']])>
-            @switch($status)
-                @case('running')
+        <span
+            data-slot="tool-call-status"
+            @class(['inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium', $meta['text']])
+        >
+            @switch ($status)
+                @case ('running')
                     <x-lucide-loader-circle class="size-3.5 shrink-0 animate-spin" aria-hidden="true" />
                     <span class="sr-only">{{ __('Running') }}</span>
                     @break
-
-                @case('success')
+                @case ('success')
                     <x-lucide-check class="size-3.5 shrink-0" aria-hidden="true" />
                     @break
-
-                @case('error')
+                @case ('error')
                     <x-lucide-x class="size-3.5 shrink-0" aria-hidden="true" />
                     @break
-
                 @default
                     <x-lucide-clock class="size-3.5 shrink-0" aria-hidden="true" />
             @endswitch
@@ -80,7 +83,7 @@
         </span>
 
         <x-lucide-chevron-down
-            class="text-muted-foreground pointer-events-none size-4 shrink-0 transition-transform duration-200 [[data-state=open]>&]:rotate-180"
+            class="text-muted-foreground [[data-state=open]>&]:rotate-180 pointer-events-none size-4 shrink-0 transition-transform duration-200"
             aria-hidden="true"
         />
     </button>
@@ -100,14 +103,20 @@
             @if ($argsText !== null)
                 <div data-slot="tool-call-arguments">
                     <p class="text-muted-foreground mb-1.5 text-xs font-medium">{{ __('Arguments') }}</p>
-                    <pre tabindex="0" class="bg-muted focus-visible:ring-ring/50 overflow-x-auto rounded-md p-3 font-mono text-xs leading-relaxed text-foreground outline-none focus-visible:ring-[3px]"><code>{{ $argsText }}</code></pre>
+                    <pre
+                        tabindex="0"
+                        class="bg-muted focus-visible:ring-ring/50 text-foreground overflow-x-auto rounded-md p-3 font-mono text-xs leading-relaxed outline-none focus-visible:ring-[3px]"
+                    ><code>{{ $argsText }}</code></pre>
                 </div>
             @endif
 
             @if ($resultText !== null)
                 <div data-slot="tool-call-result">
                     <p class="text-muted-foreground mb-1.5 text-xs font-medium">{{ __('Result') }}</p>
-                    <pre tabindex="0" @class(['bg-muted focus-visible:ring-ring/50 overflow-x-auto rounded-md p-3 font-mono text-xs leading-relaxed outline-none focus-visible:ring-[3px]', $status === 'error' ? 'text-destructive' : 'text-foreground'])><code>{{ $resultText }}</code></pre>
+                    <pre
+                        tabindex="0"
+                        @class(['bg-muted focus-visible:ring-ring/50 overflow-x-auto rounded-md p-3 font-mono text-xs leading-relaxed outline-none focus-visible:ring-[3px]', $status === 'error' ? 'text-destructive' : 'text-foreground'])
+                    ><code>{{ $resultText }}</code></pre>
                 </div>
             @endif
 

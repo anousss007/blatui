@@ -37,21 +37,34 @@
             'hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-sm',
         ])
         style="padding-inline-start: {{ $indent }}rem;"
-        @if ($hasChildren) @click="open = !open" @endif
+        @if ($hasChildren) @click="open = ! open" @endif
     >
         @if ($hasChildren)
             <span class="text-muted-foreground -ms-1 flex size-4 shrink-0 items-center justify-center">
-                <x-lucide-chevron-right class="size-3.5 transition-transform duration-150 rtl:-scale-x-100" x-bind:class="open && 'rotate-90'" aria-hidden="true" />
+                <x-lucide-chevron-right
+                    class="size-3.5 transition-transform duration-150 rtl:-scale-x-100"
+                    x-bind:class="open && 'rotate-90'"
+                    aria-hidden="true"
+                />
             </span>
         @else
             <span class="size-4 shrink-0"></span>
         @endif
 
         @if ($hasChildren)
-            <x-lucide-folder x-show="!open" class="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
-            <x-lucide-folder-open x-show="open" x-cloak class="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+            <x-lucide-folder x-show="! open" class="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+            <x-lucide-folder-open
+                x-show="open"
+                x-cloak
+                class="text-muted-foreground size-4 shrink-0"
+                aria-hidden="true"
+            />
         @elseif ($icon)
-            <x-dynamic-component :component="'lucide-'.$icon" class="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+            <x-dynamic-component
+                :component="'lucide-'.$icon"
+                class="text-muted-foreground size-4 shrink-0"
+                aria-hidden="true"
+            />
         @endif
 
         <span class="truncate">{{ $label }}</span>

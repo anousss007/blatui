@@ -1,4 +1,5 @@
-@props(['variant' => 'segmented'])   {{-- segmented (default pill) | underline | pills --}}
+@props(['variant' => 'segmented'])
+{{-- segmented (default pill) | underline | pills --}}
 
 @php
     $variants = [

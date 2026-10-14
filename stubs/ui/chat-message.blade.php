@@ -14,7 +14,7 @@
     if ($name) {
         $parts = array_values(array_filter(preg_split('/\s+/', trim($name))));
         if (count($parts) >= 2) {
-            $initials = strtoupper(mb_substr($parts[0], 0, 1) . mb_substr($parts[count($parts) - 1], 0, 1));
+            $initials = strtoupper(mb_substr($parts[0], 0, 1).mb_substr($parts[count($parts) - 1], 0, 1));
         } elseif (count($parts) === 1) {
             $initials = strtoupper(mb_substr($parts[0], 0, 2));
         }
@@ -38,7 +38,11 @@
             <x-ui.avatar-fallback class="text-foreground">{{ $initials }}</x-ui.avatar-fallback>
         @else
             <x-ui.avatar-fallback class="text-muted-foreground">
-                <x-dynamic-component :component="'lucide-'.($isUser ? 'user' : 'bot')" class="size-4" aria-hidden="true" />
+                <x-dynamic-component
+                    :component="'lucide-'.($isUser ? 'user' : 'bot')"
+                    class="size-4"
+                    aria-hidden="true"
+                />
             </x-ui.avatar-fallback>
         @endif
     </x-ui.avatar>
@@ -50,7 +54,7 @@
         'items-start' => ! $isUser,
     ])>
         @if ($name || $time)
-            <div class="flex items-center gap-2 px-1 text-xs text-muted-foreground">
+            <div class="text-muted-foreground flex items-center gap-2 px-1 text-xs">
                 @if ($name)
                     <span class="font-medium">{{ $name }}</span>
                 @endif
@@ -66,9 +70,19 @@
             'bg-muted text-foreground rounded-es-sm' => ! $isUser,
         ])>
             @if ($typing)
-                <span class="flex items-center gap-1 py-1" role="status" aria-label="{{ $name ? __(':name is typing', ['name' => $name]) : __('Typing') }}">
-                    <span class="size-2 animate-bounce rounded-full bg-current opacity-60 [animation-delay:-0.3s]" aria-hidden="true"></span>
-                    <span class="size-2 animate-bounce rounded-full bg-current opacity-60 [animation-delay:-0.15s]" aria-hidden="true"></span>
+                <span
+                    class="flex items-center gap-1 py-1"
+                    role="status"
+                    aria-label="{{ $name ? __(':name is typing', ['name' => $name]) : __('Typing') }}"
+                >
+                    <span
+                        class="size-2 animate-bounce rounded-full bg-current opacity-60 [animation-delay:-0.3s]"
+                        aria-hidden="true"
+                    ></span>
+                    <span
+                        class="size-2 animate-bounce rounded-full bg-current opacity-60 [animation-delay:-0.15s]"
+                        aria-hidden="true"
+                    ></span>
                     <span class="size-2 animate-bounce rounded-full bg-current opacity-60" aria-hidden="true"></span>
                 </span>
             @else

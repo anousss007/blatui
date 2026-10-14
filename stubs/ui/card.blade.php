@@ -12,6 +12,4 @@
     $classes = $variants[$variant] ?? $variants['default'];
 @endphp
 
-<div data-slot="card" {{ $attributes->twMerge($classes) }}>
-    {{ $slot }}
-</div>
+<div data-slot="card" {{ $attributes->twMerge($classes) }}>{{ $slot }}</div>

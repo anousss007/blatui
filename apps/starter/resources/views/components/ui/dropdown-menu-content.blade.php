@@ -25,7 +25,10 @@
         @click.outside="closeMenu(false)"
         @keydown.escape.prevent.stop="closeMenu()"
         @keydown.tab.prevent.stop="closeMenu()"
-        @keydown="$blatNav($event); $blatType($event)"
+        @keydown="
+            $blatNav($event);
+            $blatType($event);
+        "
         :id="$id('blat-menu')"
         :aria-labelledby="$id('blat-menu-trigger')"
         role="menu"

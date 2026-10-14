@@ -82,7 +82,7 @@
         <span
             x-show="! done"
             aria-hidden="true"
-            class="animate-caret-blink ms-px inline-block h-[1em] w-[0.5em] translate-y-[0.12em] bg-primary align-text-bottom"
+            class="animate-caret-blink bg-primary ms-px inline-block h-[1em] w-[0.5em] translate-y-[0.12em] align-text-bottom"
         ></span>
     @endif
 </span>

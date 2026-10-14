@@ -41,7 +41,10 @@
     <div class="flex items-start justify-between gap-4">
         <div class="flex items-center gap-3">
             @if ($icon || isset($leading))
-                <span class="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg" aria-hidden="true">
+                <span
+                    class="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg"
+                    aria-hidden="true"
+                >
                     @if (isset($leading))
                         {{ $leading }}
                     @else
@@ -51,9 +54,7 @@
             @endif
 
             @if ($label !== null)
-                <span class="text-muted-foreground text-sm font-medium">
-                    {{ $label }}
-                </span>
+                <span class="text-muted-foreground text-sm font-medium"> {{ $label }} </span>
             @endif
         </div>
 
@@ -70,9 +71,7 @@
         @endif
     </div>
 
-    <div class="text-2xl font-semibold tabular-nums sm:text-3xl">
-        {{ $value ?? $slot }}
-    </div>
+    <div class="text-2xl font-semibold tabular-nums sm:text-3xl">{{ $value ?? $slot }}</div>
 
     @if ($change !== null || $caption !== null)
         <div class="flex items-center gap-1.5 text-sm">

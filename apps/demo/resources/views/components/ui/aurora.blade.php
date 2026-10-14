@@ -24,13 +24,21 @@
 @once('blat-aurora')
     <style>
         @keyframes blat-aurora-drift {
-            0%   { transform: translate3d(-6%, -4%, 0) rotate(0deg) scale(1.15); }
-            33%  { transform: translate3d(6%, 3%, 0) rotate(40deg) scale(1.3); }
-            66%  { transform: translate3d(-4%, 5%, 0) rotate(-30deg) scale(1.2); }
-            100% { transform: translate3d(-6%, -4%, 0) rotate(0deg) scale(1.15); }
+            0% {
+                transform: translate3d(-6%, -4%, 0) rotate(0deg) scale(1.15);
+            }
+            33% {
+                transform: translate3d(6%, 3%, 0) rotate(40deg) scale(1.3);
+            }
+            66% {
+                transform: translate3d(-4%, 5%, 0) rotate(-30deg) scale(1.2);
+            }
+            100% {
+                transform: translate3d(-6%, -4%, 0) rotate(0deg) scale(1.15);
+            }
         }
         @media (prefers-reduced-motion: reduce) {
-            [data-slot="aurora"] .blat-aurora-layer {
+            [data-slot='aurora'] .blat-aurora-layer {
                 animation: none !important;
             }
         }
@@ -66,8 +74,8 @@
     }
     $blobBg = implode(', ', $blobs);
 
-    $blurPx = (float) $blur . 'px';
-    $speedS = (float) $speed . 's';
+    $blurPx = (float) $blur.'px';
+    $speedS = (float) $speed.'s';
 @endphp
 
 <div

@@ -1,0 +1,10 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "Pint/laravel_blade": true
+    },
+    "in": [
+        "resources/views/components/ui",
+        "resources/views/components/block"
+    ]
+}

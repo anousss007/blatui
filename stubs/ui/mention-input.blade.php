@@ -21,6 +21,7 @@
                 'sub' => isset($m['sub']) ? (string) $m['sub'] : null,
             ];
         }
+
         return ['value' => (string) $m, 'label' => (string) $m, 'avatar' => null, 'sub' => null];
     })->values();
 
@@ -33,7 +34,9 @@
     $wireModel = \Illuminate\View\ComponentAttributeBag::hasMacro('wire') ? $attributes->wire('model') : null;
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
     $wireLive = $hasWire && $wireModel->hasModifier('live');
-    if ($hasWire) { $attributes = $attributes->whereDoesntStartWith('wire:model'); }
+    if ($hasWire) {
+        $attributes = $attributes->whereDoesntStartWith('wire:model');
+    }
 @endphp
 
 <div
@@ -84,7 +87,7 @@
         },
         insertActive() {
             const m = this.matches[this.activeIndex];
-            if (!m) return false;
+            if (! m) return false;
             const el = this.$refs.field;
             const pos = el.selectionStart;
             const head = el.value.slice(0, this.anchor);
@@ -109,36 +112,53 @@
          `data-slot="mention-input-field"` rides a `display:contents` wrapper to keep that
          selector working without disturbing layout or the `$refs.field` element. --}}
     <span class="contents" data-slot="mention-input-field">
-    <x-ui.textarea
-        x-ref="field"
-        {{-- An id only if the consumer asked for one: a generated one is a fresh morph key
+        <x-ui.textarea
+            x-ref="field"
+            {{-- An id only if the consumer asked for one: a generated one is a fresh morph key
              on every render, and Livewire swaps the field out from under whoever is typing in
              it. Nothing here referenced it. Issue #27. --}}
-        :id="$id"
-        :name="$name"
-        :rows="(int) $rows"
-        :placeholder="$placeholder"
-        :disabled="$disabled"
-        {{-- Bound attrs null-omit when absent (a bare @if isn't valid inside a component tag). --}}
-        :wire:model="$hasWire && ! $wireLive ? $wireModel->value() : null"
-        :wire:model.live="$wireLive ? $wireModel->value() : null"
-        role="combobox"
-        aria-label="{{ $name ? $name : __('Mention input') }}"
-        aria-autocomplete="list"
-        x-bind:aria-expanded="open"
-        x-bind:aria-controls="open ? $id('blat-mention-list') : null"
-        x-bind:aria-activedescendant="open ? activeId : null"
-        @input="scan()"
-        @click="scan()"
-        @keyup.arrow-left="scan()"
-        @keyup.arrow-right="scan()"
-        @keydown.arrow-down="if (open) { $event.preventDefault(); move(1); }"
-        @keydown.arrow-up="if (open) { $event.preventDefault(); move(-1); }"
-        @keydown.enter="if (open && insertActive()) $event.preventDefault();"
-        @keydown.tab="if (open && insertActive()) $event.preventDefault();"
-        @keydown.escape="if (open) { $event.preventDefault(); $event.stopPropagation(); close(); }"
-        @blur="close()"
-    >{{ $initial }}</x-ui.textarea>
+            :id="$id"
+            :name="$name"
+            :rows="(int) $rows"
+            :placeholder="$placeholder"
+            :disabled="$disabled"
+            {{-- Bound attrs null-omit when absent (a bare @if isn't valid inside a component tag). --}}
+            :wire:model="$hasWire && ! $wireLive ? $wireModel->value() : null"
+            :wire:model.live="$wireLive ? $wireModel->value() : null"
+            role="combobox"
+            aria-label="{{ $name ? $name : __('Mention input') }}"
+            aria-autocomplete="list"
+            x-bind:aria-expanded="open"
+            x-bind:aria-controls="open ? $id('blat-mention-list') : null"
+            x-bind:aria-activedescendant="open ? activeId : null"
+            @input="scan()"
+            @click="scan()"
+            @keyup.arrow-left="scan()"
+            @keyup.arrow-right="scan()"
+            @keydown.arrow-down="
+                if (open) {
+                    $event.preventDefault();
+                    move(1);
+                }
+            "
+            @keydown.arrow-up="
+                if (open) {
+                    $event.preventDefault();
+                    move(-1);
+                }
+            "
+            @keydown.enter="if (open && insertActive()) $event.preventDefault();"
+            @keydown.tab="if (open && insertActive()) $event.preventDefault();"
+            @keydown.escape="
+                if (open) {
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                    close();
+                }
+            "
+            @blur="close()"
+        >
+            {{ $initial }}</x-ui.textarea>
     </span>
 
     {{-- Suggestion popup. Sits below the field; the textarea keeps focus (combobox pattern). --}}
@@ -160,15 +180,27 @@
                 :id="$id('blat-mention-opt', m.value)"
                 :aria-selected="i === activeIndex"
                 :data-active="i === activeIndex"
-                @click="activeIndex = i; insertActive()"
+                @click="
+                    activeIndex = i;
+                    insertActive();
+                "
                 @mouseenter="activeIndex = i"
                 class="data-[active=true]:bg-accent data-[active=true]:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none"
             >
                 <template x-if="m.avatar">
-                    <img :src="m.avatar" :alt="''" aria-hidden="true" class="size-6 shrink-0 rounded-full object-cover" />
+                    <img
+                        :src="m.avatar"
+                        :alt="''"
+                        aria-hidden="true"
+                        class="size-6 shrink-0 rounded-full object-cover"
+                    />
                 </template>
-                <template x-if="!m.avatar">
-                    <span class="bg-muted text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium" aria-hidden="true" x-text="m.label.slice(0, 1).toUpperCase()"></span>
+                <template x-if="! m.avatar">
+                    <span
+                        class="bg-muted text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium"
+                        aria-hidden="true"
+                        x-text="m.label.slice(0, 1).toUpperCase()"
+                    ></span>
                 </template>
                 <span class="flex min-w-0 flex-col">
                     <span class="truncate font-medium" x-text="m.label"></span>

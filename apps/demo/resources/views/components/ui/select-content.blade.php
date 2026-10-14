@@ -22,7 +22,10 @@
         @keydown.tab.prevent.stop="close()"
         @keydown.enter.prevent.stop="document.activeElement?.click()"
         @keydown.space.prevent.stop="document.activeElement?.click()"
-        @keydown="$blatNav($event, { selector: '[role=option]' }); $blatType($event, '[role=option]')"
+        @keydown="
+            $blatNav($event, { selector: '[role=option]' });
+            $blatType($event, '[role=option]');
+        "
         :id="$id('blat-listbox')"
         role="listbox"
         tabindex="-1"
@@ -36,8 +39,6 @@
         x-transition:leave-end="opacity-0 scale-95"
         {{ $attributes->twMerge('bg-popover text-popover-foreground fixed z-50 max-h-96 min-w-[8rem] origin-top overflow-x-hidden overflow-y-auto rounded-md border shadow-md') }}
     >
-        <div data-slot="select-viewport" class="p-1">
-            {{ $slot }}
-        </div>
+        <div data-slot="select-viewport" class="p-1">{{ $slot }}</div>
     </div>
 </template>

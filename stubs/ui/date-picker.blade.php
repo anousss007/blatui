@@ -24,8 +24,8 @@
     'showOutsideDays' => true,
     'width' => null,
     'presets' => null,          // false/null → none | true → sensible defaults for the mode |
-                                // array of named keys (['today','last7Days',…]) and/or custom
-                                // ['My label' => ['from'=>'Y-m-d','to'=>'Y-m-d']] / ['date'=>'Y-m-d']
+    // array of named keys (['today','last7Days',…]) and/or custom
+    // ['My label' => ['from'=>'Y-m-d','to'=>'Y-m-d']] / ['date'=>'Y-m-d']
 ])
 
 @php
@@ -201,7 +201,7 @@
         get invalid() { return this.errors.length > 0; },
         get label() {
             if (this.mode === 'range') {
-                if (!this.from) return '';
+                if (! this.from) return '';
                 return this.fmt(this.from) + ' – ' + (this.to ? this.fmt(this.to) : '…');
             }
             return this.value
@@ -214,21 +214,21 @@
 >
     @if ($name)
         @if ($isRange)
-            <input type="hidden" name="{{ $name }}[from]" :value="from" :aria-invalid="invalid ? 'true' : null">
-            <input type="hidden" name="{{ $name }}[to]" :value="to" :aria-invalid="invalid ? 'true' : null">
+            <input type="hidden" name="{{ $name }}[from]" :value="from" :aria-invalid="invalid ? 'true' : null" />
+            <input type="hidden" name="{{ $name }}[to]" :value="to" :aria-invalid="invalid ? 'true' : null" />
         @else
-            <input type="hidden" name="{{ $name }}" :value="value">
+            <input type="hidden" name="{{ $name }}" :value="value" />
         @endif
     @endif
 
     <button
         type="button"
         x-ref="trigger"
-        @click="open = !open"
+        @click="open = ! open"
         aria-haspopup="dialog"
         :aria-expanded="open"
         :aria-controls="$id('blat-datepicker')"
-        :class="{ 'text-muted-foreground': !label }"
+        :class="{ 'text-muted-foreground': ! label }"
         :aria-invalid="invalid ? 'true' : null"
         class="{{ $width }} border-input dark:bg-input/30 dark:hover:bg-input/50 inline-flex h-9 items-center justify-start gap-2 rounded-md border bg-transparent px-3 py-2 text-start text-sm font-normal whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none hover:bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20"
     >
@@ -239,70 +239,78 @@
     {{-- Teleported to <body> so the popover is never clipped by an overflow-hidden ancestor
          (a card, table cell, the docs preview…). x-blat-anchor still positions it at the trigger. --}}
     <template x-teleport="body" wire:ignore>
-    <div
-        x-blat-dialog-layer
-        x-show="open"
-        x-cloak
-        x-blat-anchor.bottom-start.offset.4="$refs.trigger"
-        @click.outside="open = false"
-        @keydown.escape.window="open = false"
-        {{-- Listener lives here (inside the teleported popover) so it catches the calendar's
+        <div
+            x-blat-dialog-layer
+            x-show="open"
+            x-cloak
+            x-blat-anchor.bottom-start.offset.4="$refs.trigger"
+            @click.outside="open = false"
+            @keydown.escape.window="open = false"
+            {{-- Listener lives here (inside the teleported popover) so it catches the calendar's
              bubbling event; the popover shares the picker's x-data scope, so `value` updates.
              `calendar:updated` reports every change with its source, so we can mirror the state
              on a seed but only auto-close on a real user pick. --}}
-        @calendar:updated="mode === 'range'
-            ? (setRange($event.detail.value.from, $event.detail.value.to), ($event.detail.source === 'select' && from && to && !invalid) && (open = false))
-            : (value = $event.detail.value, $event.detail.source === 'select' && (open = false))"
-        x-trap="open"
-        :id="$id('blat-datepicker')"
-        role="dialog"
-        aria-label="{{ $isRange ? __('Choose a date range') : __('Choose date') }}"
-        tabindex="-1"
-        class="bg-popover text-popover-foreground z-50 flex w-auto origin-top flex-col overflow-y-auto overscroll-contain rounded-md border p-0 shadow-md"
-        x-transition:enter="transition ease-out duration-150"
-        x-transition:enter-start="opacity-0 scale-95"
-        x-transition:enter-end="opacity-100 scale-100"
-    >
-        <div x-ref="cal" class="flex flex-col sm:flex-row">
-            @if ($hasPresets)
-                <div class="flex shrink-0 flex-row gap-1 overflow-x-auto border-b p-2 sm:max-w-[9rem] sm:flex-col sm:gap-0.5 sm:overflow-visible sm:border-e sm:border-b-0"
-                    role="group" aria-label="{{ __('Presets') }}">
-                    @foreach ($presetList as $p)
-                        <button
-                            type="button"
-                            @click="applyPreset(@js($p))"
-                            :data-active="isActivePreset(@js($p))"
-                            class="hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground focus-visible:ring-ring/50 inline-flex shrink-0 cursor-pointer items-center rounded-md px-2.5 py-1.5 text-start text-sm whitespace-nowrap transition-colors outline-none focus-visible:ring-[2px] sm:w-full"
-                        >{{ $p['label'] }}</button>
-                    @endforeach
-                </div>
-            @endif
+            @calendar:updated="
+                mode === 'range'
+                    ? (setRange($event.detail.value.from, $event.detail.value.to),
+                      $event.detail.source === 'select' && from && to && ! invalid && (open = false))
+                    : ((value = $event.detail.value), $event.detail.source === 'select' && (open = false))
+            "
+            x-trap="open"
+            :id="$id('blat-datepicker')"
+            role="dialog"
+            aria-label="{{ $isRange ? __('Choose a date range') : __('Choose date') }}"
+            tabindex="-1"
+            class="bg-popover text-popover-foreground z-50 flex w-auto origin-top flex-col overflow-y-auto overscroll-contain rounded-md border p-0 shadow-md"
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+        >
+            <div x-ref="cal" class="flex flex-col sm:flex-row">
+                @if ($hasPresets)
+                    <div
+                        class="flex shrink-0 flex-row gap-1 overflow-x-auto border-b p-2 sm:max-w-[9rem] sm:flex-col sm:gap-0.5 sm:overflow-visible sm:border-e sm:border-b-0"
+                        role="group"
+                        aria-label="{{ __('Presets') }}"
+                    >
+                        @foreach ($presetList as $p)
+                            <button
+                                type="button"
+                                @click="applyPreset(@js($p))"
+                                :data-active="isActivePreset(@js($p))"
+                                class="hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground focus-visible:ring-ring/50 inline-flex shrink-0 cursor-pointer items-center rounded-md px-2.5 py-1.5 text-start text-sm whitespace-nowrap transition-colors outline-none focus-visible:ring-[2px] sm:w-full"
+                            >
+                                {{ $p['label'] }}
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
 
-            <x-ui.calendar
-                :mode="$mode"
-                :value="$calValue"
-                :caption-layout="$captionLayout"
-                :week-start="$weekStart"
-                :number-of-months="$months"
-                :default-month="$defaultMonth"
-                :show-outside-days="$showOutsideDays"
-                :min-date="$min"
-                :max-date="$max"
-                :out-of-range="$outOfRange"
-                class="border-0"
-            />
+                <x-ui.calendar
+                    :mode="$mode"
+                    :value="$calValue"
+                    :caption-layout="$captionLayout"
+                    :week-start="$weekStart"
+                    :number-of-months="$months"
+                    :default-month="$defaultMonth"
+                    :show-outside-days="$showOutsideDays"
+                    :min-date="$min"
+                    :max-date="$max"
+                    :out-of-range="$outOfRange"
+                    class="border-0"
+                />
+            </div>
+
+            <template x-if="errors.length">
+                <ul class="border-t px-3 py-2" role="alert">
+                    <template x-for="msg in errors" :key="msg">
+                        <li class="text-destructive flex items-start gap-1 text-xs">
+                            <x-lucide-circle-alert class="mt-0.5 size-3 shrink-0" aria-hidden="true" />
+                            <span x-text="msg"></span>
+                        </li>
+                    </template>
+                </ul>
+            </template>
         </div>
-
-        <template x-if="errors.length">
-            <ul class="border-t px-3 py-2" role="alert">
-                <template x-for="msg in errors" :key="msg">
-                    <li class="text-destructive flex items-start gap-1 text-xs">
-                        <x-lucide-circle-alert class="mt-0.5 size-3 shrink-0" aria-hidden="true" />
-                        <span x-text="msg"></span>
-                    </li>
-                </template>
-            </ul>
-        </template>
-    </div>
     </template>
 </div>

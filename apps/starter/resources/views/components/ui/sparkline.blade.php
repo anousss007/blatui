@@ -44,13 +44,23 @@
         data-slot="sparkline"
         role="img"
         aria-label="{{ $ariaLabel }}"
-        width="{{ $width }}" height="{{ $height }}" viewBox="0 0 {{ $width }} {{ $height }}"
-        fill="none" preserveAspectRatio="none"
+        width="{{ $width }}"
+        height="{{ $height }}"
+        viewBox="0 0 {{ $width }} {{ $height }}"
+        fill="none"
+        preserveAspectRatio="none"
         {{ $attributes->twMerge('text-primary inline-block align-middle') }}
     >
         @if ($area && $areaPath)
             <path d="{{ $areaPath }}" fill="currentColor" fill-opacity="0.12" stroke="none" />
         @endif
-        <path d="{{ $line }}" fill="none" stroke="currentColor" stroke-width="{{ $strokeWidth }}" stroke-linecap="round" stroke-linejoin="round" />
+        <path
+            d="{{ $line }}"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="{{ $strokeWidth }}"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        />
     </svg>
 @endif

@@ -12,6 +12,6 @@
 @endphp
 
 <x-dynamic-component
-    :component="'lucide-' . $name"
+    :component="'lucide-'.$name"
     {{ $attributes->class(['blat-rtl-flip' => (bool) $directional]) }}
 />

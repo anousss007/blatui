@@ -45,11 +45,7 @@
             {{-- Inherits the tooltip's background so colored / light variants match; positioned per side. --}}
             <span
                 aria-hidden="true"
-                class="bg-inherit absolute size-2.5 rotate-45 rounded-[2px]
-                    group-data-[side=top]/tooltip:-bottom-1 group-data-[side=top]/tooltip:left-1/2 group-data-[side=top]/tooltip:-translate-x-1/2
-                    group-data-[side=bottom]/tooltip:-top-1 group-data-[side=bottom]/tooltip:left-1/2 group-data-[side=bottom]/tooltip:-translate-x-1/2
-                    group-data-[side=left]/tooltip:-right-1 group-data-[side=left]/tooltip:top-1/2 group-data-[side=left]/tooltip:-translate-y-1/2
-                    group-data-[side=right]/tooltip:-left-1 group-data-[side=right]/tooltip:top-1/2 group-data-[side=right]/tooltip:-translate-y-1/2"
+                class="absolute size-2.5 rotate-45 rounded-[2px] bg-inherit group-data-[side=bottom]/tooltip:-top-1 group-data-[side=bottom]/tooltip:left-1/2 group-data-[side=bottom]/tooltip:-translate-x-1/2 group-data-[side=left]/tooltip:top-1/2 group-data-[side=left]/tooltip:-right-1 group-data-[side=left]/tooltip:-translate-y-1/2 group-data-[side=right]/tooltip:top-1/2 group-data-[side=right]/tooltip:-left-1 group-data-[side=right]/tooltip:-translate-y-1/2 group-data-[side=top]/tooltip:-bottom-1 group-data-[side=top]/tooltip:left-1/2 group-data-[side=top]/tooltip:-translate-x-1/2"
             ></span>
         @endif
     </div>

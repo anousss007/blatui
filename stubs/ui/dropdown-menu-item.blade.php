@@ -16,4 +16,5 @@
     :close-on-select="$closeOnSelect"
     :type="$type"
     {{ $attributes }}
->{{ $slot }}</x-ui.menu-item>
+>
+    {{ $slot }}</x-ui.menu-item>

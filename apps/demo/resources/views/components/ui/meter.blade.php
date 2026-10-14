@@ -71,13 +71,10 @@
     $accessibleName = $label ?? $attributes->get('aria-label') ?? __('Meter');
 
     // The visible value text, e.g. "72%" or "7.2 / 10".
-    $valueText = rtrim(rtrim(number_format($value, 1, '.', ''), '0'), '.') . ($unit ?? '');
+    $valueText = rtrim(rtrim(number_format($value, 1, '.', ''), '0'), '.').($unit ?? '');
 @endphp
 
-<div
-    data-slot="meter"
-    {{ $attributes->except('aria-label')->twMerge('grid w-full gap-1.5') }}
->
+<div data-slot="meter" {{ $attributes->except('aria-label')->twMerge('grid w-full gap-1.5') }}>
     @if ($label !== null || $showValue)
         <div data-slot="meter-header" class="flex items-center justify-between gap-2 text-sm">
             @if ($label !== null)

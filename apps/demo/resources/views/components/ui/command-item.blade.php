@@ -33,5 +33,7 @@
         @mouseenter="activeId = $el.id"
         @if ($disabled) aria-disabled="true" data-disabled="true" @endif
         {{ $attributes->twMerge($classes) }}
-    >{{ $slot }}</div>
+    >
+        {{ $slot }}
+    </div>
 @endif

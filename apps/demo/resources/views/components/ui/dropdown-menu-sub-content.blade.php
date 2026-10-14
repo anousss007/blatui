@@ -10,7 +10,10 @@
         @mouseleave="closeSoon()"
         @keydown.escape.prevent.stop="closeMenu()"
         @keydown.left.prevent.stop="closeMenu()"
-        @keydown.stop="$blatNav($event); $blatType($event)"
+        @keydown.stop="
+            $blatNav($event);
+            $blatType($event);
+        "
         :id="$id('blat-submenu')"
         :aria-labelledby="$id('blat-submenu-trigger')"
         role="menu"

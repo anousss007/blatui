@@ -16,17 +16,19 @@
 
 @php
     $beam = $color ?: 'var(--color-primary)';
-    $thickness = (int) $size . 'px';
-    $dur = (float) $duration . 's';
+    $thickness = (int) $size.'px';
+    $dur = (float) $duration.'s';
 @endphp
 
 @once('blat-border-beam')
     <style>
         @keyframes blat-border-beam-spin {
-            to { transform: rotate(1turn); }
+            to {
+                transform: rotate(1turn);
+            }
         }
-        [data-slot="border-beam"] .blat-border-beam-ring::before {
-            content: "";
+        [data-slot='border-beam'] .blat-border-beam-ring::before {
+            content: '';
             position: absolute;
             inset: 0;
             border-radius: inherit;
@@ -49,7 +51,7 @@
             animation: blat-border-beam-spin var(--blat-beam-duration, 6s) linear infinite;
         }
         @media (prefers-reduced-motion: reduce) {
-            [data-slot="border-beam"] .blat-border-beam-ring::before {
+            [data-slot='border-beam'] .blat-border-beam-ring::before {
                 animation: none;
             }
         }

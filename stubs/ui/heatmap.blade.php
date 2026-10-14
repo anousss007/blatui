@@ -56,6 +56,7 @@
                 $lvl = min(4, array_search($t, $thresholds, true) + 1);
             }
         }
+
         return $lvl;
     };
 

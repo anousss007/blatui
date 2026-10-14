@@ -1,9 +1,9 @@
 @props([
     'speed' => 0.3,   // depth factor: how far the content shifts relative to scroll.
-                      //   0 = locked to the page (no parallax). Positive moves the
-                      //   content opposite the scroll (it appears to lag, reading as
-                      //   "further away"). Negative moves it with the scroll (faster /
-                      //   "closer"). Typical range -1 .. 1.
+    //   0 = locked to the page (no parallax). Positive moves the
+    //   content opposite the scroll (it appears to lag, reading as
+    //   "further away"). Negative moves it with the scroll (faster /
+    //   "closer"). Typical range -1 .. 1.
     'axis' => 'y',    // 'y' (vertical, the usual) or 'x' (horizontal).
 ])
 
@@ -87,7 +87,5 @@
 >
     {{-- Content stays in normal flow and fully readable; only a decorative transform
          is applied. Under prefers-reduced-motion the style getter returns no transform. --}}
-    <div :style="style" class="motion-reduce:!transform-none">
-        {{ $slot }}
-    </div>
+    <div :style="style" class="motion-reduce:!transform-none">{{ $slot }}</div>
 </div>

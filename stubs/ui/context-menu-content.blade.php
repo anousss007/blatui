@@ -14,7 +14,10 @@
         @resize.window="closeMenu(false)"
         @keydown.escape.prevent.stop="closeMenu()"
         @keydown.tab.prevent.stop="closeMenu()"
-        @keydown="$blatNav($event); $blatType($event)"
+        @keydown="
+            $blatNav($event);
+            $blatType($event);
+        "
         :style="`position: fixed; left: ${x}px; top: ${y}px`"
         role="menu"
         aria-orientation="vertical"

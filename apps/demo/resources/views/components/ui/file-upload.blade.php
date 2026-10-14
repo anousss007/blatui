@@ -63,10 +63,14 @@
     $hasWire = $wireModel && is_string($wireModel->value()) && $wireModel->value() !== '';
     $wireAttrs = $attributes->whereStartsWith('wire:model');
     $attributes = $attributes->whereDoesntStartWith('wire:model');
-    if ($hasWire) { $attributes = $attributes->merge(['data-blat-model' => $wireModel->value()]); }
+    if ($hasWire) {
+        $attributes = $attributes->merge(['data-blat-model' => $wireModel->value()]);
+    }
     // Read off the attribute rather than baked into x-data, which Alpine evaluates exactly once:
     // a modal reused for a second record renders a different value, and the list has to follow.
-    if ($initial) { $attributes = $attributes->merge(['data-blat-value' => json_encode($initial, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]); }
+    if ($initial) {
+        $attributes = $attributes->merge(['data-blat-value' => json_encode($initial, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]);
+    }
 @endphp
 
 <div
@@ -181,7 +185,7 @@
 
         remove(index) {
             const entry = this.files[index];
-            if (!entry) return;
+            if (! entry) return;
             if (entry.blob) URL.revokeObjectURL(entry.url);
             this.files.splice(index, 1);
             if (entry.existing) this.announce(entry);
@@ -206,7 +210,7 @@
             const property = this.$root.dataset.blatModel;
             if (wire && property && entry.status !== 'uploading') {
                 if (this.multiple && entry.tmp) wire.$removeUpload(property, entry.tmp);
-                else if (!this.multiple) wire.$set(property, null);
+                else if (! this.multiple) wire.$set(property, null);
             }
             this.syncInput();
         },
@@ -243,7 +247,7 @@
 
         reconcile(seed, held) {
             if (seed !== this.seedKey) { this.seedKey = seed; this.hydrate(seed); }
-            if (!this.uploads) return;
+            if (! this.uploads) return;
 
             // The temporary uploads the property still names. Livewire tags them
             // (`livewire-file:foo.png`); rows remember the bare filename, so the tag comes off.
@@ -251,11 +255,11 @@
             const names = list
                 .map((v) => (typeof v === 'string' ? v.replace(/^livewire-files?:/, '') : null))
                 .filter(Boolean);
-            const empty = !list.length || (list.length === 1 && list[0] === '');
+            const empty = ! list.length || (list.length === 1 && list[0] === '');
 
             // Anything else in there — a stored path the consumer swapped in, say — is not ours
             // to interpret, and a row is better kept than wrongly dropped.
-            if (!empty && !names.length) return;
+            if (! empty && ! names.length) return;
 
             // A finished upload the property no longer names is a file the server has let go:
             // the form was reset, or the modal reopened for the next record. Since #27 this
@@ -274,7 +278,7 @@
         hydrate(seed) {
             let items = [];
             try { items = seed ? JSON.parse(seed) : []; } catch (e) { items = []; }
-            this.files = this.files.filter((entry) => !entry.existing);
+            this.files = this.files.filter((entry) => ! entry.existing);
             this.files.unshift(...items.map((item) => ({
                 id: ++this.seq,
                 file: null,
@@ -302,7 +306,7 @@
             // never reaches the input is a file that never uploads and never submits — it only
             // looks selected.
             const dropped = Array.from(event.dataTransfer.files);
-            if (!dropped.length) return;
+            if (! dropped.length) return;
             const dt = new DataTransfer();
             (this.multiple ? dropped : dropped.slice(0, 1)).forEach((file) => dt.items.add(file));
             this.$refs.input.files = dt.files;
@@ -331,11 +335,21 @@
     <input
         x-ref="input"
         type="file"
-        @if ($id) id="{{ $id }}" @endif
-        @if ($name) name="{{ $name }}{{ $multiple ? '[]' : '' }}" @endif
-        @if ($accept) accept="{{ $accept }}" @endif
-        @if ($multiple) multiple @endif
-        @if ($disabled) disabled @endif
+        @if ($id)
+        id="{{ $id }}"
+        @endif
+        @if ($name)
+        name="{{ $name }}{{ $multiple ? '[]' : '' }}"
+        @endif
+        @if ($accept)
+        accept="{{ $accept }}"
+        @endif
+        @if ($multiple)
+        multiple
+        @endif
+        @if ($disabled)
+        disabled
+        @endif
         @change="onChange($event)"
         {{ $wireAttrs }}
         class="sr-only"
@@ -353,20 +367,18 @@
         @click="open()"
         @keydown.enter.prevent="open()"
         @keydown.space.prevent="open()"
-        @dragover.prevent="!disabled && (dragging = true)"
+        @dragover.prevent="! disabled && (dragging = true)"
         @dragleave.prevent="dragging = false"
         @drop.prevent="onDrop($event)"
         :class="dragging ? 'bg-muted ring-ring/50 ring-[3px] border-ring' : ''"
-        class="border-input flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed bg-transparent px-6 py-8 text-center transition-[color,background-color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-disabled:pointer-events-none aria-disabled:opacity-50"
+        class="border-input focus-visible:border-ring focus-visible:ring-ring/50 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed bg-transparent px-6 py-8 text-center transition-[color,background-color,box-shadow] outline-none focus-visible:ring-[3px] aria-disabled:pointer-events-none aria-disabled:opacity-50"
     >
         <span class="bg-muted text-muted-foreground flex size-10 items-center justify-center rounded-full">
             <x-lucide-cloud-upload class="size-5" aria-hidden="true" />
         </span>
-        <p class="text-foreground text-sm font-medium">
-            {{ __('Drag & drop files here, or click to browse') }}
-        </p>
+        <p class="text-foreground text-sm font-medium">{{ __('Drag & drop files here, or click to browse') }}</p>
         @if ($hint)
-            <p class="text-muted-foreground text-xs">{{ $hint }}</p>
+        <p class="text-muted-foreground text-xs">{{ $hint }}</p>
         @endif
     </div>
 
@@ -383,7 +395,7 @@
                 <template x-if="file.url && file.image">
                     <img :src="file.url" :alt="file.name" class="size-10 shrink-0 rounded-md object-cover" />
                 </template>
-                <template x-if="!(file.url && file.image)">
+                <template x-if="! (file.url && file.image)">
                     <span class="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-md">
                         <x-lucide-file class="size-5" aria-hidden="true" />
                     </span>
@@ -394,11 +406,15 @@
                         <span class="text-foreground truncate text-sm font-medium" x-text="file.name"></span>
                         {{-- An already-saved file arrives as a URL; its size is only known if
                              the consumer passed one, and "0 B" would be a lie. --}}
-                        <span x-show="file.size" class="text-muted-foreground shrink-0 text-xs tabular-nums" x-text="formatBytes(file.size)"></span>
+                        <span
+                            x-show="file.size"
+                            class="text-muted-foreground shrink-0 text-xs tabular-nums"
+                            x-text="formatBytes(file.size)"
+                        ></span>
                     </div>
                     {{-- Per-file progress — the width is Livewire's own upload progress, so the bar
                          only exists when there is an upload for it to report. --}}
-                    <template x-if="uploads && !file.existing && file.status !== 'error'">
+                    <template x-if="uploads && ! file.existing && file.status !== 'error'">
                         <div
                             class="bg-muted h-1.5 w-full overflow-hidden rounded-full"
                             role="progressbar"
@@ -407,7 +423,10 @@
                             aria-valuemin="0"
                             aria-valuemax="100"
                         >
-                            <div class="bg-primary h-full rounded-full transition-[width] duration-200" :style="`width: ${file.progress}%`"></div>
+                            <div
+                                class="bg-primary h-full rounded-full transition-[width] duration-200"
+                                :style="`width: ${file.progress}%`"
+                            ></div>
                         </div>
                     </template>
                     <template x-if="file.status === 'error'">
@@ -419,7 +438,7 @@
                     type="button"
                     @click="remove(index)"
                     :aria-label="@js(__('Remove :name')).replace(':name', file.name)"
-                    class="text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-ring/50 flex size-8 shrink-0 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-[3px]"
+                    class="text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-ring/50 flex size-8 shrink-0 items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-[3px]"
                 >
                     <x-lucide-x class="size-4" aria-hidden="true" />
                 </button>

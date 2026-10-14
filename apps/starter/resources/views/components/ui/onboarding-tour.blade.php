@@ -52,7 +52,7 @@
         get isLast() { return this.index >= this.count - 1; },
         get hasTarget() { return this.rect.width > 0 || this.rect.height > 0; },
         start() {
-            if (!this.count) return;
+            if (! this.count) return;
             this.index = 0;
             this.active = true;
             this.$nextTick(() => this.go());
@@ -93,7 +93,7 @@
             const vh = window.innerHeight;
             const m = 12; // viewport margin
 
-            if (!this.hasTarget) {
+            if (! this.hasTarget) {
                 this.card = { top: Math.max(m, (vh - ch) / 2), left: Math.max(m, (vw - cw) / 2), placement: 'center' };
                 return;
             }
@@ -127,10 +127,10 @@
             if (c) c.focus({ preventScroll: true });
         },
         next() { if (this.isLast) { this.end(); } else { this.index++; this.go(); } },
-        back() { if (!this.isFirst) { this.index--; this.go(); } },
+        back() { if (! this.isFirst) { this.index--; this.go(); } },
         end() { this.active = false; },
     }"
-    x-init="if (active) start()"
+    x-init="if (active) start();"
     @keydown.escape.window="active && end()"
     @resize.window="active && recompute()"
     @scroll.window.passive="active && recompute()"
@@ -147,16 +147,16 @@
                 x-show="active && hasTarget"
                 data-slot="onboarding-tour-spotlight"
                 aria-hidden="true"
-                class="pointer-events-none fixed rounded-lg ring-2 ring-ring transition-all duration-200 ease-out"
-                style="box-shadow: 0 0 0 9999px rgb(0 0 0 / 0.6);"
+                class="ring-ring pointer-events-none fixed rounded-lg ring-2 transition-all duration-200 ease-out"
+                style="box-shadow: 0 0 0 9999px rgb(0 0 0 / 0.6)"
                 :style="`top:${rect.top}px; left:${rect.left}px; width:${rect.width}px; height:${rect.height}px; box-shadow: 0 0 0 9999px rgb(0 0 0 / 0.6);`"
             ></div>
 
             <div
-                x-show="active && !hasTarget"
+                x-show="active && ! hasTarget"
                 data-slot="onboarding-tour-overlay"
                 aria-hidden="true"
-                class="fixed inset-0 bg-foreground/50"
+                class="bg-foreground/50 fixed inset-0"
             ></div>
 
             {{-- The step card / coachmark. --}}
@@ -174,15 +174,25 @@
                 x-transition:enter="transition ease-out duration-150"
                 x-transition:enter-start="opacity-0 scale-95"
                 x-transition:enter-end="opacity-100 scale-100"
-                class="bg-popover text-popover-foreground fixed z-[101] w-[min(20rem,calc(100vw-1.5rem))] rounded-lg border p-4 shadow-lg outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                class="bg-popover text-popover-foreground focus-visible:ring-ring/50 fixed z-[101] w-[min(20rem,calc(100vw-1.5rem))] rounded-lg border p-4 shadow-lg outline-none focus-visible:ring-[3px]"
                 :style="`top:${card.top}px; left:${card.left}px;`"
             >
                 <div class="flex flex-col gap-1.5">
                     <p class="text-muted-foreground text-xs font-medium" aria-hidden="true">
                         <span x-text="@js(__(':current of :total')).replace(':current', index + 1).replace(':total', count)"></span>
                     </p>
-                    <h2 :id="$id('blat-tour-title')" data-slot="onboarding-tour-title" class="text-sm leading-none font-semibold" x-text="step.title"></h2>
-                    <p :id="$id('blat-tour-body')" data-slot="onboarding-tour-body" class="text-muted-foreground text-sm" x-text="step.body"></p>
+                    <h2
+                        :id="$id('blat-tour-title')"
+                        data-slot="onboarding-tour-title"
+                        class="text-sm leading-none font-semibold"
+                        x-text="step.title"
+                    ></h2>
+                    <p
+                        :id="$id('blat-tour-body')"
+                        data-slot="onboarding-tour-body"
+                        class="text-muted-foreground text-sm"
+                        x-text="step.body"
+                    ></p>
                 </div>
 
                 {{-- Step dots --}}
@@ -190,7 +200,7 @@
                     <template x-for="i in count" :key="i">
                         <span
                             class="size-1.5 rounded-full transition-colors"
-                            :class="(i - 1) === index ? 'bg-primary' : 'bg-muted-foreground/30'"
+                            :class="i - 1 === index ? 'bg-primary' : 'bg-muted-foreground/30'"
                         ></span>
                     </template>
                 </div>
@@ -200,24 +210,28 @@
                         type="button"
                         @click="end()"
                         data-slot="onboarding-tour-skip"
-                        class="text-muted-foreground hover:text-foreground inline-flex h-8 items-center rounded-md px-2 text-sm font-medium transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                    >{{ __('Skip') }}</button>
+                        class="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 inline-flex h-8 items-center rounded-md px-2 text-sm font-medium transition-colors outline-none focus-visible:ring-[3px]"
+                    >
+                        {{ __('Skip') }}
+                    </button>
 
                     <div class="flex items-center gap-2">
                         <button
                             type="button"
-                            x-show="!isFirst"
+                            x-show="! isFirst"
                             @click="back()"
                             data-slot="onboarding-tour-back"
-                            class="border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-8 items-center rounded-md border px-3 text-sm font-medium shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                        >{{ __('Back') }}</button>
+                            class="border-input bg-background hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 items-center rounded-md border px-3 text-sm font-medium shadow-xs transition-colors outline-none focus-visible:ring-[3px]"
+                        >
+                            {{ __('Back') }}
+                        </button>
                         <button
                             type="button"
                             @click="next()"
                             data-slot="onboarding-tour-next"
-                            class="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-8 items-center rounded-md px-3 text-sm font-medium shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                            class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 items-center rounded-md px-3 text-sm font-medium shadow-xs transition-colors outline-none focus-visible:ring-[3px]"
                         >
-                            <span x-show="!isLast">{{ __('Next') }}</span>
+                            <span x-show="! isLast">{{ __('Next') }}</span>
                             <span x-show="isLast">{{ __('Done') }}</span>
                         </button>
                     </div>

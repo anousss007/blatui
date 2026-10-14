@@ -67,7 +67,11 @@
 >
     <span aria-hidden="true" x-text="out"></span>
     @if ($cursor)
-        <span x-show="! done" aria-hidden="true" class="animate-caret-blink ms-px inline-block h-[1em] w-[2px] translate-y-[0.12em] bg-current"></span>
+        <span
+            x-show="! done"
+            aria-hidden="true"
+            class="animate-caret-blink ms-px inline-block h-[1em] w-[2px] translate-y-[0.12em] bg-current"
+        ></span>
     @endif
     <span class="sr-only">{{ implode(', ', $words) }}</span>
 </span>

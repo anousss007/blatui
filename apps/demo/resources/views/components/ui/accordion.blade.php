@@ -22,7 +22,14 @@
         },
     }"
     x-id="['blat-accordion-trigger', 'blat-accordion-panel']"
-    @keydown="$blatNav($event, { selector: '[data-slot=accordion-trigger]', orientation: 'vertical', loop: false, requireMatch: true })"
+    @keydown="
+        $blatNav($event, {
+            selector: '[data-slot=accordion-trigger]',
+            orientation: 'vertical',
+            loop: false,
+            requireMatch: true,
+        })
+    "
     {{ $attributes }}
 >
     {{ $slot }}

@@ -58,7 +58,7 @@
     @if ($style) style="{{ $style }}" @endif
     {{ $attributes->twMerge($classes) }}
 >
-    @isset($before){{ $before }}@endisset
+    @isset($before) {{ $before }}@endisset
     {{ $slot }}
-    @isset($after){{ $after }}@endisset
+    @isset($after) {{ $after }}@endisset
 </{{ $tag }}>

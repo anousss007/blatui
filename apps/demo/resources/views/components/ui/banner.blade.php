@@ -35,9 +35,7 @@
     aria-label="{{ __('Announcement') }}"
     {{ $attributes->twMerge('relative flex w-full items-center gap-3 border-b px-4 py-2.5 text-sm '.$cls) }}
 >
-    <div class="flex flex-1 flex-wrap items-center justify-center gap-x-3 gap-y-1">
-        {{ $slot }}
-    </div>
+    <div class="flex flex-1 flex-wrap items-center justify-center gap-x-3 gap-y-1">{{ $slot }}</div>
     @if ($dismissible)
         <button
             type="button"

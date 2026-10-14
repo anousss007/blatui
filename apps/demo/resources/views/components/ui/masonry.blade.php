@@ -48,6 +48,4 @@
     $classes = trim($cols.' '.$gapUtil.' [&>*]:break-inside-avoid');
 @endphp
 
-<div data-slot="masonry" {{ $attributes->twMerge($classes) }}>
-    {{ $slot }}
-</div>
+<div data-slot="masonry" {{ $attributes->twMerge($classes) }}>{{ $slot }}</div>

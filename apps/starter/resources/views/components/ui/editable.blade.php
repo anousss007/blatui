@@ -73,13 +73,13 @@
     {{ $attributes->twMerge('inline-flex w-full max-w-full flex-col items-stretch gap-2') }}
 >
     @if ($name)
-        <input type="hidden" name="{{ $name }}" :value="value" @if ($id) id="{{ $id }}" @endif>
+        <input type="hidden" name="{{ $name }}" :value="value" @if ($id) id="{{ $id }}" @endif />
     @endif
 
     {{-- Display state: a button that reveals the value and a hover/focus pencil affordance. --}}
     <button
         type="button"
-        x-show="!editing"
+        x-show="! editing"
         @click="edit()"
         aria-label="{{ __('Edit :label', ['label' => $label]) }}"
         @class([
@@ -87,8 +87,15 @@
             $displaySize,
         ])
     >
-        <span class="truncate" :class="value ? '' : 'text-muted-foreground'" x-text="value || @js($placeholder ?? '')"></span>
-        <x-lucide-pencil class="text-muted-foreground size-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" aria-hidden="true" />
+        <span
+            class="truncate"
+            :class="value ? '' : 'text-muted-foreground'"
+            x-text="value || @js($placeholder ?? '')"
+        ></span>
+        <x-lucide-pencil
+            class="text-muted-foreground size-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+            aria-hidden="true"
+        />
     </button>
 
     @if ($isTextarea)
@@ -108,7 +115,7 @@
                     type="button"
                     @click="cancel()"
                     aria-label="{{ __('Cancel') }}"
-                    class="border-input bg-background hover:bg-muted text-foreground focus-visible:ring-ring/50 inline-flex h-8 items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-medium shadow-xs outline-none transition-colors focus-visible:ring-[3px]"
+                    class="border-input bg-background hover:bg-muted text-foreground focus-visible:ring-ring/50 inline-flex h-8 items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-medium shadow-xs transition-colors outline-none focus-visible:ring-[3px]"
                 >
                     <x-lucide-x class="size-4" aria-hidden="true" />
                     <span>{{ __('Cancel') }}</span>
@@ -117,7 +124,7 @@
                     type="button"
                     @click="save()"
                     aria-label="{{ __('Save') }}"
-                    class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/50 inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium shadow-xs outline-none transition-colors focus-visible:ring-[3px]"
+                    class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/50 inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium shadow-xs transition-colors outline-none focus-visible:ring-[3px]"
                 >
                     <x-lucide-check class="size-4" aria-hidden="true" />
                     <span>{{ __('Save') }}</span>

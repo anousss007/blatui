@@ -20,6 +20,4 @@
     $classes = $base.' '.($variants[$variant] ?? $variants['ghost']).' '.($sizes[$size] ?? $sizes['xs']);
 @endphp
 
-<button type="{{ $type }}" data-slot="input-group-button" {{ $attributes->twMerge($classes) }}>
-    {{ $slot }}
-</button>
+<button type="{{ $type }}" data-slot="input-group-button" {{ $attributes->twMerge($classes) }}>{{ $slot }}</button>

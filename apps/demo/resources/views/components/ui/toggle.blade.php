@@ -41,7 +41,7 @@
 <button
     type="button"
     x-data="{ _model: $blatModel(@js((bool) $pressed)), get pressed() { return this._model.value; }, set pressed(v) { this._model.value = v; }, }"
-    @click="pressed = !pressed"
+    @click="pressed = ! pressed"
     :data-state="pressed ? 'on' : 'off'"
     :aria-pressed="pressed"
     @if ($disabled) disabled @endif

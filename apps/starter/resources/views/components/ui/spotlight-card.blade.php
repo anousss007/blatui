@@ -42,8 +42,8 @@
         hover: false,
         track(e) {
             const r = this.$el.getBoundingClientRect();
-            this.$el.style.setProperty('--x', (e.clientX - r.left) + 'px');
-            this.$el.style.setProperty('--y', (e.clientY - r.top) + 'px');
+            this.$el.style.setProperty('--x', e.clientX - r.left + 'px');
+            this.$el.style.setProperty('--y', e.clientY - r.top + 'px');
         },
     }"
     @mousemove="track($event)"
@@ -60,7 +60,5 @@
     ></div>
 
     {{-- Card content sits above the overlay on its own stacking context. --}}
-    <div class="relative z-10">
-        {{ $slot }}
-    </div>
+    <div class="relative z-10">{{ $slot }}</div>
 </div>

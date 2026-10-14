@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.36.1] - 2026-10-14
+
+### Changed
+- **Every component is formatted by Laravel Pint, Blade included** (#43). The `ui/` and `block/`
+  components now go through Pint's `Pint/laravel_blade` rule (Prettier with the Blade and Tailwind
+  plugins) on top of the `laravel` preset, so a `blatui:add` drops in files that already match
+  what Pint produces, and running Pint with that rule on your app leaves them untouched. Purely
+  cosmetic: the rendered markup is unchanged apart from whitespace. CI fails if a component is not
+  formatted.
+
 ## [1.36.0] - 2026-10-11
 
 ### Added
@@ -1551,7 +1561,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.36.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.36.1...HEAD
+[1.36.1]: https://github.com/anousss007/blatui/compare/v1.36.0...v1.36.1
 [1.36.0]: https://github.com/anousss007/blatui/compare/v1.35.0...v1.36.0
 [1.35.0]: https://github.com/anousss007/blatui/compare/v1.34.0...v1.35.0
 [1.34.0]: https://github.com/anousss007/blatui/compare/v1.33.0...v1.34.0

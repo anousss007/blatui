@@ -10,7 +10,12 @@
     :tabindex="rovingId === id ? 0 : -1"
     @click="toggleMenu(id)"
     @focus="rovingId = id"
-    @mouseenter="if (active !== null) { active = id; rovingId = id }"
+    @mouseenter="
+        if (active !== null) {
+            active = id;
+            rovingId = id;
+        }
+    "
     @keydown.down.prevent.stop="openMenu(id)"
     @keydown.enter.prevent.stop="openMenu(id)"
     @keydown.space.prevent.stop="openMenu(id)"
@@ -19,4 +24,6 @@
     :data-state="active === id ? 'open' : 'closed'"
     data-slot="menubar-trigger"
     {{ $attributes->twMerge('focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex items-center rounded-sm px-2 py-1 text-sm font-medium outline-hidden select-none') }}
->{{ $slot }}</button>
+>
+    {{ $slot }}
+</button>

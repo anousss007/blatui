@@ -97,14 +97,17 @@
         @if ($name)
             @if ($multiple)
                 <template x-for="v in value" :key="v">
-                    <input type="hidden" name="{{ $name }}[]" :value="v">
+                    <input type="hidden" name="{{ $name }}[]" :value="v" />
                 </template>
             @else
-                <input type="hidden" name="{{ $name }}" :value="value">
+                <input type="hidden" name="{{ $name }}" :value="value" />
             @endif
         @endif
         @if ($hasOptions)
-            <x-ui.select-trigger :class="'w-full'.($multiple ? ' data-[size=default]:h-auto min-h-9 py-1' : '')" :ariaLabel="$placeholder !== '' ? $placeholder : __('Select option')">
+            <x-ui.select-trigger
+                :class="'w-full'.($multiple ? ' data-[size=default]:h-auto min-h-9 py-1' : '')"
+                :ariaLabel="$placeholder !== '' ? $placeholder : __('Select option')"
+            >
                 <x-ui.select-value :placeholder="$placeholder" />
             </x-ui.select-trigger>
             <x-ui.select-content :indicator="$indicator">

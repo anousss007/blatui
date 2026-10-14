@@ -44,4 +44,8 @@
         }
     }"
     {{ $attributes->twMerge('leading-snug') }}
->@foreach ($words as $w)<span data-w class="transition-opacity duration-300 ease-out">{{ $w }}</span> @endforeach</{{ $tag }}>
+>
+    @foreach ($words as $w)
+        <span data-w class="transition-opacity duration-300 ease-out">{{ $w }}</span>
+    @endforeach
+</{{ $tag }}>

@@ -14,9 +14,6 @@
     $cols = $colClasses[(int) $columns] ?? $colClasses[3];
 @endphp
 
-<div
-    data-slot="bento-grid"
-    {{ $attributes->twMerge('grid grid-cols-1 gap-4 auto-rows-[minmax(10rem,auto)] '.$cols) }}
->
+<div data-slot="bento-grid" {{ $attributes->twMerge('grid grid-cols-1 gap-4 auto-rows-[minmax(10rem,auto)] '.$cols) }}>
     {{ $slot }}
 </div>

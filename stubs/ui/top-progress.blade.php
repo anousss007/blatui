@@ -24,13 +24,13 @@
 
 @php
     $barColor = $color ?: 'var(--color-primary)';
-    $barHeight = (int) $height . 'px';
+    $barHeight = (int) $height.'px';
 @endphp
 
 @once('blat-top-progress')
     <style>
         @media (prefers-reduced-motion: reduce) {
-            [data-slot="top-progress"] .blat-top-progress-bar {
+            [data-slot='top-progress'] .blat-top-progress-bar {
                 transition: none !important;
             }
         }
@@ -44,7 +44,9 @@
         active: false,
         visible: false,
         timer: null,
-        clamp(v) { return Math.max(0, Math.min(1, v)); },
+        clamp(v) {
+            return Math.max(0, Math.min(1, v));
+        },
         start() {
             if (this.active) return;
             this.active = true;
@@ -54,7 +56,7 @@
             this.timer = setInterval(() => this.trickle(), 400);
         },
         trickle() {
-            if (!this.active) return;
+            if (! this.active) return;
             if (this.progress >= 0.9) return;
             // ease the increment down as we approach the cap
             const remaining = 0.9 - this.progress;
@@ -65,12 +67,17 @@
             this.visible = true;
         },
         done() {
-            if (this.timer) { clearInterval(this.timer); this.timer = null; }
+            if (this.timer) {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
             this.active = false;
             this.set(1);
             setTimeout(() => {
                 this.visible = false;
-                setTimeout(() => { if (!this.active) this.progress = 0; }, 300);
+                setTimeout(() => {
+                    if (! this.active) this.progress = 0;
+                }, 300);
             }, 250);
         },
     }"

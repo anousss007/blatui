@@ -1,4 +1,5 @@
-@props(['variant' => 'default'])   {{-- default | card (bordered, rounded, on bg-card) --}}
+@props(['variant' => 'default'])
+{{-- default | card (bordered, rounded, on bg-card) --}}
 
 @php
     $container = $variant === 'card'

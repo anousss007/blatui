@@ -128,31 +128,33 @@
         class="bg-muted/40 flex flex-wrap items-center gap-0.5 border-b p-1"
     >
         @foreach ($tools as $tool)
-            @if (isset($tool['sep']))
-                <span aria-hidden="true" class="bg-border mx-1 h-5 w-px self-center"></span>
-            @else
-                <button
-                    type="button"
-                    data-slot="rich-text-editor-button"
-                    aria-label="{{ $tool['label'] }}"
-                    @if (! empty($tool['state'])) :aria-pressed="!!active['{{ $tool['state'] }}']" @endif
-                    @if (isset($tool['cmd']))
-                        @click="run(@js($tool['cmd']))"
-                    @elseif (isset($tool['block']))
-                        @click="block(@js($tool['block']))"
-                    @elseif (isset($tool['link']))
-                        @click="link()"
-                    @elseif (isset($tool['clear']))
-                        @click="clear()"
-                    @endif
-                    @class([
-                        'text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-8 cursor-pointer items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-[3px]',
-                        'aria-pressed:bg-accent aria-pressed:text-accent-foreground' => ! empty($tool['state']),
-                    ])
-                >
-                    <x-dynamic-component :component="'lucide-'.$tool['icon']" class="size-4" aria-hidden="true" />
-                </button>
+        @if (isset($tool['sep']))
+        <span aria-hidden="true" class="bg-border mx-1 h-5 w-px self-center"></span>
+        @else
+        <button
+            type="button"
+            data-slot="rich-text-editor-button"
+            aria-label="{{ $tool['label'] }}"
+            @if (! empty($tool['state']))
+            :aria-pressed="!!active['{{ $tool['state'] }}']"
             @endif
+            @if (isset($tool['cmd']))
+            @click="run(@js($tool['cmd']))"
+            @elseif (isset($tool['block']))
+            @click="block(@js($tool['block']))"
+            @elseif (isset($tool['link']))
+            @click="link()"
+            @elseif (isset($tool['clear']))
+            @click="clear()"
+            @endif
+            @class([
+                'text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 inline-flex size-8 cursor-pointer items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-[3px]',
+                'aria-pressed:bg-accent aria-pressed:text-accent-foreground' => ! empty($tool['state']),
+            ])
+        >
+            <x-dynamic-component :component="'lucide-'.$tool['icon']" class="size-4" aria-hidden="true" />
+        </button>
+        @endif
         @endforeach
     </div>
 
@@ -174,19 +176,23 @@
              generated would be a new morph key on every render, and Livewire would replace the
              box the user is writing in. A consumer's own id is stable, so it still lands. #27 --}}
         aria-label="{{ $placeholder }}"
-        @if ($id) id="{{ $id }}" @endif
+        @if ($id)
+        id="{{ $id }}"
+        @endif
         data-placeholder="{{ $placeholder }}"
         dir="auto"
         @input="sync()"
         @keyup="refresh()"
         @mouseup="refresh()"
         @focus="refresh()"
-        class="min-h-40 w-full max-w-none px-3 py-3 text-sm leading-7 outline-none empty:before:text-muted-foreground empty:before:pointer-events-none empty:before:content-[attr(data-placeholder)] [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h1]:mb-2 [&_h1]:text-2xl [&_h1]:font-semibold [&_h2]:mb-2 [&_h2]:text-xl [&_h2]:font-semibold [&_li]:mt-1 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:ps-6 [&_p]:my-2 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:ps-6"
-    >{!! $value !!}</div>
+        class="empty:before:text-muted-foreground [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h1]:mb-2 [&_h1]:text-2xl [&_h1]:font-semibold [&_h2]:mb-2 [&_h2]:text-xl [&_h2]:font-semibold [&_li]:mt-1 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:ps-6 [&_p]:my-2 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:ps-6 min-h-40 w-full max-w-none px-3 py-3 text-sm leading-7 outline-none empty:before:pointer-events-none empty:before:content-[attr(data-placeholder)]"
+    >
+        {!! $value !!}
+    </div>
 
     {{-- Mirror for a plain <form>: it carries the name and the value, nothing else. The Livewire
          binding no longer rides on it. --}}
     @if ($name)
-        <textarea x-ref="input" name="{{ $name }}" class="hidden" aria-hidden="true" tabindex="-1">{!! $value !!}</textarea>
+    <textarea x-ref="input" name="{{ $name }}" class="hidden" aria-hidden="true" tabindex="-1">{!! $value !!}</textarea>
     @endif
 </div>
