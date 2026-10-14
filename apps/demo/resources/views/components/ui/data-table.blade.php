@@ -211,19 +211,9 @@
                 class="text-sm font-medium"
                 x-text="@js(__('Page :page of :pages')).replace(':pages', pageCount).replace(':page', page)"
             ></span>
-            <x-ui.button
-                variant="outline"
-                size="sm"
-                x-bind:disabled="page === 1"
-                @click="prev()"
-            >
+            <x-ui.button variant="outline" size="sm" x-bind:disabled="page === 1" @click="prev()">
                 {{ __('Previous') }}</x-ui.button>
-            <x-ui.button
-                variant="outline"
-                size="sm"
-                x-bind:disabled="page === pageCount"
-                @click="next()"
-            >
+            <x-ui.button variant="outline" size="sm" x-bind:disabled="page === pageCount" @click="next()">
                 {{ __('Next') }}</x-ui.button>
         </div>
     </div>

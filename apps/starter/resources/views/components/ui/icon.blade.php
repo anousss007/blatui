@@ -11,7 +11,4 @@
         && preg_match('/(left|right)/i', $name);
 @endphp
 
-<x-dynamic-component
-    :component="'lucide-'.$name"
-    {{ $attributes->class(['blat-rtl-flip' => (bool) $directional]) }}
-/>
+<x-dynamic-component :component="'lucide-'.$name" {{ $attributes->class(['blat-rtl-flip' => (bool) $directional]) }} />
