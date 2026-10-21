@@ -8,7 +8,7 @@
     "require": {
         "php": "^8.3",
         "gehrisandro/tailwind-merge-laravel": "^1.4",
-        "laravel/framework": "^13.17",
+        "laravel/framework": "^13.36",
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.0",
         "mallardduck/blade-lucide-icons": "^2.0"

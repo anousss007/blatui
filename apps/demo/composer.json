@@ -13,9 +13,9 @@
     "require": {
         "php": "^8.3",
         "gehrisandro/tailwind-merge-laravel": "^1.4",
-        "laravel/framework": "^13.8",
+        "laravel/framework": "^13.36",
         "laravel/tinker": "^3.0",
-        "mallardduck/blade-lucide-icons": "^1.26"
+        "mallardduck/blade-lucide-icons": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
