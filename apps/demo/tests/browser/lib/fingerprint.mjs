@@ -67,10 +67,18 @@ export async function freeze(page) {
     // next one records its fallback. Trigger them all, then wait.
     page.blatStep = 'freeze: scrolling the page';
     await page.evaluate(async () => {
+        // A frame, or 100ms if no frame comes. Headless Chromium on a busy CI runner now and then
+        // stops producing frames for one of the parallel pages, and a bare requestAnimationFrame
+        // then waits forever: that is where the visual job's 120s stalls were (calendar @ 639px,
+        // caught by the step tracking in inLanes()).
+        const frame = () => new Promise((r) => {
+            requestAnimationFrame(r);
+            setTimeout(r, 100);
+        });
         const step = window.innerHeight;
         for (let y = 0; y < document.body.scrollHeight; y += step) {
             window.scrollTo(0, y);
-            await new Promise((r) => requestAnimationFrame(r));
+            await frame();
         }
         window.scrollTo(0, 0);
     });
