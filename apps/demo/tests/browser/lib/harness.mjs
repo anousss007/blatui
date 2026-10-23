@@ -6,6 +6,7 @@
 // backdrop — the markup is fine, the render tests pass, and only a real browser
 // disagrees. So the rule here is: assert on COMPUTED state after a real interaction,
 // never on markup. Markup is what the PHPUnit render tests are for.
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { mkdirSync } from 'node:fs';
 
 export const SHOTS = new URL('../shots/', import.meta.url).pathname;
@@ -136,27 +137,51 @@ export async function newPage(browser, { width = 1280, height = 900 } = {}) {
  * listeners exist, and the failure looks exactly like a broken component.
  */
 export async function visit(page, url) {
+    page.blatStep = 'loading the page';
     await page.goto(url, { waitUntil: 'networkidle' });
+    page.blatStep = 'waiting for Alpine';
     await page
         .waitForFunction(() => window.Alpine && document.querySelectorAll('[x-cloak]').length === 0, null, { timeout: 5000 })
         .catch(() => {}); // a page with no Alpine at all is a legitimate case
     await page.waitForTimeout(100);
 }
 
+/**
+ * The attempt of inLanes() an async call belongs to. A result is filed under it, so the results
+ * of an attempt that is abandoned — the ones it recorded before it stuck and the ones it would
+ * still record from a closed page — can be dropped without touching the other lanes' results.
+ */
+const attemptScope = new AsyncLocalStorage();
+
 export function createReporter() {
     const results = [];
     let current = '';
+
+    const record = (result) => {
+        const attempt = attemptScope.getStore();
+        if (attempt?.abandoned) return false;
+        results.push({ ...result, suite: current, attempt });
+
+        return true;
+    };
 
     return {
         suite(name) {
             current = name;
         },
         pass(name) {
-            results.push({ suite: current, name, ok: true });
+            record({ name, ok: true });
         },
         fail(name, detail) {
-            results.push({ suite: current, name, ok: false, detail });
-            console.log(`  ✗ ${name}\n      ${String(detail).split('\n').join('\n      ')}`);
+            if (record({ name, ok: false, detail })) {
+                console.log(`  ✗ ${name}\n      ${String(detail).split('\n').join('\n      ')}`);
+            }
+        },
+        /** Forget everything an abandoned inLanes() attempt recorded. */
+        discard(attempt) {
+            for (let i = results.length - 1; i >= 0; i--) {
+                if (results[i].attempt === attempt) results.splice(i, 1);
+            }
         },
         /** Run one check; a thrown error is a failure, never a crashed run. */
         async check(name, fn) {
@@ -224,27 +249,45 @@ export async function inLanes(browser, items, { lanes = 4, viewport, each, repor
 
     // A watchdog per item. Nothing else here is bounded: page.evaluate() has no timeout, so one
     // component that never settles used to hold its lane — and the job — until CI's six-hour
-    // limit, with nothing in the log to say which one. Now it is a named failure, the stuck page
-    // is thrown away, and the lane carries on with a fresh one.
+    // limit, with nothing in the log to say which one. Now the stuck page is thrown away and the
+    // lane carries on with a fresh one.
+    //
+    // A stuck item gets one more go on that fresh page before it counts as a failure. On CI's
+    // shared runners a page now and then stalls for minutes in a step that takes a second
+    // everywhere else — a different component each time, and the re-run passes. A page that
+    // genuinely never settles stalls twice and still fails. Either way the log names the step it
+    // was in (`page.blatStep`, set by the suites), so a stall can be traced instead of guessed.
     const lane = async () => {
         let page = await newPage(browser, viewport);
         for (let item = queue.shift(); item !== undefined; item = queue.shift()) {
-            let timer;
-            const work = each(page, item);
-            const outcome = await Promise.race([
-                work.then(() => 'done'),
-                new Promise((resolve) => { timer = setTimeout(() => resolve('timeout'), timeout); }),
-            ]);
-            clearTimeout(timer);
-            if (outcome !== 'timeout') continue;
-
-            work.catch(() => {}); // it rejects once its page is closed below
             const name = `${label} ${item} @ ${viewport?.width ?? '?'}px: finished within ${timeout / 1000}s`;
-            const detail = `still running after ${timeout / 1000}s — something on this page never settles`;
+            const stuckIn = [];
+
+            while (stuckIn.length < 2) {
+                let timer;
+                const attempt = { abandoned: false };
+                page.blatStep = null;
+                const work = attemptScope.run(attempt, () => each(page, item));
+                const outcome = await Promise.race([
+                    work.then(() => 'done'),
+                    new Promise((resolve) => { timer = setTimeout(() => resolve('timeout'), timeout); }),
+                ]);
+                clearTimeout(timer);
+                if (outcome !== 'timeout') break;
+
+                attempt.abandoned = true;
+                reporter?.discard(attempt);
+                stuckIn.push(page.blatStep ?? 'unknown step');
+                work.catch(() => {}); // it rejects once its page is closed below
+                await page.close().catch(() => {});
+                page = await newPage(browser, viewport);
+                if (stuckIn.length === 1) console.log(`  ↻ ${name.replace(/: finished.*/, '')}: stuck in "${stuckIn[0]}" for ${timeout / 1000}s, retrying on a fresh page`);
+            }
+            if (stuckIn.length < 2) continue;
+
+            const detail = `still running after ${timeout / 1000}s, twice — something on this page never settles (stuck in "${stuckIn.join('", then "')}")`;
             if (reporter) reporter.fail(name, detail);
             else throw new Error(`${name}: ${detail}`);
-            await page.close().catch(() => {});
-            page = await newPage(browser, viewport);
         }
         await page.close();
     };

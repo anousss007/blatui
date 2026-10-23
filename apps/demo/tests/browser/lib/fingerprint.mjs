@@ -49,6 +49,7 @@ export async function pinRendering(page, baseUrl) {
  * Returns nothing; call it after every navigation, before capturing.
  */
 export async function freeze(page) {
+    page.blatStep = 'freeze: freezing animations';
     await page.addStyleTag({
         content: `*, *::before, *::after {
             animation-duration: 0s !important;
@@ -64,6 +65,7 @@ export async function freeze(page) {
     // start until something scrolls them into view, and the thing that eventually does is the
     // capture itself — so the first look at an example records the image still pending and the
     // next one records its fallback. Trigger them all, then wait.
+    page.blatStep = 'freeze: scrolling the page';
     await page.evaluate(async () => {
         const step = window.innerHeight;
         for (let y = 0; y < document.body.scrollHeight; y += step) {
@@ -76,6 +78,7 @@ export async function freeze(page) {
     // Every image has to have finished — loaded or failed. An avatar swaps to its fallback on
     // the image's error event, so capturing while a request is still in flight records whichever
     // of the two states won the race that time, and the next machine records the other one.
+    page.blatStep = 'freeze: waiting for images';
     await page
         .waitForFunction(() => [...document.images].every((img) => img.complete), null, { timeout: 5000 })
         .catch(() => {});
@@ -97,8 +100,10 @@ export async function freeze(page) {
  */
 export async function fingerprint(page, selector = null, index = 0) {
     const target = selector ? page.locator(selector).nth(index) : page;
+    page.blatStep = `fingerprint ${selector ?? 'page'} #${index}: screenshot`;
     const png = await target.screenshot({ animations: 'disabled', caret: 'hide' });
 
+    page.blatStep = `fingerprint ${selector ?? 'page'} #${index}: hashing`;
     return page.evaluate(
         async ([base64, w, h]) => {
             const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
