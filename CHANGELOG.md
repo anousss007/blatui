@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.36.3] - 2026-10-23
+
+### Fixed
+- **A field control keeps the focus through a Livewire re-render.** When the
+  `<x-ui.field-label>` has no `for`, the field gives its control an id in the browser. Livewire
+  keys elements by `id`, and the server's markup has none, so every re-render replaced the
+  control: whoever was typing in it lost the focus to `<body>`, and inside a dialog the focus
+  jumped to the first field. The same went for the field's description and error. Livewire's
+  morph now patches them in place and the ids come back right after. This needs
+  `blatui-core.js` from this release. Giving the label `for` and the control an `id` was the
+  workaround and still works.
+- **No ResizeObserver loop on the first open of a combobox.** The panel took its trigger's width
+  from inside Floating UI's resize observer, which resized the node it was observing. WebKit
+  logged "ResizeObserver loop completed with undelivered notifications" every time, and Chromium
+  raised it as an error event. The panel now takes the width as it is shown.
+
 ## [1.36.2] - 2026-10-23
 
 ### Fixed
@@ -1587,7 +1603,9 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.36.1...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.36.3...HEAD
+[1.36.3]: https://github.com/anousss007/blatui/compare/v1.36.2...v1.36.3
+[1.36.2]: https://github.com/anousss007/blatui/compare/v1.36.1...v1.36.2
 [1.36.1]: https://github.com/anousss007/blatui/compare/v1.36.0...v1.36.1
 [1.36.0]: https://github.com/anousss007/blatui/compare/v1.35.0...v1.36.0
 [1.35.0]: https://github.com/anousss007/blatui/compare/v1.34.0...v1.35.0
