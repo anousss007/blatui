@@ -7,7 +7,7 @@ return [
         [
             'name' => 'name',
             'type' => 'string',
-            'description' => 'Name of the underlying input, used for form submission and as the fallback accessible label.',
+            'description' => 'Name of the underlying input, used for form submission and as the fallback accessible label when nothing else names the field.',
         ],
         [
             'name' => 'value',
@@ -58,7 +58,7 @@ return [
         [
             'name' => 'id',
             'type' => 'string',
-            'description' => 'id attribute of the underlying input, for associating an external label.',
+            'description' => 'id attribute of the underlying input, for associating an external label. With an id, a `<label for>` names the field; the fallback label (name, then "Number") is only applied when no label points at it.',
         ],
         [
             'name' => 'placeholder',

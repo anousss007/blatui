@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.36.2] - 2026-10-23
+
+### Fixed
+- **Selects, comboboxes and menus work from the keyboard inside a dialog** (#45). Their lists are
+  teleported to `<body>`, outside the focus trap of `<x-ui.dialog>` (and the sheet, drawer,
+  alert-dialog, command-dialog and mobile sidebar), so the trap took the focus straight back.
+  You could not type in a combobox's search box, and arrow keys never reached a select's
+  options. The modal's `.inert` also hid the open list from screen readers. A list opened inside
+  a modal now runs a focus trap of its own (`x-trap="open && $blatInModal"`), which pauses the
+  modal's trap while the list is open. Outside a modal nothing changes. The list stays in
+  `<body>`, so a Livewire re-render of the dialog no longer removes it. This needs
+  `blatui-core.js` from this release.
+- **A select keeps naming its value after a Livewire re-render** (#48). With `:value` and
+  `wire:model.live`, the round trip changed the select's `x-data` expression. Alpine (3.16+)
+  re-applies a changed expression to the live component, which emptied the labels its
+  (teleported) items had registered, so the trigger showed the placeholder over a chosen value.
+  The value now travels in `data-blat-value` and the expression never changes. An unbound
+  select still follows a new `:value` from the server.
+- **A consumer's `x-init` runs** on the combobox (button trigger), select trigger/content/item,
+  the dropdown, context and menubar triggers and contents, and command-item (#46). These
+  elements carry an `x-init` of their own, and the browser kept only the first of the two. Both
+  now run, the component's first.
+- **number-input: a `<label for>` names the field** (#47). The input always carried a fallback
+  `aria-label` ("Number", or the `name`), which outranks a label. With an `id`, the fallback is
+  now only applied in the browser when no label points at the input.
+
 ## [1.36.1] - 2026-10-14
 
 ### Changed

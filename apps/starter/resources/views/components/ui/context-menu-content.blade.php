@@ -1,10 +1,18 @@
+@php
+    // A consumer x-init runs after the component's own: two x-init attributes on one element
+    // and the browser keeps only the first, silently dropping the consumer's (issue #46).
+    $xInit = $attributes->get('x-init');
+    $attributes = $attributes->except('x-init');
+@endphp
+
 <template x-teleport="body" wire:ignore>
     <div
         x-blat-dialog-layer
         x-show="open"
+        x-trap.noreturn="open && $blatInModal"
         x-cloak
         x-ref="menu"
-        x-init="_menu = $el"
+        x-init="_menu = $el{{ $xInit ? '; '.$xInit : '' }}"
         @click.outside="closeMenu(false)"
         {{-- The menu is pinned to fixed viewport coords captured at open, so close it on
              page scroll/resize instead of leaving it stranded (matches Radix). The menu's

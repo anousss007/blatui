@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\DataTable;
+use App\Livewire\DialogCheckout;
 use App\Livewire\DialogField;
 use App\Livewire\DialogPopover;
 use App\Livewire\DialogValue;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Route;
  */
 Route::get('/', fn () => redirect('/field'));
 Route::get('/field', FieldValidation::class);
+Route::get('/dialog-checkout', DialogCheckout::class);
 Route::get('/dialog-field', DialogField::class);
 Route::get('/dialog-popover', DialogPopover::class);
 Route::get('/dialog-value', DialogValue::class);

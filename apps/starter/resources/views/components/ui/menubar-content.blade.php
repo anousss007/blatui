@@ -13,6 +13,7 @@
     <div
         x-blat-dialog-layer
         x-show="active === id"
+        x-trap.noreturn="active === id && $blatInModal"
         x-cloak
         {!! $anchorAttr !!}
         @click.outside="if (active === id) closeMenu(false);"

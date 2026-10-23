@@ -6,6 +6,10 @@
 ])
 
 @php
+    // A consumer x-init runs after the component's own: two x-init attributes on one element
+    // and the browser keeps only the first, silently dropping the consumer's (issue #46).
+    $xInit = $attributes->get('x-init');
+    $attributes = $attributes->except('x-init');
     $placement = $side.($align === 'center' ? '' : '-'.$align);
     $anchorAttr = 'x-blat-anchor.'.$placement.'.offset.'.$sideOffset.'="$refs.trigger"';
 @endphp
@@ -14,8 +18,9 @@
     <div
         x-blat-dialog-layer
         x-show="open"
+        x-trap.noreturn="open && $blatInModal"
         x-cloak
-        x-init="_list = $el"
+        x-init="_list = $el{{ $xInit ? '; '.$xInit : '' }}"
         {!! $anchorAttr !!}
         @click.outside="close(false)"
         @keydown.escape.prevent.stop="close()"

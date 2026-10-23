@@ -855,6 +855,95 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /generated-ids', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/generated-ids');
 
+    // ------------------------- issues #45 #46 #47 #48: a checkout form inside <x-ui.dialog>
+    //
+    // The dialog traps focus, and every list here is teleported to <body>, outside that trap: it
+    // took the keyboard back from the combobox search box and from the select's options (#45).
+    // The select is wire:model.live with :value, so the round trip rewrites its x-data, which
+    // emptied the labels its items had registered and put the placeholder back (#48).
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/dialog-checkout`);
+    await page.click('[data-testid=open]');
+    await page.waitForSelector('[data-slot="dialog-content"]', { state: 'visible', timeout: 5000 });
+    await page.waitForTimeout(400);
+
+    const focused = () => page.evaluate(() => {
+        const el = document.activeElement;
+
+        return { slot: el?.dataset.slot ?? el?.tagName.toLowerCase(), value: el?.dataset.value ?? null, id: el?.id || null };
+    });
+    const echoed = (what) => page.$eval(`[data-testid=echo-${what}]`, (el) => el.textContent.trim());
+
+    await reporter.check('a consumer x-init on a button combobox runs (#46)', async () =>
+        expect.equal(await page.evaluate(() => window.__comboboxInit), 1, 'times the x-init ran'));
+
+    await page.focus('[data-testid=category] button[role=combobox]');
+    await page.keyboard.press('Enter');
+    await page.waitForSelector('[data-slot="combobox-content"]', { state: 'visible', timeout: 5000 });
+    await page.waitForTimeout(150);
+    const inSearch = await page.evaluate(() => document.activeElement?.closest('[data-slot="combobox-content"]') !== null && document.activeElement?.tagName === 'INPUT');
+    await page.keyboard.type('dri');
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => document.querySelector('[data-testid=echo-category]')?.textContent.trim() === 'drinks', null, { timeout: 5000 }).catch(() => {});
+    await reporter.check('inside a dialog, the combobox search box takes the focus and the keyboard picks (#45)', async () =>
+        expect.truthy(inSearch, 'the search box did not have the focus once the list opened') ||
+        expect.equal(await echoed('category'), 'drinks', 'the category on the server'));
+
+    await page.focus('#branch');
+    await page.keyboard.press('ArrowDown');
+    await page.waitForSelector('[data-slot="select-content"]', { state: 'visible', timeout: 5000 });
+    await page.waitForTimeout(150);
+    const onOption = await focused();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => document.querySelector('[data-testid=stock]'), null, { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(300);
+    const afterPick = await focused();
+    await reporter.check('inside a dialog, the select options take the focus and the keyboard picks (#45)', async () =>
+        expect.equal(onOption.slot, 'select-item', 'what had the focus once the list opened') ||
+        expect.equal(await echoed('branch'), '2', 'the branch on the server') ||
+        expect.equal(afterPick.id, 'branch', 'what has the focus after the pick'));
+
+    const branchShown = () => page.$eval('#branch [data-slot=select-value] > span', (el) => el.textContent.trim());
+    await reporter.check('the select still names its value after the wire:model.live round trip (#48)', async () =>
+        expect.equal(await branchShown(), 'South', 'the trigger text'));
+
+    await page.click('#branch');
+    await page.waitForSelector('[data-slot="select-content"]', { state: 'visible', timeout: 5000 });
+    await page.click('[data-slot="select-item"][data-value="3"]');
+    await page.waitForFunction(() => document.querySelector('[data-testid=echo-branch]')?.textContent.trim() === '3', null, { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(300);
+    await reporter.check('a second pick with the mouse is named too (#48)', async () =>
+        expect.equal(await branchShown(), 'East', 'the trigger text'));
+
+    await page.focus('[data-testid=more]');
+    await page.keyboard.press('Enter');
+    await page.waitForSelector('[data-slot="dropdown-menu-content"]', { state: 'visible', timeout: 5000 });
+    await page.waitForTimeout(150);
+    const inMenu = await focused();
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(200);
+    await reporter.check('inside a dialog, a dropdown menu takes the focus, and Escape closes only the menu (#45)', async () =>
+        expect.equal(inMenu.slot, 'dropdown-menu-item', 'what had the focus once the menu opened') ||
+        expect.truthy(await page.isVisible('[data-slot="dialog-content"]'), 'Escape closed the dialog as well') ||
+        expect.truthy(await page.evaluate(() => document.activeElement?.dataset.testid === 'more'), 'Escape did not return the focus to the menu button'));
+
+    await reporter.check('an open list is not hidden from assistive tech by the dialog (#45)', async () => {
+        await page.click('#branch');
+        await page.waitForSelector('[data-slot="select-content"]', { state: 'visible', timeout: 5000 });
+        await page.waitForTimeout(150);
+        const hidden = await page.$eval('[data-slot="select-content"]', (el) => el.closest('[aria-hidden="true"]') !== null);
+        await page.keyboard.press('Escape');
+
+        return expect.truthy(!hidden, 'the open listbox sits under aria-hidden="true"');
+    });
+
+    await reporter.check('a <label for> names the number-input, not a fallback aria-label (#47)', async () =>
+        expect.equal(await page.$eval('#amount', (el) => el.getAttribute('aria-label')), null, 'aria-label on the input'));
+
+    await reporter.check('no console errors on /dialog-checkout', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/dialog-checkout');
+
     await page.close();
 }
 

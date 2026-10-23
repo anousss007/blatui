@@ -7,6 +7,10 @@
 ])
 
 @php
+    // A consumer x-init runs after the component's own: two x-init attributes on one element
+    // and the browser keeps only the first, silently dropping the consumer's (issue #46).
+    $xInit = $attributes->get('x-init');
+    $attributes = $attributes->except('x-init');
     $indicator = in_array($indicator, ['check', 'checkbox', 'radio'], true) ? $indicator : 'check';
     $jsVal = \Illuminate\Support\Js::from((string) $value)->toHtml();
 @endphp
@@ -20,7 +24,7 @@
     @if (! $disabled)
         @click="selectOption(@js((string) $value), $el.querySelector('[data-slot=select-item-label]').textContent.trim())"
     @endif
-    x-init="seedSelected(@js((string) $value), $el.querySelector('[data-slot=select-item-label]').textContent.trim())"
+    x-init="seedSelected(@js((string) $value), $el.querySelector('[data-slot=select-item-label]').textContent.trim()){{ $xInit ? '; '.$xInit : '' }}"
     :aria-selected="isSelected(@js((string) $value))"
     :data-state="isSelected(@js((string) $value)) ? 'checked' : 'unchecked'"
     {{ $attributes->twMerge("hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pe-8 ps-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4") }}

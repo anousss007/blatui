@@ -89,7 +89,12 @@
 @else
     <div
         data-slot="select"
-        x-data="blatSelect({ model: $blatModel(@js($initialValue)), wired: @js($hasWire), multiple: @js((bool) $multiple) })"
+        {{-- The value travels in data-blat-value, not in the x-data expression. A changed expression
+             is reconciled into the live scope by Alpine (3.16+), which resets everything the items
+             registered (the labels the trigger shows, the list), and teleported items never register
+             again: the trigger fell back to the placeholder over a chosen value (issue #48). --}}
+        x-data="blatSelect({ model: $blatModel(JSON.parse($el.dataset.blatValue)), wired: @js($hasWire), multiple: @js((bool) $multiple) })"
+        data-blat-value="{{ json_encode($initialValue) }}"
         x-id="['blat-listbox']"
         @if ($style) style="{{ $style }}" @endif
         {{ $attributes->twMerge('relative') }}
