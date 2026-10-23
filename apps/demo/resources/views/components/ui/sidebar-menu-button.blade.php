@@ -4,6 +4,9 @@
              shadcn/ui's `tooltip` prop, and only rendered when it would say something the
              screen doesn't: the label <span> stays in the DOM when collapsed, so the
              accessible name is unaffected either way — this is for sighted pointer users.
+    current  true or 'exact': work out isActive from the page rather than passing it. Kept
+             right in the browser across wire:navigate visits, so a sidebar inside @persist
+             stays correct, and opens the <x-ui.collapsible> groups around the current link.
 --}}
 @props([
     'href' => null,
@@ -11,9 +14,24 @@
     'variant' => 'default',
     'size' => 'default',
     'tooltip' => null,
+    'current' => false,
 ])
 
 @php
+    // `current` derives isActive from the page instead of taking it from the caller: matched
+    // here for the first paint, then kept up to date in the browser by x-blat-current, which
+    // is what a sidebar inside @persist (or a Livewire component re-rendered by an update
+    // request, where the route is livewire.update) needs. Same rule as blatPathMatches() in
+    // blatui-core.js and Livewire's wire:current: segment prefix by default, 'exact' for the
+    // whole path, the root always exact. #54
+    if ($current && $href) {
+        $here = trim(class_exists(\Livewire\Livewire::class) ? \Livewire\Livewire::originalPath() : request()->path(), '/');
+        $link = parse_url($href);
+        $want = trim($link['path'] ?? '', '/');
+        $isActive = (! isset($link['host']) || $link['host'] === request()->getHost())
+            && ($current === 'exact' || $want === '' ? $here === $want : $here === $want || str_starts_with($here, $want.'/'));
+    }
+
     $base = 'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-start text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pe-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0';
     $variants = [
         'default' => 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
@@ -64,6 +82,7 @@
         data-sidebar="menu-button"
         data-size="{{ $size }}"
         @if ($isActive) data-active="true" aria-current="page" @endif
+        @if ($current) x-blat-current="@js($current === 'exact' ? 'exact' : 'prefix')" @endif
         @if ($tooltip) x-ref="trigger" :aria-describedby="{{ $tipState }} ? $id('blat-tooltip') : null" @endif
         {{ $attributes->twMerge($classes) }}
     >{{ $slot }}</a>

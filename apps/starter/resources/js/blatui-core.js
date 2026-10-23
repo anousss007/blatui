@@ -2114,6 +2114,108 @@ const blatTreeGrid = (config = {}) => ({
 });
 
 
+/**
+ * Does a link's href name the page we are on? The rule is Livewire's `wire:current`, so a
+ * sidebar marked both ways never disagrees with itself: same host, trailing slashes ignored,
+ * and by default every segment of the href is a prefix of the page's (`/orders` is current on
+ * `/orders/12`). `exact` wants the whole path. The root is always exact, or `/` would be
+ * current everywhere. Kept in step with blatCurrentPath() in sidebar-menu-button.blade.php.
+ */
+function blatPathMatches(href, url, exact) {
+    if (href.hostname !== url.hostname) return false;
+    const want = href.pathname.replace(/\/+$/, '');
+    const have = url.pathname.replace(/\/+$/, '');
+    if (exact || want === '') return want === have;
+    return have === want || have.startsWith(want + '/');
+}
+
+// x-blat-current="'exact'" — keeps data-active + aria-current on a menu link in step with the
+//   page, for a sidebar the server does not re-render on every visit: one inside @persist, or a
+//   Livewire component whose update request only knows the /livewire/update route (#54).
+//   Re-checked on each wire:navigate visit and whenever a morph rewrites the attributes from
+//   the server's copy. Becoming current dispatches `blat-current`, which opens the enclosing
+//   <x-ui.collapsible>s, so a group follows the page without an :open the server can't know.
+const blatCurrentPages = new Set();
+let blatCurrentListening = false;
+
+function blatCurrentDirective(el, { expression }, { evaluate, cleanup }) {
+    const exact = (expression ? evaluate(expression) : null) === 'exact';
+    // menu-action and menu-badge style off the tooltip wrapper when there is one (it stands in
+    // as their peer), so the state goes there too.
+    const peer = () => (el.parentElement?.dataset.slot === 'sidebar-menu-button-tooltip' ? el.parentElement : null);
+    let was = false;
+
+    const sync = () => {
+        const href = el.getAttribute('href');
+        const now = !!href && !href.startsWith('#') && blatPathMatches(new URL(href, location.href), new URL(location.href), exact);
+        setAttr(el, 'data-active', now ? 'true' : null);
+        if (el.tagName === 'A') setAttr(el, 'aria-current', now ? 'page' : null);
+        const p = peer();
+        if (p) setAttr(p, 'data-active', now ? 'true' : null);
+        if (now && was === false) el.dispatchEvent(new CustomEvent('blat-current', { bubbles: true }));
+        was = now;
+    };
+
+    if (!blatCurrentListening) {
+        blatCurrentListening = true;
+        const all = () => blatCurrentPages.forEach((fn) => fn());
+        document.addEventListener('livewire:navigated', all);
+        window.addEventListener('popstate', all);
+    }
+    // The first pass dispatches too, once Alpine has given the collapsibles above their scope:
+    // a reload of a page deep in a closed group opens it.
+    queueMicrotask(sync);
+    blatCurrentPages.add(sync);
+    const observer = new MutationObserver(sync);
+    observer.observe(el, { attributes: true, attributeFilter: ['href', 'data-active', 'aria-current'] });
+    cleanup(() => {
+        blatCurrentPages.delete(sync);
+        observer.disconnect();
+    });
+}
+
+// x-blat-scroll-memory="'sidebar_scroll'" — remembers how far a list was scrolled, per tab, in
+//   sessionStorage under that key, and puts it back when the list is rendered again: after a
+//   wire:navigate visit or a reload, without @persist (#54). A copy that is hidden when it
+//   starts (the mobile drawer) is restored the moment it gets a size.
+function blatScrollMemoryDirective(el, { expression }, { evaluate, cleanup }) {
+    const key = 'blat:scroll:' + (expression ? evaluate(expression) : 'sidebar_scroll');
+    const read = () => {
+        try { return Number(sessionStorage.getItem(key)) || 0; } catch { return 0; }
+    };
+    let restored = false;
+    const restore = () => {
+        if (restored || el.clientHeight === 0) return;
+        restored = true;
+        el.scrollTop = read();
+    };
+    const save = () => {
+        if (el.clientHeight === 0) return;
+        try { sessionStorage.setItem(key, String(Math.round(el.scrollTop))); } catch {}
+    };
+    restore();
+    el.addEventListener('scroll', save, { passive: true });
+    // Hidden → shown restores again: each opening of the drawer lands where the list was left.
+    const resize = new ResizeObserver(() => {
+        if (el.clientHeight === 0) restored = false;
+        else restore();
+    });
+    resize.observe(el);
+    // @persist carries this very node into the next page, and moving a node resets its scroll.
+    // The move happens within one task, so the observer above never sees it leave.
+    const navigated = () => {
+        restored = false;
+        restore();
+    };
+    document.addEventListener('livewire:navigated', navigated);
+    cleanup(() => {
+        el.removeEventListener('scroll', save);
+        document.removeEventListener('livewire:navigated', navigated);
+        resize.disconnect();
+    });
+}
+
+
 // x-blat-field — wires a form field's control to its label/description/error:
 //   aria-describedby ← description + error ids, aria-invalid + data-invalid when
 //   an error is present, and label[for] ← control id when not already set. Radix/
@@ -2660,6 +2762,8 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.directive('blat-anchor', blatAnchorDirective);
     Alpine.directive('blat-dialog-layer', blatDialogLayerDirective);
     Alpine.directive('blat-field', Alpine.skipDuringClone(blatFieldDirective));
+    Alpine.directive('blat-current', Alpine.skipDuringClone(blatCurrentDirective));
+    Alpine.directive('blat-scroll-memory', Alpine.skipDuringClone(blatScrollMemoryDirective));
     Alpine.magic('blatModel', blatModelMagic);
     Alpine.magic('blatWire', blatWire);
     Alpine.magic('blatNumber', () => blatNumber);

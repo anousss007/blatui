@@ -1074,6 +1074,77 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /date-range', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/date-range');
 
+    // ------------------------------------------------ a long sidebar across wire:navigate (#54)
+    // Two layouts around the same Livewire sidebar: one keeps it in @persist, the other renders
+    // it again on every visit. Both have to keep the list where it was scrolled, mark exactly
+    // the current link (data-active + aria-current) and open the group around it; @persist used
+    // to leave the previous link marked, and the plain one put the list back at the top.
+    for (const [base, persisted] of [['/nav', true], ['/nav-plain', false]]) {
+        page.blatErrors.length = 0;
+        await visit(page, `${baseUrl}${base}/5`);
+        await page.waitForTimeout(300);
+        // Only the docked copy: the mobile drawer holds a second one, hidden.
+        const sidebar = (fn, arg) => page.evaluate(([src, a]) => {
+            const list = [...document.querySelectorAll('[data-slot=sidebar-content]')].find((el) => el.checkVisibility());
+            return new Function('list', 'a', src)(list, a);
+        }, [fn, arg]);
+        const marked = () => sidebar(`return [...list.querySelectorAll('[data-active=true]')].map((el) => el.textContent.trim() + (el.getAttribute('aria-current') === 'page' ? '' : ' (no aria-current)')).join(', ')`);
+        const groupOpen = (g) => sidebar(`return list.querySelector('[data-testid=group-' + a + '] [data-slot=collapsible-content]')?.checkVisibility() ?? 'missing'`, g);
+        // Clicked where it is, by mouse: a locator click scrolls the link into view first, which
+        // is the one thing these checks must not do to the list.
+        const go = async (label) => {
+            const box = await page.locator('[data-slot=sidebar-content]:visible a', { hasText: new RegExp(`^${label}$`) }).boundingBox();
+            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+            await page.waitForFunction((t) => document.querySelector('[data-testid=page]')?.textContent === t, label.replace('Sub', 'Page'), { timeout: 5000 }).catch(() => {});
+            await page.waitForTimeout(300);
+        };
+
+        await reporter.check(`${base}: a full load marks the current sub link and opens its group`, async () =>
+            expect.equal(await marked(), 'Sub 5', 'marked links') ||
+            expect.equal(await groupOpen(2), true, 'group 2 open'));
+
+        await sidebar(`list.scrollTop = 400; list._blatSame = true`);
+        await page.waitForTimeout(100);
+        // Whichever link sits mid-list at that scroll: it has to be clicked where it is.
+        const target = await sidebar(`const r = list.getBoundingClientRect(); return [...list.querySelectorAll('a')].find((a) => a.getBoundingClientRect().top > r.top + r.height / 2)?.textContent.trim()`);
+        await go(target);
+        await reporter.check(`${base}: the list keeps its scroll position across a wire:navigate visit`, async () => {
+            const top = await sidebar(`return list.scrollTop`);
+            return expect.equal(Math.abs(top - 400) <= 1, true, `scrollTop ${top} near 400`);
+        });
+        await reporter.check(`${base}: after the visit only the new page is marked`, async () =>
+            expect.equal(await marked(), target, 'marked links') ||
+            expect.equal(await sidebar(`return !!list._blatSame`), persisted, 'same sidebar node (persisted)'));
+
+        await page.evaluate((u) => window.Livewire.navigate(u), `${base}/8`);
+        await page.waitForFunction(() => document.querySelector('[data-testid=page]')?.textContent === 'Page 8', null, { timeout: 5000 }).catch(() => {});
+        await page.waitForTimeout(300);
+        await reporter.check(`${base}: a visit into a closed group opens it`, async () =>
+            expect.equal(await marked(), 'Sub 8', 'marked links') ||
+            expect.equal(await groupOpen(3), true, 'group 3 open'));
+
+        // A Livewire update renders the sidebar on /livewire/update: the server has no page to match.
+        await page.locator('[data-testid=sidebar-refresh]:visible').click();
+        await page.waitForFunction(() => [...document.querySelectorAll('[data-testid=sidebar-renders]')].some((el) => el.textContent === '2'), null, { timeout: 5000 }).catch(() => {});
+        await page.waitForTimeout(300);
+        await reporter.check(`${base}: re-rendering the sidebar keeps the current link and the open groups`, async () =>
+            expect.equal(await marked(), 'Sub 8', 'marked links') ||
+            expect.equal(await groupOpen(3), true, 'group 3 open') ||
+            expect.equal(await groupOpen(2), persisted, 'group 2 (opened by the first visit) still open'));
+
+        await sidebar(`list.scrollTop = 300`);
+        await page.waitForTimeout(100);
+        await page.reload();
+        await page.waitForTimeout(400);
+        await reporter.check(`${base}: a reload restores the scroll position`, async () => {
+            const top = await sidebar(`return list.scrollTop`);
+            return expect.equal(Math.abs(top - 300) <= 1, true, `scrollTop ${top} near 300`);
+        });
+
+        await reporter.check(`no console errors on ${base}`, () => expect.empty(page.blatErrors, 'console errors'));
+        reporter.progress(base);
+    }
+
     await page.close();
 }
 

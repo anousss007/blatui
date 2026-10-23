@@ -12,8 +12,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **`locale` on the date-picker and datetime-picker** (#52). It reaches the calendar's month
   and weekday names and the date on the trigger: `<x-ui.date-picker locale="es" />`.
+- **`current` on `sidebar-menu-button` and `sidebar-menu-sub-button`** (#54). In place of
+  `isActive`, the link works out from the page whether it is the current one: segment by
+  segment by default (`/orders` on `/orders/12`), the whole path with `current="exact"`, the
+  same rule as Livewire's `wire:current`. It is matched on the server for the first paint (from
+  the page, not the `livewire/update` route) and kept right in the browser on every
+  `wire:navigate` visit and after every re-render: `data-active`, `aria-current="page"`, and the
+  `<x-ui.collapsible>` groups around the link open. A sidebar inside `@persist`, or in its own
+  Livewire component, no longer keeps the previous page marked.
+- **`persist` on `sidebar-content`** (#54). Remembers how far the list is scrolled, per browser
+  tab, and puts it back after a `wire:navigate` visit or a reload, with or without `@persist`.
+  `persist="admin_nav"` names the key when two lists should not share one.
 
 ### Changed
+- **An active `sidebar-menu-sub-button` sets `aria-current="page"`**, as the menu button
+  always has. It is a link to the page being read, and assistive tech now says so.
 - **The calendar follows the app locale.** Without a `locale` prop, the calendar, date-picker
   and datetime-picker use `app()->getLocale()` (Laravel's `pt_BR` is read as `pt-BR`), like every
   string they render through `__()` since 1.34.0. Before, the calendar was always `en-US` and
