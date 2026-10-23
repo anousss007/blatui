@@ -310,7 +310,8 @@
 
 <div
     data-slot="markdown-editor"
-    x-data="blatMarkdownEditor($blatModel(@js((string) $value)))"
+    data-blat-value="{{ json_encode((string) $value) }}"
+    x-data="blatMarkdownEditor($blatModel())"
     {{-- The tab/panel idrefs come from Alpine rather than from the server. An id generated per
          render is a new morph key every render, so Livewire replaced the tabs and the textarea
          on any re-render — taking the caret and the focus with them. Alpine's $id() is scoped to

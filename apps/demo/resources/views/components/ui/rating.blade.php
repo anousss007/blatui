@@ -32,8 +32,9 @@
 
 <div
     data-slot="rating"
+    data-blat-value="{{ json_encode((float) $value) }}"
     x-data="{
-        _model: $blatModel(@js((float) $value)),
+        _model: $blatModel(),
         get value() { return this._model.value; },
         set value(v) { this._model.value = v; },
         hover: 0,

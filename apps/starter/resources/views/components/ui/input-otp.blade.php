@@ -29,8 +29,9 @@
 
 <div
     data-slot="input-otp"
+    data-blat-value="{{ json_encode((string) $value) }}"
     x-data="{
-        _model: $blatModel(@js((string) $value)),
+        _model: $blatModel(),
         get value() { return this._model.value; },
         set value(v) { this._model.value = v; },
         max: {{ $maxlength }},

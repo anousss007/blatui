@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\DataTable;
+use App\Livewire\DateRange;
 use App\Livewire\DialogCheckout;
 use App\Livewire\DialogField;
 use App\Livewire\DialogPopover;
@@ -28,6 +29,7 @@ Route::get('/dialog-value', DialogValue::class);
 Route::get('/label-wiring', LabelWiring::class);
 Route::get('/native-dialog', NativeDialog::class);
 Route::get('/data-table', DataTable::class);
+Route::get('/date-range', DateRange::class);
 Route::get('/greenfield', Greenfield::class);
 Route::get('/generated-ids', GeneratedIds::class);
 Route::get('/wire-model', WireModel::class);

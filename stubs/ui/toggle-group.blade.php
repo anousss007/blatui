@@ -28,9 +28,10 @@
     data-size="{{ $size }}"
     role="group"
     data-orientation="{{ $orientation }}"
+    data-blat-value="{{ json_encode($type === 'multiple' ? (array) ($value ?? []) : $value) }}"
     x-data="{
         type: @js($type),
-        _model: $blatModel(@js($type === 'multiple' ? (array) ($value ?? []) : $value)),
+        _model: $blatModel(),
         get value() { return this._model.value; },
         set value(v) { this._model.value = v; },
         rovingValue: null,

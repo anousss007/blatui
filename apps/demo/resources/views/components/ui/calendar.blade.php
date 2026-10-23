@@ -37,6 +37,9 @@
     $nextMonthLabel ??= __('Go to the next month');
     $todayLabel ??= __('Today, :date');
     $selectedLabel ??= __('selected');
+    // Month names, weekdays and the day labels follow the app locale, like every string above
+    // (#52). As a BCP-47 tag: Laravel's `pt_BR` is `pt-BR` to the browser.
+    $locale ??= str_replace('_', '-', app()->getLocale());
     // Address a single calendar among several on the page: `calendar-id="search"` (or a plain
     // `id`) makes `calendar:set` & co. targetable and stamps outgoing calendar:updated events.
     $calendarId ??= $attributes->get('id');
@@ -81,7 +84,10 @@
     $dayBtn = implode(' ', [
         'relative inline-flex size-(--cell-size) select-none items-center justify-center rounded-md p-0 text-sm font-normal transition-colors',
         'hover:bg-accent hover:text-accent-foreground',
-        'data-[today]:bg-accent data-[today]:text-accent-foreground',
+        // Not on a selected day or either end of a range (#53): Tailwind emits data-[today] after
+        // data-[selected] and data-[range-*], so at equal specificity it won and today, picked,
+        // looked unpicked. A today in the middle of a range is accent either way.
+        '[&[data-today]:not([data-selected],[data-range-start],[data-range-end])]:bg-accent [&[data-today]:not([data-selected],[data-range-start],[data-range-end])]:text-accent-foreground',
         'data-[outside]:text-muted-foreground',
         'data-[disabled]:text-muted-foreground data-[disabled]:opacity-40 data-[disabled]:line-through data-[disabled]:pointer-events-none',
         // outOfRange="flag": selectable but flagged red (overridden by the selected/range styles below).

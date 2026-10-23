@@ -29,6 +29,7 @@
     'maxNights' => null,
     'outOfRange' => 'disable',  // 'disable' (prevent out-of-range dates) | 'flag' (allow + red)
     'weekStart' => 0,
+    'locale' => null,
     'numberOfMonths' => null,
     'defaultMonth' => null,
     'showOutsideDays' => true,
@@ -47,6 +48,8 @@
     };
 
     $isRange = $mode === 'range';
+    // One locale for the calendar and the trigger's label, the app's unless given (#52).
+    $locale ??= str_replace('_', '-', app()->getLocale());
 
     // Range shows two months by default (like a typical date-range picker); single shows one.
     $months = $numberOfMonths !== null ? max(1, (int) $numberOfMonths) : ($isRange ? 2 : 1);
@@ -93,10 +96,12 @@
 
 <div
     data-slot="datetime-picker"
+    data-blat-value="{{ json_encode($modelInit) }}"
     x-data="{
         open: false,
         mode: @js($mode),
         cycle: @js($hourCycle),
+        locale: $blatLocale(@js($locale)),
         seconds: @js((bool) $seconds),
         minDate: @js($minDate), minTime: @js($minTime),
         maxDate: @js($maxDate), maxTime: @js($maxTime),
@@ -107,7 +112,7 @@
         // those. All four fields are therefore VIEWS over the bound value rather than copies of
         // it: assigning any of them rewrites the value, and a value assigned from anywhere else —
         // the server, a morph — is visible in all of them immediately, with nothing to re-seed.
-        _model: $blatModel(@js($modelInit)),
+        _model: $blatModel(),
         get model() { return this._model.value; },
         set model(v) { this._model.value = v; },
         _split(v) {
@@ -156,6 +161,10 @@
             // teleported and wire:ignore'd, so nothing else ever re-seeds it, and it would keep
             // highlighting the days it opened with.
             this.$watch('_model.value', () => this.repaintCalendar());
+            // A bound picker starts from the property, which the server never rendered into the
+            // calendar unless `:value` repeated it: without this a range kept in the query string
+            // showed on the trigger and not in the calendar when it opened.
+            if (this._model.path) this.$nextTick(() => this.repaintCalendar());
         },
         repaintCalendar() {
             const cal = this.$refs.cal && this.$refs.cal.querySelector('[data-slot=calendar]');
@@ -184,12 +193,12 @@
             if (!d) return '';
             const dt = new Date(d + 'T' + (t || '00:00'));
             if (isNaN(dt)) return '';
-            const ds = dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+            const ds = dt.toLocaleDateString(this.locale, { year: 'numeric', month: 'short', day: 'numeric' });
             if (!t) return ds;
             const to = { hour: '2-digit', minute: '2-digit' };
             if (this.seconds) to.second = '2-digit';
             if (this.cycle !== 'auto') to.hourCycle = this.cycle === '12' ? 'h12' : 'h23';
-            return ds + ', ' + dt.toLocaleTimeString(undefined, to);
+            return ds + ', ' + dt.toLocaleTimeString(this.locale, to);
         },
         get errors() {
             const e = [];
@@ -300,6 +309,7 @@
                     :value="$isRange ? $calRange : $initDate"
                     :caption-layout="$captionLayout"
                     :week-start="$weekStart"
+                    :locale="$locale"
                     :number-of-months="$months"
                     :default-month="$defaultMonth"
                     :show-outside-days="$showOutsideDays"

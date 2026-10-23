@@ -197,6 +197,20 @@ function _parse(s) {
 function _sameDay(a, b) { return a && b && _ymd(a) === _ymd(b); }
 function _addMonths(d, n) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 
+/**
+ * A locale tag the Intl APIs accept, or `fallback`. The tag usually comes from the app locale
+ * (`app()->getLocale()`), which is whatever the app configured — `es`, `pt-BR`, but also a
+ * custom name no browser knows — and `toLocaleString` throws a RangeError on a malformed one.
+ */
+function blatLocale(tag, fallback = 'en-US') {
+    if (! tag) return fallback;
+    try {
+        return new Intl.DateTimeFormat(tag).resolvedOptions().locale;
+    } catch {
+        return fallback;
+    }
+}
+
 const calendar = (cfg = {}) => ({
     // Instance handle. Set it with the `calendar-id` prop (or a plain `id`) and every
     // incoming hook can be aimed at THIS calendar even when broadcast on `window`, and
@@ -205,7 +219,7 @@ const calendar = (cfg = {}) => ({
     // sheet, say) need this: an un-targeted window dispatch reaches all of them.
     calendarId: cfg.calendarId || null,
     mode: cfg.mode || 'single',
-    locale: cfg.locale || 'en-US',
+    locale: blatLocale(cfg.locale),
     // aria-label fragments, localised by the Blade layer (never hardcode English here).
     todayLabel: cfg.todayLabel || 'Today, :date',
     selectedLabel: cfg.selectedLabel || 'selected',
@@ -1582,7 +1596,8 @@ function keepInModal(el, cleanup) {
 // and the same object simply holds the value locally, so a component behaves identically.
 //
 // Usage, in a component's x-data (the Blade bridge renders the data attributes):
-//     _model: $blatModel(@js($default)),
+//     data-blat-value="{{ json_encode($default) }}"   ← on the x-data element
+//     _model: $blatModel(),
 //     get value() { return this._model.value },
 //     set value(v) { this._model.value = v },
 // ---------------------------------------------------------------------------
@@ -1623,11 +1638,52 @@ function blatWire(el) {
     return (root && window.Livewire.find(root.getAttribute('wire:id'))) || null;
 }
 
-function blatModelMagic(el) {
-    return (fallback = null) => ({
-        // Where the value lives when nothing is bound. Declared here (rather than captured
-        // in a closure) so Alpine's reactivity covers it and a local component still re-renders.
-        local: fallback,
+function blatModelMagic(el, { Alpine, cleanup }) {
+    return (...args) => {
+        // Called with no argument, the starting value comes from the element's `data-blat-value`
+        // (JSON) instead of from the x-data expression — and that is the form every component
+        // uses. A value written into x-data made the expression itself change whenever the
+        // value did: with `:value="$x" wire:model.live="x"` every round trip did, and Alpine
+        // (3.16+) re-applies a changed expression to the live component, resetting every key in
+        // it — the date-picker's popover closed after the first day of a range (#53), a select
+        // lost its labels (#48). With the value in an attribute the expression never changes.
+        const seeded = args.length === 0;
+        const state = Alpine.reactive({ local: seeded ? readSeed(el) : (args[0] ?? null) });
+
+        // What the attribute used to do through x-data, kept: a component that is not bound
+        // follows a new value from the server. A bound one reads the property, not `local`.
+        if (seeded && ! el._blatSeedWatch) {
+            let seed = el.dataset.blatValue;
+            el._blatSeedWatch = new MutationObserver(() => {
+                if (el.dataset.blatValue === seed) return;
+                seed = el.dataset.blatValue;
+                state.local = readSeed(el);
+            });
+            el._blatSeedWatch.observe(el, { attributes: true, attributeFilter: ['data-blat-value'] });
+            cleanup(() => {
+                el._blatSeedWatch?.disconnect();
+                delete el._blatSeedWatch;
+            });
+        }
+
+        return blatModelFor(el, state);
+    };
+}
+
+function readSeed(el) {
+    try {
+        return JSON.parse(el.dataset.blatValue ?? 'null');
+    } catch {
+        return null;
+    }
+}
+
+function blatModelFor(el, state) {
+    return {
+        // Where the value lives when nothing is bound. Reactive (Alpine.reactive above) so a
+        // local component re-renders, and so the seed observer can move it from outside.
+        get local() { return state.local; },
+        set local(v) { state.local = v; },
 
         get path() { return el.dataset.blatModel || null; },
 
@@ -1665,7 +1721,7 @@ function blatModelMagic(el) {
             const wire = this.path && el.dataset.blatModelLive === '1' ? blatWire(el) : null;
             if (wire) wire.$set(this.path, wire.$get(this.path), true);
         },
-    });
+    };
 }
 
 
@@ -2608,6 +2664,7 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.magic('blatWire', blatWire);
     Alpine.magic('blatNumber', () => blatNumber);
     Alpine.magic('blatInModal', (el) => blatInModal(el));
+    Alpine.magic('blatLocale', () => blatLocale);
     Alpine.magic('blatNav', blatNavMagic);
     Alpine.magic('blatType', blatTypeMagic);
     hookLivewireMorph();

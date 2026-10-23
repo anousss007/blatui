@@ -73,10 +73,11 @@
 
 <div
     data-slot="combobox"
+    data-blat-value="{{ json_encode($initialValue) }}"
     x-data="blatListbox({
         trigger: @js($trigger),
         multiple: @js((bool) $multiple),
-        model: $blatModel(@js($initialValue)),
+        model: $blatModel(),
         query: @js($initialQuery),
         options: @js($opts),
     })"

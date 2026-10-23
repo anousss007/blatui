@@ -42,8 +42,9 @@
 
 <div
     data-slot="time-field"
+    data-blat-value="{{ json_encode($value) }}"
     x-data="{
-        _model: $blatModel(@js($value)),
+        _model: $blatModel(),
         get value() { return this._model.value; },
         set value(v) { this._model.value = v; },
         cycle: @js($hourCycle),

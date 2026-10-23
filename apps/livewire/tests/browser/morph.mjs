@@ -982,6 +982,98 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /dialog-checkout', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/dialog-checkout');
 
+    // ------------------------------------- a range picker bound live with :value (#52, #53)
+    // The value used to be written into the x-data expression, so the first day of a range
+    // changed it and Alpine re-applied it to the live component: `open` went back to false and
+    // the popover closed before the second day. Every component with a value did the same.
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/date-range`);
+    const xData = () => page.$$eval('[x-data*="blatModel"]', (els) => els.map((el) => el.getAttribute('x-data')));
+    const rangeOpen = () => page.locator('[role=dialog][aria-label="Choose a date range"]').first().isVisible();
+    const day = (n) => page.locator('[role=dialog]:visible [data-slot=calendar] button[data-day]:not([data-outside])').nth(n);
+    const echoedRange = async () => `${await page.textContent('[data-testid=echo-from]')} → ${await page.textContent('[data-testid=echo-to]')}`;
+    const xDataBefore = await xData();
+
+    await page.click('[data-testid=range] button[x-ref=trigger]');
+    await page.waitForTimeout(300);
+    const [first, second] = [await day(9).getAttribute('data-day'), await day(13).getAttribute('data-day')];
+    await day(9).click();
+    await page.waitForFunction((d) => document.querySelector('[data-testid=echo-from]')?.textContent === d, first, { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(250);
+    await reporter.check('a live range picker with :value stays open after the first day', async () =>
+        expect.equal(await echoedRange(), `${first} → null`, 'the property after the first day') ||
+        expect.truthy(await rangeOpen(), 'the popover closed after the first day'));
+
+    if (! (await rangeOpen())) { // the bug: reopen, so the rest of the section still runs
+        await page.click('[data-testid=range] button[x-ref=trigger]');
+        await page.waitForTimeout(300);
+    }
+    await day(13).click();
+    await page.waitForFunction((d) => document.querySelector('[data-testid=echo-to]')?.textContent === d, second, { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(250);
+    await reporter.check('the second day completes the range and closes the popover', async () =>
+        expect.equal(await echoedRange(), `${first} → ${second}`, 'the property after the second day') ||
+        expect.equal(await rangeOpen(), false, 'popover open after the second day') ||
+        expect.truthy(page.url().includes(`dateRange[to]=${second}`) || decodeURIComponent(page.url()).includes(`dateRange[to]=${second}`), `the query string: ${page.url()}`));
+
+    await reporter.check('no bound component changes its x-data across round trips', async () => {
+        const after = await xData();
+        const changed = after.map((x, i) => (x === xDataBefore[i] ? null : i)).filter((i) => i !== null);
+
+        return expect.truthy(after.length === 5, `bound components found: ${after.length}`) ||
+            expect.equal(changed.length, 0, 'bound components whose x-data expression changed');
+    });
+
+    // #53: today as the end of the range is drawn as an end, not as an unpicked today.
+    await page.click('[data-testid=ends-today]');
+    await page.waitForTimeout(600);
+    await page.click('[data-testid=range] button[x-ref=trigger]');
+    await page.waitForTimeout(300);
+    await reporter.check('today at the end of a range is drawn like the start, not as today', async () => {
+        const looks = await page.evaluate(() => {
+            const cal = document.querySelector('[role=dialog][aria-label="Choose a date range"]');
+            const today = cal.querySelector('button[data-today]');
+            const start = cal.querySelector('button[data-range-start]');
+
+            return { end: today?.hasAttribute('data-range-end'), same: !! today && !! start && getComputedStyle(today).backgroundColor === getComputedStyle(start).backgroundColor };
+        });
+
+        return expect.equal(JSON.stringify(looks), '{"end":true,"same":true}', 'today as range end');
+    });
+    await page.keyboard.press('Escape');
+
+    // #52: locale="es" reaches the calendar inside the picker.
+    await page.click('[data-testid=spanish] button[x-ref=trigger]');
+    await page.waitForTimeout(300);
+    await reporter.check('a date-picker locale reaches its calendar', async () => {
+        const caption = await page.$$eval('[role=dialog]', (ds) => ds.filter((d) => getComputedStyle(d).display !== 'none').map((d) => d.querySelector('[data-slot=calendar]')?.innerText ?? '').join(' '));
+
+        return expect.truthy(/octubre de 2026/.test(caption), `the calendar caption: ${caption.slice(0, 80)}`);
+    });
+    await page.keyboard.press('Escape');
+
+    // A range in the query string, bound without :value: the trigger always showed it, the
+    // calendar did not, because only :value was ever rendered into it. And seeding it from the
+    // property must not send anything by itself.
+    await visit(page, `${baseUrl}/date-range?dateRange[from]=2026-10-06&dateRange[to]=2026-10-09`);
+    await page.waitForTimeout(500);
+    await page.click('[data-testid=range-plain] button[x-ref=trigger]');
+    await page.waitForTimeout(300);
+    await reporter.check('a bound picker without :value opens on the range the property holds', async () => {
+        const shown = await page.evaluate(() => {
+            const d = [...document.querySelectorAll('[role=dialog][aria-label="Choose a date range"]')].find((x) => getComputedStyle(x).display !== 'none');
+
+            return `${d?.querySelector('[data-range-start]')?.dataset.day} → ${d?.querySelector('[data-range-end]')?.dataset.day}`;
+        });
+
+        return expect.equal(shown, '2026-10-06 → 2026-10-09', 'the range the calendar highlights') ||
+            expect.equal(await page.textContent('[data-testid=renders]'), '1', 'renders after loading and opening (a request went out)');
+    });
+    await page.keyboard.press('Escape');
+
+    await reporter.check('no console errors on /date-range', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/date-range');
+
     await page.close();
 }
 

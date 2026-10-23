@@ -41,15 +41,16 @@
 
 <div
     data-slot="color-picker"
+    data-blat-value="{{ json_encode($value) }}"
     x-data="{
         open: false,
         disabled: @js((bool) $disabled),
         inline: @js((bool) $inline),
-        _model: $blatModel(@js($value)),
+        _model: $blatModel(),
         get hex() { return this._model.value; },
         set hex(v) { this._model.value = v; },
         hue: 0,
-        input: @js($value),
+        input: JSON.parse($el.dataset.blatValue),
         swatches: @js(array_values((array) $palette)),
 
         init() {
@@ -57,6 +58,14 @@
             const norm = this.normalize(this.hex);
             if (norm) { this.hex = norm; this.input = norm; }
             this.hue = this.hexToHue(this.hex);
+            // A colour set from outside (the server, a morph) reaches the text box and the hue.
+            // One typed here already matches its own normalised form, so typing is left alone.
+            this.$watch('hex', (v) => {
+                const norm = this.normalize(v);
+                if (! norm || norm === this.normalize(this.input)) return;
+                this.input = norm;
+                this.hue = this.hexToHue(norm);
+            });
         },
 
         // Accept #rgb / #rrggbb (with or without leading #); return a normalized

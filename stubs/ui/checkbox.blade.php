@@ -41,7 +41,8 @@
         type="button"
         role="checkbox"
         @if ($id) id="{{ $id }}" @endif
-        x-data="{ _model: $blatModel(@js((bool) $checked)), get checked() { return this._model.value; }, set checked(v) { this._model.value = v; }, indeterminate: @js((bool) $indeterminate) }"
+        data-blat-value="{{ json_encode((bool) $checked) }}"
+        x-data="{ _model: $blatModel(), get checked() { return this._model.value; }, set checked(v) { this._model.value = v; }, indeterminate: @js((bool) $indeterminate) }"
         :data-state="indeterminate ? 'indeterminate' : checked ? 'checked' : 'unchecked'"
         :aria-checked="indeterminate ? 'mixed' : checked.toString()"
         @click="indeterminate ? ((indeterminate = false), (checked = true)) : (checked = ! checked)"

@@ -54,12 +54,13 @@
 <div
     data-slot="knob"
     data-disabled="@js((bool) $disabled)"
+    data-blat-value="{{ json_encode((float) $value) }}"
     x-data="{
         min: @js((float) $min),
         max: @js((float) $max),
         step: @js((float) $step),
         disabled: @js((bool) $disabled),
-        _model: $blatModel(@js((float) $value)),
+        _model: $blatModel(),
         get value() { return this._model.value; },
         set value(v) { this._model.value = v; },
         dragging: false,
