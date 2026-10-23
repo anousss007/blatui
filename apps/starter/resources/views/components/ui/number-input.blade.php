@@ -41,10 +41,13 @@
     // The spinbutton (not the wrapper) must carry the accessible name. Route any
     // author-supplied aria-label / aria-labelledby onto the <input>, falling back
     // to the field name then a generic label, so the control is never unnamed.
+    // An aria-label outranks a <label for>, so the fallback must not be rendered when one
+    // can name the field: with an id it is only set in the browser, and only when no label
+    // points at the input (issue #47).
     $ariaLabel = $attributes->get('aria-label');
     $ariaLabelledby = $attributes->get('aria-labelledby');
     $attributes = $attributes->except(['aria-label', 'aria-labelledby']);
-    $inputLabel = $ariaLabel ?? $name;
+    $fallbackLabel = $name ?? __('Number');
 
     // Livewire bridge — bind to a consumer's wire:model when present. The property path travels
     // as a data attribute instead of being baked into x-data (which Alpine evaluates once), so a
@@ -210,10 +213,12 @@
         role="spinbutton"
         @if ($ariaLabelledby)
             aria-labelledby="{{ $ariaLabelledby }}"
-        @elseif ($inputLabel)
-            aria-label="{{ $inputLabel }}"
+        @elseif ($ariaLabel)
+            aria-label="{{ $ariaLabel }}"
+        @elseif ($id)
+            x-init="$el.labels?.length || $el.setAttribute('aria-label', @js($fallbackLabel))"
         @else
-            aria-label="{{ __('Number') }}"
+            aria-label="{{ $fallbackLabel }}"
         @endif
         @if ($name) name="{{ $name }}" @endif
         @if ($id) id="{{ $id }}" @endif

@@ -496,6 +496,9 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
             ]
         }
     },
@@ -614,6 +617,9 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
             ]
         }
     },
@@ -865,6 +871,9 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
             ]
         }
     },
@@ -1420,6 +1429,9 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
             ]
         }
     },
@@ -1984,6 +1996,9 @@
             "composer": [
                 "mallardduck/blade-lucide-icons",
                 "gehrisandro/tailwind-merge-laravel"
+            ],
+            "npm": [
+                "@alpinejs/focus"
             ]
         }
     },

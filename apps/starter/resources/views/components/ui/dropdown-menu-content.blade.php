@@ -5,6 +5,10 @@
 ])
 
 @php
+    // A consumer x-init runs after the component's own: two x-init attributes on one element
+    // and the browser keeps only the first, silently dropping the consumer's (issue #46).
+    $xInit = $attributes->get('x-init');
+    $attributes = $attributes->except('x-init');
     $placement = $side.($align === 'center' ? '' : '-'.$align);
     // Anchor to the inner sidebar menu-action button when present (it is absolutely
     // positioned at the item's top-right), otherwise to the trigger element itself.
@@ -18,9 +22,10 @@
     <div
         x-blat-dialog-layer
         x-show="open"
+        x-trap.noreturn="open && $blatInModal"
         x-cloak
         x-ref="menu"
-        x-init="_menu = $el"
+        x-init="_menu = $el{{ $xInit ? '; '.$xInit : '' }}"
         {!! $anchorAttr !!}
         @click.outside="closeMenu(false)"
         @keydown.escape.prevent.stop="closeMenu()"

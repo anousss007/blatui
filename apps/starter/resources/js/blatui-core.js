@@ -1435,7 +1435,8 @@ function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cle
 // re-derived across a morph because no morph could be made to break it: re-rendering a native
 // <dialog>'s subtree closes the modal outright, which is the app's problem long before it is
 // this directive's. Change that if a report ever shows otherwise — not before.
-function blatDialogLayerDirective(el) {
+function blatDialogLayerDirective(el, _, { cleanup }) {
+    keepInModal(el, cleanup);
     queueMicrotask(() => {
         const home = el._x_teleportBack;
         if (!home) return;
@@ -1448,6 +1449,54 @@ function blatDialogLayerDirective(el) {
             // against the new containing block so the popover re-anchors to its trigger.
             requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
         }
+    });
+}
+
+// A teleported layer opened from inside a modal (issue #45). <x-ui.dialog> and the other modals
+// trap focus with x-trap.inert, and the layer lives in <body>, outside that trap: the trap took
+// every focus the layer received straight back, and its .inert hid the layer from assistive tech
+// as one of <body>'s other children. Moving the layer into the modal is no answer, because the
+// next Livewire morph of the modal removes a node it did not render. So the layer stays where it
+// is and, while it is open inside a modal, runs a trap of its own: `x-trap.noreturn="open &&
+// $blatInModal"` on the layer, which focus-trap stacks on top of the modal's and pauses it.
+//
+// Two things follow, handled here for every layer at once:
+//   - The layer's trap starts a few ms after the component has already moved focus into it, and
+//     in that window the modal's trap pulls the focus back out. When the layer's trap then starts
+//     with nothing focused inside, it falls back to the layer itself. The focus is handed on to
+//     the element the component meant to focus, so the selected option or the search box gets it.
+//   - The modal's .inert writes aria-hidden onto the layer, which is removed again while the
+//     layer belongs to that modal.
+function blatInModal(el) {
+    for (let n = el; n; n = n._x_teleportBack ?? n.parentElement) {
+        if (n.matches?.('[aria-modal="true"]')) return true;
+    }
+
+    return false;
+}
+
+function keepInModal(el, cleanup) {
+    let intended = null;
+    const onFocus = (e) => {
+        if (e.target !== el) {
+            intended = e.target;
+        } else if (intended && el.contains(intended) && intended.offsetParent !== null && blatInModal(el)) {
+            intended.focus();
+        }
+    };
+    el.addEventListener('focus', onFocus, true);
+
+    // x-show hides the layer through its style: what was focused in it then is forgotten, so a
+    // later opening never hands the focus to an element remembered from an earlier one.
+    const observer = new MutationObserver(() => {
+        if (el.style.display === 'none') intended = null;
+        if (el.getAttribute('aria-hidden') === 'true' && blatInModal(el)) el.removeAttribute('aria-hidden');
+    });
+    observer.observe(el, { attributes: true, attributeFilter: ['aria-hidden', 'style'] });
+
+    cleanup(() => {
+        el.removeEventListener('focus', onFocus, true);
+        observer.disconnect();
     });
 }
 
@@ -2227,6 +2276,23 @@ const blatSelect = (config = {}) => ({
     },
     _list: null,
     _trigger: null,
+    _seedWatch: null,
+    // The server's value arrives in data-blat-value (kept out of x-data, see select.blade.php).
+    // Bound to wire:model, the property is the value and the attribute is only its first seed.
+    // Unbound, a re-render that hands the select a different value moves it, as it always did.
+    init() {
+        if (config.wired) return;
+        let seed = this.$el.dataset.blatValue;
+        this._seedWatch = new MutationObserver(() => {
+            if (this.$el.dataset.blatValue === seed) return;
+            seed = this.$el.dataset.blatValue;
+            this.value = normaliseSelectValue({ value: JSON.parse(seed) }, this.multiple).value;
+        });
+        this._seedWatch.observe(this.$el, { attributes: true, attributeFilter: ['data-blat-value'] });
+    },
+    destroy() {
+        this._seedWatch?.disconnect();
+    },
     get _options() {
         return this._list
             ? Array.from(this._list.querySelectorAll('[role="option"]')).filter(
@@ -2484,6 +2550,7 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.magic('blatModel', blatModelMagic);
     Alpine.magic('blatWire', blatWire);
     Alpine.magic('blatNumber', () => blatNumber);
+    Alpine.magic('blatInModal', (el) => blatInModal(el));
     Alpine.magic('blatNav', blatNavMagic);
     Alpine.magic('blatType', blatTypeMagic);
 }

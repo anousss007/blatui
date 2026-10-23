@@ -50,6 +50,13 @@
     $sizeCls = $sizes[$size] ?? $sizes['default'];
     $minH = ['sm' => 'min-h-8', 'default' => 'min-h-9', 'lg' => 'min-h-10'][$size] ?? 'min-h-9';
 
+    // The button trigger keeps the search box in step with the active option. A consumer x-init
+    // runs after it: two x-init attributes on one element and the browser keeps only the first,
+    // silently dropping the consumer's (issue #46).
+    $xInit = $attributes->get('x-init');
+    $attributes = $attributes->except('x-init');
+    $init = implode('; ', array_filter([$isInput ? null : "\$watch('query', () => ensureActive())", $xInit]));
+
     // Livewire bridge — bind the listbox value to a consumer's wire:model when present, through
     // $blatModel (blatui-core.js): the property path travels as a data attribute so a morph can
     // re-point it.
@@ -74,7 +81,7 @@
         options: @js($opts),
     })"
     x-id="['blat-combobox-list', 'blat-combobox-opt']"
-    @unless ($isInput) x-init="$watch('query', () => ensureActive())" @endunless
+    @if ($init) x-init="{{ $init }}" @endif
     {{ $attributes->twMerge('relative '.$width) }}
 >
     @if ($name)
@@ -239,6 +246,7 @@
             x-show="open"
             x-cloak
             data-slot="combobox-content"
+            @unless ($isInput) x-trap.noreturn="open && $blatInModal" @endunless
             {{-- x-blat-anchor, not Alpine's x-anchor: same house directive as select-content and
              dropdown-menu-content, so a panel opened from inside a modal's top layer positions
              the same way everywhere, and a long list opened from a low trigger gets capped to the
