@@ -175,6 +175,35 @@ export async function run({ browser, reporter }) {
             expect.equal(focused, 'category-root', 'focus after clicking the label');
     });
 
+    // The control's id is minted in the browser (the label has no `for`). Livewire keys nodes by
+    // id, so the morph used to see two different nodes and replace the input on every re-render:
+    // whoever was typing in it lost focus to <body>.
+    await reporter.check('a re-render patches a control with a minted id in place, focus kept', async () => {
+        await page.click('[data-testid=control-auto]');
+        await page.keyboard.type('ab');
+        await page.evaluate(() => {
+            window.__control = document.querySelector('[data-testid=control-auto]');
+            window.__desc = document.querySelector('[data-testid=field-auto] [data-slot=field-description]');
+        });
+        const ticks = Number(await page.textContent('[data-testid=ticks]'));
+        await page.evaluate(() => window.Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id')).tick());
+        await page.waitForFunction((t) => document.querySelector('[data-testid=ticks]')?.textContent === String(t), ticks + 1);
+        await page.waitForTimeout(250);
+        await page.keyboard.type('c');
+        const state = await page.evaluate(() => {
+            const control = document.querySelector('[data-testid=control-auto]');
+            return {
+                same: control === window.__control,
+                desc: document.querySelector('[data-testid=field-auto] [data-slot=field-description]') === window.__desc,
+                focused: document.activeElement === control,
+                value: control.value,
+                labelled: control.labels?.[0]?.textContent.trim() ?? null,
+            };
+        });
+
+        return expect.equal(JSON.stringify(state), '{"same":true,"desc":true,"focused":true,"value":"abc","labelled":"Nickname"}', 'the control after a re-render');
+    });
+
     await reporter.check('no console errors on /label-wiring', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/label-wiring');
 
@@ -877,10 +906,19 @@ export async function run({ browser, reporter }) {
     await reporter.check('a consumer x-init on a button combobox runs (#46)', async () =>
         expect.equal(await page.evaluate(() => window.__comboboxInit), 1, 'times the x-init ran'));
 
+    // A ResizeObserver loop is reported as an error event on window, and Chromium sends it to
+    // neither the console nor pageerror, so it is counted here. The first open used to resize the
+    // list from inside autoUpdate's observer (the match-width min-width), which is that loop.
+    await page.evaluate(() => {
+        window.__roLoops = 0;
+        window.addEventListener('error', (e) => /ResizeObserver loop/.test(e.message) && window.__roLoops++);
+    });
     await page.focus('[data-testid=category] button[role=combobox]');
     await page.keyboard.press('Enter');
     await page.waitForSelector('[data-slot="combobox-content"]', { state: 'visible', timeout: 5000 });
     await page.waitForTimeout(150);
+    await reporter.check('the first open of a combobox in a dialog sizes its list without a ResizeObserver loop', async () =>
+        expect.equal(await page.evaluate(() => window.__roLoops), 0, 'ResizeObserver loop errors'));
     const inSearch = await page.evaluate(() => document.activeElement?.closest('[data-slot="combobox-content"]') !== null && document.activeElement?.tagName === 'INPUT');
     await page.keyboard.type('dri');
     await page.keyboard.press('Enter');

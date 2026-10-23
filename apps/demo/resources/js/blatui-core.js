@@ -988,9 +988,43 @@ function stableIds(owner) {
     return (node, role, prefix) => {
         if (node.id) return (minted[role] = node.id);
         node.id = minted[role] || mintId(prefix);
+        node._blatMintedId = node.id;
 
         return (minted[role] = node.id);
     };
+}
+
+/**
+ * Take the ids stableIds() minted back off the children of a node a Livewire morph is about
+ * to patch.
+ *
+ * Livewire keys elements by `id`. The live node carries the id we minted, the server's markup
+ * has none, so the keys differ and the morph REPLACES the node instead of patching it: an
+ * input whose label has no `for` was swapped on every re-render, and the focus (and caret) of
+ * whoever was typing in it went to <body>. With the id gone the keys match again and the node
+ * is patched in place. keepWired()'s observer puts the same id back once the morph is done —
+ * stableIds() hands back the one it memoised.
+ *
+ * It has to be `morph.updating`, which fires on each parent right before its children are
+ * compared. The component-level `morph` hook is too early: Livewire awaits a transition between
+ * the two, the observer runs in that gap, and the ids are back by the time keys are compared.
+ *
+ * Only an id we minted that is still in place: an id the app wrote, or put over ours, stays.
+ *
+ * Half of the fix. The other half is registering the stableIds() directives with
+ * skipDuringClone: Livewire runs Alpine over its copy of the server's tree before the morph,
+ * and wiring that copy minted ids on IT — the keys differed again, the other way round.
+ */
+function stripMintedIds(parent) {
+    for (const child of parent.children) {
+        if (child._blatMintedId && child.id === child._blatMintedId) child.removeAttribute('id');
+    }
+}
+
+function hookLivewireMorph() {
+    const hook = () => window.Livewire.hook('morph.updating', ({ el }) => stripMintedIds(el));
+    if (window.Livewire?.hook) hook();
+    else document.addEventListener('livewire:init', hook, { once: true });
 }
 
 /**
@@ -1425,7 +1459,27 @@ function blatAnchorDirective(el, { modifiers, expression }, { evaluateLater, cle
 
     getReference((initial) => rebind(initial));
 
-    cleanup(() => stop && stop());
+    // `.match-width`: widen the popover the moment it is shown, before the browser lays it out.
+    // Left to size() alone, the first width arrived from inside autoUpdate's ResizeObserver
+    // callback — the observer reported the popover at its content width, the update it ran
+    // resized the very node it was observing, and WebKit logged "ResizeObserver loop completed
+    // with undelivered notifications" on every first open of a combobox. Written here, in the
+    // microtask that follows x-show, the observer's first report is already the final size and
+    // size() finds nothing left to change.
+    let shown = el.style.display !== 'none';
+    const presize = new MutationObserver(() => {
+        const wasShown = shown;
+        shown = el.style.display !== 'none';
+        if (! matchWidth || wasShown || ! shown || ! reference?.getBoundingClientRect) return;
+        const width = reference.getBoundingClientRect().width;
+        if (width > 0) el.style.minWidth = `${Math.round(width)}px`;
+    });
+    presize.observe(el, { attributes: true, attributeFilter: ['style'] });
+
+    cleanup(() => {
+        presize.disconnect();
+        if (stop) stop();
+    });
 }
 
 // Left one-shot on purpose, unlike its neighbours. The others were re-derived because a
@@ -2543,14 +2597,18 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.data('blatTreeGrid', blatTreeGrid);
     Alpine.data('blatSidebarFlyout', blatSidebarFlyout);
     Alpine.directive('blat-trigger', blatTriggerDirective);
-    Alpine.directive('blat-labelledby', blatLabelledByDirective);
+    // Not while Livewire clones the server's tree before a morph: wiring that detached copy
+    // gives its nodes ids the live ones do not have yet, the keys differ, and the morph replaces
+    // the live nodes (see stripMintedIds). The real tree is re-wired right after the morph.
+    Alpine.directive('blat-labelledby', Alpine.skipDuringClone(blatLabelledByDirective));
     Alpine.directive('blat-anchor', blatAnchorDirective);
     Alpine.directive('blat-dialog-layer', blatDialogLayerDirective);
-    Alpine.directive('blat-field', blatFieldDirective);
+    Alpine.directive('blat-field', Alpine.skipDuringClone(blatFieldDirective));
     Alpine.magic('blatModel', blatModelMagic);
     Alpine.magic('blatWire', blatWire);
     Alpine.magic('blatNumber', () => blatNumber);
     Alpine.magic('blatInModal', (el) => blatInModal(el));
     Alpine.magic('blatNav', blatNavMagic);
     Alpine.magic('blatType', blatTypeMagic);
+    hookLivewireMorph();
 }
