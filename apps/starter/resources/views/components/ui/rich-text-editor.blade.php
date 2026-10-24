@@ -48,9 +48,10 @@
 
 <div
     data-slot="rich-text-editor"
+    data-blat-value="{{ json_encode((string) $value) }}"
     x-data="{
         active: {},
-        _model: $blatModel(@js((string) $value)),
+        _model: $blatModel(),
         get value() { return this._model.value },
         set value(v) { this._model.value = v },
 

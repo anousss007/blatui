@@ -99,6 +99,11 @@ return [
             'description' => 'First day of the week (0 = Sunday, 1 = Monday).',
         ],
         [
+            'name' => 'locale',
+            'type' => 'string',
+            'description' => 'BCP-47 locale (e.g. "es", "en-GB") for the calendar\'s month and weekday names and the date on the trigger. Defaults to the app locale (app()->getLocale(), "pt_BR" read as "pt-BR"). An unknown tag falls back to "en-US".',
+        ],
+        [
             'name' => 'numberOfMonths',
             'type' => 'int',
             'description' => 'Number of calendar months shown side by side. Defaults to 1 in single mode and 2 in range mode.',

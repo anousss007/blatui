@@ -27,8 +27,9 @@
 
 <div
     data-slot="tags-input"
+    data-blat-value="{{ json_encode(array_values((array) $value)) }}"
     x-data="{
-        _model: $blatModel(@js(array_values((array) $value))),
+        _model: $blatModel(),
         get tags() { return this._model.value; },
         set tags(v) { this._model.value = v; },
         draft: '',

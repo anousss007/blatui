@@ -65,8 +65,9 @@
 
 <div
     data-slot="number-input"
+    data-blat-value="{{ json_encode($value === null || $value === '' ? null : (float) $value) }}"
     x-data="{
-        _model: $blatModel(@js($value === null || $value === '' ? null : (float) $value)),
+        _model: $blatModel(),
         get value() { return this._model.value; },
         set value(v) { this._model.value = v; },
         min: @js($min === null ? null : (float) $min),

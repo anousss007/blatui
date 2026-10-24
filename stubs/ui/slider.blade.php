@@ -58,6 +58,7 @@
     data-orientation="{{ $orientation }}"
     @if ($range) data-range @endif
     @if ($disabled) data-disabled @endif
+    data-blat-value="{{ json_encode($range ? [(float) $low, (float) $high] : (float) $value) }}"
     x-data="{
         min: {{ $min }},
         max: {{ $max }},
@@ -65,7 +66,7 @@
         disabled: {{ $disabled ? 'true' : 'false' }},
         range: {{ $range ? 'true' : 'false' }},
         vertical: {{ $vertical ? 'true' : 'false' }},
-        _model: $blatModel(@js($range ? [(float) $low, (float) $high] : (float) $value)),
+        _model: $blatModel(),
         get value() { return this._model.value; },
         set value(v) { this._put(v); },
         // In range mode the two handles are the two halves of ONE bound value (`[low, high]`,

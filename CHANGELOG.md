@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.37.0] - 2026-10-23
+
+### Added
+- **`locale` on the date-picker and datetime-picker** (#52). It reaches the calendar's month
+  and weekday names and the date on the trigger: `<x-ui.date-picker locale="es" />`.
+- **`current` on `sidebar-menu-button` and `sidebar-menu-sub-button`** (#54). In place of
+  `isActive`, the link works out from the page whether it is the current one: segment by
+  segment by default (`/orders` on `/orders/12`), the whole path with `current="exact"`, the
+  same rule as Livewire's `wire:current`. It is matched on the server for the first paint (from
+  the page, not the `livewire/update` route) and kept right in the browser on every
+  `wire:navigate` visit and after every re-render: `data-active`, `aria-current="page"`, and the
+  `<x-ui.collapsible>` groups around the link open. A sidebar inside `@persist`, or in its own
+  Livewire component, no longer keeps the previous page marked.
+- **`persist` on `sidebar-content`** (#54). Remembers how far the list is scrolled, per browser
+  tab, and puts it back after a `wire:navigate` visit or a reload, with or without `@persist`.
+  `persist="admin_nav"` names the key when two lists should not share one.
+
+### Changed
+- **An active `sidebar-menu-sub-button` sets `aria-current="page"`**, as the menu button
+  always has. It is a link to the page being read, and assistive tech now says so.
+- **The calendar follows the app locale.** Without a `locale` prop, the calendar, date-picker
+  and datetime-picker use `app()->getLocale()` (Laravel's `pt_BR` is read as `pt-BR`), like every
+  string they render through `__()` since 1.34.0. Before, the calendar was always `en-US` and
+  the pickers' trigger used the browser's locale. An app on `en` sees no change. A tag the
+  browser rejects falls back to `en-US`.
+
+### Fixed
+- **A component bound with `:value` and `wire:model.live` keeps its state through the round
+  trip.** The value was written into the component's `x-data`, so every new value changed the
+  expression, and Alpine (3.16+) re-applies a changed expression to the live component,
+  resetting all of its state. The date-picker closed after the first day of a range, so a range
+  could not be picked in one go. The value now travels in `data-blat-value`, read by
+  `$blatModel()`, and the expression never changes. That covers all 19 bound components that
+  carried their value in `x-data`, from checkbox to tags-input. A component that is not bound
+  still follows a new `:value` from the server. Needs `blatui-core.js` from this release.
+- **A bound date picker opens on the value it holds** without `:value`. A range kept in the
+  query string showed on the trigger but not in the calendar, because only `:value` was ever
+  rendered into the calendar. Same for the datetime-picker.
+- **Today no longer hides a picked day** (#53). Its accent colour came after the selected and
+  range styles in the CSS and won, so a range ending today looked unfinished, and a selected
+  today in single mode looked unselected. Today now keeps the accent only on a day that is not
+  picked.
+
 ## [1.36.3] - 2026-10-23
 
 ### Fixed
@@ -1603,7 +1646,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.36.3...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.37.0...HEAD
+[1.37.0]: https://github.com/anousss007/blatui/compare/v1.36.3...v1.37.0
 [1.36.3]: https://github.com/anousss007/blatui/compare/v1.36.2...v1.36.3
 [1.36.2]: https://github.com/anousss007/blatui/compare/v1.36.1...v1.36.2
 [1.36.1]: https://github.com/anousss007/blatui/compare/v1.36.0...v1.36.1

@@ -22,14 +22,25 @@
 <div
     data-slot="radio-group"
     role="radiogroup"
-    x-data="{ _model: $blatModel(@js($value)), get value() { return this._model.value; }, set value(v) { this._model.value = v; }, rovingValue: @js($value) }"
+    data-blat-value="{{ json_encode($value) }}"
+    x-data="{
+        _model: $blatModel(),
+        get value() {
+            return this._model.value;
+        },
+        set value(v) {
+            this._model.value = v;
+        },
+        rovingValue: JSON.parse($el.dataset.blatValue),
+    }"
     x-init="
+        $watch('value', (v) => (rovingValue = v ?? rovingValue));
         $nextTick(() => {
             if (rovingValue === null) {
                 const f = $el.querySelector('[role=radio]:not([disabled])');
                 rovingValue = f?.getAttribute('data-value') ?? null;
             }
-        })
+        });
     "
     @keydown="
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes($event.key)) {

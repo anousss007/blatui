@@ -197,6 +197,20 @@ function _parse(s) {
 function _sameDay(a, b) { return a && b && _ymd(a) === _ymd(b); }
 function _addMonths(d, n) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 
+/**
+ * A locale tag the Intl APIs accept, or `fallback`. The tag usually comes from the app locale
+ * (`app()->getLocale()`), which is whatever the app configured — `es`, `pt-BR`, but also a
+ * custom name no browser knows — and `toLocaleString` throws a RangeError on a malformed one.
+ */
+function blatLocale(tag, fallback = 'en-US') {
+    if (! tag) return fallback;
+    try {
+        return new Intl.DateTimeFormat(tag).resolvedOptions().locale;
+    } catch {
+        return fallback;
+    }
+}
+
 const calendar = (cfg = {}) => ({
     // Instance handle. Set it with the `calendar-id` prop (or a plain `id`) and every
     // incoming hook can be aimed at THIS calendar even when broadcast on `window`, and
@@ -205,7 +219,7 @@ const calendar = (cfg = {}) => ({
     // sheet, say) need this: an un-targeted window dispatch reaches all of them.
     calendarId: cfg.calendarId || null,
     mode: cfg.mode || 'single',
-    locale: cfg.locale || 'en-US',
+    locale: blatLocale(cfg.locale),
     // aria-label fragments, localised by the Blade layer (never hardcode English here).
     todayLabel: cfg.todayLabel || 'Today, :date',
     selectedLabel: cfg.selectedLabel || 'selected',
@@ -1582,7 +1596,8 @@ function keepInModal(el, cleanup) {
 // and the same object simply holds the value locally, so a component behaves identically.
 //
 // Usage, in a component's x-data (the Blade bridge renders the data attributes):
-//     _model: $blatModel(@js($default)),
+//     data-blat-value="{{ json_encode($default) }}"   ← on the x-data element
+//     _model: $blatModel(),
 //     get value() { return this._model.value },
 //     set value(v) { this._model.value = v },
 // ---------------------------------------------------------------------------
@@ -1623,11 +1638,52 @@ function blatWire(el) {
     return (root && window.Livewire.find(root.getAttribute('wire:id'))) || null;
 }
 
-function blatModelMagic(el) {
-    return (fallback = null) => ({
-        // Where the value lives when nothing is bound. Declared here (rather than captured
-        // in a closure) so Alpine's reactivity covers it and a local component still re-renders.
-        local: fallback,
+function blatModelMagic(el, { Alpine, cleanup }) {
+    return (...args) => {
+        // Called with no argument, the starting value comes from the element's `data-blat-value`
+        // (JSON) instead of from the x-data expression — and that is the form every component
+        // uses. A value written into x-data made the expression itself change whenever the
+        // value did: with `:value="$x" wire:model.live="x"` every round trip did, and Alpine
+        // (3.16+) re-applies a changed expression to the live component, resetting every key in
+        // it — the date-picker's popover closed after the first day of a range (#53), a select
+        // lost its labels (#48). With the value in an attribute the expression never changes.
+        const seeded = args.length === 0;
+        const state = Alpine.reactive({ local: seeded ? readSeed(el) : (args[0] ?? null) });
+
+        // What the attribute used to do through x-data, kept: a component that is not bound
+        // follows a new value from the server. A bound one reads the property, not `local`.
+        if (seeded && ! el._blatSeedWatch) {
+            let seed = el.dataset.blatValue;
+            el._blatSeedWatch = new MutationObserver(() => {
+                if (el.dataset.blatValue === seed) return;
+                seed = el.dataset.blatValue;
+                state.local = readSeed(el);
+            });
+            el._blatSeedWatch.observe(el, { attributes: true, attributeFilter: ['data-blat-value'] });
+            cleanup(() => {
+                el._blatSeedWatch?.disconnect();
+                delete el._blatSeedWatch;
+            });
+        }
+
+        return blatModelFor(el, state);
+    };
+}
+
+function readSeed(el) {
+    try {
+        return JSON.parse(el.dataset.blatValue ?? 'null');
+    } catch {
+        return null;
+    }
+}
+
+function blatModelFor(el, state) {
+    return {
+        // Where the value lives when nothing is bound. Reactive (Alpine.reactive above) so a
+        // local component re-renders, and so the seed observer can move it from outside.
+        get local() { return state.local; },
+        set local(v) { state.local = v; },
 
         get path() { return el.dataset.blatModel || null; },
 
@@ -1665,7 +1721,7 @@ function blatModelMagic(el) {
             const wire = this.path && el.dataset.blatModelLive === '1' ? blatWire(el) : null;
             if (wire) wire.$set(this.path, wire.$get(this.path), true);
         },
-    });
+    };
 }
 
 
@@ -2056,6 +2112,108 @@ const blatTreeGrid = (config = {}) => ({
             .replace(':level', String((me?.depth ?? 0) + 1));
     },
 });
+
+
+/**
+ * Does a link's href name the page we are on? The rule is Livewire's `wire:current`, so a
+ * sidebar marked both ways never disagrees with itself: same host, trailing slashes ignored,
+ * and by default every segment of the href is a prefix of the page's (`/orders` is current on
+ * `/orders/12`). `exact` wants the whole path. The root is always exact, or `/` would be
+ * current everywhere. Kept in step with blatCurrentPath() in sidebar-menu-button.blade.php.
+ */
+function blatPathMatches(href, url, exact) {
+    if (href.hostname !== url.hostname) return false;
+    const want = href.pathname.replace(/\/+$/, '');
+    const have = url.pathname.replace(/\/+$/, '');
+    if (exact || want === '') return want === have;
+    return have === want || have.startsWith(want + '/');
+}
+
+// x-blat-current="'exact'" — keeps data-active + aria-current on a menu link in step with the
+//   page, for a sidebar the server does not re-render on every visit: one inside @persist, or a
+//   Livewire component whose update request only knows the /livewire/update route (#54).
+//   Re-checked on each wire:navigate visit and whenever a morph rewrites the attributes from
+//   the server's copy. Becoming current dispatches `blat-current`, which opens the enclosing
+//   <x-ui.collapsible>s, so a group follows the page without an :open the server can't know.
+const blatCurrentPages = new Set();
+let blatCurrentListening = false;
+
+function blatCurrentDirective(el, { expression }, { evaluate, cleanup }) {
+    const exact = (expression ? evaluate(expression) : null) === 'exact';
+    // menu-action and menu-badge style off the tooltip wrapper when there is one (it stands in
+    // as their peer), so the state goes there too.
+    const peer = () => (el.parentElement?.dataset.slot === 'sidebar-menu-button-tooltip' ? el.parentElement : null);
+    let was = false;
+
+    const sync = () => {
+        const href = el.getAttribute('href');
+        const now = !!href && !href.startsWith('#') && blatPathMatches(new URL(href, location.href), new URL(location.href), exact);
+        setAttr(el, 'data-active', now ? 'true' : null);
+        if (el.tagName === 'A') setAttr(el, 'aria-current', now ? 'page' : null);
+        const p = peer();
+        if (p) setAttr(p, 'data-active', now ? 'true' : null);
+        if (now && was === false) el.dispatchEvent(new CustomEvent('blat-current', { bubbles: true }));
+        was = now;
+    };
+
+    if (!blatCurrentListening) {
+        blatCurrentListening = true;
+        const all = () => blatCurrentPages.forEach((fn) => fn());
+        document.addEventListener('livewire:navigated', all);
+        window.addEventListener('popstate', all);
+    }
+    // The first pass dispatches too, once Alpine has given the collapsibles above their scope:
+    // a reload of a page deep in a closed group opens it.
+    queueMicrotask(sync);
+    blatCurrentPages.add(sync);
+    const observer = new MutationObserver(sync);
+    observer.observe(el, { attributes: true, attributeFilter: ['href', 'data-active', 'aria-current'] });
+    cleanup(() => {
+        blatCurrentPages.delete(sync);
+        observer.disconnect();
+    });
+}
+
+// x-blat-scroll-memory="'sidebar_scroll'" — remembers how far a list was scrolled, per tab, in
+//   sessionStorage under that key, and puts it back when the list is rendered again: after a
+//   wire:navigate visit or a reload, without @persist (#54). A copy that is hidden when it
+//   starts (the mobile drawer) is restored the moment it gets a size.
+function blatScrollMemoryDirective(el, { expression }, { evaluate, cleanup }) {
+    const key = 'blat:scroll:' + (expression ? evaluate(expression) : 'sidebar_scroll');
+    const read = () => {
+        try { return Number(sessionStorage.getItem(key)) || 0; } catch { return 0; }
+    };
+    let restored = false;
+    const restore = () => {
+        if (restored || el.clientHeight === 0) return;
+        restored = true;
+        el.scrollTop = read();
+    };
+    const save = () => {
+        if (el.clientHeight === 0) return;
+        try { sessionStorage.setItem(key, String(Math.round(el.scrollTop))); } catch {}
+    };
+    restore();
+    el.addEventListener('scroll', save, { passive: true });
+    // Hidden → shown restores again: each opening of the drawer lands where the list was left.
+    const resize = new ResizeObserver(() => {
+        if (el.clientHeight === 0) restored = false;
+        else restore();
+    });
+    resize.observe(el);
+    // @persist carries this very node into the next page, and moving a node resets its scroll.
+    // The move happens within one task, so the observer above never sees it leave.
+    const navigated = () => {
+        restored = false;
+        restore();
+    };
+    document.addEventListener('livewire:navigated', navigated);
+    cleanup(() => {
+        el.removeEventListener('scroll', save);
+        document.removeEventListener('livewire:navigated', navigated);
+        resize.disconnect();
+    });
+}
 
 
 // x-blat-field — wires a form field's control to its label/description/error:
@@ -2604,10 +2762,13 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.directive('blat-anchor', blatAnchorDirective);
     Alpine.directive('blat-dialog-layer', blatDialogLayerDirective);
     Alpine.directive('blat-field', Alpine.skipDuringClone(blatFieldDirective));
+    Alpine.directive('blat-current', Alpine.skipDuringClone(blatCurrentDirective));
+    Alpine.directive('blat-scroll-memory', Alpine.skipDuringClone(blatScrollMemoryDirective));
     Alpine.magic('blatModel', blatModelMagic);
     Alpine.magic('blatWire', blatWire);
     Alpine.magic('blatNumber', () => blatNumber);
     Alpine.magic('blatInModal', (el) => blatInModal(el));
+    Alpine.magic('blatLocale', () => blatLocale);
     Alpine.magic('blatNav', blatNavMagic);
     Alpine.magic('blatType', blatTypeMagic);
     hookLivewireMorph();

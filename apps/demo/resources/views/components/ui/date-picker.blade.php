@@ -6,6 +6,7 @@
       min / max       date bounds ("Y-m-d") for the calendar
       minNights / maxNights  range length bound (nights between from and to)
       numberOfMonths  calendar months shown (defaults: single -> 1, range -> 2)
+      locale          BCP-47 tag for the calendar and the trigger's date (default: the app locale)
 --}}
 @props([
     'mode' => 'single',
@@ -15,6 +16,7 @@
     'numberOfMonths' => null,
     'captionLayout' => 'label',
     'weekStart' => 0,
+    'locale' => null,
     'defaultMonth' => null,
     'min' => null,
     'max' => null,
@@ -30,6 +32,8 @@
 
 @php
     $isRange = $mode === 'range';
+    // One locale for the calendar and the trigger's label, the app's unless given (#52).
+    $locale ??= str_replace('_', '-', app()->getLocale());
     $months = $numberOfMonths !== null ? max(1, (int) $numberOfMonths) : ($isRange ? 2 : 1);
 
     $fromDate = $toDate = null;
@@ -90,10 +94,11 @@
 
 <div
     data-slot="date-picker"
+    data-blat-value="{{ json_encode($isRange ? ['from' => $fromDate, 'to' => $toDate] : $value) }}"
     x-data="{
         open: false,
         mode: @js($mode),
-        _model: $blatModel(@js($isRange ? ['from' => $fromDate, 'to' => $toDate] : $value)),
+        _model: $blatModel(),
         get value() { return this._model.value; },
         set value(v) { this._model.value = v; },
         // The two ends of a range are the two halves of ONE bound value, so they are read from it
@@ -117,6 +122,10 @@
             // reach the calendar as well. The popover is teleported and wire:ignore'd, so nothing
             // else ever re-seeds it, and it would keep highlighting the days it opened with.
             this.$watch('_model.value', () => this.repaintCalendar());
+            // A bound picker starts from the property, which the server never rendered into the
+            // calendar unless `:value` repeated it: without this a range kept in the query string
+            // showed on the trigger and not in the calendar when it opened.
+            if (this._model.path) this.$nextTick(() => this.repaintCalendar());
         },
         repaintCalendar() {
             const cal = this.$refs.cal && this.$refs.cal.querySelector('[data-slot=calendar]');
@@ -127,6 +136,7 @@
                 cal.dispatchEvent(new CustomEvent('calendar:set', { detail: this.value || null, bubbles: false }));
             }
         },
+        locale: $blatLocale(@js($locale)),
         minNights: @js($minNights !== null ? (int) $minNights : null),
         maxNights: @js($maxNights !== null ? (int) $maxNights : null),
         minDate: @js($min), maxDate: @js($max),
@@ -181,7 +191,7 @@
             const { from, to } = this.presetDates(p);
             return this.mode === 'range' ? (this.from === from && this.to === to) : (this.value === (to || from));
         },
-        fmt(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('default', { year: 'numeric', month: 'short', day: 'numeric' }) : ''; },
+        fmt(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString(this.locale, { year: 'numeric', month: 'short', day: 'numeric' }) : ''; },
         nights() { return (this.from && this.to) ? Math.round((new Date(this.to + 'T00:00:00') - new Date(this.from + 'T00:00:00')) / 86400000) : null; },
         get errors() {
             const e = []; const n = this.nights();
@@ -205,7 +215,7 @@
                 return this.fmt(this.from) + ' – ' + (this.to ? this.fmt(this.to) : '…');
             }
             return this.value
-                ? new Date(this.value + 'T00:00:00').toLocaleDateString('default', { year: 'numeric', month: 'long', day: 'numeric' })
+                ? new Date(this.value + 'T00:00:00').toLocaleDateString(this.locale, { year: 'numeric', month: 'long', day: 'numeric' })
                 : '';
         },
     }"
@@ -291,6 +301,7 @@
                     :value="$calValue"
                     :caption-layout="$captionLayout"
                     :week-start="$weekStart"
+                    :locale="$locale"
                     :number-of-months="$months"
                     :default-month="$defaultMonth"
                     :show-outside-days="$showOutsideDays"

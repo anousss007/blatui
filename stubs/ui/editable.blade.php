@@ -47,18 +47,26 @@
 
 <div
     data-slot="editable"
+    data-blat-value="{{ json_encode((string) $value) }}"
     x-data="{
         editing: false,
-        _model: $blatModel(@js((string) $value)),
-        get value() { return this._model.value; },
-        set value(v) { this._model.value = v; },
+        _model: $blatModel(),
+        get value() {
+            return this._model.value;
+        },
+        set value(v) {
+            this._model.value = v;
+        },
         draft: '',
         edit() {
             this.draft = this.value;
             this.editing = true;
             this.$nextTick(() => {
                 const el = this.$refs.field;
-                if (el) { el.focus(); el.select(); }
+                if (el) {
+                    el.focus();
+                    el.select();
+                }
             });
         },
         save() {

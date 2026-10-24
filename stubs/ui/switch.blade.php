@@ -43,7 +43,16 @@
     type="button"
     role="switch"
     @if ($id) id="{{ $id }}" @endif
-    x-data="{ _model: $blatModel(@js((bool) $checked)), get checked() { return this._model.value; }, set checked(v) { this._model.value = v; }, }"
+    data-blat-value="{{ json_encode((bool) $checked) }}"
+    x-data="{
+        _model: $blatModel(),
+        get checked() {
+            return this._model.value;
+        },
+        set checked(v) {
+            this._model.value = v;
+        },
+    }"
     :data-state="checked ? 'checked' : 'unchecked'"
     :aria-checked="checked"
     @click="checked = ! checked"

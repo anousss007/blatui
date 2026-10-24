@@ -60,7 +60,7 @@ return [
         [
             'name' => 'locale',
             'type' => 'string',
-            'description' => 'BCP-47 locale (e.g. "en-GB") for month names, weekday labels, and date formatting.',
+            'description' => 'BCP-47 locale (e.g. "en-GB") for month names, weekday labels, and date formatting. Defaults to the app locale (app()->getLocale(), "pt_BR" read as "pt-BR"). An unknown tag falls back to "en-US".',
         ],
         [
             'name' => 'disabled',
