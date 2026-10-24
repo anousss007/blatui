@@ -329,6 +329,9 @@ const CHECKS = {
                 await label.scrollIntoViewIfNeeded();
                 await label.click();
                 await page.keyboard.press('Escape');
+                // Closing hands focus back to the trigger a tick later; read it once it has landed
+                // (or after a second, when it never will) rather than racing the hand-back.
+                await page.waitForFunction((i) => document.activeElement === document.getElementById(i), id, { timeout: 1000 }).catch(() => {});
                 result[id] = await page.evaluate((i) => {
                     const el = document.getElementById(i);
                     // The accessible name, as the label association resolves it.
