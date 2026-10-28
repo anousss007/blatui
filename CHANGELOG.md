@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.37.1] - 2026-10-28
+
+### Fixed
+- **A sidebar inside `@persist` follows the trigger again after a `wire:navigate` visit** (#57).
+  The visit renders a new `sidebar-provider` around the persisted sidebar, which kept reading
+  the previous provider's `open`: the header trigger toggled the cookie and `aria-expanded` but
+  the sidebar stayed put, and the mobile drawer no longer opened. The provider state now lives
+  in `blatSidebarProvider` (blatui-core.js), shared by every provider that `persist`s under the
+  same cookie name, so the old and the new provider drive one state. A collapsed sidebar stays
+  collapsed across visits. Needs `persist` on the provider, as the #54 recipe already has.
+
 ## [1.37.0] - 2026-10-23
 
 ### Added
@@ -1646,7 +1657,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.37.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.37.1...HEAD
+[1.37.1]: https://github.com/anousss007/blatui/compare/v1.37.0...v1.37.1
 [1.37.0]: https://github.com/anousss007/blatui/compare/v1.36.3...v1.37.0
 [1.36.3]: https://github.com/anousss007/blatui/compare/v1.36.2...v1.36.3
 [1.36.2]: https://github.com/anousss007/blatui/compare/v1.36.1...v1.36.2

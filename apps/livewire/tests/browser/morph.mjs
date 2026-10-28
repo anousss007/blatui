@@ -1132,6 +1132,40 @@ export async function run({ browser, reporter }) {
             expect.equal(await groupOpen(3), true, 'group 3 open') ||
             expect.equal(await groupOpen(2), persisted, 'group 2 (opened by the first visit) still open'));
 
+        // #57: the trigger sits outside @persist, so after a visit it belongs to a provider the
+        // persisted sidebar was never rendered in. Both have to keep driving one `open`.
+        const rail = () => page.evaluate(() => {
+            const el = document.querySelector('[data-slot=sidebar]');
+            const trigger = document.querySelector('[data-testid=sidebar-trigger]');
+            return `${el?.dataset.state} gap=${el?.firstElementChild.offsetWidth} expanded=${trigger?.getAttribute('aria-expanded')} cookie=${document.cookie.match(/sidebar_state=(\w+)/)?.[1]}`;
+        });
+        const toggle = async () => {
+            await page.click('[data-testid=sidebar-trigger]');
+            await page.waitForTimeout(400);
+        };
+        await toggle();
+        await reporter.check(`${base}: after a visit the trigger still collapses the sidebar`, async () =>
+            expect.equal(await rail(), 'collapsed gap=0 expanded=false cookie=false', 'sidebar'));
+        await page.evaluate((u) => window.Livewire.navigate(u), `${base}/9`);
+        await page.waitForFunction(() => document.querySelector('[data-testid=page]')?.textContent === 'Page 9', null, { timeout: 5000 }).catch(() => {});
+        await page.waitForTimeout(300);
+        await reporter.check(`${base}: a collapsed sidebar stays collapsed across a visit`, async () =>
+            expect.equal(await rail(), 'collapsed gap=0 expanded=false cookie=false', 'sidebar'));
+        await toggle();
+        await reporter.check(`${base}: and the next page's trigger expands it again`, async () =>
+            expect.equal(await rail(), 'expanded gap=256 expanded=true cookie=true', 'sidebar'));
+        // Below the breakpoint the same trigger opens the drawer, which the persisted sidebar
+        // teleported to <body> on the first page.
+        const desktop = page.viewportSize();
+        await page.setViewportSize({ width: 600, height: desktop.height });
+        await page.waitForTimeout(200);
+        await toggle();
+        await reporter.check(`${base}: after a visit the trigger opens the mobile drawer`, async () =>
+            expect.equal(await page.evaluate(() => document.querySelector('[role=dialog][aria-label=Sidebar]')?.checkVisibility() ?? 'missing'), true, 'drawer visible'));
+        await page.keyboard.press('Escape');
+        await page.setViewportSize(desktop);
+        await page.waitForTimeout(300);
+
         await sidebar(`list.scrollTop = 300`);
         await page.waitForTimeout(100);
         await page.reload();

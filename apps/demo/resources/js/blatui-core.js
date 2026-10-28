@@ -1184,6 +1184,57 @@ function blatLabelledByDirective(el, { expression }, { evaluate, cleanup }) {
 // render behind the modal (and be inert). Inside the dialog it shares the top layer and stays
 // interactive. With no native <dialog> ancestor it stays in <body> (the teleport default),
 // still escaping any overflow-clipping ancestor. Pure DOM — works in any component's scope.
+// blatSidebarProvider — the state every sidebar part reads: open (desktop), openMobile,
+// isMobile, collapsed, toggle().
+//
+// It lives in one plain reactive object, and the scope on the provider only forwards to it.
+// That is what lets a sidebar kept in @persist survive a wire:navigate visit (#57): the visit
+// renders a NEW provider with a new scope, but the persisted sidebar keeps its DOM, its
+// bindings and therefore the OLD provider's scope. Two scopes holding their own `open` meant
+// the header trigger (new scope) toggled a value the sidebar (old scope) no longer read. A
+// provider that persists under a cookie name now picks up the state the previous one left
+// behind, so both scopes forward to the same object and the trigger drives the sidebar again.
+// The state is kept as it is rather than reset to what the server painted: a page restored
+// from the history cache carries a stale `open`, the live state does not.
+//
+// The accessors never touch `this`: Alpine calls them with whichever merged proxy READ the
+// property, so `this.open` in a getter would hand a tooltip or collapsible its own `open` —
+// the reason `collapsed` used to be a plain value kept in sync by an x-effect.
+const sidebarStates = new Map();
+
+const blatSidebarProvider = (Alpine, { open = true, key = null, mobileQuery = '(max-width: 767px)' } = {}) => {
+    let state = key && sidebarStates.get(key);
+    if (!state) {
+        state = Alpine.reactive({ open, openMobile: false, isMobile: false });
+        if (key) sidebarStates.set(key, state);
+        // Once per state, not per provider: a provider replaced by a visit would otherwise leave
+        // its listener and its cookie writer behind.
+        const mq = window.matchMedia(mobileQuery);
+        state.isMobile = mq.matches;
+        mq.addEventListener('change', (e) => (state.isMobile = e.matches));
+        if (key) {
+            let last = state.open;
+            Alpine.effect(() => {
+                const v = state.open;
+                if (v === last) return;
+                last = v;
+                document.cookie = `${key}=${v}; path=/; max-age=31536000; SameSite=Lax`;
+            });
+        }
+    }
+
+    return {
+        get open() { return state.open; },
+        set open(v) { state.open = v; },
+        get openMobile() { return state.openMobile; },
+        set openMobile(v) { state.openMobile = v; },
+        get isMobile() { return state.isMobile; },
+        set isMobile(v) { state.isMobile = v; },
+        get collapsed() { return !state.isMobile && !state.open; },
+        toggle() { state.isMobile ? (state.openMobile = !state.openMobile) : (state.open = !state.open); },
+    };
+};
+
 // blatSidebarFlyout — a sidebar submenu, reachable from the icon rail (#39).
 //
 // Collapsed to icons, a <x-ui.sidebar-menu-sub> has nowhere to go: the rail is 3rem wide, so
@@ -2753,6 +2804,7 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.data('blatListbox', blatListbox);
     Alpine.data('blatCommand', blatCommand);
     Alpine.data('blatTreeGrid', blatTreeGrid);
+    Alpine.data('blatSidebarProvider', (options) => blatSidebarProvider(Alpine, options));
     Alpine.data('blatSidebarFlyout', blatSidebarFlyout);
     Alpine.directive('blat-trigger', blatTriggerDirective);
     // Not while Livewire clones the server's tree before a morph: wiring that detached copy

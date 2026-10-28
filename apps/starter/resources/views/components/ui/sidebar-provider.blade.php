@@ -10,7 +10,9 @@
                       no flash, and a `wire:navigate` visit or a Livewire re-render renders it
                       right too. The cookie is set by JS and read from the raw Cookie header,
                       so Laravel's cookie encryption needs no exception for it. Two providers
-                      on one page that both persist want different names.
+                      on one page that both persist want different names. Also what lets a
+                      sidebar kept in Livewire's @persist follow a trigger rendered outside it:
+                      providers that share a cookie name share one live state.
 --}}
 @props(['defaultOpen' => true, 'mobileBreakpoint' => '767px', 'persist' => false])
 
@@ -36,27 +38,11 @@
 
 <div
     data-slot="sidebar-provider"
-    x-data="{
-        open: {{ $open ? 'true' : 'false' }},
-        openMobile: false,
-        isMobile: false,
-        collapsed: false,
-        toggle() { this.isMobile ? (this.openMobile = ! this.openMobile) : (this.open = ! this.open) },
-        init() {
-            const mq = window.matchMedia(@js($mobileQuery));
-            this.isMobile = mq.matches;
-            mq.addEventListener('change', e => this.isMobile = e.matches);
-            @if ($cookieName)
-            this.$watch('open', v => document.cookie = @js($cookieName) + '=' + v + '; path=/; max-age=31536000; SameSite=Lax');
-            @endif
-        }
-    }"
-    {{-- `collapsed` is a plain property kept in sync, deliberately NOT a getter. Alpine
-         resolves a getter's `this` against the scope that READS it (mergeProxies passes the
-         reading proxy as the receiver), so `!this.open` inside a getter would pick up the
-         `open` of whatever tooltip or collapsible the reader sits in — inverted, silently.
-         A plain value is read straight off this scope, wherever it is read from. --}}
-    x-effect="collapsed = ! isMobile && ! open"
+    {{-- The state lives in blatui-core.js (blatSidebarProvider), shared by every provider that
+         persists under the same cookie name: a sidebar kept in @persist still holds the scope
+         of the provider it was first rendered in, and a wire:navigate visit renders a new one
+         around it. Sharing the state keeps the new page's trigger driving that sidebar (#57). --}}
+    x-data="blatSidebarProvider({ open: {{ $open ? 'true' : 'false' }}, key: @js($cookieName), mobileQuery: @js($mobileQuery) })"
     style="{{ $style }}"
     {{ $attributes->except('style')->twMerge('group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar') }}
 >
