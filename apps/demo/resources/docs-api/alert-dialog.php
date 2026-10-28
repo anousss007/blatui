@@ -16,6 +16,11 @@ return [
             'description' => 'Enables "dispatchable" mode: opens/closes from anywhere via $dispatch(\'open-alert-dialog-{id}\') / $dispatch(\'close-alert-dialog-{id}\'). Ideal for a single shared confirm driven by per-row delete buttons in a loop (pair with <x-ui.alert-dialog-trigger for="{id}">). Pass row context in the event detail and read it from $event.detail.',
         ],
         [
+            'name' => 'wire:model',
+            'type' => 'bool',
+            'description' => 'Since 1.38. Set on <x-ui.alert-dialog>. Binds the open state to a Livewire boolean property, both ways: `$this->open = true` opens it from the server, and closing it (Escape, the overlay, a close button) sets the property back to false. Opening it from the browser with `$wire.open = true` sends no request at all. Deferred like any wire:model; .live sends every change.',
+        ],
+        [
             'name' => 'for',
             'type' => 'string',
             'description' => 'Set on <x-ui.alert-dialog-trigger>. Opens a dispatchable alert-dialog defined elsewhere (matching its id) instead of one in the same scope.',
@@ -42,6 +47,13 @@ return [
         [
             'name' => 'action',
             'description' => 'The confirm button (<x-ui.alert-dialog-action>) styled as a primary button; runs any @click you add, then closes the dialog.',
+        ],
+    ],
+    'events' => [
+        [
+            'name' => 'alert-dialog-closed',
+            'direction' => 'out',
+            'description' => 'Since 1.38. Dispatched from the <x-ui.alert-dialog> root once it has finished closing and is off screen, whatever closed it. The place to reset a form: on open = false the fade-out is still playing, and a reset that lands then empties the fields in front of the user. Listen with x-on:alert-dialog-closed or wire:alert-dialog-closed="resetForm" on the root; it bubbles, so add .self when alert dialogs are nested.',
         ],
     ],
 ];

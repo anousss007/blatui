@@ -310,6 +310,23 @@ class ComponentRenderTest extends TestCase
     }
 
     /** Off-canvas below md by default; raise it to get the drawer on tablets too. */
+    /**
+     * #59: wire:model on a dialog, sheet or alert-dialog binds its `open` (x-modelable is the
+     * whole bridge, wire:model passes through the bag), and the teleported wrapper carries
+     * x-blat-closed, which dispatches {kind}-closed from the root once it is off screen.
+     */
+    public function test_overlays_bind_open_and_announce_when_closed(): void
+    {
+        foreach (['dialog', 'sheet', 'alert-dialog'] as $kind) {
+            $html = $this->render("<x-ui.{$kind} wire:model=\"open\"><x-ui.{$kind}-content>x</x-ui.{$kind}-content></x-ui.{$kind}>");
+            $root = substr($html, (int) strpos($html, "data-slot=\"{$kind}\""));
+            $root = substr($root, 0, (int) strpos($root, '>'));
+            $this->assertStringContainsString('x-modelable="open"', $root, $kind);
+            $this->assertStringContainsString('wire:model="open"', $root, $kind);
+            $this->assertStringContainsString("x-blat-closed=\"{$kind}\"", $html, $kind);
+        }
+    }
+
     public function test_sidebar_mobile_breakpoint_is_configurable(): void
     {
         $this->assertStringContainsString(

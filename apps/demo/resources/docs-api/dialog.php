@@ -16,6 +16,11 @@ return [
             'description' => 'Enables "dispatchable" mode: the dialog also opens/closes from anywhere via $dispatch(\'open-dialog-{id}\') / $dispatch(\'close-dialog-{id}\'). Lets a trigger inside a loop or partial drive a single shared modal defined elsewhere (pair with <x-ui.dialog-trigger for="{id}">).',
         ],
         [
+            'name' => 'wire:model',
+            'type' => 'bool',
+            'description' => 'Since 1.38. Set on <x-ui.dialog>. Binds the open state to a Livewire boolean property, both ways: `$this->open = true` opens it from the server, and closing it (Escape, the overlay, a close button) sets the property back to false. Opening it from the browser with `$wire.open = true` sends no request at all. Deferred like any wire:model; .live sends every change.',
+        ],
+        [
             'name' => 'showClose',
             'type' => 'bool',
             'default' => 'true',
@@ -63,6 +68,13 @@ return [
         [
             'name' => 'close',
             'description' => 'Wrap any element in <x-ui.dialog-close> to make it dismiss the dialog (in addition to the built-in X, Escape, and overlay click).',
+        ],
+    ],
+    'events' => [
+        [
+            'name' => 'dialog-closed',
+            'direction' => 'out',
+            'description' => 'Since 1.38. Dispatched from the <x-ui.dialog> root once it has finished closing and is off screen, whatever closed it. The place to reset a form: on open = false the fade-out is still playing, and a reset that lands then empties the fields in front of the user. Listen with x-on:dialog-closed or wire:dialog-closed="resetForm" on the root; it bubbles, so add .self when dialogs are nested.',
         ],
     ],
 ];
