@@ -11,7 +11,11 @@
             @persist('sidebar')
                 <livewire:nav-sidebar base="/nav" />
             @endpersist
-            <x-ui.sidebar-inset class="p-8">{{ $slot }}</x-ui.sidebar-inset>
+            <x-ui.sidebar-inset class="p-8">
+                {{-- Outside @persist, the way an app header carries it (#57). --}}
+                <x-ui.sidebar-trigger data-testid="sidebar-trigger" />
+                {{ $slot }}
+            </x-ui.sidebar-inset>
         </x-ui.sidebar-provider>
     </body>
 </html>

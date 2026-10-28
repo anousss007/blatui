@@ -313,16 +313,16 @@ class ComponentRenderTest extends TestCase
     public function test_sidebar_mobile_breakpoint_is_configurable(): void
     {
         $this->assertStringContainsString(
-            "matchMedia('(max-width: 767px)')",
+            "mobileQuery: '(max-width: 767px)'",
             $this->render('<x-ui.sidebar-provider>x</x-ui.sidebar-provider>')
         );
         $this->assertStringContainsString(
-            "matchMedia('(max-width: 1023px)')",
+            "mobileQuery: '(max-width: 1023px)'",
             $this->render('<x-ui.sidebar-provider mobile-breakpoint="1023px">x</x-ui.sidebar-provider>')
         );
         // A bare number is read as px.
         $this->assertStringContainsString(
-            "matchMedia('(max-width: 900px)')",
+            "mobileQuery: '(max-width: 900px)'",
             $this->render('<x-ui.sidebar-provider :mobile-breakpoint="900">x</x-ui.sidebar-provider>')
         );
     }
@@ -373,15 +373,20 @@ class ComponentRenderTest extends TestCase
      * Alpine resolves a getter's `this` against the scope that READS it, so a `collapsed`
      * getter on the provider would pick up the `open` of the tooltip or collapsible the
      * reader sits in — inverted, silently, in our own sidebar-07 block. Two guards: the
-     * provider keeps a plain synced property, and the tooltip wrapper never introduces
-     * an `open` of its own (the menu button drives its collapsible with `open = !open`).
+     * provider's accessors read the shared state object and never `this` (#57 moved them into
+     * blatSidebarProvider), and the tooltip wrapper never introduces an `open` of its own (the
+     * menu button drives its collapsible with `open = !open`).
      */
     public function test_collapsed_state_survives_nested_alpine_scopes(): void
     {
         $provider = $this->render('<x-ui.sidebar-provider>x</x-ui.sidebar-provider>');
-        $this->assertStringContainsString('collapsed: false', $provider);
-        $this->assertMatchesRegularExpression('/x-effect="collapsed = !\s*isMobile && !\s*open"/', $provider);
-        $this->assertStringNotContainsString('get collapsed', $provider);
+        $this->assertStringContainsString('x-data="blatSidebarProvider({', $provider);
+
+        $core = (string) file_get_contents(resource_path('js/blatui-core.js'));
+        $factory = substr($core, (int) strpos($core, 'const blatSidebarProvider = '));
+        $factory = substr($factory, 0, (int) strpos($factory, "\n};\n"));
+        $this->assertStringContainsString('get collapsed() { return !state.isMobile && !state.open; }', $factory);
+        $this->assertStringNotContainsString('this.', $factory);
 
         $tipped = $this->render('<x-ui.sidebar-menu-button tooltip="Home">x</x-ui.sidebar-menu-button>');
         $this->assertStringContainsString('x-data="{ tipOpen: false }"', $tipped);

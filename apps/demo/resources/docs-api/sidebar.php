@@ -35,7 +35,7 @@ return [
             'name' => 'persist',
             'type' => 'bool|string',
             'default' => 'false',
-            'description' => 'Since 1.36. Set on <x-ui.sidebar-provider>. Remembers the desktop expanded/collapsed state in a cookie (`sidebar_state`, or the name you pass instead of `true`). The cookie is read on the server, so the first paint is already in the remembered state — no flash on a reload, a wire:navigate visit or a Livewire re-render — and it is read from the raw Cookie header, so it needs no EncryptCookies exception. Give two persisting providers on one page different names.',
+            'description' => 'Since 1.36. Set on <x-ui.sidebar-provider>. Remembers the desktop expanded/collapsed state in a cookie (`sidebar_state`, or the name you pass instead of `true`). The cookie is read on the server, so the first paint is already in the remembered state — no flash on a reload, a wire:navigate visit or a Livewire re-render — and it is read from the raw Cookie header, so it needs no EncryptCookies exception. Give two persisting providers on one page different names. Since 1.37.1 it is also what a sidebar kept in Livewire\'s @persist needs: providers that persist under the same name share one live state, so a trigger rendered outside @persist (in a header) keeps driving the persisted sidebar after a wire:navigate visit.',
         ],
         [
             'name' => 'style',
