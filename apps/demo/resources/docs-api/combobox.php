@@ -93,6 +93,50 @@ return [
             'type' => 'string',
             'description' => 'Set on the focusable control: the trigger button, or the text field with trigger="input". A <label for="{id}"> then names it and focuses it on click, as with a native select. The search field inside the popover gets {id}-search.',
         ],
+        [
+            'name' => 'remote',
+            'type' => 'bool',
+            'default' => 'false',
+            'description' => 'Since 1.39. The options come from the server, a page at a time, through the combobox-fetch event: while the user types (debounced), when the list opens on a query it has not fetched yet, and when the list is scrolled near its end. The browser stops filtering, since the server already did. Enter pressed before the answer arrives waits for it, and picks the only match if there is exactly one (a barcode scanner).',
+        ],
+        [
+            'name' => 'pageSize',
+            'type' => 'int',
+            'default' => '30',
+            'description' => 'Since 1.39. With remote: how many options to ask for per page, sent as detail.limit.',
+        ],
+        [
+            'name' => 'debounce',
+            'type' => 'int',
+            'default' => '250',
+            'description' => 'Since 1.39. With remote: milliseconds of quiet typing before a search is sent.',
+        ],
+    ],
+
+    'slots' => [
+        [
+            'name' => 'start',
+            'description' => 'Since 1.39. Input trigger, single select: content inside the field before the text, like an input-group addon (a search icon). Replaces the icon prop.',
+        ],
+        [
+            'name' => 'end',
+            'description' => 'Since 1.39. Input trigger, single select: content inside the field after the text, in place of the chevron. Icon-only <x-ui.input-group-button>s fit here; clicking them does not open the list.',
+        ],
+    ],
+
+    'events' => [
+        [
+            'name' => 'combobox-fetch',
+            'direction' => 'out',
+            'detail' => '{ query, offset, limit, respond }',
+            'description' => 'Since 1.39, with remote. Asks for options. offset 0 is a new search and replaces the list; a higher offset is the next page and is appended. Call respond() with an array of options, with { options, hasMore }, or with a promise of either: x-on:combobox-fetch="$event.detail.respond($wire.searchCustomers($event.detail.query, $event.detail.offset, $event.detail.limit))". Mark that method #[Renderless]: it only returns data. An answer overtaken by a newer search is dropped.',
+        ],
+        [
+            'name' => 'combobox-select',
+            'direction' => 'out',
+            'detail' => '{ value, option }',
+            'description' => 'Since 1.39. A pick, with the whole option: any key beyond value and label (a document number, a price) comes along. It is cancelable: call $event.preventDefault() to take the pick over, and nothing is stored, the list closes and the field empties for the next pick (add a line to a table, scan the next code).',
+        ],
     ],
 
     'shapes' => [
@@ -109,6 +153,11 @@ return [
                     'name' => 'label',
                     'type' => 'string',
                     'description' => 'Visible, searchable text for the option. Falls back to value when omitted.',
+                ],
+                [
+                    'name' => '…',
+                    'type' => 'mixed',
+                    'description' => 'Any other key is kept on the option and travels with combobox-select.',
                 ],
             ],
         ],

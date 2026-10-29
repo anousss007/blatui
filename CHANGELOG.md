@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **A remote `combobox`, for lists too big to send** (#61). With `remote`, the options come from
+  the server a page at a time, through a `combobox-fetch` event (`{ query, offset, limit,
+  respond }`). It fires while the user types (debounced by `debounce`, 250 ms), when the list
+  opens on a query it has not fetched, and when the list is scrolled near its end while the last
+  answer said `hasMore`. `respond()` takes an array, `{ options, hasMore }`, or a promise of
+  either, so a Livewire handler is one line around a `#[Renderless]` method. A remote list is
+  not filtered again in the browser. An answer overtaken by a newer search is dropped. Enter
+  pressed before the answer arrives waits for it and picks the only match (a barcode scanner).
+  `page-size` (30) is sent as `limit`.
+- **`combobox-select`**, with the whole option (#61). Keys beyond `value` and `label` stay on the
+  option and travel with it. The event is cancelable: `x-on:combobox-select.prevent="…"` takes the
+  pick over, so nothing is stored and the field empties for the next one (add a line to a table).
+- **`start` and `end` slots on the input combobox** (#61): an icon and icon-only buttons inside
+  the field, like an input-group. Clicking them does not open the list.
+
+### Changed
+- The combobox's own filter ignores accents: "jose" finds "José".
+- The combobox's label and chips keep a picked option that is no longer among the options (a
+  remote search replaced them).
+
+### Fixed
+- **An `infinite-scroll` list stalled when a batch left its end in view** (#61). The
+  IntersectionObserver reports changes only. A short batch, or rows a browser-side filter hides,
+  leaves the sentinel visible, so the list stopped at the Load more button and waited for a
+  scroll that could not happen. After `loaded()` the component now checks again and asks for the
+  next batch until the box is full.
+
 ## [1.38.0] - 2026-10-29
 
 ### Added

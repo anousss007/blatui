@@ -327,6 +327,30 @@ class ComponentRenderTest extends TestCase
         }
     }
 
+    public function test_combobox_remote_config_slots_and_option_extras(): void
+    {
+        $html = $this->render(<<<'BLADE'
+            <x-ui.combobox trigger="input" remote :page-size="15" :debounce="400" :options="[['value' => '7', 'label' => 'Ana', 'document' => '123']]">
+                <x-slot:start><i data-testid="lead"></i></x-slot:start>
+                <x-slot:end><button data-testid="addon">+</button></x-slot:end>
+            </x-ui.combobox>
+            BLADE);
+
+        $this->assertStringContainsString('remote: true', $html);
+        $this->assertStringContainsString('pageSize: 15', $html);
+        $this->assertStringContainsString('debounce: 400', $html);
+        // Keys beyond value and label stay on the option, for combobox-select.
+        $this->assertStringContainsString('\u0022document\u0022:\u0022123\u0022', $html);
+        $this->assertMatchesRegularExpression('/data-slot="combobox-start".*data-testid="lead".*role="combobox".*data-slot="combobox-end".*data-testid="addon"/s', $html);
+        $this->assertStringContainsString('@scroll.passive="fillList()"', $html);
+
+        // Without remote nothing pages, and the plain field keeps its chevron.
+        $plain = $this->render('<x-ui.combobox trigger="input" :options="[\'a\']" />');
+        $this->assertStringContainsString('remote: false', $plain);
+        $this->assertStringNotContainsString('fillList', $plain);
+        $this->assertStringNotContainsString('combobox-end', $plain);
+    }
+
     public function test_sidebar_mobile_breakpoint_is_configurable(): void
     {
         $this->assertStringContainsString(

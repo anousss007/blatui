@@ -82,8 +82,18 @@
             }));
         },
 
-        // Clear the loading state after a batch has been appended.
-        loaded() { this.loading = false; },
+        // Clear the loading state after a batch has been appended, then look again. The observer
+        // only reports a change: when the new batch leaves the sentinel in view (a short batch, or
+        // rows a browser-side filter hides) nothing changes and the list would stop at the button.
+        // Observing afresh reports the sentinel's current state, so the next batch is asked for.
+        loaded() {
+            this.loading = false;
+            this.$nextTick(() => {
+                if (! this.observer || this.finished) return;
+                this.observer.unobserve(this.$refs.sentinel);
+                this.observer.observe(this.$refs.sentinel);
+            });
+        },
 
         // Mark the list complete: hides the sentinel + button, shows the end message.
         finish() { this.loading = false; this.finished = true; },

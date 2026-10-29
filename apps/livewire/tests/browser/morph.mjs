@@ -1155,6 +1155,116 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /instant', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/instant');
 
+    // ------------------------------------------------ remote comboboxes over big lists (#61)
+    // Searches and pages are #[Renderless] calls that return data; a pick changes the page in the
+    // browser and travels with save(). So the request count is the contract: one per search or
+    // page, none per pick, one for save.
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/remote`);
+    await page.waitForTimeout(300);
+    let posPosts = 0;
+    const countPos = (r) => r.method() === 'POST' && r.url().includes('/livewire') && posPosts++;
+    page.on('request', countPos);
+    const listed = () => page.locator('[role=listbox]:visible [role=option]').count();
+    const customer = page.locator('[data-testid=customer-field] input[role=combobox]');
+
+    posPosts = 0;
+    await customer.click();
+    await page.waitForTimeout(800);
+    const opened = [await listed(), posPosts];
+    await page.locator('[role=listbox]:visible').evaluate((l) => { l.scrollTop = l.scrollHeight; });
+    await page.waitForTimeout(800);
+    await reporter.check('/remote: the customer list opens on a page and scrolls into the next', async () =>
+        expect.equal(opened.join(' / '), '30 / 1', 'options / requests on open') ||
+        expect.equal(`${await listed()} / ${posPosts}`, '60 / 2', 'after scrolling to the end'));
+
+    posPosts = 0;
+    await page.keyboard.type('luis garcia', { delay: 30 });
+    await page.waitForTimeout(900);
+    const firstMatch = await page.locator('[role=listbox]:visible [role=option]').first().innerText();
+    await reporter.check('/remote: a search is one request, back at the top, matched by the server only', async () =>
+        expect.equal(posPosts, 1, 'requests for one debounced search') ||
+        expect.equal(await listed(), 30, 'options (a new search replaces, and does not page on)') ||
+        // Words in any order and without accents: a browser-side filter would have hidden it.
+        expect.equal(firstMatch, 'LUIS GARCÍA GARCÍA', 'first match'));
+
+    posPosts = 0;
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(100);
+    await reporter.check('/remote: a pick shows the card at once, without a request', async () =>
+        expect.equal(await page.locator('[data-testid=customer-name]').innerText(), firstMatch, 'card') ||
+        expect.equal(await page.locator('[data-testid=customer-field]').isVisible(), false, 'field hidden') ||
+        expect.equal(posPosts, 0, 'requests'));
+
+    await page.click('[data-testid=change-customer]');
+    await page.click('[data-testid=walk-in]');
+    await page.waitForTimeout(100);
+    await reporter.check('/remote: the walk-in button picks without the list', async () =>
+        expect.equal(await page.locator('[data-testid=customer-name]').innerText(), 'Clientes varios', 'card') ||
+        expect.equal(await page.locator('[role=listbox]:visible').count(), 0, 'list open') ||
+        expect.equal(posPosts, 0, 'requests'));
+
+    await page.click('[data-testid=change-customer]');
+    await page.click('[data-testid=new-customer]');
+    await page.waitForTimeout(300);
+    await page.fill('[data-testid=new-name]', 'Rosa Nueva');
+    await page.fill('[data-testid=new-document]', '12345678');
+    posPosts = 0;
+    await page.click('[data-testid=new-save]');
+    await page.waitForTimeout(600);
+    await reporter.check('/remote: a customer created in the dialog lands on the card', async () =>
+        expect.equal(await page.locator('[data-testid=customer-name]').innerText(), 'ROSA NUEVA', 'card') ||
+        expect.equal(posPosts, 1, 'requests (the create call)'));
+
+    // One line per product: a second scan adds to the line, and adds to what was typed into it.
+    const product = page.locator('[data-testid=product-search] input[role=combobox]');
+    const qty = (sku) => page.locator(`[data-line="${sku}"] input`).inputValue();
+    const scan = async (code) => {
+        await product.click();
+        await page.keyboard.type(code);
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(700);
+    };
+    posPosts = 0;
+    await scan('775000000123');
+    await reporter.check('/remote: a scan typed faster than the search adds the line and empties the field', async () =>
+        expect.equal(await page.locator('[data-line]').count(), 1, 'lines') ||
+        expect.equal(await product.inputValue(), '', 'field') ||
+        expect.equal(posPosts, 1, 'requests (the search; the pick is free)'));
+    await scan('775000000123');
+    const afterSecond = await qty('SKU-00123');
+    await page.locator('[data-line="SKU-00123"] input').fill('5');
+    await page.locator('[data-line="SKU-00123"] input').blur();
+    await page.waitForTimeout(100);
+    const typedBack = await page.evaluate(() => window.Livewire.all().find((c) => c.name === 'remote-pos').$wire.lines[0].quantity);
+    await scan('775000000123');
+    await reporter.check('/remote: the quantity field and $wire.lines follow each other', async () =>
+        expect.equal(await page.locator('[data-line]').count(), 1, 'lines') ||
+        expect.equal(afterSecond, '2', 'after a second scan') ||
+        expect.equal(typedBack, 5, '$wire after typing 5') ||
+        expect.equal(await qty('SKU-00123'), '6', 'after a third scan'));
+
+    await scan('775000000007');
+    await page.locator('[data-line="SKU-00123"] [data-testid=remove-line]').click();
+    await page.waitForTimeout(100);
+    await page.locator('[data-line="SKU-00007"] [data-slot=number-input] button').last().click();
+    await page.waitForTimeout(100);
+    await reporter.check('/remote: removing a line re-points the quantity fields below it', async () =>
+        expect.equal(await page.locator('[data-line]').count(), 1, 'lines') ||
+        expect.equal(await qty('SKU-00007'), '2', 'the stepper of the line that moved up') ||
+        expect.equal(await page.evaluate(() => JSON.stringify(window.Livewire.all().find((c) => c.name === 'remote-pos').$wire.lines.map((l) => l.quantity))), '[2]', '$wire.lines'));
+
+    posPosts = 0;
+    await page.click('[data-testid=save]');
+    await page.waitForTimeout(600);
+    await reporter.check('/remote: save sends everything in one request', async () =>
+        expect.equal(await page.locator('[data-testid=saved]').innerText(), 'customer 87019; SKU-00007 x2', 'what the server received') ||
+        expect.equal(posPosts, 1, 'requests'));
+    page.off('request', countPos);
+
+    await reporter.check('no console errors on /remote', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/remote');
+
     // ------------------------------------------------ a long sidebar across wire:navigate (#54)
     // Two layouts around the same Livewire sidebar: one keeps it in @persist, the other renders
     // it again on every visit. Both have to keep the list where it was scrolled, mark exactly
