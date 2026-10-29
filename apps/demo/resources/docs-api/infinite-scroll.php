@@ -26,7 +26,7 @@ return [
         ],
         [
             'name' => 'loaded()',
-            'description' => 'Clears the loading state after a batch of items has been appended, re-arming the observer for the next page.',
+            'description' => 'Clears the loading state after a batch of items has been appended, then checks the sentinel again: if it is still in view (a short batch, or rows a browser-side filter hides), the next batch is asked for straight away rather than waiting for a scroll that cannot happen (since 1.39).',
         ],
         [
             'name' => 'finish()',

@@ -14,6 +14,9 @@
     'icon' => null,               // optional leading lucide icon name (input trigger only, e.g. "search")
     'indicator' => 'check',       // check | checkbox | radio — how a selected option is marked in the list
     'id' => null,                 // lands on the focusable control, so <label for="{id}"> names and focuses it
+    'remote' => false,            // true → options come from the server, a page at a time, via the combobox-fetch event
+    'pageSize' => 30,             // remote: rows per page, sent as detail.limit
+    'debounce' => 250,            // remote: ms of quiet typing before a search is sent
 ])
 
 @php
@@ -27,8 +30,9 @@
     $searchPlaceholder ??= __('Search...');
     $empty ??= __('No results found.');
 
+    // Keys beyond value and label stay on the option: they travel with the combobox-select event.
     $opts = collect($options)->map(fn ($o) => is_array($o)
-        ? ['value' => (string) ($o['value'] ?? ''), 'label' => (string) ($o['label'] ?? $o['value'] ?? '')]
+        ? ['value' => (string) ($o['value'] ?? ''), 'label' => (string) ($o['label'] ?? $o['value'] ?? '')] + $o
         : ['value' => (string) $o, 'label' => (string) $o]
     )->values();
 
@@ -80,6 +84,9 @@
         model: $blatModel(),
         query: @js($initialQuery),
         options: @js($opts),
+        remote: @js((bool) $remote),
+        pageSize: @js(max(1, (int) $pageSize)),
+        debounce: @js(max(0, (int) $debounce)),
     })"
     x-id="['blat-combobox-list', 'blat-combobox-opt']"
     @if ($init) x-init="{{ $init }}" @endif
@@ -153,6 +160,47 @@
                     x-bind:class="open && 'rotate-180'"
                     aria-hidden="true"
                 />
+            </div>
+        @elseif (isset($start) || isset($end))
+            {{-- Field with addons: the start and end slots sit inside the border, like an
+             input-group (a search icon, icon-only buttons). Clicking them never opens the list. --}}
+            <div
+                x-ref="control"
+                @click="$event.target === $el && $refs.input.focus()"
+                class="border-input dark:bg-input/30 {{ $minH }} flex w-full items-center gap-1 rounded-md border bg-transparent px-1 shadow-xs transition-[color,box-shadow] has-[input:focus-visible]:border-ring has-[input:focus-visible]:ring-ring/50 has-[input:focus-visible]:ring-[3px] [&_svg:not([class*='size-'])]:size-4 {{ $disabled ? 'pointer-events-none opacity-50' : '' }}"
+            >
+                @isset($start)
+                    <div data-slot="combobox-start" class="text-muted-foreground flex shrink-0 items-center gap-1 ps-2">
+                        {{ $start }}
+                    </div>
+                @endisset
+                <input
+                    x-ref="input"
+                    @if ($id) id="{{ $id }}" @endif
+                    x-model="query"
+                    type="text"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    autocomplete="off"
+                    :aria-expanded="open"
+                    :aria-controls="$id('blat-combobox-list')"
+                    :aria-activedescendant="activeValue != null ? $id('blat-combobox-opt', activeValue) : null"
+                    @focus="openList()"
+                    @click="openList()"
+                    @input="onInput()"
+                    @keydown.down.prevent="move(1)"
+                    @keydown.up.prevent="move(-1)"
+                    @keydown.enter.prevent="selectActive()"
+                    @keydown.escape.prevent.stop="close()"
+                    placeholder="{{ $placeholder }}"
+                    @disabled($disabled)
+                    class="placeholder:text-muted-foreground min-w-0 flex-1 bg-transparent px-2 text-sm outline-none disabled:cursor-not-allowed {{ $sizeCls }}"
+                />
+                @isset($end)
+                    <div data-slot="combobox-end" class="text-muted-foreground flex shrink-0 items-center gap-1 pe-1">
+                        {{ $end }}
+                    </div>
+                @endisset
             </div>
         @else
             <div class="relative">
@@ -287,6 +335,7 @@
                             :aria-activedescendant="activeValue != null ? $id('blat-combobox-opt', activeValue) : null"
                             @keydown.down.prevent="move(1)"
                             @keydown.up.prevent="move(-1)"
+                            @input="queueFetch()"
                             @keydown.home.prevent="edge('first')"
                             @keydown.end.prevent="edge('last')"
                             @keydown.enter.prevent="selectActive()"
@@ -301,6 +350,7 @@
                     tabindex="-1"
                     :aria-multiselectable="multiple"
                     :id="$id('blat-combobox-list')"
+                    @if ($remote) @scroll.passive="fillList()" @endif
                     @if (! $isInput && ! $searchable)
                         @keydown.down.prevent="move(1)"
                         @keydown.up.prevent="move(-1)"
@@ -310,7 +360,7 @@
                     @endif
                     class="max-h-[300px] min-h-0 scroll-py-1 overflow-x-hidden overflow-y-auto {{ $isInput ? '' : 'p-1' }} outline-hidden"
                 >
-                    <div x-show="visibleCount === 0" class="py-6 text-center text-sm">{{ $empty }}</div>
+                    <div x-show="visibleCount === 0 && ! loading" class="py-6 text-center text-sm">{{ $empty }}</div>
                     <template x-for="option in options" :key="option.value">
                         <div
                             role="option"
@@ -357,6 +407,17 @@
                             <span x-text="option.label"></span>
                         </div>
                     </template>
+                    @if ($remote)
+                        <div
+                            role="status"
+                            x-show="loading"
+                            x-cloak
+                            class="text-muted-foreground flex items-center justify-center gap-2 py-3 text-sm"
+                        >
+                            <x-ui.spinner class="size-4" aria-hidden="true" />
+                            <span>{{ __('Loading…') }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -491,7 +491,9 @@
         "files": [
             "combobox.blade.php"
         ],
-        "dependencies": [],
+        "dependencies": [
+            "spinner"
+        ],
         "packages": {
             "composer": [
                 "mallardduck/blade-lucide-icons",

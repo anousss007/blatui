@@ -70,6 +70,7 @@ if you don't have it.
 | `/number-form` | a `number-input` emptied mid-edit under `.live`, bound to a non-nullable `float` on a Form object — issue #31 |
 | `/tree-table` | `server-tree-table` rows moved in the browser, then re-rendered by a server that saves, or refuses, the move — issue #32 |
 | `/instant` | a create/edit dialog bound with `wire:model`, opened with no request, reset on `dialog-closed`, recorded frame by frame; `?actions=` and `?island=` compare the table's row-action shapes and an `@island` around the stats — issue #59 |
+| `/remote` | remote comboboxes over 87,018 customers and 50,000 products through `#[Renderless]` searches: a pick swaps the field for a card or adds a table line with no request, a scan before the answer waits for it, the quantity fields follow `$wire.lines` both ways, and save is the one request that renders — issue #61 |
 
 Every check asserts computed state after a real server round-trip. The suite fails on the
 pre-fix engine — that is the bar for adding one here.

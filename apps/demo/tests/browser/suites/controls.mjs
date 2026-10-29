@@ -216,6 +216,101 @@ const CHECKS = {
                 expect.empty(page.blatErrors, 'console errors')
             );
         });
+
+        // remote: the options are the server's, a page at a time. The list asks while you type,
+        // and for the next page when scrolled to its end; Enter before the answer waits for it. #61
+        await reporter.check(`combobox: remote options page in, and Enter waits for the answer ${at}`, async () => {
+            const section = page.locator('section', { has: page.locator('h2', { hasText: /^Inline Async$/ }) });
+            const input = section.locator('input[role="combobox"]');
+            await input.scrollIntoViewIfNeeded();
+            await input.click();
+            const shown = () => page.locator('[role="listbox"]:visible [role="option"]:visible').count();
+            await page.waitForTimeout(700);
+            const first = await shown();
+            await page.locator('[role="listbox"]:visible').evaluate((l) => { l.scrollTop = l.scrollHeight; });
+            await page.waitForTimeout(700);
+            const second = await shown();
+            await page.keyboard.type('Framework 177');
+            await page.keyboard.press('Enter');
+            await page.waitForTimeout(800);
+
+            return (
+                expect.equal(first, 20, 'first page') ??
+                expect.equal(second, 40, 'after scrolling to the end') ??
+                expect.equal(await input.inputValue(), 'Framework 177', 'Enter picked the only match once it arrived') ??
+                expect.empty(page.blatErrors, 'console errors')
+            );
+        });
+
+        // The end slot's buttons pick without the list; combobox-select hands over the whole option.
+        await reporter.check(`combobox: addon buttons and the select event drive a card ${at}`, async () => {
+            const section = page.locator('section', { has: page.locator('h2', { hasText: /^Inline Addons$/ }) });
+            await section.scrollIntoViewIfNeeded();
+            await section.getByRole('button', { name: 'Walk-in customer' }).click();
+            await page.waitForTimeout(200);
+            const walkIn = await section.locator('[data-slot="item-title"]').innerText();
+            const listOpen = await page.locator('[role="listbox"]:visible').count();
+            await section.getByRole('button', { name: 'Change customer' }).click();
+            await section.locator('input[role="combobox"]').click();
+            await page.keyboard.type('jose');
+            await page.waitForTimeout(200);
+            const matches = await page.locator('[role="listbox"]:visible [role="option"]:visible').count();
+            await page.keyboard.press('Enter');
+            await page.waitForTimeout(200);
+
+            return (
+                expect.equal(walkIn, 'Walk-in customer', 'card after the walk-in button') ??
+                expect.equal(listOpen, 0, 'the button opened the list') ??
+                expect.equal(matches, 1, '"jose" matches "José"') ??
+                expect.equal(await section.locator('[data-slot="item-description"]').innerText(), '70011223', 'the option kept its document') ??
+                expect.empty(page.blatErrors, 'console errors')
+            );
+        });
+
+        // A consumer's id lands on the control, so <label for> both names it and focuses it. #33
+        await reporter.check(`combobox: a label names and focuses the control it points at ${at}`, async () => {
+            const result = {};
+            for (const id of ['category-root', 'framework']) {
+                const label = page.locator(`label[for="${id}"]`);
+                await label.scrollIntoViewIfNeeded();
+                await label.click();
+                await page.keyboard.press('Escape');
+                // Closing hands focus back to the trigger a tick later; read it once it has landed
+                // (or after a second, when it never will) rather than racing the hand-back.
+                await page.waitForFunction((i) => document.activeElement === document.getElementById(i), id, { timeout: 1000 }).catch(() => {});
+                result[id] = await page.evaluate((i) => {
+                    const el = document.getElementById(i);
+                    // The accessible name, as the label association resolves it.
+                    return { focused: document.activeElement === el, role: el?.getAttribute('role'), labelled: el?.labels?.[0]?.textContent.trim() ?? null };
+                }, id);
+            }
+
+            return expect.equal(JSON.stringify(result['category-root']), '{"focused":true,"role":"combobox","labelled":"Category"}', 'button trigger') ||
+                expect.equal(JSON.stringify(result.framework), '{"focused":true,"role":"combobox","labelled":"Framework"}', 'input trigger');
+        });
+    },
+
+    async 'infinite-scroll'(page, { reporter, at }) {
+        // A browser-side filter that leaves a batch short keeps the end of the list in view. The
+        // observer reports changes only, so the list used to stop there, at the Load more button,
+        // waiting for a scroll that could not happen. #61
+        await reporter.check(`infinite-scroll: a filtered list keeps loading until its box is full ${at}`, async () => {
+            const section = page.locator('section', { has: page.locator('h2', { hasText: /^Filtered$/ }) });
+            await section.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(600);
+            await section.getByRole('button', { name: 'Rare' }).click();
+            await page.waitForTimeout(2500);
+            const state = await section.evaluate((s) => {
+                // The rows themselves must run past the box: the Load more button alone can make
+                // it scroll by a few pixels, which is exactly where the list used to stop.
+                const box = s.querySelector('.overflow-y-auto');
+                const rows = s.querySelectorAll('[data-row]');
+                const last = rows[rows.length - 1];
+                return { rows: rows.length, full: !! last && last.getBoundingClientRect().bottom - box.getBoundingClientRect().top + box.scrollTop > box.clientHeight };
+            });
+
+            return expect.truthy(state.full, `the list stopped at ${state.rows} rows without filling its box`) ?? expect.empty(page.blatErrors, 'console errors');
+        });
     },
 
     async 'number-input'(page, { reporter, at }) {
@@ -317,30 +412,6 @@ const CHECKS = {
             return expect.equal(afterCollapse, before - 2, 'rows shown after closing a branch with two children') ||
                 expect.equal(JSON.stringify(detail && { parent: detail.parent, ids: detail.ids, moved: detail.moved }), '{"parent":1,"ids":[2,4,3],"moved":4}', 'the tree-reorder payload') ||
                 expect.empty(page.blatErrors, 'console errors');
-        });
-    },
-
-    // A consumer's id lands on the control, so <label for> both names it and focuses it. #33
-    async combobox(page, { reporter, at }) {
-        await reporter.check(`combobox: a label names and focuses the control it points at ${at}`, async () => {
-            const result = {};
-            for (const id of ['category-root', 'framework']) {
-                const label = page.locator(`label[for="${id}"]`);
-                await label.scrollIntoViewIfNeeded();
-                await label.click();
-                await page.keyboard.press('Escape');
-                // Closing hands focus back to the trigger a tick later; read it once it has landed
-                // (or after a second, when it never will) rather than racing the hand-back.
-                await page.waitForFunction((i) => document.activeElement === document.getElementById(i), id, { timeout: 1000 }).catch(() => {});
-                result[id] = await page.evaluate((i) => {
-                    const el = document.getElementById(i);
-                    // The accessible name, as the label association resolves it.
-                    return { focused: document.activeElement === el, role: el?.getAttribute('role'), labelled: el?.labels?.[0]?.textContent.trim() ?? null };
-                }, id);
-            }
-
-            return expect.equal(JSON.stringify(result['category-root']), '{"focused":true,"role":"combobox","labelled":"Category"}', 'button trigger') ||
-                expect.equal(JSON.stringify(result.framework), '{"focused":true,"role":"combobox","labelled":"Framework"}', 'input trigger');
         });
     },
 
