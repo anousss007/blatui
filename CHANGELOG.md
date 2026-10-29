@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.38.0] - 2026-10-29
+
 ### Added
 - **`wire:model` on `dialog`, `sheet` and `alert-dialog`** (#59). Binds the open state to a
   Livewire boolean, both ways: `$this->open = true` opens it from the server, Escape / the
@@ -1672,7 +1674,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.37.1...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.38.0...HEAD
+[1.38.0]: https://github.com/anousss007/blatui/compare/v1.37.1...v1.38.0
 [1.37.1]: https://github.com/anousss007/blatui/compare/v1.37.0...v1.37.1
 [1.37.0]: https://github.com/anousss007/blatui/compare/v1.36.3...v1.37.0
 [1.36.3]: https://github.com/anousss007/blatui/compare/v1.36.2...v1.36.3
