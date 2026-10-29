@@ -2225,6 +2225,26 @@ function blatCurrentDirective(el, { expression }, { evaluate, cleanup }) {
     });
 }
 
+// x-blat-closed="dialog" — on the teleported wrapper of a dialog, sheet or alert-dialog: once
+//   it has finished closing, dispatches `{kind}-closed` from the component's root (#59). That is
+//   the moment to reset a form: on `open = false` the leave transition is still playing, and a
+//   reset that lands then empties the fields while they are fading out. Alpine hides this
+//   wrapper only after the transitions inside it have run, so its display going to none is
+//   exactly "closed and off screen", whatever closed it. Dispatched from the root, not from
+//   here in <body>, so `x-on:dialog-closed` / `wire:dialog-closed` on <x-ui.dialog> hears it.
+function blatClosedDirective(el, { expression }, { cleanup }) {
+    let shown = false;
+    const observer = new MutationObserver(() => {
+        if (el.style.display !== 'none') { shown = true; return; }
+        if (! shown) return;
+        shown = false;
+        const root = el._x_teleportBack?.closest(`[data-slot="${expression}"]`) || el;
+        root.dispatchEvent(new CustomEvent(`${expression}-closed`, { bubbles: true }));
+    });
+    observer.observe(el, { attributes: true, attributeFilter: ['style'] });
+    cleanup(() => observer.disconnect());
+}
+
 // x-blat-scroll-memory="'sidebar_scroll'" — remembers how far a list was scrolled, per tab, in
 //   sessionStorage under that key, and puts it back when the list is rendered again: after a
 //   wire:navigate visit or a reload, without @persist (#54). A copy that is hidden when it
@@ -2816,6 +2836,7 @@ export function registerBlatUI(Alpine, options = {}) {
     Alpine.directive('blat-field', Alpine.skipDuringClone(blatFieldDirective));
     Alpine.directive('blat-current', Alpine.skipDuringClone(blatCurrentDirective));
     Alpine.directive('blat-scroll-memory', Alpine.skipDuringClone(blatScrollMemoryDirective));
+    Alpine.directive('blat-closed', Alpine.skipDuringClone(blatClosedDirective));
     Alpine.magic('blatModel', blatModelMagic);
     Alpine.magic('blatWire', blatWire);
     Alpine.magic('blatNumber', () => blatNumber);

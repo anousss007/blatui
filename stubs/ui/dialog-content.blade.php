@@ -32,7 +32,7 @@
 @endphp
 
 <template x-teleport="body">
-    <div x-show="open" x-cloak class="fixed inset-0 z-50">
+    <div x-show="open" x-cloak x-blat-closed="dialog" class="fixed inset-0 z-50">
         <div
             x-show="open"
             @if ($closeOnOverlay) @click="open = false" @endif

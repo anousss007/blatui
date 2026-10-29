@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`wire:model` on `dialog`, `sheet` and `alert-dialog`** (#59). Binds the open state to a
+  Livewire boolean, both ways: `$this->open = true` opens it from the server, Escape / the
+  overlay / a close button set it back to false, and `$wire.open = true` opens it from the
+  browser with no request at all. The roots carry `x-modelable="open"`, which is all
+  `wire:model` needs.
+- **`dialog-closed`, `sheet-closed` and `alert-dialog-closed` events** (#59). Dispatched from
+  the root once the overlay has finished closing and is off screen, whatever closed it: the
+  moment to reset a form (`wire:dialog-closed="resetForm"`). On `open = false` the fade-out is
+  still playing, and a reset that lands then empties the fields in front of the user.
+  Together with `wire:model` this is what lets a create/edit dialog open instantly: reset when
+  it closes rather than when it opens, open it with `$wire.open = true`, and load a record with
+  a direct `$wire.edit(id)` call that `wire:loading wire:target="edit"` can see. The Livewire
+  testbed's `/instant` page is that pattern, checked frame by frame.
+
 ## [1.37.1] - 2026-10-28
 
 ### Fixed

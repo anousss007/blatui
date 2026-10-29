@@ -16,6 +16,11 @@ return [
             'description' => 'Enables "dispatchable" mode: the sheet also opens/closes from anywhere via $dispatch(\'open-sheet-{id}\') / $dispatch(\'close-sheet-{id}\'). Use <x-ui.sheet-trigger for="{id}"> from inside a loop or partial.',
         ],
         [
+            'name' => 'wire:model',
+            'type' => 'bool',
+            'description' => 'Since 1.38. Set on <x-ui.sheet>. Binds the open state to a Livewire boolean property, both ways: `$this->open = true` opens it from the server, and closing it (Escape, the overlay, a close button) sets the property back to false. Opening it from the browser with `$wire.open = true` sends no request at all. Deferred like any wire:model; .live sends every change.',
+        ],
+        [
             'name' => 'side',
             'type' => 'string',
             'default' => "'right'",
@@ -53,6 +58,13 @@ return [
         [
             'name' => 'content',
             'description' => 'The sliding panel (<x-ui.sheet-content>), teleported to <body>. Compose it from <x-ui.sheet-header> (with <x-ui.sheet-title> + <x-ui.sheet-description>), your body, and <x-ui.sheet-footer>. Dismisses on overlay click, Escape, or the close button.',
+        ],
+    ],
+    'events' => [
+        [
+            'name' => 'sheet-closed',
+            'direction' => 'out',
+            'description' => 'Since 1.38. Dispatched from the <x-ui.sheet> root once it has finished closing and is off screen, whatever closed it. The place to reset a form: on open = false the fade-out is still playing, and a reset that lands then empties the fields in front of the user. Listen with x-on:sheet-closed or wire:sheet-closed="resetForm" on the root; it bubbles, so add .self when sheets are nested.',
         ],
     ],
 ];

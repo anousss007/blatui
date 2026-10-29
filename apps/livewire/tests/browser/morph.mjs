@@ -1074,6 +1074,87 @@ export async function run({ browser, reporter }) {
     await reporter.check('no console errors on /date-range', () => expect.empty(page.blatErrors, 'console errors'));
     reporter.progress('/date-range');
 
+    // ------------------------------------------------ a create/edit dialog that opens at once (#59)
+    // The dialog is bound with wire:model, opened from the browser through $wire.open, reset on
+    // dialog-closed and loaded with a direct $wire.edit() call. "At once" is checked as "with no
+    // request" for create, and every frame is recorded for edit: the reporter's version showed
+    // the previous record for ~500 ms, and only a frame-by-frame record can say that never happens.
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/instant?actions=shared`);
+    await page.waitForTimeout(300);
+    let brandPosts = 0;
+    const countPosts = (r) => r.method() === 'POST' && r.url().includes('/livewire') && brandPosts++;
+    page.on('request', countPosts);
+    const brandWire = (path) => page.evaluate((p) => window.Livewire.all().find((c) => c.name === 'instant-brand-dialog').$wire[p], path);
+    // Every distinct state of the dialog over `ms`, as "visible title / name / skeleton|fields".
+    const film = (ms) => page.evaluate((ms) => new Promise((done) => {
+        const out = []; const t0 = performance.now();
+        const tick = () => {
+            const el = document.querySelector('[data-testid=brand-dialog]');
+            const state = ! el?.checkVisibility() ? 'hidden' : [
+                el.querySelector('[data-testid=title]').textContent.trim(),
+                el.querySelector('[data-testid=name]').value || '(empty)',
+                el.querySelector('[data-testid=skeleton]').checkVisibility() ? 'skeleton' : 'fields',
+            ].join(' / ');
+            if (out.at(-1) !== state) out.push(state);
+            performance.now() - t0 < ms ? requestAnimationFrame(tick) : done(out);
+        };
+        tick();
+    }), ms);
+    await page.evaluate(() => {
+        window._blatClosed = 0;
+        document.querySelector('[data-slot=dialog]').addEventListener('dialog-closed', () => window._blatClosed++);
+    });
+
+    brandPosts = 0;
+    let frames = film(500);
+    await page.click('[data-testid=create]');
+    await reporter.check('/instant: "new" opens clean without a request', async () =>
+        expect.equal((await frames).join(' → '), 'hidden → New brand / (empty) / fields', 'dialog states') ||
+        expect.equal(brandPosts, 0, 'requests'));
+
+    await page.fill('[data-testid=name]', 'Typed, then cancelled');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(700);
+    await reporter.check('/instant: Escape closes it, writes open=false back and resets the form once it is off screen', async () =>
+        expect.equal(await brandWire('open'), false, '$wire.open') ||
+        expect.equal(await brandWire('name'), '', '$wire.name') ||
+        expect.equal(await page.evaluate(() => window._blatClosed), 1, 'dialog-closed events'));
+
+    brandPosts = 0;
+    frames = film(1000);
+    await page.click('[data-testid=edit-3]');
+    await reporter.check('/instant: "edit" opens at once on a skeleton, then shows that record, never another one', async () =>
+        expect.equal((await frames).join(' → '), 'hidden → Edit brand / (empty) / skeleton → Edit brand / Brand 03 / fields', 'dialog states') ||
+        expect.equal(brandPosts, 1, 'requests (the edit call)'));
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(700);
+
+    brandPosts = 0;
+    frames = film(500);
+    await page.click('[data-testid=create]');
+    await reporter.check('/instant: "new" right after an edit opens clean, still without a request', async () =>
+        expect.equal((await frames).join(' → '), 'hidden → New brand / (empty) / fields', 'dialog states') ||
+        expect.equal(brandPosts, 0, 'requests'));
+
+    await page.fill('[data-testid=name]', 'Brand new');
+    frames = film(1400);
+    await page.click('[data-testid=submit]');
+    await reporter.check('/instant: saving closes it from the server, and the fields do not empty while it fades out', async () =>
+        expect.equal((await frames).join(' → '), 'New brand / Brand new / fields → hidden', 'dialog states') ||
+        expect.equal(await brandWire('name'), '', '$wire.name after closing'));
+
+    await page.evaluate(() => window.Livewire.all().find((c) => c.name === 'instant-brand-dialog').$wire.$set('open', true));
+    await page.waitForTimeout(600);
+    await reporter.check('/instant: the server opens it through the bound property', async () =>
+        expect.equal(await page.evaluate(() => document.querySelector('[data-testid=brand-dialog]').checkVisibility()), true, 'dialog visible'));
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(600);
+    page.off('request', countPosts);
+
+    await reporter.check('no console errors on /instant', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('/instant');
+
     // ------------------------------------------------ a long sidebar across wire:navigate (#54)
     // Two layouts around the same Livewire sidebar: one keeps it in @persist, the other renders
     // it again on every visit. Both have to keep the list where it was scrolled, mark exactly
