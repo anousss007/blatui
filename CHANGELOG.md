@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.39.0] - 2026-10-29
+
 ### Added
 - **A remote `combobox`, for lists too big to send** (#61). With `remote`, the options come from
   the server a page at a time, through a `combobox-fetch` event (`{ query, offset, limit,
@@ -1702,7 +1704,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.38.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.39.0...HEAD
+[1.39.0]: https://github.com/anousss007/blatui/compare/v1.38.0...v1.39.0
 [1.38.0]: https://github.com/anousss007/blatui/compare/v1.37.1...v1.38.0
 [1.37.1]: https://github.com/anousss007/blatui/compare/v1.37.0...v1.37.1
 [1.37.0]: https://github.com/anousss007/blatui/compare/v1.36.3...v1.37.0
