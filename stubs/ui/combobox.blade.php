@@ -365,7 +365,7 @@
                         <div
                             role="option"
                             :id="$id('blat-combobox-opt', option.value)"
-                            x-show="visible.some((o) => o.value === option.value)"
+                            x-show="isVisible(option)"
                             @click="select(option.value)"
                             @mouseenter="activeValue = option.value"
                             :aria-selected="isSelected(option.value)"
