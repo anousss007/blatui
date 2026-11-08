@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.39.1] - 2026-11-08
+
 ### Fixed
 - **A combobox with hundreds of options took seconds to open and lagged on every keystroke**
   (#63). Each option row searched the whole filtered list for itself, so a render ran the
@@ -1712,7 +1714,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.39.0...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.39.1...HEAD
+[1.39.1]: https://github.com/anousss007/blatui/compare/v1.39.0...v1.39.1
 [1.39.0]: https://github.com/anousss007/blatui/compare/v1.38.0...v1.39.0
 [1.38.0]: https://github.com/anousss007/blatui/compare/v1.37.1...v1.38.0
 [1.37.1]: https://github.com/anousss007/blatui/compare/v1.37.0...v1.37.1
