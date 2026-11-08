@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **A combobox with hundreds of options took seconds to open and lagged on every keystroke**
+  (#63). Each option row searched the whole filtered list for itself, so a render ran the
+  accent-folding match n² times (about 820,000 normalisations for 906 options). A row now asks
+  `isVisible(option)` about itself, and folded labels and queries are memoised, so a render folds
+  each label once and a keystroke folds only the new query. Search, keyboard navigation and the
+  empty state are unchanged.
+
 ## [1.39.0] - 2026-10-29
 
 ### Added

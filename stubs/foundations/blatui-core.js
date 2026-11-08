@@ -2705,208 +2705,233 @@ const blatCommand = () => ({
 // can be `$event.detail.respond($wire.search(…))`. It asks while the user types (debounced),
 // when the list opens on a query it has not fetched, and when the list is scrolled near its end
 // while the last answer said hasMore. An answer that a newer search has overtaken is dropped.
-const blatListbox = (config = {}) => ({
-    trigger: config.trigger || 'button', // 'button' | 'input'
-    open: false,
-    // `filtering` only matters for the input trigger: the list shows ALL options
-    // until the user actually types, so opening a field with a value shows siblings.
-    filtering: false,
-    multiple: !!config.multiple,
-    // The value lives in the caller's model — a $blatModel bound to wire:model, or the same
-    // object holding it locally when there is none. One source of truth either way.
-    _model: config.model ?? { value: config.value ?? (config.multiple ? [] : '') },
-    get value() { const v = this._model.value; return v ?? (this.multiple ? [] : ''); },
-    set value(v) { this._model.value = v; },
-    activeValue: null,
-    options: config.options || [],
-    // Seed the query: input/single starts showing the selected label.
-    query: config.query ?? '',
-    remote: !!config.remote,
-    pageSize: config.pageSize ?? 30,
-    debounce: config.debounce ?? 250,
-    loading: false,
-    hasMore: false,
-    // Every option that has been picked, by value. A remote list replaces its options on each
-    // search, and the trigger label and the chips must not go blank because the chosen option
-    // is no longer among them.
-    known: {},
-    _seq: 0,
-    _timer: null,
-    _fetched: null,
-    _enter: false,
+//
+// Filtering is linear (issue #63): every option row asks isVisible() about itself, rather than
+// searching `visible` (a fresh filter of the whole list) for its own value, which was n² matches()
+// per render and per keystroke. Folded strings are memoised outside the reactive object, so each
+// label is folded once, and the query once per change.
+const blatListbox = (config = {}) => {
+    const folds = new Map();
+    const fold = (text) => {
+        const key = String(text);
+        let out = folds.get(key);
+        if (out === undefined) {
+            // Queries accumulate as the user types; a long session must not grow without end.
+            if (folds.size > 10000) folds.clear();
+            out = key.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            folds.set(key, out);
+        }
+        return out;
+    };
+    return {
+        trigger: config.trigger || 'button', // 'button' | 'input'
+        open: false,
+        // `filtering` only matters for the input trigger: the list shows ALL options
+        // until the user actually types, so opening a field with a value shows siblings.
+        filtering: false,
+        multiple: !!config.multiple,
+        // The value lives in the caller's model — a $blatModel bound to wire:model, or the same
+        // object holding it locally when there is none. One source of truth either way.
+        _model: config.model ?? { value: config.value ?? (config.multiple ? [] : '') },
+        get value() { const v = this._model.value; return v ?? (this.multiple ? [] : ''); },
+        set value(v) { this._model.value = v; },
+        activeValue: null,
+        options: config.options || [],
+        // Seed the query: input/single starts showing the selected label.
+        query: config.query ?? '',
+        remote: !!config.remote,
+        pageSize: config.pageSize ?? 30,
+        debounce: config.debounce ?? 250,
+        loading: false,
+        hasMore: false,
+        // Every option that has been picked, by value. A remote list replaces its options on each
+        // search, and the trigger label and the chips must not go blank because the chosen option
+        // is no longer among them.
+        known: {},
+        _seq: 0,
+        _timer: null,
+        _fetched: null,
+        _enter: false,
 
-    isSelected(v) { return this.multiple ? this.value.includes(v) : this.value === v; },
-    optionFor(v) { return this.options.find((o) => o.value === v) || this.known[v] || null; },
-    get selected() {
-        const listed = this.options.filter((o) => this.isSelected(o.value));
-        const values = this.multiple ? this.value : (this.value === '' || this.value == null ? [] : [this.value]);
-        const kept = values.filter((v) => ! listed.some((o) => o.value === v)).map((v) => this.known[v]).filter(Boolean);
-        return [...listed, ...kept];
-    },
-    // Single-select trigger label (button variant renders this).
-    get label() { const o = this.optionFor(this.value); return o ? o.label : ''; },
-    // Case- and accent-insensitive: "jose" finds "José".
-    fold(text) { return String(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); },
-    matches(label) { return this.fold(label).includes(this.fold(this.query)); },
-    get visible() {
-        // A remote list is the server's answer to the query: filtering it again here would hide
-        // rows the server matched differently (word order, accents, a document number).
-        if (this.remote) return this.options;
-        // Input trigger only filters once the user types; button always filters by query.
-        if (this.trigger === 'input' && !this.filtering) return this.options;
-        return this.options.filter((o) => this.matches(o.label));
-    },
-    // What a remote list asks the server for. An input trigger that has not been typed in shows
-    // the selected label, which is not a search.
-    get term() { return this.trigger === 'input' && ! this.filtering ? '' : this.query; },
-    queueFetch() {
-        if (! this.remote) return;
-        clearTimeout(this._timer);
-        this._timer = setTimeout(() => this.fetch(0), this.debounce);
-    },
-    fetch(offset = 0) {
-        clearTimeout(this._timer);
-        this._timer = null;
-        const seq = ++this._seq;
-        const query = this.term;
-        this.loading = true;
-        const respond = (answer) => Promise.resolve(answer).then((result) => {
-            if (seq !== this._seq) return;
-            const list = Array.isArray(result) ? result : (result?.options ?? []);
-            this.hasMore = ! Array.isArray(result) && !! result?.hasMore;
-            this.options = offset ? [...this.options, ...list] : list;
-            if (! offset) {
-                this._fetched = query;
-                // A new answer starts at the top. Left where the last one was scrolled, the
-                // list would sit at its end and ask for a second page nobody scrolled to.
-                if (this.$refs.list) this.$refs.list.scrollTop = 0;
-            }
-            this.loading = false;
-            this.$nextTick(() => {
-                if (this._enter && ! offset) {
-                    this._enter = false;
-                    // A scanner types a code and presses Enter before the answer arrives: an
-                    // answer with exactly one match is the item it scanned.
-                    if (this.visible.length === 1) return this.select(this.visible[0].value);
+        isSelected(v) { return this.multiple ? this.value.includes(v) : this.value === v; },
+        optionFor(v) { return this.options.find((o) => o.value === v) || this.known[v] || null; },
+        get selected() {
+            const listed = this.options.filter((o) => this.isSelected(o.value));
+            const values = this.multiple ? this.value : (this.value === '' || this.value == null ? [] : [this.value]);
+            const kept = values.filter((v) => ! listed.some((o) => o.value === v)).map((v) => this.known[v]).filter(Boolean);
+            return [...listed, ...kept];
+        },
+        // Single-select trigger label (button variant renders this).
+        get label() { const o = this.optionFor(this.value); return o ? o.label : ''; },
+        // Case- and accent-insensitive: "jose" finds "José".
+        fold(text) { return fold(text); },
+        matches(label) { return fold(label).includes(fold(this.query)); },
+        // Whether the query filters the list at all. A remote list is the server's answer to the
+        // query: filtering it again here would hide rows the server matched differently (word order,
+        // accents, a document number). The input trigger only filters once the user types; the
+        // button trigger always filters by query.
+        get filters() { return ! this.remote && (this.trigger !== 'input' || this.filtering); },
+        // One option row's own question — what its x-show asks.
+        isVisible(option) { return ! this.filters || this.matches(option.label); },
+        get visible() {
+            if (! this.filters) return this.options;
+            const q = fold(this.query);
+            return this.options.filter((o) => fold(o.label).includes(q));
+        },
+        // What a remote list asks the server for. An input trigger that has not been typed in shows
+        // the selected label, which is not a search.
+        get term() { return this.trigger === 'input' && ! this.filtering ? '' : this.query; },
+        queueFetch() {
+            if (! this.remote) return;
+            clearTimeout(this._timer);
+            this._timer = setTimeout(() => this.fetch(0), this.debounce);
+        },
+        fetch(offset = 0) {
+            clearTimeout(this._timer);
+            this._timer = null;
+            const seq = ++this._seq;
+            const query = this.term;
+            this.loading = true;
+            const respond = (answer) => Promise.resolve(answer).then((result) => {
+                if (seq !== this._seq) return;
+                const list = Array.isArray(result) ? result : (result?.options ?? []);
+                this.hasMore = ! Array.isArray(result) && !! result?.hasMore;
+                this.options = offset ? [...this.options, ...list] : list;
+                if (! offset) {
+                    this._fetched = query;
+                    // A new answer starts at the top. Left where the last one was scrolled, the
+                    // list would sit at its end and ask for a second page nobody scrolled to.
+                    if (this.$refs.list) this.$refs.list.scrollTop = 0;
                 }
-                this.ensureActive();
-                this.fillList();
+                this.loading = false;
+                this.$nextTick(() => {
+                    if (this._enter && ! offset) {
+                        this._enter = false;
+                        // A scanner types a code and presses Enter before the answer arrives: an
+                        // answer with exactly one match is the item it scanned.
+                        if (this.visible.length === 1) return this.select(this.visible[0].value);
+                    }
+                    this.ensureActive();
+                    this.fillList();
+                });
+            }, () => {
+                if (seq === this._seq) { this.loading = false; this._enter = false; }
             });
-        }, () => {
-            if (seq === this._seq) { this.loading = false; this._enter = false; }
-        });
-        this.$root.dispatchEvent(new CustomEvent('combobox-fetch', {
-            bubbles: true,
-            detail: { query, offset, limit: this.pageSize, respond },
-        }));
-    },
-    more() {
-        if (this.remote && this.hasMore && ! this.loading) this.fetch(this.options.length);
-    },
-    // Ask for the next page when the list is scrolled near its end — or cannot scroll at all yet,
-    // which a scroll event would never report.
-    fillList() {
-        const list = this.$refs.list;
-        if (! list || ! this.open) return;
-        if (list.scrollHeight - list.scrollTop - list.clientHeight < 48) this.more();
-    },
-    get visibleCount() { return this.visible.length; },
-    ensureActive() {
-        const v = this.visible;
-        if (!v.length) { this.activeValue = null; return; }
-        if (!v.some((o) => o.value === this.activeValue)) {
-            this.activeValue = (v.find((o) => this.isSelected(o.value)) || v[0]).value;
-        }
-    },
-    move(dir) {
-        if (this.trigger === 'input' && !this.open) { this.openList(); return; }
-        const v = this.visible;
-        if (!v.length) return;
-        let i = v.findIndex((o) => o.value === this.activeValue);
-        i = i < 0 ? 0 : (i + dir + v.length) % v.length;
-        this.activeValue = v[i].value;
-    },
-    edge(pos) {
-        const v = this.visible;
-        if (!v.length) return;
-        this.activeValue = (pos === 'last' ? v[v.length - 1] : v[0]).value;
-    },
-    openList() {
-        this.open = true;
-        if (this.trigger === 'button') {
-            this.query = '';
-            this.$nextTick(() => { this.ensureActive(); (this.$refs.search || this.$refs.list)?.focus(); });
-        } else {
-            this.filtering = false;
+            this.$root.dispatchEvent(new CustomEvent('combobox-fetch', {
+                bubbles: true,
+                detail: { query, offset, limit: this.pageSize, respond },
+            }));
+        },
+        more() {
+            if (this.remote && this.hasMore && ! this.loading) this.fetch(this.options.length);
+        },
+        // Ask for the next page when the list is scrolled near its end — or cannot scroll at all yet,
+        // which a scroll event would never report.
+        fillList() {
+            const list = this.$refs.list;
+            if (! list || ! this.open) return;
+            if (list.scrollHeight - list.scrollTop - list.clientHeight < 48) this.more();
+        },
+        get visibleCount() { return this.visible.length; },
+        ensureActive() {
+            const v = this.visible;
+            if (!v.length) { this.activeValue = null; return; }
+            if (!v.some((o) => o.value === this.activeValue)) {
+                this.activeValue = (v.find((o) => this.isSelected(o.value)) || v[0]).value;
+            }
+        },
+        move(dir) {
+            if (this.trigger === 'input' && !this.open) { this.openList(); return; }
+            const v = this.visible;
+            if (!v.length) return;
+            let i = v.findIndex((o) => o.value === this.activeValue);
+            i = i < 0 ? 0 : (i + dir + v.length) % v.length;
+            this.activeValue = v[i].value;
+        },
+        edge(pos) {
+            const v = this.visible;
+            if (!v.length) return;
+            this.activeValue = (pos === 'last' ? v[v.length - 1] : v[0]).value;
+        },
+        openList() {
+            this.open = true;
+            if (this.trigger === 'button') {
+                this.query = '';
+                this.$nextTick(() => { this.ensureActive(); (this.$refs.search || this.$refs.list)?.focus(); });
+            } else {
+                this.filtering = false;
+                this.$nextTick(() => this.ensureActive());
+            }
+            if (this.remote && ! this._timer && this._fetched !== this.term) this.fetch(0);
+        },
+        // Input trigger: typing opens + filters; single select clears the committed value.
+        onInput() {
+            if (!this.multiple) this.value = '';
+            this.open = true;
+            this.filtering = true;
+            this.queueFetch();
             this.$nextTick(() => this.ensureActive());
-        }
-        if (this.remote && ! this._timer && this._fetched !== this.term) this.fetch(0);
-    },
-    // Input trigger: typing opens + filters; single select clears the committed value.
-    onInput() {
-        if (!this.multiple) this.value = '';
-        this.open = true;
-        this.filtering = true;
-        this.queueFetch();
-        this.$nextTick(() => this.ensureActive());
-    },
-    toggle() { this.open ? this.close(false) : this.openList(); },
-    close(returnFocus = true) {
-        if (!this.open) return;
-        this.open = false;
-        this.filtering = false;
-        if (this.trigger === 'button' && returnFocus) this.$nextTick(() => this.$refs.trigger?.focus());
-    },
-    selectActive() {
-        // The list on screen is an answer to an older query: wait for this one.
-        if (this.remote && (this._timer || (this.loading && this._fetched !== this.term))) {
-            this._enter = true;
-            if (this._timer) this.fetch(0);
-            return;
-        }
-        if (this.activeValue != null) this.select(this.activeValue);
-    },
-    select(v) {
-        const option = this.optionFor(v);
-        if (option) this.known[v] = option;
-        // Announce the pick with the whole option — a remote option can carry whatever the page
-        // needs (a document number, a price) beyond value and label. A listener that calls
-        // preventDefault() takes the pick over: nothing is stored, and the field empties for the
-        // next one (add a line to a table, scan the next code).
-        const picked = new CustomEvent('combobox-select', { bubbles: true, cancelable: true, detail: { value: v, option } });
-        this.$root.dispatchEvent(picked);
-        if (picked.defaultPrevented) {
-            this.query = '';
+        },
+        toggle() { this.open ? this.close(false) : this.openList(); },
+        close(returnFocus = true) {
+            if (!this.open) return;
+            this.open = false;
             this.filtering = false;
-            this.close(false);
-            if (this.trigger === 'input') this.$nextTick(() => (this.$refs.input || this.$refs.control)?.focus());
-            return;
-        }
-        if (this.multiple) {
-            // Assign rather than push/splice: `value` may BE the bound Livewire property, and a
-            // mutation nobody assigned is a change wire:model.live never hears about.
-            const current = this.value;
-            this.value = current.includes(v) ? current.filter((x) => x !== v) : [...current, v];
-            if (this.trigger === 'input') {
+            if (this.trigger === 'button' && returnFocus) this.$nextTick(() => this.$refs.trigger?.focus());
+        },
+        selectActive() {
+            // The list on screen is an answer to an older query: wait for this one.
+            if (this.remote && (this._timer || (this.loading && this._fetched !== this.term))) {
+                this._enter = true;
+                if (this._timer) this.fetch(0);
+                return;
+            }
+            if (this.activeValue != null) this.select(this.activeValue);
+        },
+        select(v) {
+            const option = this.optionFor(v);
+            if (option) this.known[v] = option;
+            // Announce the pick with the whole option — a remote option can carry whatever the page
+            // needs (a document number, a price) beyond value and label. A listener that calls
+            // preventDefault() takes the pick over: nothing is stored, and the field empties for the
+            // next one (add a line to a table, scan the next code).
+            const picked = new CustomEvent('combobox-select', { bubbles: true, cancelable: true, detail: { value: v, option } });
+            this.$root.dispatchEvent(picked);
+            if (picked.defaultPrevented) {
                 this.query = '';
                 this.filtering = false;
-                this.$nextTick(() => this.$refs.input?.focus());
+                this.close(false);
+                if (this.trigger === 'input') this.$nextTick(() => (this.$refs.input || this.$refs.control)?.focus());
+                return;
             }
-            return; // keep the list open for further picks
-        }
-        if (this.trigger === 'input') {
-            if (option) { this.value = option.value; this.query = option.label; }
+            if (this.multiple) {
+                // Assign rather than push/splice: `value` may BE the bound Livewire property, and a
+                // mutation nobody assigned is a change wire:model.live never hears about.
+                const current = this.value;
+                this.value = current.includes(v) ? current.filter((x) => x !== v) : [...current, v];
+                if (this.trigger === 'input') {
+                    this.query = '';
+                    this.filtering = false;
+                    this.$nextTick(() => this.$refs.input?.focus());
+                }
+                return; // keep the list open for further picks
+            }
+            if (this.trigger === 'input') {
+                if (option) { this.value = option.value; this.query = option.label; }
+                this.close();
+                return;
+            }
+            this.value = this.value === v ? '' : v; // toggle off in single button mode (matches shadcn)
             this.close();
-            return;
-        }
-        this.value = this.value === v ? '' : v; // toggle off in single button mode (matches shadcn)
-        this.close();
-        this.query = '';
-    },
-    remove(v) { this.value = this.value.filter((x) => x !== v); },
-    // Input trigger: Backspace on an empty query pops the last chip.
-    backspace() { if (this.multiple && this.query === '' && this.value.length) this.value = this.value.slice(0, -1); },
-});
+            this.query = '';
+        },
+        remove(v) { this.value = this.value.filter((x) => x !== v); },
+        // Input trigger: Backspace on an empty query pops the last chip.
+        backspace() { if (this.multiple && this.query === '' && this.value.length) this.value = this.value.slice(0, -1); },
+    };
+};
+
+export { blatListbox };
 
 // ---------------------------------------------------------------------------
 // Register every BlatUI Alpine piece — plugins, the theme store, the calendar
