@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.39.2] - 2026-11-15
+
 ### Fixed
 - **The theme fell back to its defaults after a `wire:navigate` visit** (#65). Livewire copies the
   server's `<html>` attributes over the live ones and removes every attribute the server did not
@@ -1727,7 +1729,8 @@ WCAG AA color contrast.
   and the Alpine + chart + calendar engine (JS).
 - Laravel auto-discovery of the service provider.
 
-[Unreleased]: https://github.com/anousss007/blatui/compare/v1.39.1...HEAD
+[Unreleased]: https://github.com/anousss007/blatui/compare/v1.39.2...HEAD
+[1.39.2]: https://github.com/anousss007/blatui/compare/v1.39.1...v1.39.2
 [1.39.1]: https://github.com/anousss007/blatui/compare/v1.39.0...v1.39.1
 [1.39.0]: https://github.com/anousss007/blatui/compare/v1.38.0...v1.39.0
 [1.38.0]: https://github.com/anousss007/blatui/compare/v1.37.1...v1.38.0
