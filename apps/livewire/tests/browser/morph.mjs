@@ -1370,6 +1370,67 @@ export async function run({ browser, reporter }) {
         reporter.progress(base);
     }
 
+    // ------------------------------------------------ the theme on <html> across wire:navigate (#65)
+    // Livewire copies the server's <html> attributes over the live ones and drops the rest, and
+    // the server never sends the theme: every dimension the store applies has to come back, on
+    // the very frame the new page is painted, and on a back-button visit too.
+    page.blatErrors.length = 0;
+    await visit(page, `${baseUrl}/nav-plain/1`);
+    await page.waitForTimeout(300);
+    const themeOnHtml = () => page.evaluate(() => window.__blatTheme());
+    await page.evaluate(() => {
+        window.__blatTheme = () => {
+            const root = document.documentElement;
+            const attrs = [...root.attributes].filter((a) => a.name.startsWith('data-')).map((a) => `${a.name}=${a.value}`).sort();
+            return [root.classList.contains('dark') ? 'dark' : 'light', ...attrs].join(' ');
+        };
+        const theme = window.Alpine.store('theme');
+        theme.setMode('dark');
+        theme.setBase('zinc');
+        theme.setPreset('blue');
+        theme.setRadius('1');
+        theme.setFont('mono');
+        theme.setShadow('lg');
+        theme.setSpacing('compact');
+        theme.setTracking('wide');
+        theme.setInputStyle('fill');
+        theme.setFontHeading('serif');
+    });
+    const applied = await themeOnHtml();
+    // Every frame of the visit, sampled where the browser is about to paint.
+    const sampleFrames = () => page.evaluate(() => {
+        window.__blatFrames = new Set();
+        const tick = () => {
+            window.__blatFrames.add(window.__blatTheme());
+            window.__blatSampling = requestAnimationFrame(tick);
+        };
+        tick();
+    });
+    const sampled = () => page.evaluate(() => {
+        cancelAnimationFrame(window.__blatSampling);
+        return [...window.__blatFrames];
+    });
+    const toPage = async (n, how) => {
+        await sampleFrames();
+        await how();
+        await page.waitForFunction((t) => document.querySelector('[data-testid=page]')?.textContent === t, `Page ${n}`, { timeout: 5000 }).catch(() => {});
+        await page.waitForTimeout(300);
+    };
+
+    await reporter.check('theme: the store puts every dimension on <html>', async () =>
+        expect.equal(applied, 'dark data-base=zinc data-font-heading=serif data-font=mono data-input-style=fill data-radius=1 data-shadow=lg data-spacing=compact data-theme=blue data-tracking=wide', '<html>'));
+    await toPage(2, () => page.evaluate((u) => window.Livewire.navigate(u), `${baseUrl}/nav-plain/2`));
+    await reporter.check('theme: a wire:navigate visit keeps it on <html>, on every painted frame', async () =>
+        expect.equal(await themeOnHtml(), applied, '<html> after the visit') ||
+        expect.equal((await sampled()).join(' | '), applied, 'frames painted during the visit'));
+    await toPage(1, () => page.goBack());
+    await reporter.check('theme: a back-button visit keeps it on <html>', async () =>
+        expect.equal(await themeOnHtml(), applied, '<html> after going back') ||
+        expect.equal((await sampled()).join(' | '), applied, 'frames painted during the visit'));
+    await page.evaluate(() => window.Alpine.store('theme').reset());
+    await reporter.check('no console errors on the theme visits', () => expect.empty(page.blatErrors, 'console errors'));
+    reporter.progress('theme');
+
     await page.close();
 }
 

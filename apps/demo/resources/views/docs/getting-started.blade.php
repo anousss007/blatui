@@ -184,7 +184,7 @@ Alpine.start()</x-code-block>
 document.addEventListener('alpine:init', () => {
     registerBlatUI(window.Alpine)
 })</x-code-block>
-                        <p class="text-muted-foreground mt-2 text-sm">BlatUI registers a <code class="bg-muted rounded px-1 text-xs">theme</code> store for dark mode. If Flux already drives dark mode, pass <code class="bg-muted rounded px-1 text-xs">registerBlatUI(window.Alpine, &lbrace; darkMode: false &rbrace;)</code> so the two don't both toggle <code class="bg-muted rounded px-1 text-xs">.dark</code>.</p>
+                        <p class="text-muted-foreground mt-2 text-sm">BlatUI registers a <code class="bg-muted rounded px-1 text-xs">theme</code> store for dark mode. If Flux already drives dark mode, pass <code class="bg-muted rounded px-1 text-xs">registerBlatUI(window.Alpine, &lbrace; darkMode: false &rbrace;)</code> so the two don't both toggle <code class="bg-muted rounded px-1 text-xs">.dark</code>. The store also puts the theme back on <code class="bg-muted rounded px-1 text-xs">&lt;html&gt;</code> after every <code class="bg-muted rounded px-1 text-xs">wire:navigate</code> visit, so your layout needs nothing extra for that.</p>
                     </div>
                 </div>
             </div>
