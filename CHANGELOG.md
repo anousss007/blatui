@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **The theme fell back to its defaults after a `wire:navigate` visit** (#65). Livewire copies the
+  server's `<html>` attributes over the live ones and removes every attribute the server did not
+  send, and neither the anti-flash `<head>` script nor the theme store's `init()` runs again. That
+  dropped everything the store applies: the `dark` class, `data-base`, `data-theme`, `data-font`,
+  `data-font-heading`, `data-shadow`, `data-spacing`, `data-tracking`, `data-input-style` and
+  `data-radius`. The store now applies the theme again as soon as Livewire swaps the page, before
+  the new page is painted, and on a back-button visit too. Nothing to change in your layout.
+- The starter's anti-flash `<head>` script applied only the mode, base, preset and radius, so the
+  other dimensions flashed their defaults on a full load. It now applies all of them, and falls
+  back to light like the store it ships with (it assumed `system`, so a dark OS painted dark and
+  then flipped to light).
+
 ## [1.39.1] - 2026-11-08
 
 ### Fixed
