@@ -1,6 +1,7 @@
 {{--
-    Knob — a rotary dial input. Drag (pointer), scroll (wheel) or use the keyboard to set a value.
-      The value sweeps a 270° arc (-135° → +135°). The center shows the current value.
+    Knob — a rotary dial input. Drag (pointer), the keyboard, or the wheel once it has focus.
+      The value sweeps a 270° arc (-135° → +135° from the top), with the gap at the bottom.
+      The center shows the current value.
       name      when set, a hidden <input> mirrors the value for form submission.
       min/max/step/value/size/label/disabled as usual. size: sm | default | lg.
     A11y: the knob is role="slider" with live aria-valuenow and bounds, an aria-label, tabindex=0,
@@ -77,8 +78,10 @@
         get dashOffset() { return this.circ - this.arcLen * this.ratio },
         get angle() { return this.startAngle + this.sweepDeg * this.ratio },
         get display() {
-            // show as integer when step is whole, else trim trailing zeros
-            return Number.isInteger(this.step) ? Math.round(this.value) : parseFloat(this.value.toFixed(3));
+            // show as integer when step is whole, else trim trailing zeros. A wire:model that
+            // starts out null shows the minimum, like the arc does.
+            const v = Number(this.value ?? this.min);
+            return Number.isInteger(this.step) ? Math.round(v) : parseFloat(v.toFixed(3));
         },
         bump(d) { if (this.disabled) return; this.value = this.clamp(this.$blatNumber.step(this.value, d * this.step, this.step)) },
         page(d) {
@@ -86,8 +89,11 @@
             const big = Math.max(this.step, (this.max - this.min) / 10);
             this.value = this.clamp(this.$blatNumber.step(this.value, d * big, this.step));
         },
+        // Only once the dial has focus (click or Tab), like a native number input: otherwise a
+        // page scrolled with the pointer passing over the knob stops scrolling and moves the
+        // value instead. A horizontal scroll (deltaY 0) is not a turn either.
         wheel(e) {
-            if (this.disabled) return;
+            if (this.disabled || document.activeElement !== this.$refs.dial || e.deltaY === 0) return;
             e.preventDefault();
             this.bump(e.deltaY < 0 ? 1 : -1);
         },
@@ -100,8 +106,10 @@
             const end = this.startAngle + this.sweepDeg;   // +135
             let ratio;
             if (deg < this.startAngle || deg > end) {
-                // bottom dead zone (the unused 90°) → snap to the nearer end
-                ratio = deg < 0 ? 0 : 1;
+                // Bottom dead zone (the unused 90°). A press there takes the nearer end; a drag
+                // stays on the end it reached, so overshooting max past the bottom does not
+                // flip the value to min (and back).
+                ratio = this.dragging && e.type === 'pointermove' ? (this.ratio >= 0.5 ? 1 : 0) : deg < 0 ? 0 : 1;
             } else {
                 ratio = (deg - this.startAngle) / this.sweepDeg;
             }
@@ -149,9 +157,12 @@
         ])
         :class="dragging && 'cursor-grabbing'"
     >
-        <svg viewBox="0 0 {{ $vb }} {{ $vb }}" fill="none" aria-hidden="true" class="size-full -rotate-[135deg]">
+        {{-- A circle's stroke starts at 3 o'clock and runs clockwise: rotate(135) moves its start to
+             -135° from the top (bottom left), so the 270° arcs leave the gap at the bottom. --}}
+        <svg viewBox="0 0 {{ $vb }} {{ $vb }}" fill="none" aria-hidden="true" class="size-full">
             {{-- background track (270° arc) --}}
             <circle
+                transform="rotate(135 {{ $center }} {{ $center }})"
                 cx="{{ $center }}"
                 cy="{{ $center }}"
                 r="{{ $radius }}"
@@ -160,8 +171,10 @@
                 stroke-linecap="round"
                 stroke-dasharray="{{ $arcLen }} {{ $circ }}"
             />
-            {{-- value arc --}}
+            {{-- value arc; hidden at the minimum, where the round caps would still paint a dot --}}
             <circle
+                transform="rotate(135 {{ $center }} {{ $center }})"
+                :stroke-opacity="ratio > 0 ? 1 : 0"
                 cx="{{ $center }}"
                 cy="{{ $center }}"
                 r="{{ $radius }}"
@@ -172,7 +185,7 @@
                 :stroke-dashoffset="dashOffset"
                 class="transition-[stroke-dashoffset] duration-100 ease-out"
             />
-            {{-- indicator notch at the current angle (rotates around centre) --}}
+            {{-- indicator notch at the current angle from the top (rotates around the centre) --}}
             <line
                 x1="{{ $center }}"
                 y1="{{ $thickness + 3 }}"
@@ -181,7 +194,7 @@
                 stroke="currentColor"
                 stroke-width="{{ $thickness * 0.5 }}"
                 stroke-linecap="round"
-                :style="`transform: rotate(${angle + 135}deg); transform-origin: {{ $center }}px {{ $center }}px;`"
+                :style="`transform: rotate(${angle}deg); transform-origin: {{ $center }}px {{ $center }}px;`"
             />
         </svg>
         <span

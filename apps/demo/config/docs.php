@@ -214,7 +214,7 @@ return [
         'notification-center' => 'A bell with an unread-count badge that opens an inbox of notifications.',
 
         'segmented-control' => 'An iOS-style segmented control for picking one option from a small set.',
-        'knob' => 'A rotary dial input — drag, scroll or use the keyboard to set a value.',
+        'knob' => 'A rotary dial input — drag it, use the keyboard, or scroll once it has focus.',
         'signature-pad' => 'Draw a signature on a canvas and capture it as a data URL, with clear and undo.',
         'rich-text-editor' => 'A lightweight, dependency-free WYSIWYG editor with a formatting toolbar.',
         'markdown-editor' => 'A Markdown textarea with a live preview, formatting toolbar and Write/Preview tabs.',

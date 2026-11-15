@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **The knob's arc was drawn a quarter turn off.** The 90° gap sat on the left instead of at the
+  bottom, so the value arc never ended where the notch pointed (at 100 the arc stopped around 7
+  o'clock and the notch pointed at half past 4). The arcs now run from -135° to +135° from the
+  top, with the gap at the bottom, and end on the notch.
+- **A knob dragged past its maximum flipped to its minimum** when the pointer crossed the bottom
+  of the dial, and back again. A drag in the gap now stays on the end it reached. A press there
+  still takes the nearer end.
+- **The wheel no longer takes over the page scroll.** A page scrolled with the pointer over a
+  knob stopped and turned the knob instead. The wheel now turns the knob only once it has focus
+  (a click or Tab), like a native number input, and a horizontal scroll no longer counts as a
+  turn down.
+- At the minimum, the value arc no longer leaves a dot of its round cap on the track, and a
+  `wire:model` that starts out `null` shows the minimum instead of throwing.
+
 ## [1.39.2] - 2026-11-15
 
 ### Fixed

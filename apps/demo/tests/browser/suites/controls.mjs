@@ -561,6 +561,100 @@ const CHECKS = {
         });
     },
 
+    async knob(page, { reporter, at }) {
+        const dial = page.locator('[data-slot="knob"] [role="slider"]').first();
+        const now = async () => Number(await dial.getAttribute('aria-valuenow'));
+        // Where things are drawn, in degrees from the top, clockwise: the start and the end of
+        // the value arc, and the notch. Read off the rendered geometry (the circle's own path
+        // through its transform), not off the formulas that placed them.
+        const drawn = () => dial.evaluate((el) => {
+            const r = el.getBoundingClientRect();
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height / 2;
+            const deg = (pt) => Math.round((Math.atan2(pt.x - cx, cy - pt.y) * 180) / Math.PI);
+            const onScreen = (node, x, y) => new DOMPoint(x, y).matrixTransform(node.getScreenCTM());
+            const arc = el.querySelectorAll('circle')[1];
+            const shown = arc.getTotalLength() - Number(arc.getAttribute('stroke-dashoffset'));
+            const line = el.querySelector('line');
+            const tip = onScreen(line, line.x1.baseVal.value, line.y1.baseVal.value);
+            const at = (len) => {
+                const p = arc.getPointAtLength(len);
+                return deg(onScreen(arc, p.x, p.y));
+            };
+
+            return { start: at(0), end: at(Math.max(0, shown)), notch: deg(tip), shown: Number(getComputedStyle(arc).strokeOpacity) };
+        });
+        const near = (a, b) => Math.abs((((a - b) % 360) + 540) % 360 - 180) <= 3;
+        // The value arc runs on a 100 ms transition.
+        const settle = () => page.waitForTimeout(250);
+
+        await dial.scrollIntoViewIfNeeded();
+        await dial.focus();
+        await page.keyboard.press('End');
+        await settle();
+        await reporter.check(`knob: the arc runs from -135° to +135° and ends on the notch ${at}`, async () => {
+            const max = await drawn();
+            await page.keyboard.press('Home');
+            for (let i = 0; i < 50; i++) await page.keyboard.press('ArrowUp');
+            await settle();
+            const mid = await drawn();
+
+            return (
+                expect.truthy(near(max.start, -135), `the arc starts at ${max.start}°, not -135° (bottom left)`) ??
+                expect.truthy(near(max.end, 135) && near(max.notch, 135), `at max the arc ends at ${max.end}° and the notch is at ${max.notch}°, not 135°`) ??
+                expect.truthy(near(mid.end, 0) && near(mid.notch, 0), `at 50 the arc ends at ${mid.end}° and the notch is at ${mid.notch}°, not 0° (top)`)
+            );
+        });
+
+        await reporter.check(`knob: no stray dot of the value arc at the minimum ${at}`, async () => {
+            await page.keyboard.press('Home');
+            await settle();
+
+            return expect.equal((await drawn()).shown, 0, 'value arc opacity at min');
+        });
+
+        await reporter.check(`knob: a drag past the bottom stays at max instead of flipping to min ${at}`, async () => {
+            const box = await dial.boundingBox();
+            const cx = box.x + box.width / 2;
+            const cy = box.y + box.height / 2;
+            const R = box.width * 0.4;
+            const to = (deg) => page.mouse.move(cx + R * Math.sin((deg * Math.PI) / 180), cy - R * Math.cos((deg * Math.PI) / 180));
+            await to(90);
+            await page.mouse.down();
+            for (const deg of [120, 135, 150, 170, 185, 200, 215]) await to(deg);
+            const value = await now();
+            await page.mouse.up();
+
+            return expect.equal(value, 100, 'value after overshooting max past the bottom');
+        });
+
+        await reporter.check(`knob: the wheel scrolls the page until the dial has focus ${at}`, async () => {
+            const box = await dial.boundingBox();
+            await page.evaluate(() => document.activeElement?.blur());
+            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+            const before = await now();
+            const y = await page.evaluate(() => scrollY);
+            await page.mouse.wheel(0, 120);
+            await page.waitForTimeout(200);
+            const scrolled = (await page.evaluate(() => scrollY)) !== y;
+            const unchanged = (await now()) === before;
+            await dial.scrollIntoViewIfNeeded();
+            await dial.focus();
+            const focusedBefore = await now();
+            const box2 = await dial.boundingBox();
+            await page.mouse.move(box2.x + box2.width / 2, box2.y + box2.height / 2);
+            // Down: the drag above left the value at max.
+            await page.mouse.wheel(0, 120);
+            await page.waitForTimeout(200);
+
+            return (
+                expect.truthy(scrolled && unchanged, `unfocused: page scrolled ${scrolled}, value ${before} → ${await now()}`) ??
+                expect.equal(await now(), focusedBefore - 1, 'focused: a wheel down takes one step off') ??
+                expect.empty(page.blatErrors, 'console errors')
+            );
+        });
+    },
+
     async pagination(page, { reporter, at }) {
         await reporter.check(`pagination: renders navigable items ${at}`, async () => {
             const items = await page.locator('[data-slot="pagination-item"]').count();
