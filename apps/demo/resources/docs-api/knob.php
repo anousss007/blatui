@@ -31,7 +31,7 @@ return [
             'name' => 'step',
             'type' => 'number',
             'default' => '1',
-            'description' => 'Granularity for drag, scroll and arrow-key changes. Page Up/Down move by a larger amount.',
+            'description' => 'Granularity for drag, arrow-key and wheel changes (the wheel turns the dial once it has focus). Page Up/Down move by a larger amount.',
         ],
         [
             'name' => 'size',
